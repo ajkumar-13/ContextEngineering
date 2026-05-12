@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-labelledby="t d">
+  <title id="t">Sub-agent Isolation</title>
+  <desc id="d">A parent agent's context window with three child sub-agents, each running in its own isolated context. The children's contexts do not pollute the parent. They communicate with the parent and with each other through a shared filesystem of plan files, scratchpads, and outputs.</desc>
+
+  <style><![CDATA[
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-warn:#B8895A;--ce-neutral-1:#EAEAE4;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-warn:#D4B58A;--ce-neutral-1:#1F2229;}}
+    .bg{fill:var(--ce-bg);}
+    .ctx{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
+    .ctx-parent{fill:var(--ce-surface);stroke:var(--ce-primary);stroke-width:1.75;}
+    .ctx-child{fill:var(--ce-surface);stroke:var(--ce-accent);stroke-width:1.5;stroke-dasharray:5 4;}
+    .shared{fill:var(--ce-neutral-1);stroke:var(--ce-border);stroke-width:1;}
+    .arrow{stroke:var(--ce-ink-muted);stroke-width:1.25;fill:none;}
+    .pill-p{fill:var(--ce-primary);} .pill-a{fill:var(--ce-accent);}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .head{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:13px;fill:#FFFFFF;}
+    .label{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:13px;fill:var(--ce-ink);}
+    .small{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ce-ink-muted);}
+    .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:500;font-size:11px;fill:var(--ce-ink);}
+  ]]></style>
+
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--ce-ink-muted)"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="960" height="540"/>
+  <text class="title" x="48" y="44">Sub-agent isolation</text>
+
+  <!-- Parent context window (large, top) -->
+  <rect class="ctx-parent" x="280" y="80" width="400" height="120" rx="12"/>
+  <rect class="pill-p" x="280" y="80" width="180" height="26" rx="13"/>
+  <text class="head" x="370" y="98" text-anchor="middle">PARENT CONTEXT</text>
+  <text class="label" x="300" y="138">Orchestrator agent</text>
+  <text class="small" x="300" y="158">High-level plan, current goal, summary of children's outputs.</text>
+  <text class="small" x="300" y="174">Stays small — does not see the children's working memory.</text>
+
+  <!-- Three child contexts -->
+  <g>
+    <!-- Child 1 -->
+    <rect class="ctx-child" x="60"  y="280" width="240" height="130" rx="12"/>
+    <rect class="pill-a"    x="60"  y="280" width="120" height="22" rx="11"/>
+    <text class="head" x="120" y="296" text-anchor="middle">SUB-AGENT 1</text>
+    <text class="label" x="76" y="326">Research</text>
+    <text class="small" x="76" y="346">Independent context window.</text>
+    <text class="small" x="76" y="362">~30k tokens of papers + notes.</text>
+    <text class="mono"  x="76" y="386">writes →  research/notes.md</text>
+
+    <!-- Child 2 -->
+    <rect class="ctx-child" x="360" y="280" width="240" height="130" rx="12"/>
+    <rect class="pill-a"    x="360" y="280" width="120" height="22" rx="11"/>
+    <text class="head" x="420" y="296" text-anchor="middle">SUB-AGENT 2</text>
+    <text class="label" x="376" y="326">Code</text>
+    <text class="small" x="376" y="346">Independent context window.</text>
+    <text class="small" x="376" y="362">~50k tokens of repo + diffs.</text>
+    <text class="mono"  x="376" y="386">writes →  src/, tests/, plan.md</text>
+
+    <!-- Child 3 -->
+    <rect class="ctx-child" x="660" y="280" width="240" height="130" rx="12"/>
+    <rect class="pill-a"    x="660" y="280" width="120" height="22" rx="11"/>
+    <text class="head" x="720" y="296" text-anchor="middle">SUB-AGENT 3</text>
+    <text class="label" x="676" y="326">Eval</text>
+    <text class="small" x="676" y="346">Independent context window.</text>
+    <text class="small" x="676" y="362">~10k tokens of test fixtures.</text>
+    <text class="mono"  x="676" y="386">writes →  evals/results.json</text>
+  </g>
+
+  <!-- Arrows: parent <-> each child -->
+  <path class="arrow" d="M340,200 L180,278" marker-end="url(#ar)"/>
+  <path class="arrow" d="M480,200 L480,278" marker-end="url(#ar)"/>
+  <path class="arrow" d="M620,200 L780,278" marker-end="url(#ar)"/>
+  <path class="arrow" d="M180,278 L340,200" marker-end="url(#ar)" stroke-dasharray="4 3"/>
+  <path class="arrow" d="M480,278 L480,200" marker-end="url(#ar)" stroke-dasharray="4 3"/>
+  <path class="arrow" d="M780,278 L620,200" marker-end="url(#ar)" stroke-dasharray="4 3"/>
+
+  <!-- Shared filesystem (bottom) -->
+  <rect class="shared" x="60" y="450" width="840" height="60" rx="10"/>
+  <text class="label" x="80" y="476">Shared filesystem · the inter-agent bus</text>
+  <text class="mono"  x="80" y="498">plan.md  ·  research/notes.md  ·  src/  ·  evals/results.json  ·  AGENTS.md</text>
+
+  <!-- Connectors from each child down to shared bus -->
+  <path class="arrow" d="M180,410 L180,448" marker-end="url(#ar)"/>
+  <path class="arrow" d="M480,410 L480,448" marker-end="url(#ar)"/>
+  <path class="arrow" d="M780,410 L780,448" marker-end="url(#ar)"/>
+</svg>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" role="img" aria-labelledby="t d">
+  <title id="t">The WSCI Framework: Write, Select, Compress, Isolate</title>
+  <desc  id="d">A four-quadrant diagram. Each quadrant names one primitive operation a context engineer performs on the context window. Write moves information out for later. Select pulls information in for now. Compress shrinks what is already inside. Isolate splits the work into separate context windows.</desc>
+
+  <style><![CDATA[
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;}}
+    .bg{fill:var(--ce-bg);}
+    .quad{fill:var(--ce-surface); stroke:var(--ce-border); stroke-width:1;}
+    .stroke-ink{stroke:var(--ce-ink); fill:none; stroke-width:1.5;}
+    .stroke-thin{stroke:var(--ce-ink-muted); fill:none; stroke-width:1;}
+    .center{fill:var(--ce-neutral-1); stroke:var(--ce-border); stroke-width:1;}
+    .badge-w{fill:var(--ce-primary);} .badge-s{fill:var(--ce-success);}
+    .badge-c{fill:var(--ce-accent);}  .badge-i{fill:var(--ce-warn);}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:22px;fill:var(--ce-ink);}
+    .qtitle{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:18px;fill:#FFFFFF;}
+    .qhead{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:16px;fill:var(--ce-ink);}
+    .label{font-family:Inter,system-ui,sans-serif;font-weight:500;font-size:13px;fill:var(--ce-ink);}
+    .small{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+    .axis{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ce-ink-muted); text-transform:uppercase; letter-spacing:0.06em;}
+  ]]></style>
+
+  <rect class="bg" width="960" height="560"/>
+  <text class="title" x="48" y="48">The WSCI Framework</text>
+  <text class="small" x="48" y="68">Every move you make on a context window is one of four primitive operations.</text>
+
+  <!-- Axis labels around the 2x2 grid -->
+  <text class="axis" x="480" y="100" text-anchor="middle">moves information INTO the window</text>
+  <text class="axis" x="480" y="540" text-anchor="middle">moves information OUT or SPLITS the window</text>
+  <g transform="translate(36,300) rotate(-90)"><text class="axis" text-anchor="middle">single context</text></g>
+  <g transform="translate(924,300) rotate(-90)"><text class="axis" text-anchor="middle">multiple contexts</text></g>
+
+  <!-- 2x2 grid coordinates: 80..880 x 110..510, gap 16
+       Quadrants:
+         WRITE     (top-left:    80,110 -> 472,302)
+         SELECT    (top-right:   488,110 -> 880,302)
+         COMPRESS  (bot-left:    80,318 -> 472,510)
+         ISOLATE   (bot-right:   488,318 -> 880,510)
+  -->
+
+  <!-- WRITE -->
+  <rect class="quad" x="80" y="110" width="392" height="192" rx="14"/>
+  <rect class="badge-w" x="80" y="110" width="120" height="34" rx="14"/>
+  <text class="qtitle" x="140" y="134" text-anchor="middle">WRITE</text>
+  <text class="qhead"  x="100" y="172">Move out of the window, for later.</text>
+  <text class="label"  x="100" y="198">·  Scratchpads &amp; task.md</text>
+  <text class="label"  x="100" y="220">·  Persistent memory files</text>
+  <text class="label"  x="100" y="242">·  Plan files / specs</text>
+  <text class="small"  x="100" y="276">The filesystem becomes a cheap, durable extension of context.</text>
+
+  <!-- SELECT -->
+  <rect class="quad" x="488" y="110" width="392" height="192" rx="14"/>
+  <rect class="badge-s" x="488" y="110" width="120" height="34" rx="14"/>
+  <text class="qtitle" x="548" y="134" text-anchor="middle">SELECT</text>
+  <text class="qhead"  x="508" y="172">Pull into the window, for now.</text>
+  <text class="label"  x="508" y="198">·  RAG (vector + BM25 + rerank)</text>
+  <text class="label"  x="508" y="220">·  Tool / file lookups</text>
+  <text class="label"  x="508" y="242">·  Memory recall</text>
+  <text class="small"  x="508" y="276">The right chunk at the right time beats a bigger context window.</text>
+
+  <!-- COMPRESS -->
+  <rect class="quad" x="80" y="318" width="392" height="192" rx="14"/>
+  <rect class="badge-c" x="80" y="318" width="160" height="34" rx="14"/>
+  <text class="qtitle" x="160" y="342" text-anchor="middle">COMPRESS</text>
+  <text class="qhead"  x="100" y="380">Shrink what is already inside.</text>
+  <text class="label"  x="100" y="406">·  Rolling / hierarchical summary</text>
+  <text class="label"  x="100" y="428">·  /compact in coding agents</text>
+  <text class="label"  x="100" y="450">·  Token compression (LLMLingua)</text>
+  <text class="small"  x="100" y="484">Buys space at the price of fidelity — know what you can lose.</text>
+
+  <!-- ISOLATE -->
+  <rect class="quad" x="488" y="318" width="392" height="192" rx="14"/>
+  <rect class="badge-i" x="488" y="318" width="130" height="34" rx="14"/>
+  <text class="qtitle" x="553" y="342" text-anchor="middle">ISOLATE</text>
+  <text class="qhead"  x="508" y="380">Split into separate windows.</text>
+  <text class="label"  x="508" y="406">·  Sub-agents (parent + children)</text>
+  <text class="label"  x="508" y="428">·  Parallel workers</text>
+  <text class="label"  x="508" y="450">·  Shared files as the inter-agent bus</text>
+  <text class="small"  x="508" y="484">Powerful and dangerous — single agent is the right default.</text>
+
+  <!-- Tiny visual: window glyphs in each quadrant header could go here;
+       kept clean for legibility -->
+</svg>

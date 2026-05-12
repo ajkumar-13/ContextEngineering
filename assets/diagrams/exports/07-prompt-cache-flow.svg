@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" width="960" height="480" role="img" aria-labelledby="t d">
+  <title id="t">Prompt Caching — token flow on cache hit vs miss</title>
+  <desc id="d">A two-row diagram. Top row, cache miss: every token in the system prompt, tools, and history is sent to the model and billed as a fresh input. Bottom row, cache hit: a long stable prefix is matched against a stored cache and re-used at a fraction of the input cost; only the new tail is billed at the full rate.</desc>
+
+  <style><![CDATA[
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-2:#CFCFC8;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-2:#2C3038;}}
+    .bg{fill:var(--ce-bg);}
+    .row{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
+    .seg-fresh{fill:var(--ce-alert);} .seg-fresh-2{fill:var(--ce-alert);fill-opacity:0.85;}
+    .seg-cached{fill:var(--ce-success);fill-opacity:0.85;}
+    .seg-new{fill:var(--ce-primary);}
+    .stroke-thin{stroke:var(--ce-ink-muted);fill:none;stroke-width:1;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .head{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:14px;fill:var(--ce-ink);}
+    .label{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:#FFFFFF;}
+    .small{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+    .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600;font-size:12px;fill:var(--ce-ink);}
+  ]]></style>
+
+  <rect class="bg" width="960" height="480"/>
+  <text class="title" x="48" y="44">Prompt caching — what changes when the prefix is stable</text>
+
+  <!-- Cache MISS row -->
+  <text class="head" x="48" y="98">Cache miss · every token billed at full input rate</text>
+  <rect class="row" x="48" y="112" width="864" height="80" rx="10"/>
+  <!-- segments: system 220, tools 200, memory 140, rag 160, history 100, user 44 -->
+  <g>
+    <rect class="seg-fresh"   x="48"  y="112" width="220" height="80" rx="10"/>
+    <rect class="seg-fresh-2" x="268" y="112" width="200" height="80"/>
+    <rect class="seg-fresh"   x="468" y="112" width="140" height="80"/>
+    <rect class="seg-fresh-2" x="608" y="112" width="160" height="80"/>
+    <rect class="seg-fresh"   x="768" y="112" width="100" height="80"/>
+    <rect class="seg-new"     x="868" y="112" width="44"  height="80" rx="10"/>
+    <line class="stroke-thin" x1="268" y1="112" x2="268" y2="192"/>
+    <line class="stroke-thin" x1="468" y1="112" x2="468" y2="192"/>
+    <line class="stroke-thin" x1="608" y1="112" x2="608" y2="192"/>
+    <line class="stroke-thin" x1="768" y1="112" x2="768" y2="192"/>
+    <line class="stroke-thin" x1="868" y1="112" x2="868" y2="192"/>
+    <text class="label" x="158" y="158" text-anchor="middle">system</text>
+    <text class="label" x="368" y="158" text-anchor="middle">tools</text>
+    <text class="label" x="538" y="158" text-anchor="middle">memory</text>
+    <text class="label" x="688" y="158" text-anchor="middle">rag</text>
+    <text class="label" x="818" y="158" text-anchor="middle">history</text>
+  </g>
+  <text class="small" x="48"  y="210">8 200 input tokens billed</text>
+  <text class="small" x="912" y="210" text-anchor="end">user turn  →  full rate</text>
+
+  <!-- Cache HIT row -->
+  <text class="head" x="48" y="260">Cache hit · stable prefix billed at ~10% (Anthropic) or ~50% (OpenAI) of input rate</text>
+  <rect class="row" x="48" y="274" width="864" height="80" rx="10"/>
+  <g>
+    <rect class="seg-cached" x="48"  y="274" width="720" height="80" rx="10"/>
+    <rect class="seg-fresh"  x="768" y="274" width="100" height="80"/>
+    <rect class="seg-new"    x="868" y="274" width="44"  height="80" rx="10"/>
+    <line class="stroke-thin" x1="268" y1="274" x2="268" y2="354"/>
+    <line class="stroke-thin" x1="468" y1="274" x2="468" y2="354"/>
+    <line class="stroke-thin" x1="608" y1="274" x2="608" y2="354"/>
+    <line class="stroke-thin" x1="768" y1="274" x2="768" y2="354"/>
+    <line class="stroke-thin" x1="868" y1="274" x2="868" y2="354"/>
+    <text class="label" x="158" y="320" text-anchor="middle">system</text>
+    <text class="label" x="368" y="320" text-anchor="middle">tools</text>
+    <text class="label" x="538" y="320" text-anchor="middle">memory</text>
+    <text class="label" x="688" y="320" text-anchor="middle">rag</text>
+    <text class="label" x="818" y="320" text-anchor="middle">history</text>
+  </g>
+  <text class="small" x="48"  y="372">7 200 cached  +  1 000 fresh tokens billed</text>
+  <text class="small" x="912" y="372" text-anchor="end">user turn  →  full rate</text>
+
+  <!-- Legend -->
+  <g transform="translate(48, 408)">
+    <rect class="seg-cached" x="0"   y="0" width="14" height="14" rx="3"/>
+    <text class="small" x="22" y="12">cached prefix (re-used)</text>
+    <rect class="seg-fresh"  x="220" y="0" width="14" height="14" rx="3"/>
+    <text class="small" x="242" y="12">fresh input (full price)</text>
+    <rect class="seg-new"    x="430" y="0" width="14" height="14" rx="3"/>
+    <text class="small" x="452" y="12">new user turn (full price)</text>
+  </g>
+  <text class="small" x="48" y="456">Cacheable layers must be byte-identical and at the very start of the prompt.  Move volatile content to the end.</text>
+</svg>

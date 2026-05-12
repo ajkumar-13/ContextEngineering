@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" width="960" height="420" role="img" aria-labelledby="t d">
+  <title id="t">The five jobs of a context engineer</title>
+  <desc id="d">A grid of five cards naming the five recurring jobs of a context engineer: decide what goes in, decide what stays out, decide where each piece is placed, decide when to refresh or compress, and decide how to measure whether it worked.</desc>
+
+  <style><![CDATA[
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;}}
+    .bg{fill:var(--ce-bg);}
+    .card{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
+    .num-1{fill:var(--ce-primary);} .num-2{fill:var(--ce-accent);}
+    .num-3{fill:var(--ce-success);} .num-4{fill:var(--ce-warn);}
+    .num-5{fill:var(--ce-alert);}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .num{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:22px;fill:#FFFFFF;}
+    .head{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:14px;fill:var(--ce-ink);}
+    .small{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+  ]]></style>
+
+  <rect class="bg" width="960" height="420"/>
+  <text class="title" x="40" y="40">Five jobs of a context engineer</text>
+
+  <!-- Row of 5 cards -->
+  <g>
+    <!-- 1 -->
+    <rect class="card" x="40"  y="80" width="170" height="280" rx="12"/>
+    <circle class="num-1" cx="80"  cy="120" r="22"/>
+    <text class="num"  x="80" y="128" text-anchor="middle">1</text>
+    <text class="head" x="56" y="180">What</text>
+    <text class="head" x="56" y="200">goes in</text>
+    <text class="small" x="56" y="232">Pick the layers</text>
+    <text class="small" x="56" y="248">and sources</text>
+    <text class="small" x="56" y="264">the model needs</text>
+    <text class="small" x="56" y="280">to answer well.</text>
+
+    <!-- 2 -->
+    <rect class="card" x="226" y="80" width="170" height="280" rx="12"/>
+    <circle class="num-2" cx="266" cy="120" r="22"/>
+    <text class="num"  x="266" y="128" text-anchor="middle">2</text>
+    <text class="head" x="242" y="180">What</text>
+    <text class="head" x="242" y="200">stays out</text>
+    <text class="small" x="242" y="232">Equally important.</text>
+    <text class="small" x="242" y="248">Drop noise, dead</text>
+    <text class="small" x="242" y="264">history, irrelevant</text>
+    <text class="small" x="242" y="280">tools, stale chunks.</text>
+
+    <!-- 3 -->
+    <rect class="card" x="412" y="80" width="170" height="280" rx="12"/>
+    <circle class="num-3" cx="452" cy="120" r="22"/>
+    <text class="num"  x="452" y="128" text-anchor="middle">3</text>
+    <text class="head" x="428" y="180">Where</text>
+    <text class="head" x="428" y="200">it sits</text>
+    <text class="small" x="428" y="232">Order and</text>
+    <text class="small" x="428" y="248">position matter:</text>
+    <text class="small" x="428" y="264">edges get attention,</text>
+    <text class="small" x="428" y="280">middles get lost.</text>
+
+    <!-- 4 -->
+    <rect class="card" x="598" y="80" width="170" height="280" rx="12"/>
+    <circle class="num-4" cx="638" cy="120" r="22"/>
+    <text class="num"  x="638" y="128" text-anchor="middle">4</text>
+    <text class="head" x="614" y="180">When</text>
+    <text class="head" x="614" y="200">to refresh</text>
+    <text class="small" x="614" y="232">Compress, summarise,</text>
+    <text class="small" x="614" y="248">or write out to</text>
+    <text class="small" x="614" y="264">disk before the</text>
+    <text class="small" x="614" y="280">window rots.</text>
+
+    <!-- 5 -->
+    <rect class="card" x="784" y="80" width="160" height="280" rx="12"/>
+    <circle class="num-5" cx="824" cy="120" r="22"/>
+    <text class="num"  x="824" y="128" text-anchor="middle">5</text>
+    <text class="head" x="800" y="180">How</text>
+    <text class="head" x="800" y="200">to measure</text>
+    <text class="small" x="800" y="232">Tracing, evals,</text>
+    <text class="small" x="800" y="248">cost &amp; latency.</text>
+    <text class="small" x="800" y="264">Without it,</text>
+    <text class="small" x="800" y="280">you are guessing.</text>
+  </g>
+</svg>

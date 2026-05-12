@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-labelledby="t d">
+  <title id="t">Memory Taxonomy for AI Agents</title>
+  <desc id="d">A tree dividing agent memory into short-term and long-term. Short-term covers working memory and the conversation buffer. Long-term subdivides into episodic memory of past interactions, semantic memory of distilled facts and preferences, and procedural memory of skills and routines.</desc>
+
+  <style><![CDATA[
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-warn:#B8895A;--ce-neutral-1:#EAEAE4;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-warn:#D4B58A;--ce-neutral-1:#1F2229;}}
+    .bg{fill:var(--ce-bg);}
+    .leaf{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
+    .node-root{fill:var(--ce-primary);}
+    .node-mid {fill:var(--ce-accent);}
+    .edge{stroke:var(--ce-ink-muted);stroke-width:1.25;fill:none;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .root-t{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:15px;fill:#FFFFFF;}
+    .mid-t {font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:14px;fill:#FFFFFF;}
+    .leaf-t{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:13px;fill:var(--ce-ink);}
+    .small {font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ce-ink-muted);}
+  ]]></style>
+
+  <rect class="bg" width="960" height="540"/>
+  <text class="title" x="48" y="44">Memory taxonomy for AI agents</text>
+
+  <!-- Root -->
+  <rect class="node-root" x="400" y="76" width="160" height="44" rx="10"/>
+  <text class="root-t" x="480" y="104" text-anchor="middle">Memory</text>
+
+  <!-- Edges to two mid nodes -->
+  <path class="edge" d="M480,120 L240,176"/>
+  <path class="edge" d="M480,120 L720,176"/>
+
+  <!-- Mid nodes -->
+  <rect class="node-mid" x="120" y="180" width="240" height="40" rx="10"/>
+  <text class="mid-t" x="240" y="206" text-anchor="middle">Short-term</text>
+  <rect class="node-mid" x="600" y="180" width="240" height="40" rx="10"/>
+  <text class="mid-t" x="720" y="206" text-anchor="middle">Long-term</text>
+
+  <!-- Edges from mid to leaves -->
+  <path class="edge" d="M240,220 L160,288"/>
+  <path class="edge" d="M240,220 L320,288"/>
+  <path class="edge" d="M720,220 L560,288"/>
+  <path class="edge" d="M720,220 L720,288"/>
+  <path class="edge" d="M720,220 L860,288"/>
+
+  <!-- Short-term leaves -->
+  <rect class="leaf" x="60"  y="290" width="200" height="190" rx="10"/>
+  <text class="leaf-t" x="80" y="316">Working memory</text>
+  <text class="small"  x="80" y="338">Active context window.</text>
+  <text class="small"  x="80" y="354">Lost when the call ends.</text>
+  <text class="small"  x="80" y="380">Examples:</text>
+  <text class="small"  x="80" y="396">·  scratchpad</text>
+  <text class="small"  x="80" y="412">·  current plan</text>
+  <text class="small"  x="80" y="428">·  intermediate tool output</text>
+
+  <rect class="leaf" x="280" y="290" width="200" height="190" rx="10"/>
+  <text class="leaf-t" x="300" y="316">Conversation buffer</text>
+  <text class="small"  x="300" y="338">Recent user / assistant turns</text>
+  <text class="small"  x="300" y="354">of the current session.</text>
+  <text class="small"  x="300" y="380">Strategies:</text>
+  <text class="small"  x="300" y="396">·  sliding window</text>
+  <text class="small"  x="300" y="412">·  rolling summary</text>
+  <text class="small"  x="300" y="428">·  /compact threshold</text>
+
+  <!-- Long-term leaves -->
+  <rect class="leaf" x="500" y="290" width="140" height="220" rx="10"/>
+  <text class="leaf-t" x="516" y="316">Episodic</text>
+  <text class="small"  x="516" y="338">Specific past</text>
+  <text class="small"  x="516" y="354">interactions.</text>
+  <text class="small"  x="516" y="380">"On April 4 the</text>
+  <text class="small"  x="516" y="396">user asked about</text>
+  <text class="small"  x="516" y="412">webhooks."</text>
+  <text class="small"  x="516" y="440">Embedded events,</text>
+  <text class="small"  x="516" y="456">retrieved by</text>
+  <text class="small"  x="516" y="472">similarity.</text>
+  <text class="small"  x="516" y="498">Mem0 · Letta · Zep</text>
+
+  <rect class="leaf" x="650" y="290" width="140" height="220" rx="10"/>
+  <text class="leaf-t" x="666" y="316">Semantic</text>
+  <text class="small"  x="666" y="338">Distilled facts &amp;</text>
+  <text class="small"  x="666" y="354">preferences.</text>
+  <text class="small"  x="666" y="380">"User prefers</text>
+  <text class="small"  x="666" y="396">Python, stack</text>
+  <text class="small"  x="666" y="412">is AWS."</text>
+  <text class="small"  x="666" y="440">Slowly changing.</text>
+  <text class="small"  x="666" y="456">Markdown or graph.</text>
+  <text class="small"  x="666" y="498">CLAUDE.md · Graphiti</text>
+
+  <rect class="leaf" x="800" y="290" width="140" height="220" rx="10"/>
+  <text class="leaf-t" x="816" y="316">Procedural</text>
+  <text class="small"  x="816" y="338">How to do things.</text>
+  <text class="small"  x="816" y="362">Skills &amp; routines</text>
+  <text class="small"  x="816" y="378">the agent re-uses</text>
+  <text class="small"  x="816" y="394">across sessions.</text>
+  <text class="small"  x="816" y="422">Slash commands,</text>
+  <text class="small"  x="816" y="438">workflow templates,</text>
+  <text class="small"  x="816" y="454">hook scripts.</text>
+  <text class="small"  x="816" y="498">.skills/ · /commands</text>
+</svg>

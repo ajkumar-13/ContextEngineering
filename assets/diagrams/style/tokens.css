@@ -1,0 +1,73 @@
+/*
+ * Context Engineering Series — Diagram Design Tokens
+ * Source of truth: assets/diagrams/style/tokens.json
+ *
+ * Inline this file (or paste the :root block) into any standalone SVG
+ * via <style>...</style> so the SVG is self-contained and renders
+ * identically inside Markdown, on a static site, or when opened directly.
+ */
+
+:root {
+  --ce-bg:         #FAFAF7;
+  --ce-surface:    #FFFFFF;
+  --ce-ink:        #1A1A1A;
+  --ce-ink-muted:  #5C5C5C;
+  --ce-ink-subtle: #9A9A9A;
+  --ce-border:     #D9D9D4;
+  --ce-primary:    #5B7FBF;  /* soft slate-blue, Excalidraw-feel */
+  --ce-accent:     #D98E5F;  /* soft terracotta */
+  --ce-success:    #5C9E78;  /* soft sage */
+  --ce-warn:       #B8895A;  /* soft tan */
+  --ce-alert:      #C66B5E;  /* soft brick */
+  --ce-neutral-1:  #EAEAE4;
+  --ce-neutral-2:  #CFCFC8;
+  --ce-neutral-3:  #8E8E88;
+
+  --ce-font-label: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ce-font-mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --ce-stroke:       1.5;
+  --ce-stroke-thin:  1;
+  --ce-stroke-hair:  0.75;
+  --ce-radius:       10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ce-bg:         #0E0F12;
+    --ce-surface:    #16181C;
+    --ce-ink:        #F2F2EE;
+    --ce-ink-muted:  #B4B4AE;
+    --ce-ink-subtle: #6E6E68;
+    --ce-border:     #2A2D33;
+    --ce-primary:    #8BA8E0;
+    --ce-accent:     #E8B088;
+    --ce-success:    #7FBF9B;
+    --ce-warn:       #D4B58A;
+    --ce-alert:      #D88880;
+    --ce-neutral-1:  #1F2229;
+    --ce-neutral-2:  #2C3038;
+    --ce-neutral-3:  #6E6E68;
+  }
+}
+
+/* Base SVG element styles consumed by every hero diagram. */
+.ce-bg            { fill: var(--ce-bg); }
+.ce-surface       { fill: var(--ce-surface); stroke: var(--ce-border); stroke-width: var(--ce-stroke-thin); }
+.ce-ink           { fill: var(--ce-ink); }
+.ce-ink-muted    { fill: var(--ce-ink-muted); }
+.ce-ink-subtle   { fill: var(--ce-ink-subtle); }
+.ce-stroke        { stroke: var(--ce-ink); fill: none; stroke-width: var(--ce-stroke); }
+.ce-stroke-thin  { stroke: var(--ce-ink-muted); fill: none; stroke-width: var(--ce-stroke-thin); }
+.ce-stroke-dashed{ stroke: var(--ce-ink-muted); fill: none; stroke-width: var(--ce-stroke-thin); stroke-dasharray: 4 3; }
+
+.ce-primary-fill  { fill: var(--ce-primary); }
+.ce-accent-fill   { fill: var(--ce-accent); }
+.ce-success-fill  { fill: var(--ce-success); }
+.ce-warn-fill     { fill: var(--ce-warn); }
+.ce-alert-fill    { fill: var(--ce-alert); }
+
+.ce-title { font-family: var(--ce-font-label); font-weight: 600; font-size: 20px; fill: var(--ce-ink); }
+.ce-label { font-family: var(--ce-font-label); font-weight: 500; font-size: 14px; fill: var(--ce-ink); }
+.ce-small { font-family: var(--ce-font-label); font-weight: 400; font-size: 12px; fill: var(--ce-ink-muted); }
+.ce-mono  { font-family: var(--ce-font-mono);  font-weight: 400; font-size: 13px; fill: var(--ce-ink); }

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-labelledby="t d">
+  <title id="t">MCP — Host, Client, Server</title>
+  <desc  id="d">A triangle showing the three roles in the Model Context Protocol. The host is the application the user interacts with. Inside the host, an MCP client speaks the protocol with one or more MCP servers, each of which exposes tools, resources, and prompts to the host's LLM.</desc>
+
+  <style><![CDATA[
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-neutral-1:#EAEAE4;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-neutral-1:#1F2229;}}
+    .bg{fill:var(--ce-bg);}
+    .card{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
+    .ink{fill:var(--ce-ink);}
+    .arrow{stroke:var(--ce-ink-muted);stroke-width:1.5;fill:none;}
+    .pill{fill:var(--ce-primary);}
+    .pill-acc{fill:var(--ce-accent);}
+    .pill-suc{fill:var(--ce-success);}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .head{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:16px;fill:#FFFFFF;}
+    .label{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:14px;fill:var(--ce-ink);}
+    .small{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+    .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:500;font-size:12px;fill:var(--ce-ink);}
+    .edge{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ce-ink-muted);text-transform:uppercase;letter-spacing:0.06em;}
+  ]]></style>
+
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--ce-ink-muted)"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="960" height="540"/>
+  <text class="title" x="48" y="44">MCP — one protocol, three roles</text>
+  <text class="small" x="48" y="64">The Model Context Protocol decouples LLM choice from tool choice.</text>
+
+  <!-- Host (top, large rounded rectangle) -->
+  <rect class="card" x="280" y="100" width="400" height="170" rx="14"/>
+  <rect class="pill" x="280" y="100" width="120" height="30" rx="14"/>
+  <text class="head" x="340" y="121" text-anchor="middle">HOST</text>
+  <text class="label" x="300" y="160">Claude Desktop · Cursor · VS Code · custom app</text>
+  <text class="small" x="300" y="184">Owns the LLM session and the user-facing surface.</text>
+
+  <!-- Client (inside host) -->
+  <rect class="card" x="320" y="200" width="320" height="60" rx="10"/>
+  <text class="label" x="340" y="226">MCP Client</text>
+  <text class="small" x="340" y="246">Speaks the protocol on behalf of the host.</text>
+
+  <!-- Two MCP servers at the bottom -->
+  <!-- Server A -->
+  <rect class="card" x="80" y="380" width="340" height="120" rx="14"/>
+  <rect class="pill-acc" x="80" y="380" width="160" height="30" rx="14"/>
+  <text class="head" x="160" y="401" text-anchor="middle">MCP SERVER · A</text>
+  <text class="label" x="100" y="436">Filesystem</text>
+  <text class="mono"  x="100" y="460">tools: read_file · write_file · grep</text>
+  <text class="mono"  x="100" y="478">resources: file://*  ·  prompts: scaffold</text>
+
+  <!-- Server B -->
+  <rect class="card" x="540" y="380" width="340" height="120" rx="14"/>
+  <rect class="pill-suc" x="540" y="380" width="160" height="30" rx="14"/>
+  <text class="head" x="620" y="401" text-anchor="middle">MCP SERVER · B</text>
+  <text class="label" x="560" y="436">GitHub</text>
+  <text class="mono"  x="560" y="460">tools: list_prs · create_issue · diff</text>
+  <text class="mono"  x="560" y="478">resources: repo://owner/name</text>
+
+  <!-- Edges (client to each server) -->
+  <path class="arrow" d="M420,260 C 360,310 260,330 250,378" marker-end="url(#ar)"/>
+  <path class="arrow" d="M540,260 C 600,310 700,330 710,378" marker-end="url(#ar)"/>
+
+  <!-- Reverse arrows (server to client) -->
+  <path class="arrow" d="M250,378 C 260,328 360,308 420,260" marker-start="url(#ar)" stroke-dasharray="4 3"/>
+  <path class="arrow" d="M710,378 C 700,328 600,308 540,260" marker-start="url(#ar)" stroke-dasharray="4 3"/>
+
+  <!-- Edge label -->
+  <text class="edge" x="480" y="338" text-anchor="middle">stdio  ·  HTTP / SSE</text>
+
+  <!-- Footer note -->
+  <text class="small" x="48" y="530">Each server exposes three primitives: tools (callable functions), resources (readable data), and prompts (re-usable templates).</text>
+</svg>

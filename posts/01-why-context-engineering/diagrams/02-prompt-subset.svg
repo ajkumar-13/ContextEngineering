@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-labelledby="t d">
+  <title id="t">Prompt engineering is a subset of context engineering</title>
+  <desc id="d">A nested-set diagram. The large outer rounded rectangle is labelled "Context engineering" and contains the six layers the model actually reads on every call: system prompt, tools and MCP, memory and state, retrieved RAG chunks, conversation history, and the user instruction. A small inner ellipse, labelled "Prompt engineering", wraps only the user-instruction layer, showing that prompt engineering is a strict subset of context engineering.</desc>
+
+  <style><![CDATA[
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;}}
+    .bg{fill:var(--ce-bg);}
+    .outer{fill:var(--ce-primary);fill-opacity:0.06;stroke:var(--ce-primary);stroke-width:1.5;}
+    .inner{fill:var(--ce-accent);fill-opacity:0.12;stroke:var(--ce-accent);stroke-width:1.5;}
+    .layer{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
+    .layer-hl{fill:var(--ce-surface);stroke:var(--ce-accent);stroke-width:1.5;}
+    .pill{fill:var(--ce-primary);}
+    .pill-hl{fill:var(--ce-accent);}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .head-out{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:14px;fill:var(--ce-primary);text-transform:uppercase;letter-spacing:0.08em;}
+    .head-in{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:13px;fill:var(--ce-accent);text-transform:uppercase;letter-spacing:0.08em;}
+    .label{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:13px;fill:var(--ce-ink);}
+    .small{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ce-ink-muted);}
+  ]]></style>
+
+  <rect class="bg" width="960" height="540"/>
+  <text class="title" x="40" y="40">Prompt engineering &#8834; Context engineering</text>
+  <text class="small" x="40" y="60">The user's literal sentence is one slice of the context window.  Everything else is engineered upstream.</text>
+
+  <!-- Outer container: Context engineering -->
+  <rect class="outer" x="40" y="92" width="880" height="380" rx="20"/>
+  <text class="head-out" x="64" y="124">Context engineering</text>
+  <text class="small"   x="64" y="142">Every input the model sees on a single call.</text>
+
+  <!-- Six layer cards in a 3x2 grid -->
+  <g>
+    <rect class="layer" x="64"  y="170" width="260" height="58" rx="8"/>
+    <rect class="pill"  x="64"  y="170" width="6"   height="58" rx="3"/>
+    <text class="label" x="84"  y="194">01 &#183; System prompt</text>
+    <text class="small" x="84"  y="212">Identity, rules, format, knowledge</text>
+
+    <rect class="layer" x="350" y="170" width="260" height="58" rx="8"/>
+    <rect class="pill"  x="350" y="170" width="6"   height="58" rx="3" opacity="0.85"/>
+    <text class="label" x="370" y="194">02 &#183; Tools / MCP</text>
+    <text class="small" x="370" y="212">JSON schemas of every callable function</text>
+
+    <rect class="layer" x="636" y="170" width="260" height="58" rx="8"/>
+    <rect class="pill"  x="636" y="170" width="6"   height="58" rx="3" opacity="0.7"/>
+    <text class="label" x="656" y="194">03 &#183; Memory &amp; state</text>
+    <text class="small" x="656" y="212">Persistent facts about user / session</text>
+
+    <rect class="layer" x="64"  y="252" width="260" height="58" rx="8"/>
+    <rect class="pill"  x="64"  y="252" width="6"   height="58" rx="3" opacity="0.7"/>
+    <text class="label" x="84"  y="276">04 &#183; RAG chunks</text>
+    <text class="small" x="84"  y="294">Retrieved evidence for this turn</text>
+
+    <rect class="layer" x="350" y="252" width="260" height="58" rx="8"/>
+    <rect class="pill"  x="350" y="252" width="6"   height="58" rx="3" opacity="0.55"/>
+    <text class="label" x="370" y="276">05 &#183; Conversation history</text>
+    <text class="small" x="370" y="294">Trimmed or compacted as it grows</text>
+
+    <!-- 06 — highlighted as the prompt-engineering target -->
+    <rect class="layer-hl" x="636" y="252" width="260" height="58" rx="8"/>
+    <rect class="pill-hl"  x="636" y="252" width="6"   height="58" rx="3"/>
+    <text class="label" x="656" y="276">06 &#183; User instruction</text>
+    <text class="small" x="656" y="294">The current turn &#183; placed last</text>
+  </g>
+
+  <!-- Inner ellipse: Prompt engineering — wraps just layer 06 -->
+  <ellipse class="inner" cx="766" cy="281" rx="180" ry="56"/>
+  <text class="head-in" x="766" y="358" text-anchor="middle">Prompt engineering</text>
+  <text class="small"   x="766" y="376" text-anchor="middle">user instruction &#183; wording &#183; few-shots</text>
+
+  <!-- Footer notes -->
+  <text class="small" x="64" y="424">Stable layers (01&#8211;02) cache.  Volatile layers (03&#8211;06) are re-assembled every turn.</text>
+  <text class="small" x="64" y="444">Prompt engineering tunes one cell of this grid.  Context engineering tunes the whole grid.</text>
+  <text class="small" x="64" y="464">Same skill, larger surface.</text>
+</svg>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" width="960" height="360" role="img" aria-labelledby="t d">
+  <title id="t">From prompt engineering to context engineering — a four-year arc</title>
+  <desc id="d">A horizontal timeline from 2022 to 2026. In late 2022 ChatGPT popularises prompt engineering. Through 2023 the focus is single-turn prompt patterns and chain of thought. In 2024 RAG, function calling, longer windows, and the first agent frameworks reframe the work as multi-source context assembly. In mid-2025 Andrej Karpathy renames the practice context engineering; Anthropic, IBM, and others publish formal articles. Through 2026 the practice consolidates around protocols like MCP, sub-agent patterns, persistent memory systems, and dedicated context-engineering tooling.</desc>
+
+  <style><![CDATA[
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-warn:#B8895A;--ce-neutral-1:#EAEAE4;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-warn:#D4B58A;--ce-neutral-1:#1F2229;}}
+    .bg{fill:var(--ce-bg);}
+    .axis{stroke:var(--ce-ink-muted);stroke-width:1.25;fill:none;}
+    .tick{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;}
+    .era-pe{fill:var(--ce-accent);fill-opacity:0.18;stroke:var(--ce-accent);stroke-width:1;}
+    .era-tr{fill:var(--ce-warn);fill-opacity:0.18;stroke:var(--ce-warn);stroke-width:1;}
+    .era-ce{fill:var(--ce-primary);fill-opacity:0.14;stroke:var(--ce-primary);stroke-width:1;}
+    .dot-pe{fill:var(--ce-accent);}
+    .dot-ce{fill:var(--ce-primary);}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .head {font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:13px;fill:var(--ce-ink);}
+    .label{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ce-ink);}
+    .small{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ce-ink-muted);}
+    .yr   {font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:13px;fill:var(--ce-ink-muted);}
+    .era-t{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
+  ]]></style>
+
+  <rect class="bg" width="960" height="360"/>
+  <text class="title" x="48" y="44">From "prompt engineering" to "context engineering"</text>
+
+  <!-- Era bands -->
+  <rect class="era-pe" x="48"  y="84" width="280" height="40" rx="8"/>
+  <rect class="era-tr" x="328" y="84" width="240" height="40" rx="8"/>
+  <rect class="era-ce" x="568" y="84" width="344" height="40" rx="8"/>
+  <text class="era-t" x="60"  y="109">Prompt engineering</text>
+  <text class="era-t" x="340" y="109">Transition · agents + RAG</text>
+  <text class="era-t" x="580" y="109">Context engineering</text>
+
+  <!-- Axis -->
+  <line class="axis" x1="48" y1="180" x2="912" y2="180"/>
+  <!-- Year ticks: 2022, 2023, 2024, 2025, 2026 -->
+  <g>
+    <line class="tick" x1="48"  y1="174" x2="48"  y2="186"/>
+    <line class="tick" x1="264" y1="174" x2="264" y2="186"/>
+    <line class="tick" x1="480" y1="174" x2="480" y2="186"/>
+    <line class="tick" x1="696" y1="174" x2="696" y2="186"/>
+    <line class="tick" x1="912" y1="174" x2="912" y2="186"/>
+    <text class="yr" x="48"  y="206" text-anchor="middle">2022</text>
+    <text class="yr" x="264" y="206" text-anchor="middle">2023</text>
+    <text class="yr" x="480" y="206" text-anchor="middle">2024</text>
+    <text class="yr" x="696" y="206" text-anchor="middle">2025</text>
+    <text class="yr" x="912" y="206" text-anchor="middle">2026</text>
+  </g>
+
+  <!-- Event markers (dot + label below axis) -->
+  <!-- Nov 2022 ChatGPT -->
+  <circle class="dot-pe" cx="92"  cy="180" r="6"/>
+  <text class="label" x="92"  y="240" text-anchor="middle">Nov 2022</text>
+  <text class="small" x="92"  y="256" text-anchor="middle">ChatGPT  ·  the</text>
+  <text class="small" x="92"  y="270" text-anchor="middle">word "prompting"</text>
+
+  <!-- 2023 CoT, ReAct, frameworks -->
+  <circle class="dot-pe" cx="300" cy="180" r="6"/>
+  <text class="label" x="300" y="240" text-anchor="middle">2023</text>
+  <text class="small" x="300" y="256" text-anchor="middle">CoT · ReAct · LangChain</text>
+  <text class="small" x="300" y="270" text-anchor="middle">"prompt patterns" era</text>
+
+  <!-- Mid 2024 RAG, function calling, long context -->
+  <circle class="dot-pe" cx="500" cy="180" r="6"/>
+  <text class="label" x="500" y="240" text-anchor="middle">2024</text>
+  <text class="small" x="500" y="256" text-anchor="middle">RAG · tool use · 200k+ windows</text>
+  <text class="small" x="500" y="270" text-anchor="middle">prompts ⊂ a larger context</text>
+
+  <!-- Jun-Jul 2025 Karpathy + Anthropic -->
+  <circle class="dot-ce" cx="700" cy="180" r="6"/>
+  <text class="label" x="700" y="240" text-anchor="middle">Jun – Sep 2025</text>
+  <text class="small" x="700" y="256" text-anchor="middle">Karpathy renames it.</text>
+  <text class="small" x="700" y="270" text-anchor="middle">Anthropic · IBM publish.</text>
+
+  <!-- 2025-26 MCP/agents/memory -->
+  <circle class="dot-ce" cx="868" cy="180" r="6"/>
+  <text class="label" x="868" y="240" text-anchor="middle">2025 – 2026</text>
+  <text class="small" x="868" y="256" text-anchor="middle">MCP · sub-agents</text>
+  <text class="small" x="868" y="270" text-anchor="middle">memory systems</text>
+
+  <!-- Annotation arrows from labels up to dots -->
+  <line class="tick" x1="92"  y1="220" x2="92"  y2="186"/>
+  <line class="tick" x1="300" y1="220" x2="300" y2="186"/>
+  <line class="tick" x1="500" y1="220" x2="500" y2="186"/>
+  <line class="tick" x1="700" y1="220" x2="700" y2="186"/>
+  <line class="tick" x1="868" y1="220" x2="868" y2="186"/>
+
+  <!-- Footer -->
+  <text class="small" x="48" y="324">The practice did not change overnight; the name caught up to it.</text>
+  <text class="small" x="48" y="340">By 2025 most "prompt engineering" work was already context engineering — assembling tools, memory, retrieved data, and history around a tiny user instruction.</text>
+</svg>

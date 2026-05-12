@@ -1,0 +1,6 @@
+[
+  {"id": "ORD-9001", "email": "alex@example.com", "total": 1499.00, "status": "shipped", "items": ["pro-plan-annual"]},
+  {"id": "ORD-9002", "email": "alex@example.com", "total": 49.00,   "status": "shipped", "items": ["addon-seats"]},
+  {"id": "ORD-9003", "email": "anika@partnerco.io","total": 250.00, "status": "refunded","items": ["consult-1h"]},
+  {"id": "ORD-9004", "email": "sam@example.com",  "total": 12000.00,"status": "shipped", "items": ["enterprise-annual"]}
+]

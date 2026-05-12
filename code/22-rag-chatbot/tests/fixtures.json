@@ -1,0 +1,14 @@
+[
+  {
+    "question": "How long does a refund over $1000 take?",
+    "answer": "Refunds over $1000 require manager approval and are routed to the billing queue; they are processed during office hours (09:00–18:00 IST, weekdays)."
+  },
+  {
+    "question": "How long is a workspace invite valid?",
+    "answer": "An Acme workspace invite is valid for 72 hours; after that a fresh invite is required."
+  },
+  {
+    "question": "Which Acme plans support SSO?",
+    "answer": "Single sign-on (Google, Microsoft, Okta) is available on the Business and Enterprise plans."
+  }
+]
