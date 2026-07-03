@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="t d">
   <title id="t">A real API call, X-rayed against the six layers</title>
   <desc id="d">A JSON request body sent to the Anthropic Messages API, annotated to show how each top-level field and message maps to one of the six context layers: system prompt, tools and MCP descriptions, memory and state, retrieved chunks, conversation history, and the user instruction.</desc>
 
