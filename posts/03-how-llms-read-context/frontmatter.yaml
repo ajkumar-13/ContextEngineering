@@ -1,0 +1,7 @@
+slug: 03-how-llms-read-context
+title: "03 · How LLMs actually read context"
+date: 2026-05-13
+tags: [context-engineering, attention, kv-cache]
+hero: ../../assets/diagrams/exports/03-lost-in-the-middle.svg
+reading_time: 14
+part: "Part I — Foundations"

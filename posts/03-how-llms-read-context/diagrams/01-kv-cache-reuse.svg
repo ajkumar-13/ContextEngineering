@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 460" width="820" height="460" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 460" role="img" aria-labelledby="t d">
   <title id="t">A stable prefix turns into a cache hit</title>
   <desc id="d">Two API calls share the same prefix (system prompt and tool schemas). The first call computes and stores the KV-cache for that prefix; the second call, made within five minutes, reuses the cached prefix and is billed at roughly one tenth of the normal input rate, while only the new suffix is billed at full price.</desc>
 
