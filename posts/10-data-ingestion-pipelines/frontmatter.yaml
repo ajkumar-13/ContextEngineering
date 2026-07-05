@@ -1,0 +1,7 @@
+slug: 10-data-ingestion-pipelines
+title: "10 · Data ingestion and document pipelines"
+date: 2026-05-14
+tags: [context-engineering, select, ingestion, rag]
+hero: diagrams/00-hero-data-ingestion-pipelines.svg
+reading_time: 13
+part: "Part II — The four primitives (WSCI)"

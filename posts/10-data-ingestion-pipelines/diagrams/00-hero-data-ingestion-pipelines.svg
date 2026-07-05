@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
+  <title id="t">The data ingestion pipeline</title>
+  <desc id="d">A left-to-right pipeline. Four raw source types on the left (a born-digital PDF, an HTML page, a scanned image, and a spreadsheet) feed into five sequential stages: parse (with OCR and layout recovery), clean (boilerplate stripping), enrich (metadata and provenance), chunk, and index (a dense vector index plus a lexical index). An arrow across the top marks the parse, clean, and enrich stages as the zone where retrieval quality is set. A note explains that whatever the parser drops here can never be retrieved downstream.</desc>
+
+  <style><![CDATA[
+    :root{
+      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
+      --ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;
+      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
+      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-3:#8E8E88;
+    }
+    @media (prefers-color-scheme:dark){
+      :root{
+        --ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;
+        --ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;
+        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
+        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-3:#6E6E68;
+      }
+    }
+    .bg{fill:var(--ce-bg);}
+    .card{fill:var(--ce-surface);stroke:var(--ce-ink);stroke-width:1.5;}
+    .src{fill:var(--ce-surface);stroke:var(--ce-ink-muted);stroke-width:1;}
+    .flow{fill:none;stroke:var(--ce-ink);stroke-width:1.5;}
+    .flow-head{fill:var(--ce-ink);}
+    .feed{fill:none;stroke:var(--ce-ink-muted);stroke-width:1;}
+    .zone{fill:none;stroke:var(--ce-primary);stroke-width:1;stroke-dasharray:4 3;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ce-ink);}
+    .n{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ce-ink-subtle);}
+    .l{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ce-ink-muted);}
+    .src-t{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ce-ink);}
+    .zt{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ce-primary);text-transform:uppercase;letter-spacing:0.06em;}
+    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:10px;fill:var(--ce-ink-muted);}
+    .idx-t{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:10px;fill:#FFFFFF;}
+  ]]></style>
+
+  <rect class="bg" width="960" height="360"/>
+  <text class="title" x="48" y="44">The ingestion pipeline</text>
+  <text class="sub" x="48" y="64">Messy source files become clean, provenance-tagged, chunk-ready text. Quality is set upstream.</text>
+
+  <!-- ============ RAW SOURCES (left) ============ -->
+  <text class="n" x="48" y="112">RAW SOURCES</text>
+  <!-- four source chips stacked -->
+  <g>
+    <rect class="src" x="48" y="122" width="118" height="34" rx="5"/>
+    <text class="src-t" x="62" y="143">PDF</text>
+    <text class="mono" x="94" y="143">born-digital</text>
+  </g>
+  <g>
+    <rect class="src" x="48" y="162" width="118" height="34" rx="5"/>
+    <text class="src-t" x="62" y="183">HTML</text>
+    <text class="mono" x="100" y="183">crawl</text>
+  </g>
+  <g>
+    <rect class="src" x="48" y="202" width="118" height="34" rx="5"/>
+    <text class="src-t" x="62" y="223">SCAN</text>
+    <text class="mono" x="102" y="223">image</text>
+  </g>
+  <g>
+    <rect class="src" x="48" y="242" width="118" height="34" rx="5"/>
+    <text class="src-t" x="62" y="263">XLSX</text>
+    <text class="mono" x="100" y="263">grid</text>
+  </g>
+
+  <!-- feed lines from the four sources converging into parse -->
+  <path class="feed" d="M166 139 H196 Q206 139 206 149 V186"/>
+  <path class="feed" d="M166 179 H196 Q206 179 206 186 V186"/>
+  <path class="feed" d="M166 219 H196 Q206 219 206 209 V212"/>
+  <path class="feed" d="M166 259 H196 Q206 259 206 249 V212"/>
+  <line class="feed" x1="206" y1="186" x2="206" y2="212"/>
+  <path class="flow-head" d="M206 218 l-4 -8 h8 z"/>
+
+  <!-- ============ FIVE STAGES ============ -->
+  <!-- stage geometry: x starts, width 128, gap ~14, vertical band y 122..276 -->
+  <!-- Stage 1: PARSE (primary) x=222 -->
+  <g>
+    <rect class="card" x="222" y="122" width="128" height="154" rx="7"/>
+    <rect x="222" y="122" width="6" height="154" rx="3" fill="var(--ce-primary)"/>
+    <text class="n" x="238" y="146">1</text>
+    <text class="h" x="252" y="146">PARSE</text>
+    <line x1="238" y1="156" x2="334" y2="156" stroke="var(--ce-border)" stroke-width="1"/>
+    <text class="l" x="238" y="176">text + layout</text>
+    <text class="l" x="238" y="194">reading order</text>
+    <text class="l" x="238" y="212">tables kept</text>
+    <text class="l" x="238" y="230">OCR for scans</text>
+    <text class="mono" x="238" y="256">most quality</text>
+    <text class="mono" x="238" y="269">lost here</text>
+  </g>
+
+  <!-- Stage 2: CLEAN (accent) x=364 -->
+  <g>
+    <rect class="card" x="364" y="122" width="128" height="154" rx="7"/>
+    <rect x="364" y="122" width="6" height="154" rx="3" fill="var(--ce-accent)"/>
+    <text class="n" x="380" y="146">2</text>
+    <text class="h" x="394" y="146">CLEAN</text>
+    <line x1="380" y1="156" x2="476" y2="156" stroke="var(--ce-border)" stroke-width="1"/>
+    <text class="l" x="380" y="176">strip boilerplate</text>
+    <text class="l" x="380" y="194">drop headers /</text>
+    <text class="l" x="380" y="212">footers, nav</text>
+    <text class="l" x="380" y="230">dedupe blocks</text>
+    <text class="mono" x="380" y="262">no page furniture</text>
+  </g>
+
+  <!-- Stage 3: ENRICH (success) x=506 -->
+  <g>
+    <rect class="card" x="506" y="122" width="128" height="154" rx="7"/>
+    <rect x="506" y="122" width="6" height="154" rx="3" fill="var(--ce-success)"/>
+    <text class="n" x="522" y="146">3</text>
+    <text class="h" x="536" y="146">ENRICH</text>
+    <line x1="522" y1="156" x2="618" y2="156" stroke="var(--ce-border)" stroke-width="1"/>
+    <text class="l" x="522" y="176">metadata</text>
+    <text class="l" x="522" y="194">provenance</text>
+    <text class="l" x="522" y="212">source · page</text>
+    <text class="l" x="522" y="230">section · time</text>
+    <text class="mono" x="522" y="262">enables citation</text>
+  </g>
+
+  <!-- Stage 4: CHUNK (warn) x=648 -->
+  <g>
+    <rect class="card" x="648" y="122" width="112" height="154" rx="7"/>
+    <rect x="648" y="122" width="6" height="154" rx="3" fill="var(--ce-warn)"/>
+    <text class="n" x="664" y="146">4</text>
+    <text class="h" x="678" y="146">CHUNK</text>
+    <line x1="664" y1="156" x2="744" y2="156" stroke="var(--ce-border)" stroke-width="1"/>
+    <text class="l" x="664" y="176">split into</text>
+    <text class="l" x="664" y="194">retrieval units</text>
+    <text class="mono" x="664" y="230">Post 11</text>
+  </g>
+
+  <!-- Stage 5: INDEX (neutral card) x=774 -->
+  <g>
+    <rect class="card" x="774" y="122" width="138" height="154" rx="7"/>
+    <rect x="774" y="122" width="6" height="154" rx="3" fill="var(--ce-neutral-3)"/>
+    <text class="n" x="790" y="146">5</text>
+    <text class="h" x="804" y="146">INDEX</text>
+    <line x1="790" y1="156" x2="898" y2="156" stroke="var(--ce-border)" stroke-width="1"/>
+    <!-- dense index chip -->
+    <rect x="790" y="170" width="108" height="28" rx="4" fill="var(--ce-primary)"/>
+    <text class="idx-t" x="800" y="188">dense · vectors</text>
+    <!-- lexical index chip -->
+    <rect x="790" y="204" width="108" height="28" rx="4" fill="var(--ce-accent)"/>
+    <text class="idx-t" x="800" y="222">lexical · BM25</text>
+    <text class="mono" x="790" y="256">Post 11</text>
+  </g>
+
+  <!-- inter-stage flow arrows -->
+  <g>
+    <line class="flow" x1="350" y1="199" x2="360" y2="199"/>
+    <path class="flow-head" d="M366 199 l-8 -4 v8 z"/>
+    <line class="flow" x1="492" y1="199" x2="502" y2="199"/>
+    <path class="flow-head" d="M508 199 l-8 -4 v8 z"/>
+    <line class="flow" x1="634" y1="199" x2="644" y2="199"/>
+    <path class="flow-head" d="M650 199 l-8 -4 v8 z"/>
+    <line class="flow" x1="760" y1="199" x2="770" y2="199"/>
+    <path class="flow-head" d="M776 199 l-8 -4 v8 z"/>
+  </g>
+
+  <!-- ============ UPSTREAM-QUALITY BRACKET (top) ============ -->
+  <path class="zone" d="M222 104 H634"/>
+  <line class="zone" x1="222" y1="104" x2="222" y2="114"/>
+  <line class="zone" x1="634" y1="104" x2="634" y2="114"/>
+  <text class="zt" x="428" y="98" text-anchor="middle">quality is set here · upstream of any embedding</text>
+
+  <!-- ============ BOTTOM NOTE ============ -->
+  <line x1="48" y1="300" x2="912" y2="300" stroke="var(--ce-border)" stroke-width="1"/>
+  <text class="l" x="48" y="322">What the parser keeps or drops is what the model can ever retrieve.</text>
+  <text class="mono" x="48" y="340">recall@N cannot recover a fact destroyed at parse time.</text>
+</svg>
