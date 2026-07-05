@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
+  <title id="t">Compaction on a filling context window</title>
+  <desc id="d">A timeline of context-window usage. A rising area chart climbs turn by turn toward a dashed compaction threshold near the top of the window. When it reaches the threshold a labelled /compact event fires: the older history is replaced by a much smaller summary block, so usage drops sharply and then resumes climbing from the lower level. A callout reports the information retention ratio, the fraction of key facts that survive the summary, at roughly eighty-five per cent, illustrating that compaction buys back window space at some cost to fidelity.</desc>
+
+  <style><![CDATA[
+    :root{
+      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
+      --ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;
+      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
+      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-grid:rgba(26,26,26,0.06);
+      --ce-neutral-1:#EAEAE4;--ce-neutral-3:#8E8E88;
+    }
+    @media (prefers-color-scheme:dark){
+      :root{
+        --ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;
+        --ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;
+        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
+        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-grid:rgba(241,238,232,0.08);
+        --ce-neutral-1:#1F2229;--ce-neutral-3:#6E6E68;
+      }
+    }
+    .bg{fill:var(--ce-bg);}
+    .frame{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
+    .grid{stroke:var(--ce-grid);stroke-width:0.75;fill:none;}
+    .axis{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;}
+    .fill-a{fill:var(--ce-primary);fill-opacity:0.22;stroke:var(--ce-primary);stroke-width:1.5;stroke-linejoin:round;}
+    .fill-b{fill:var(--ce-success);fill-opacity:0.22;stroke:var(--ce-success);stroke-width:1.5;stroke-linejoin:round;}
+    .thresh{stroke:var(--ce-alert);stroke-width:1.5;stroke-dasharray:5 4;fill:none;}
+    .drop{stroke:var(--ce-ink);stroke-width:1.5;fill:none;}
+    .lead{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;}
+    .keep{fill:var(--ce-success);fill-opacity:0.14;stroke:var(--ce-success);stroke-width:1.5;}
+    .lose{fill:var(--ce-alert);fill-opacity:0.14;stroke:var(--ce-alert);stroke-width:1.5;}
+    .card{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
+    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ce-ink);}
+    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ce-ink-muted);}
+    .lab-alert{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ce-alert);}
+    .lab-succ{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ce-success);}
+    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ce-ink-muted);}
+    .mono-i{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-weight:600;font-size:12px;fill:var(--ce-ink);}
+    .big{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-weight:700;font-size:22px;fill:var(--ce-success);}
+  ]]></style>
+
+  <rect class="bg" width="960" height="360"/>
+  <text class="title" x="48" y="44">Compaction on a filling window</text>
+  <text class="sub" x="48" y="64">Usage climbs to the trigger, /compact swaps history for a summary, and the window is bought back.</text>
+
+  <!-- ============ Chart area: plot box x 60..690, y 92..300 ============ -->
+  <!-- window ceiling = top of plot (y=92), floor (0 tokens) = y=300 -->
+  <rect class="frame" x="60" y="92" width="630" height="208" rx="6"/>
+
+  <!-- horizontal grid lines at 25/50/75/100% of window -->
+  <line class="grid" x1="60" y1="144" x2="690" y2="144"/>
+  <line class="grid" x1="60" y1="196" x2="690" y2="196"/>
+  <line class="grid" x1="60" y1="248" x2="690" y2="248"/>
+
+  <!-- compaction threshold ~80% of window (y = 300 - 0.80*208 = 133.6 -> 134) -->
+  <line class="thresh" x1="60" y1="134" x2="690" y2="134"/>
+  <text class="lab-alert" x="684" y="128" text-anchor="end">compaction trigger  ·  ~80%</text>
+
+  <!-- Area A: history rising from turn 0 to the trigger -->
+  <!-- baseline y=300; climbs to threshold at x=345 -->
+  <path class="fill-a" d="M60,300 L60,282 L108,266 L156,246 L204,222 L252,192 L300,160 L345,134 L345,300 Z"/>
+
+  <!-- vertical drop line at the /compact event (x=345) -->
+  <line class="drop" x1="345" y1="134" x2="345" y2="256"/>
+
+  <!-- Area B: post-compaction, restarts from a low summary level (~20% -> y=258) and climbs again -->
+  <path class="fill-b" d="M345,300 L345,258 L393,250 L441,238 L489,224 L537,208 L585,190 L633,170 L681,152 L681,300 Z"/>
+
+  <!-- axis lines (drawn last so they sit above fills) -->
+  <line class="axis" x1="60" y1="92" x2="60" y2="300"/>
+  <line class="axis" x1="60" y1="300" x2="690" y2="300"/>
+
+  <!-- y-axis caption -->
+  <text class="h" x="60" y="84">Context-window usage</text>
+  <text class="s" x="64" y="315">turns  →</text>
+
+  <!-- phase labels -->
+  <text class="l" x="200" y="290" text-anchor="middle" fill="var(--ce-primary)">history grows</text>
+  <text class="l" x="520" y="292" text-anchor="middle" fill="var(--ce-success)">summary + new turns</text>
+
+  <!-- /compact event marker + arrow showing the drop -->
+  <circle cx="345" cy="134" r="4" fill="var(--ce-alert)"/>
+  <path class="lead" d="M345,152 C330,170 320,200 322,228" />
+  <path d="M318,220 l4,10 l6,-8 z" fill="var(--ce-ink-muted)"/>
+  <g transform="translate(150,150)">
+    <rect class="card" x="0" y="0" width="128" height="34" rx="6"/>
+    <text class="mono-i" x="12" y="22">/compact</text>
+  </g>
+  <line class="lead" x1="278" y1="167" x2="341" y2="140"/>
+
+  <!-- span bracket showing reclaimed space -->
+  <line class="lead" x1="357" y1="134" x2="357" y2="258"/>
+  <line class="lead" x1="352" y1="134" x2="362" y2="134"/>
+  <line class="lead" x1="352" y1="258" x2="362" y2="258"/>
+  <text class="s" x="366" y="192">space</text>
+  <text class="s" x="366" y="206">bought</text>
+  <text class="s" x="366" y="220">back</text>
+
+  <!-- ============ Right panel: IRR ============ -->
+  <rect class="card" x="716" y="92" width="196" height="208" rx="8"/>
+  <text class="h" x="732" y="118">Information retention</text>
+  <text class="s" x="732" y="135">of what the summary keeps</text>
+
+  <!-- IRR figure -->
+  <text class="big" x="732" y="172">IRR ≈ 85%</text>
+  <text class="mono" x="732" y="190">key facts kept / key facts in</text>
+
+  <!-- kept vs lost bar -->
+  <rect class="keep" x="732" y="204" width="150" height="20" rx="3"/>
+  <rect class="lose" x="882" y="204" width="30" height="20" rx="3"/>
+  <text class="lab-succ" x="736" y="218">kept</text>
+  <text class="lab-alert" x="908" y="240" text-anchor="end">lost</text>
+
+  <!-- retention notes -->
+  <text class="l" x="732" y="264">Preserve, in order</text>
+  <text class="s" x="732" y="280">decisions · open items · user facts</text>
+  <text class="s" x="732" y="294">tool conclusions, not verbatim bodies</text>
+
+  <!-- ============ Bottom legend strip ============ -->
+  <g transform="translate(48,332)">
+    <rect x="0" y="-16" width="16" height="10" rx="2" class="fill-a"/>
+    <text class="s" x="22" y="-7">pre-compaction history</text>
+
+    <rect x="180" y="-16" width="16" height="10" rx="2" class="fill-b"/>
+    <text class="s" x="202" y="-7">summary + resumed turns</text>
+
+    <line class="thresh" x1="372" y1="-11" x2="392" y2="-11"/>
+    <text class="s" x="398" y="-7">trigger threshold</text>
+
+    <line class="drop" x1="528" y1="-11" x2="548" y2="-11"/>
+    <text class="s" x="554" y="-7">/compact drop</text>
+  </g>
+</svg>
