@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
+  <title id="t">The system prompt as software: five named sections</title>
+  <desc id="d">A well-engineered system prompt is a stack of five labelled cards in a fixed order: Identity (who the agent is), Rules (hard constraints), Format (how output is shaped), Knowledge (small stable facts), and Tools (the tool catalogue with usage guidance). A bracket on the left marks that the boundaries between sections are fluid and a given line can belong to two of them. A note on the right shows that only the sections a task needs are loaded into the context window; the rest stay out.</desc>
+
+  <style><![CDATA[
+    :root{
+      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
+      --ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;
+      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
+      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-3:#8E8E88;
+    }
+    @media (prefers-color-scheme:dark){
+      :root{
+        --ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;
+        --ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;
+        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
+        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-3:#6E6E68;
+      }
+    }
+    .bg{fill:var(--ce-bg);}
+    .card{fill:var(--ce-surface);stroke:var(--ce-ink);stroke-width:1.5;}
+    .chip{stroke:none;}
+    .brace{fill:none;stroke:var(--ce-ink-muted);stroke-width:1;}
+    .lead{fill:none;stroke:var(--ce-ink-muted);stroke-width:1;stroke-dasharray:4 3;}
+    .load{fill:none;stroke:var(--ce-primary);stroke-width:1.5;stroke-dasharray:5 4;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+    .num{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-weight:600;font-size:12px;fill:#FFFFFF;}
+    .name{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:14px;fill:var(--ce-ink);}
+    .desc{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
+    .note{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ce-ink-muted);}
+    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ce-ink-muted);}
+  ]]></style>
+
+  <rect class="bg" width="960" height="360"/>
+  <text class="title" x="48" y="44">The system prompt as software</text>
+  <text class="s" x="48" y="64">Five named sections in a fixed order, not freeform prose. Boundaries are fluid; load only what the task needs.</text>
+
+  <!-- Left "fluid boundaries" brace spanning the whole stack -->
+  <path class="brace" d="M96 92 q-8 0 -8 8 v104 q0 8 -8 8 q8 0 8 8 v104 q0 8 8 8"/>
+  <text class="note" x="60" y="204" text-anchor="middle" transform="rotate(-90 60 204)">boundaries are fluid</text>
+
+  <!-- The five stacked cards. x 112..648, each 44 tall, 6 gap -->
+  <!-- 1 IDENTITY -->
+  <g transform="translate(112,92)">
+    <rect class="card" width="536" height="44" rx="6"/>
+    <rect class="chip" x="0" y="0" width="6" height="44" rx="3" fill="var(--ce-primary)"/>
+    <circle cx="30" cy="22" r="12" fill="var(--ce-primary)"/>
+    <text class="num" x="30" y="26" text-anchor="middle">1</text>
+    <text class="name" x="54" y="20">Identity</text>
+    <text class="desc" x="54" y="36">Who the agent is, in one paragraph</text>
+  </g>
+  <!-- 2 RULES -->
+  <g transform="translate(112,142)">
+    <rect class="card" width="536" height="44" rx="6"/>
+    <rect class="chip" x="0" y="0" width="6" height="44" rx="3" fill="var(--ce-alert)"/>
+    <circle cx="30" cy="22" r="12" fill="var(--ce-alert)"/>
+    <text class="num" x="30" y="26" text-anchor="middle">2</text>
+    <text class="name" x="54" y="20">Rules</text>
+    <text class="desc" x="54" y="36">Hard constraints: what it must and must not do</text>
+  </g>
+  <!-- 3 FORMAT -->
+  <g transform="translate(112,192)">
+    <rect class="card" width="536" height="44" rx="6"/>
+    <rect class="chip" x="0" y="0" width="6" height="44" rx="3" fill="var(--ce-accent)"/>
+    <circle cx="30" cy="22" r="12" fill="var(--ce-accent)"/>
+    <text class="num" x="30" y="26" text-anchor="middle">3</text>
+    <text class="name" x="54" y="20">Format</text>
+    <text class="desc" x="54" y="36">How outputs are shaped; downstream code depends on it</text>
+  </g>
+  <!-- 4 KNOWLEDGE -->
+  <g transform="translate(112,242)">
+    <rect class="card" width="536" height="44" rx="6"/>
+    <rect class="chip" x="0" y="0" width="6" height="44" rx="3" fill="var(--ce-success)"/>
+    <circle cx="30" cy="22" r="12" fill="var(--ce-success)"/>
+    <text class="num" x="30" y="26" text-anchor="middle">4</text>
+    <text class="name" x="54" y="20">Knowledge</text>
+    <text class="desc" x="54" y="36">Small, stable, vital facts; the rest goes to retrieval</text>
+  </g>
+  <!-- 5 TOOLS -->
+  <g transform="translate(112,292)">
+    <rect class="card" width="536" height="44" rx="6"/>
+    <rect class="chip" x="0" y="0" width="6" height="44" rx="3" fill="var(--ce-warn)"/>
+    <circle cx="30" cy="22" r="12" fill="var(--ce-warn)"/>
+    <text class="num" x="30" y="26" text-anchor="middle">5</text>
+    <text class="name" x="54" y="20">Tools</text>
+    <text class="desc" x="54" y="36">Tool catalogue with one-line usage guidance</text>
+  </g>
+
+  <!-- Right panel: load only relevant sections into the window -->
+  <g transform="translate(700,92)">
+    <rect class="load" width="212" height="244" rx="8"/>
+    <text class="h" x="16" y="26">Loaded this turn</text>
+    <text class="note" x="16" y="46">Only the sections the task</text>
+    <text class="note" x="16" y="62">needs enter the window.</text>
+
+    <!-- lead lines from three "active" sections into the panel -->
+    <rect x="16" y="80" width="180" height="26" rx="5" fill="var(--ce-surface)" stroke="var(--ce-primary)" stroke-width="1.5"/>
+    <circle cx="32" cy="93" r="6" fill="var(--ce-primary)"/>
+    <text class="name" x="46" y="97" font-size="12">Identity</text>
+
+    <rect x="16" y="114" width="180" height="26" rx="5" fill="var(--ce-surface)" stroke="var(--ce-alert)" stroke-width="1.5"/>
+    <circle cx="32" cy="127" r="6" fill="var(--ce-alert)"/>
+    <text class="name" x="46" y="131" font-size="12">Rules</text>
+
+    <rect x="16" y="148" width="180" height="26" rx="5" fill="var(--ce-surface)" stroke="var(--ce-warn)" stroke-width="1.5"/>
+    <circle cx="32" cy="161" r="6" fill="var(--ce-warn)"/>
+    <text class="name" x="46" y="165" font-size="12">Tools</text>
+
+    <text class="mono" x="16" y="196">Format · Knowledge</text>
+    <text class="note" x="16" y="214">stay out until a turn</text>
+    <text class="note" x="16" y="230">actually calls for them.</text>
+  </g>
+
+  <!-- dashed lead lines connecting active stack rows to the loaded panel -->
+  <line class="lead" x1="648" y1="114" x2="716" y2="185"/>
+  <line class="lead" x1="648" y1="164" x2="716" y2="219"/>
+  <line class="lead" x1="648" y1="314" x2="716" y2="253"/>
+</svg>
