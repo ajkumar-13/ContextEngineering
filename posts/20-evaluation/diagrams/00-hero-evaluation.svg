@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
+  <title id="t">The four-layer evaluation pyramid</title>
+  <desc id="d">A four-tier pyramid of software evaluation for LLM systems. The wide base is the unit layer: deterministic pure functions such as chunkers, parsers and schema validators, run on every commit, cheap and fast. Above it is the component layer: individual pieces like the retriever, reranker and judge, each with its own metric and fixtures, run on every relevant pull request. Above that is the end-to-end layer: the full pipeline answering gold-set fixtures, regression-gated, run on load-bearing pull requests. The narrow top tier is the online layer: real production traffic and the approval rate, the slowest and most expensive but truest signal. A vertical axis on the left shows that moving up the pyramid means running less often and paying more per run.</desc>
+
+  <style><![CDATA[
+    :root{
+      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
+      --ce-border:#D9D9D4;
+      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
+      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-grid:rgba(26,26,26,0.06);
+    }
+    @media (prefers-color-scheme:dark){
+      :root{
+        --ce-bg:#161512;--ce-surface:#1E1D1A;--ce-ink:#F1EEE8;--ce-ink-muted:#A6A29B;
+        --ce-border:#2A2D33;
+        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
+        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-grid:rgba(241,238,232,0.08);
+      }
+    }
+    .bg{fill:var(--ce-bg);}
+    .tier{stroke:var(--ce-bg);stroke-width:1.5;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+    .tname{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:14px;fill:#FFFFFF;}
+    .tdesc{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11.5px;fill:#FFFFFF;fill-opacity:0.92;}
+    .cad{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-weight:500;font-size:10.5px;fill:var(--ce-ink-muted);}
+    .axis{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;}
+    .axlab{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ce-ink-muted);}
+    .grid{stroke:var(--ce-grid);stroke-width:0.75;}
+    .end{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
+  ]]></style>
+
+  <rect class="bg" width="960" height="360"/>
+  <text class="title" x="48" y="46">The four-layer evaluation pyramid</text>
+  <text class="sub" x="48" y="66">Cheap deterministic checks at the base, expensive online signal at the top. Each tier up runs less often and costs more.</text>
+
+  <!-- horizontal guide lines aligned to tier bands -->
+  <line class="grid" x1="180" y1="112" x2="812" y2="112"/>
+  <line class="grid" x1="180" y1="168" x2="812" y2="168"/>
+  <line class="grid" x1="180" y1="224" x2="812" y2="224"/>
+  <line class="grid" x1="180" y1="280" x2="812" y2="280"/>
+
+  <!-- ==== Pyramid ==== apex ~x=496, base half-width 316, tiers 52px tall + 4px gap ==== -->
+
+  <!-- Tier 4: ONLINE (top, narrowest) -->
+  <polygon class="tier" fill="var(--ce-alert)"
+    points="440,112 552,112 573,160 419,160"/>
+  <text class="tname" x="496" y="130" text-anchor="middle">4 · ONLINE</text>
+  <text class="tdesc" x="496" y="150" text-anchor="middle">production traffic · approval rate</text>
+
+  <!-- Tier 3: END-TO-END -->
+  <polygon class="tier" fill="var(--ce-accent)"
+    points="415,164 577,164 598,212 394,212"/>
+  <text class="tname" x="496" y="182" text-anchor="middle">3 · END-TO-END</text>
+  <text class="tdesc" x="496" y="202" text-anchor="middle">gold fixtures · regression-gated</text>
+
+  <!-- Tier 2: COMPONENT -->
+  <polygon class="tier" fill="var(--ce-primary)"
+    points="390,216 602,216 623,264 369,264"/>
+  <text class="tname" x="496" y="234" text-anchor="middle">2 · COMPONENT</text>
+  <text class="tdesc" x="496" y="254" text-anchor="middle">retriever · reranker · judge</text>
+
+  <!-- Tier 1: UNIT (base, widest) -->
+  <polygon class="tier" fill="var(--ce-success)"
+    points="365,268 627,268 648,316 344,316"/>
+  <text class="tname" x="496" y="286" text-anchor="middle">1 · UNIT</text>
+  <text class="tdesc" x="496" y="306" text-anchor="middle">pure functions · chunkers · parsers · schema</text>
+
+  <!-- ==== Left axis: cadence + cost ==== -->
+  <line class="axis" x1="150" y1="112" x2="150" y2="316"/>
+  <polygon fill="var(--ce-ink-muted)" points="150,106 146,116 154,116"/>
+  <text class="axlab" x="140" y="118" text-anchor="end">less often</text>
+  <text class="axlab" x="140" y="132" text-anchor="end">more cost</text>
+  <text class="axlab" x="140" y="308" text-anchor="end">every commit</text>
+  <text class="axlab" x="140" y="322" text-anchor="end">near-free</text>
+
+  <!-- ==== Right side: run cadence per tier ==== -->
+  <text class="end" x="700" y="118">run cadence</text>
+  <text class="cad" x="700" y="140">online monitoring</text>
+  <line class="axis" x1="682" y1="136" x2="690" y2="136"/>
+  <text class="cad" x="700" y="192">load-bearing PRs</text>
+  <line class="axis" x1="682" y1="188" x2="690" y2="188"/>
+  <text class="cad" x="700" y="244">every relevant PR</text>
+  <line class="axis" x1="682" y1="240" x2="690" y2="240"/>
+  <text class="cad" x="700" y="296">every commit</text>
+  <line class="axis" x1="682" y1="292" x2="690" y2="292"/>
+</svg>
