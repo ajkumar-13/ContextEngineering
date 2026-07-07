@@ -7,7 +7,7 @@
 > - Predict where in a long prompt a model will under-attend, and design around it.
 > - Reason about which parts of a prompt are cacheable and which are not.
 
-![Lost-in-the-middle U-curve](../../assets/diagrams/exports/03-lost-in-the-middle.svg)
+![Lost-in-the-middle U-curve](../03-how-llms-read-context/diagrams/03-lost-in-the-middle.svg)
 
 *Recall as a function of where a fact sits in a long context: a U-curve, high at the start and end, sagging in the deep middle (Liu et al., 2023).*
 
@@ -73,7 +73,7 @@ The paper has been cited several thousand times because the implication is so pr
 The two design rules that fall out of this are:
 
 1. **Put the most important content at the start or the end.** The system prompt sits at the very beginning. The user's current question sits at the very end. Background facts that the model should "have read" but does not need to actively reason over can live in the middle.
-2. **Compress the middle.** If your retrieval, history, or memory layers grow past a few tens of thousands of tokens, reach for compression (Posts 12 and 16) before you reach for a bigger window.
+2. **Compress the middle.** If your retrieval, history, or memory layers grow past a few tens of thousands of tokens, reach for compression ([Posts 12](../12-compress-strategies/index.md) and [16](../16-memory-systems/index.md)) before you reach for a bigger window.
 
 ---
 
@@ -93,7 +93,7 @@ Recall that for every token the model computes a key vector and a value vector a
 
 In practice, every serving stack stores those keys and values in a **KV-cache**: a tensor of shape `[layers, heads, N, d_head]` keyed by the input token sequence. When the next token is generated, the model only needs to compute one new query, one new key, and one new value, then attend over the cache. Generation becomes linear in output length instead of quadratic.
 
-That is the *intra-request* KV-cache (KV stands for the *keys* and *values* it stores). The interesting part for context engineering is its *inter-request* cousin: **prompt caching**, sometimes called prefix caching. If two API calls share the same first *k* tokens, byte-for-byte, the provider can reuse the KV-cache it computed for those tokens on the previous call. You are billed at a heavily discounted rate on the reused prefix, and latency drops correspondingly. The size of the discount is vendor-specific: Anthropic bills a cache read at roughly a tenth of the base input price, about ten times cheaper (Anthropic, "Prompt caching with Claude", 2024), whereas OpenAI's automatic prompt caching discounts cached input by about half. Post 04 owns the exact pricing; treat these as the shape, not the last word.
+That is the *intra-request* KV-cache (KV stands for the *keys* and *values* it stores). The interesting part for context engineering is its *inter-request* cousin: **prompt caching**, sometimes called prefix caching. If two API calls share the same first *k* tokens, byte-for-byte, the provider can reuse the KV-cache it computed for those tokens on the previous call. You are billed at a heavily discounted rate on the reused prefix, and latency drops correspondingly. The size of the discount is vendor-specific: Anthropic bills a cache read at roughly a tenth of the base input price, about ten times cheaper (Anthropic, "Prompt caching with Claude", 2024), whereas OpenAI's automatic prompt caching discounts cached input by about half. **[Post 04](../04-tokens-windows-budgets/index.md)** owns the exact pricing; treat these as the shape, not the last word.
 
 ![How a stable prefix turns into a cache hit](./diagrams/01-kv-cache-reuse.svg)
 
@@ -103,7 +103,7 @@ The mechanics dictate three rules that come up over and over again in production
 
 - **Caches are prefix-keyed.** If you change byte zero of the prompt, every later byte is invalidated. Stable layers (system prompt, tool schemas) belong at the front.
 - **Caches are byte-identical.** A timestamp, a UUID, or a freshly-formatted "today is …" line at the top of your system prompt is enough to make every call a cache miss. Move volatile content past the cacheable prefix.
-- **Caches expire.** TTLs vary by vendor: Anthropic's default is five minutes of inactivity, with an optional one-hour tier (Anthropic, "Prompt caching with Claude", 2024). High-throughput agents naturally hit warm caches; low-traffic side projects rarely do. Post 25 quantifies the trade-off.
+- **Caches expire.** TTLs vary by vendor: Anthropic's default is five minutes of inactivity, with an optional one-hour tier (Anthropic, "Prompt caching with Claude", 2024). High-throughput agents naturally hit warm caches; low-traffic side projects rarely do. [Post 25](../25-long-context-vs-rag/index.md) quantifies the trade-off.
 
 ---
 
@@ -117,7 +117,7 @@ First, **needle tests measure recall, not reasoning.** Finding a single planted 
 
 Second, **needle tests are also sensitive to position**. If you re-run the same haystack with the needle at the 50 % mark instead of 95 %, accuracy almost always drops. The needle plot and the U-curve are two views of the same phenomenon.
 
-The operational rule: trust your own evals at your own context length, not the vendor's needle chart. Post 20 covers eval design.
+The operational rule: trust your own evals at your own context length, not the vendor's needle chart. [Post 20](../20-evaluation/index.md) covers eval design.
 
 ---
 
@@ -137,7 +137,7 @@ Read the figure as a histogram of **how much the model effectively uses content 
 | Middle | Long retrieved documents, conversation history, anything the model should "have read" | Cheap, but recall is weak; compress aggressively |
 | End | Memory, *just-in-time* facts, the current user question | Highest recall, near-perfect attention |
 
-There is nothing magical about three buckets. Real prompts have many more layers (Post 02) and many more sub-decisions. But the heuristic explains why the standard ordering (system → tools → memory → retrieval → history → user) keeps reappearing across frameworks built by people who do not talk to each other. It is the order the machinery rewards.
+There is nothing magical about three buckets. Real prompts have many more layers ([Post 02](../02-six-layers-of-context/index.md)) and many more sub-decisions. But the heuristic explains why the standard ordering (system → tools → memory → retrieval → history → user) keeps reappearing across frameworks built by people who do not talk to each other. It is the order the machinery rewards.
 
 ---
 

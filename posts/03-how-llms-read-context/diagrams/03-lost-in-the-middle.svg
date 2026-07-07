@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-labelledby="t d">
+  <title id="t">Lost-in-the-Middle: U-shaped Recall Across the Context Window</title>
+  <desc  id="d">A line plot of an LLM's accuracy at retrieving a relevant fact as a function of where the fact sits in a long input. Accuracy is high when the fact is near the start of the context, drops to a minimum somewhere in the middle, and recovers when the fact is near the end. After Liu et al., 2023, "Lost in the Middle: How Language Models Use Long Contexts".</desc>
+
+  <style><![CDATA[
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-alert:#D88880;--ce-neutral-1:#1F2229;}}
+    .bg{fill:var(--ce-bg);}
+    .card{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
+    .axis{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;}
+    .grid{stroke:var(--ce-ink-subtle);stroke-width:0.5;fill:none;stroke-dasharray:3 4;}
+    .curve{stroke:var(--ce-primary);stroke-width:2.5;fill:none;}
+    .fill {fill:var(--ce-primary);fill-opacity:0.08;stroke:none;}
+    .annot{stroke:var(--ce-accent);stroke-width:1.25;fill:none;stroke-dasharray:5 4;}
+    .dot{fill:var(--ce-primary);}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .label{font-family:Inter,system-ui,sans-serif;font-weight:500;font-size:14px;fill:var(--ce-ink);}
+    .small{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+    .accent-text{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:13px;fill:var(--ce-accent);}
+  ]]></style>
+
+  <rect class="bg" width="960" height="540"/>
+
+  <text class="title" x="48" y="48">Lost in the Middle</text>
+  <text class="small" x="48" y="68">Accuracy at finding a relevant fact, by where the fact sits in a long context.</text>
+
+  <!-- Plot area: x 100..900, y 110..460 -->
+  <rect class="card" x="80" y="100" width="840" height="380" rx="12"/>
+
+  <!-- Gridlines (horizontal at 25/50/75%) -->
+  <g class="grid">
+    <line x1="120" y1="170" x2="900" y2="170"/>
+    <line x1="120" y1="245" x2="900" y2="245"/>
+    <line x1="120" y1="320" x2="900" y2="320"/>
+    <line x1="120" y1="395" x2="900" y2="395"/>
+  </g>
+
+  <!-- Axes -->
+  <line class="axis" x1="120" y1="440" x2="900" y2="440"/>
+  <line class="axis" x1="120" y1="440" x2="120" y2="130"/>
+
+  <!-- Y axis ticks -->
+  <g class="small" text-anchor="end">
+    <text x="112" y="174">75%</text>
+    <text x="112" y="249">60%</text>
+    <text x="112" y="324">45%</text>
+    <text x="112" y="399">30%</text>
+    <text x="112" y="444">20%</text>
+  </g>
+
+  <!-- X axis ticks -->
+  <g class="small" text-anchor="middle">
+    <text x="120" y="460">start</text>
+    <text x="315" y="460">25%</text>
+    <text x="510" y="460">middle</text>
+    <text x="705" y="460">75%</text>
+    <text x="900" y="460">end</text>
+  </g>
+
+  <!-- Filled area under curve, then the curve itself.
+       Curve is a U-shape: high at left, dips in the middle, high at right.
+       Coordinates chosen to give a clear, asymmetric U. -->
+  <path class="fill"
+        d="M120,170
+           C 200,180 280,260 360,330
+           S 510,400 660,335
+           C 780,290 850,200 900,170
+           L 900,440 L 120,440 Z"/>
+  <path class="curve"
+        d="M120,170
+           C 200,180 280,260 360,330
+           S 510,400 660,335
+           C 780,290 850,200 900,170"/>
+
+  <!-- Highlight the trough -->
+  <line class="annot" x1="510" y1="395" x2="510" y2="130"/>
+  <circle class="dot" cx="510" cy="395" r="5"/>
+  <text class="accent-text" x="525" y="392">↑ trough — minimum recall</text>
+
+  <!-- "Put the question here" annotation near the right edge -->
+  <circle class="dot" cx="895" cy="172" r="5"/>
+  <text class="accent-text" x="888" y="160" text-anchor="end">put the user instruction here</text>
+
+  <!-- "System prompt sits here" annotation near left edge -->
+  <circle class="dot" cx="125" cy="172" r="5"/>
+  <text class="accent-text" x="135" y="160">system prompt sits here</text>
+
+  <!-- Axis labels -->
+  <text class="label" x="510" y="498" text-anchor="middle">position of relevant fact in the context window</text>
+  <g transform="translate(46,290) rotate(-90)">
+    <text class="label" text-anchor="middle">retrieval accuracy</text>
+  </g>
+
+  <!-- Citation -->
+  <text class="small" x="900" y="528" text-anchor="end">Stylised after Liu et al., 2023.  Exact numbers vary by model and task.</text>
+</svg>

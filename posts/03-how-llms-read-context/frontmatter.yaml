@@ -1,7 +1,54 @@
+---
 slug: 03-how-llms-read-context
-title: "03 · How LLMs actually read context"
+title: "03 · How LLMs Actually Read Context"
+
+description: >
+  Learn how large language models process context through tokenization,
+  self-attention, positional embeddings, attention sinks, and the KV-cache.
+  Understand why ordering matters, why information is lost in the middle,
+  and how prompt placement affects cost, latency, and model performance.
+
+author: "Ajay"
+
 date: 2026-05-13
-tags: [context-engineering, attention, kv-cache]
-hero: ../../assets/diagrams/exports/03-lost-in-the-middle.svg
+last_modified: 2026-05-13
+
+tags:
+  - context-engineering
+  - attention
+  - kv-cache
+  - transformers
+  - tokenization
+  - positional-encoding
+  - llm
+
+category: Foundations
+series: Context Engineering
+part: 1
+chapter: "Part I — Foundations"
+
+hero: ../03-how-llms-read-context/diagrams/01-lost-in-the-middle.svg
+hero_alt: "Illustration of the Lost-in-the-Middle U-curve showing recall across a long context window"
+
 reading_time: 14
-part: "Part I — Foundations"
+
+toc: true
+draft: false
+
+keywords:
+  - Large Language Models
+  - Self Attention
+  - Transformer Architecture
+  - KV Cache
+  - Prompt Caching
+  - Lost in the Middle
+  - RoPE
+  - Positional Encoding
+  - Context Window
+  - Context Engineering
+
+canonical_url: ""
+
+prev: ../02-six-layers-of-context/
+next: ../04-tokens-windows-budgets/
+---
