@@ -18,29 +18,51 @@ System prompt · tools · memory · retrieval · history · user instruction.
 
 ---
 
-## Why this exists
+## What is Context Engineering?
 
-Most LLM applications fail not because the model is weak but because the **context** assembled around the user's question is wrong: the system prompt is too vague, the wrong chunks were retrieved, history has buried the rules, or the tools are described badly. *Context engineering* is the discipline of doing that assembly well — across all six layers — so that the model has the right information, in the right place, at the right cost.
+Most LLM applications fail not because the model is weak, but because the **context** assembled around each request is wrong. The system prompt is too vague. The wrong chunks were retrieved. Historical context buried the rules. Tool descriptions are incomplete. 
 
-This repository is the source for **30 posts**, every **diagram**, every **code companion** (runnable), plus a one-page **cheatsheet** and a printable **reference-architecture poster**.
+**Context engineering** is the discipline of assembling that context *well* — across six distinct layers (system prompt, tools, memory, retrieval, conversation history, user instruction) — so the model always has the right information, in the right place, at the right cost.
 
-> No marketing voice. Neutral, textbook tone. Examples first, formalism second. Framework-agnostic.
+This repository contains the complete **Context Engineering** series:
+
+- **30 posts** spanning foundations, primitives, production concerns, and builds
+- **40+ diagrams** illustrating every major concept
+- **7 runnable code companions** with full test suites (offline-testable cores)
+- **One-page cheatsheet** for quick reference
+- **Glossary and bibliography** with every term and citation
+
+**The approach:** No marketing voice. Neutral, textbook tone. Examples first, formalism second. Framework-agnostic (applies to any LLM API, any framework).
 
 ---
 
-## Quick start
+## How to use this
 
-**If you have one hour, read these three:**
+**Start with the series index below.** Posts build on each other, but you can also jump to specific topics. Each post links to others for context.
 
-1. [01 · Why context engineering](posts/01-why-context-engineering/index.md)
-2. [02 · The six layers of context](posts/02-six-layers-of-context/index.md)
-3. [07 · Write, select, compress, isolate](posts/07-write-select-compress-isolate/index.md)
+**By time commitment:**
 
-**If you have ten minutes, read the [one-page cheatsheet](CHEATSHEET.md).**
+| Time | Path |
+|------|------|
+| **10 seconds** | Read the TL;DR immediately below. |
+| **10 minutes** | Read the [one-page cheatsheet](CHEATSHEET.md). |
+| **1 hour** | Read [Post 01 (Why)](posts/01-why-context-engineering/index.md), [Post 02 (Six layers)](posts/02-six-layers-of-context/index.md), and [Post 07 (Write–Select–Compress–Isolate)](posts/07-write-select-compress-isolate/index.md). |
+| **Full series** | Follow the linear reading order in the table below. |
 
-**If you have ten seconds:**
+**TL;DR:**
 
-> Every LLM call is a stack of six layers. Four operations — **W**rite, **S**elect, **C**ompress, **I**solate — let you engineer each layer. Five recurring **failure modes** explain almost every production bug. The rest of the series is depth on each.
+Every LLM call needs **six layers of context**: system prompt, tools, memory, retrieval, history, user instruction. Four operations — **Write** · **Select** · **Compress** · **Isolate** — let you engineer each one. Five recurring **failure modes** explain most production bugs. The rest is depth.
+
+---
+
+## What you'll learn
+
+- **How models read context** — token windows, caching, attention patterns, and what actually matters
+- **The six layers** — what each is, when to use it, and how they interact
+- **Write, Select, Compress, Isolate** — four foundational primitives that apply everywhere
+- **Production patterns** — evaluation, observability, security, privacy, structured output
+- **Decision frameworks** — when to use RAG vs. long context, how to scope memory, retrieval strategy trade-offs
+- **Real builds** — complete runnable code for a RAG chatbot, MCP server, and email-reply agent
 
 ---
 
