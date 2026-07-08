@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
+  <title id="t">Capstone email-reply agent architecture</title>
+  <desc id="d">A left-to-right product pipeline. The Gmail API feeds a triager sub-agent that decides whether a thread deserves a reply. Qualifying threads pass to a drafter agent, which pulls RAG over the user's prior replies and a per-recipient memory store to compose a draft in the user's voice. The draft crosses a deterministic send-gate and then a human review UI before any email is sent back to Gmail. An eval and trace store sits underneath, reading from every stage.</desc>
+
+  <style><![CDATA[
+    :root{
+      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
+      --ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;
+      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
+      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-3:#8E8E88;
+    }
+    @media (prefers-color-scheme:dark){
+      :root{
+        --ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;
+        --ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;
+        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
+        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-3:#6E6E68;
+      }
+    }
+    .bg{fill:var(--ce-bg);}
+    .card{fill:var(--ce-surface);stroke:var(--ce-ink);stroke-width:1.5;}
+    .store{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
+    .flow{stroke:var(--ce-ink);stroke-width:1.5;fill:none;}
+    .feed{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;stroke-dasharray:4 3;}
+    .tap{stroke:var(--ce-ink-subtle);stroke-width:1;fill:none;stroke-dasharray:2 3;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ce-ink);}
+    .role{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:10.5px;fill:var(--ce-ink-muted);}
+    .lab{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ce-ink);}
+    .pill{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:#FFFFFF;}
+    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:10px;fill:var(--ce-ink-muted);}
+  ]]></style>
+
+  <rect class="bg" width="960" height="360"/>
+  <text class="title" x="48" y="44">Capstone: the email-reply agent, end to end</text>
+  <text class="sub" x="48" y="64">Gmail feeds a triager and a drafter; every draft crosses a deterministic send-gate and a human before it ships.</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--ce-ink)"/>
+    </marker>
+    <marker id="arrowMuted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--ce-ink-muted)"/>
+    </marker>
+  </defs>
+
+  <!-- ============ MAIN PIPELINE ROW (y ~ 98..168) ============ -->
+
+  <!-- Gmail API (source) -->
+  <rect class="card" x="48" y="98" width="118" height="70" rx="8"/>
+  <rect x="48" y="98" width="118" height="22" rx="8" fill="var(--ce-neutral-3)"/>
+  <rect x="48" y="110" width="118" height="10" fill="var(--ce-neutral-3)"/>
+  <text class="pill" x="107" y="113" text-anchor="middle">Gmail API</text>
+  <text class="role" x="107" y="140" text-anchor="middle">read · draft · send</text>
+  <text class="mono" x="107" y="157" text-anchor="middle">scoped OAuth</text>
+
+  <!-- Triager (sub-agent) -->
+  <rect class="card" x="204" y="98" width="130" height="70" rx="8"/>
+  <rect x="204" y="98" width="130" height="22" rx="8" fill="var(--ce-primary)"/>
+  <rect x="204" y="110" width="130" height="10" fill="var(--ce-primary)"/>
+  <text class="pill" x="269" y="113" text-anchor="middle">Triager</text>
+  <text class="role" x="269" y="140" text-anchor="middle">sub-agent · small model</text>
+  <text class="mono" x="269" y="157" text-anchor="middle">reply? / skip</text>
+
+  <!-- Drafter (main agent) -->
+  <rect class="card" x="372" y="98" width="150" height="70" rx="8"/>
+  <rect x="372" y="98" width="150" height="22" rx="8" fill="var(--ce-accent)"/>
+  <rect x="372" y="110" width="150" height="10" fill="var(--ce-accent)"/>
+  <text class="pill" x="447" y="113" text-anchor="middle">Drafter</text>
+  <text class="role" x="447" y="140" text-anchor="middle">main agent · frontier model</text>
+  <text class="mono" x="447" y="157" text-anchor="middle">composes in user's voice</text>
+
+  <!-- Send-gate (deterministic) -->
+  <rect class="card" x="560" y="98" width="132" height="70" rx="8"/>
+  <rect x="560" y="98" width="132" height="22" rx="8" fill="var(--ce-warn)"/>
+  <rect x="560" y="110" width="132" height="10" fill="var(--ce-warn)"/>
+  <text class="pill" x="626" y="113" text-anchor="middle">Send-gate</text>
+  <text class="role" x="626" y="140" text-anchor="middle">deterministic checks</text>
+  <text class="mono" x="626" y="157" text-anchor="middle">block / allow</text>
+
+  <!-- Human review UI -->
+  <rect class="card" x="730" y="98" width="132" height="70" rx="8"/>
+  <rect x="730" y="98" width="132" height="22" rx="8" fill="var(--ce-success)"/>
+  <rect x="730" y="110" width="132" height="10" fill="var(--ce-success)"/>
+  <text class="pill" x="796" y="113" text-anchor="middle">Human review UI</text>
+  <text class="role" x="796" y="140" text-anchor="middle">approve · edit · reject</text>
+  <text class="mono" x="796" y="157" text-anchor="middle">the human ships</text>
+
+  <!-- forward flow arrows between the five stages -->
+  <line class="flow" x1="166" y1="133" x2="202" y2="133" marker-end="url(#arrow)"/>
+  <line class="flow" x1="334" y1="133" x2="370" y2="133" marker-end="url(#arrow)"/>
+  <line class="flow" x1="522" y1="133" x2="558" y2="133" marker-end="url(#arrow)"/>
+  <line class="flow" x1="692" y1="133" x2="728" y2="133" marker-end="url(#arrow)"/>
+
+  <!-- draft label over drafter->gate arrow -->
+  <text class="lab" x="541" y="126" text-anchor="middle">draft</text>
+
+  <!-- SEND return path: review UI back to Gmail send -->
+  <path class="flow" d="M796,168 L796,196 L107,196 L107,170" marker-end="url(#arrow)"/>
+  <text class="lab" x="452" y="211" text-anchor="middle">approved reply sent back to Gmail</text>
+
+  <!-- ============ CONTEXT SOURCES for the drafter (top) ============ -->
+  <!-- RAG over prior replies -->
+  <rect class="store" x="392" y="34" width="112" height="40" rx="8"/>
+  <text class="h" x="448" y="52" text-anchor="middle">RAG</text>
+  <text class="role" x="448" y="66" text-anchor="middle">prior replies · tone</text>
+  <line class="feed" x1="425" y1="74" x2="430" y2="96" marker-end="url(#arrowMuted)"/>
+
+  <!-- Memory store -->
+  <rect class="store" x="520" y="34" width="112" height="40" rx="8"/>
+  <text class="h" x="576" y="52" text-anchor="middle">Memory</text>
+  <text class="role" x="576" y="66" text-anchor="middle">per-recipient facts</text>
+  <path class="feed" d="M540,74 L500,90 L470,96" marker-end="url(#arrowMuted)"/>
+
+  <!-- ============ EVAL + TRACE STORE (bottom) ============ -->
+  <rect class="store" x="48" y="256" width="814" height="72" rx="10"/>
+  <text class="h" x="72" y="284">Eval &amp; trace store</text>
+  <text class="sub" x="72" y="303">One trace per thread; approve / reject labels feed nightly eval.</text>
+  <text class="mono" x="72" y="320">tone fidelity · faithfulness · decision accuracy · cost · p95 latency · approval rate</text>
+
+  <!-- Postgres / vector store chip on the right of the eval bar -->
+  <rect class="card" x="700" y="270" width="146" height="44" rx="8"/>
+  <text class="lab" x="773" y="290" text-anchor="middle">Postgres + vector</text>
+  <text class="role" x="773" y="305" text-anchor="middle">audit · fixtures · index</text>
+
+  <!-- taps from each pipeline stage down into the trace store -->
+  <line class="tap" x1="107" y1="196" x2="107" y2="254" marker-end="url(#arrowMuted)"/>
+  <line class="tap" x1="269" y1="168" x2="269" y2="254" marker-end="url(#arrowMuted)"/>
+  <line class="tap" x1="447" y1="168" x2="447" y2="254" marker-end="url(#arrowMuted)"/>
+  <line class="tap" x1="626" y1="168" x2="626" y2="254" marker-end="url(#arrowMuted)"/>
+  <line class="tap" x1="796" y1="196" x2="796" y2="254" marker-end="url(#arrowMuted)"/>
+
+  <!-- deploy footnote -->
+  <text class="mono" x="862" y="240" text-anchor="end">worker on Railway · review UI on Vercel</text>
+</svg>
