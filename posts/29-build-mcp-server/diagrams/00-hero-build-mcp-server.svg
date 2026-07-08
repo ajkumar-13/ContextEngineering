@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
+  <title id="t">The shape of an MCP server</title>
+  <desc id="d">A host application embeds an MCP client, which connects over a standard transport (stdio or HTTP, carrying JSON-RPC 2.0) to an MCP server. The server exposes three capabilities: tools that the model can call, resources it can read, and prompt templates it can invoke. A single tool call is shown as a request arrow from client to server carrying tools/call, and a response arrow back carrying a structured result. The server internals are shown as three stacked boxes behind a permission boundary for write tools.</desc>
+
+  <style><![CDATA[
+    :root{
+      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
+      --ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;
+      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
+      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-3:#8E8E88;
+    }
+    @media (prefers-color-scheme:dark){
+      :root{
+        --ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;
+        --ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;
+        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
+        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-3:#6E6E68;
+      }
+    }
+    .bg{fill:var(--ce-bg);}
+    .card{fill:var(--ce-surface);stroke:var(--ce-ink);stroke-width:1.5;}
+    .cardq{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
+    .flow{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;}
+    .req{stroke:var(--ce-primary);stroke-width:1.5;fill:none;}
+    .res{stroke:var(--ce-success);stroke-width:1.5;fill:none;}
+    .bound{fill:none;stroke:var(--ce-alert);stroke-width:1;stroke-dasharray:4 3;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
+    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:13px;fill:var(--ce-ink);}
+    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+    .lab{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ce-ink);}
+    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ce-ink-muted);}
+    .monop{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ce-primary);font-weight:600;}
+    .monog{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ce-success);font-weight:600;}
+  ]]></style>
+
+  <defs>
+    <marker id="arrP" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ce-primary)"/>
+    </marker>
+    <marker id="arrS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ce-success)"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="960" height="360"/>
+  <text class="title" x="48" y="44">The shape of an MCP server</text>
+  <text class="s" x="48" y="64">One server exposes tools, resources, and prompts to any host over a standard transport.</text>
+
+  <!-- ===================== HOST (left) ===================== -->
+  <g>
+    <rect class="card" x="48" y="104" width="230" height="176" rx="10"/>
+    <text class="h" x="64" y="128">Host</text>
+    <text class="s" x="64" y="146">Claude Desktop · Cursor · IDE</text>
+
+    <!-- Client nested inside host -->
+    <rect class="cardq" x="64" y="160" width="198" height="60" rx="8"/>
+    <text class="lab" x="76" y="182">MCP client</text>
+    <text class="s" x="76" y="200">speaks JSON-RPC 2.0</text>
+
+    <!-- Model nested inside host -->
+    <rect class="cardq" x="64" y="228" width="198" height="38" rx="8"/>
+    <text class="lab" x="76" y="252">LLM decides which tool</text>
+  </g>
+
+  <!-- ===================== TRANSPORT (middle) ===================== -->
+  <text class="h" x="384" y="128" text-anchor="middle">Transport</text>
+  <text class="mono" x="384" y="146" text-anchor="middle">stdio  /  HTTP</text>
+
+  <!-- request arrow: client -> server -->
+  <path class="req" d="M278 190 H478" marker-end="url(#arrP)"/>
+  <text class="monop" x="384" y="182" text-anchor="middle">tools/call  { order_id, amount }</text>
+
+  <!-- response arrow: server -> client -->
+  <path class="res" d="M478 214 H278" marker-end="url(#arrS)"/>
+  <text class="monog" x="384" y="234" text-anchor="middle">result  { ok, refund_id }</text>
+
+  <!-- ===================== SERVER (right) ===================== -->
+  <g>
+    <rect class="card" x="490" y="104" width="422" height="222" rx="10"/>
+    <text class="h" x="508" y="128">MCP server</text>
+    <text class="mono" x="904" y="128" text-anchor="end">acme-support</text>
+
+    <!-- Tools -->
+    <rect x="508" y="144" width="386" height="46" rx="8" fill="var(--ce-surface)" stroke="var(--ce-primary)" stroke-width="1.5"/>
+    <text class="lab" x="524" y="164">Tools</text>
+    <text class="mono" x="524" y="181">search_orders · issue_refund · escalate_to_human</text>
+
+    <!-- Resources -->
+    <rect x="508" y="200" width="386" height="42" rx="8" fill="var(--ce-surface)" stroke="var(--ce-accent)" stroke-width="1.5"/>
+    <text class="lab" x="524" y="219">Resources</text>
+    <text class="mono" x="524" y="235">resource://refunds_policy</text>
+
+    <!-- Prompts -->
+    <rect x="508" y="252" width="386" height="42" rx="8" fill="var(--ce-surface)" stroke="var(--ce-success)" stroke-width="1.5"/>
+    <text class="lab" x="524" y="271">Prompts</text>
+    <text class="mono" x="524" y="287">triage_intake</text>
+
+    <!-- permission boundary annotation on the write tool -->
+    <rect class="bound" x="686" y="150" width="200" height="34" rx="6"/>
+    <text class="s" x="786" y="308" text-anchor="middle">issue_refund is threshold-gated in code, not by the prompt</text>
+  </g>
+
+  <!-- boundary leader from the write tool to the note -->
+  <path class="bound" d="M786 184 V300"/>
+
+  <!-- ===================== LEGEND ===================== -->
+  <g transform="translate(48,300)">
+    <line class="req" x1="0" y1="6" x2="26" y2="6" marker-end="url(#arrP)"/>
+    <text class="s" x="32" y="10">request</text>
+    <line class="res" x1="110" y1="6" x2="136" y2="6" marker-end="url(#arrS)"/>
+    <text class="s" x="142" y="10">response</text>
+  </g>
+</svg>
