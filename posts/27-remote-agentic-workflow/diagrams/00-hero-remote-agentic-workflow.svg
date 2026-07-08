@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
+  <title id="t">The remote agentic workflow</title>
+  <desc id="d">A network diagram. On the left a thin client laptop connects over an SSH session to a cloud VM on the right, an EC2 instance drawn inside two nested boundaries: an outer IAM instance-role boundary and an inner security-group firewall. The VM runs a tmux session hosting a long-running coding agent, which reaches the LLM API over HTTPS on port 443. A Telegram and web bridge sits beside the agent and relays notifications and replies to a phone, so the session keeps working after the laptop closes.</desc>
+
+  <style><![CDATA[
+    :root{
+      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
+      --ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;
+      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
+      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-3:#8E8E88;
+    }
+    @media (prefers-color-scheme:dark){
+      :root{
+        --ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;
+        --ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;
+        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
+        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-3:#6E6E68;
+      }
+    }
+    .bg{fill:var(--ce-bg);}
+    .card{fill:var(--ce-surface);stroke:var(--ce-ink);stroke-width:1.5;}
+    .inner{fill:var(--ce-neutral-1);stroke:var(--ce-border);stroke-width:1;}
+    .iam{fill:none;stroke:var(--ce-warn);stroke-width:1.5;stroke-dasharray:6 4;}
+    .sg{fill:none;stroke:var(--ce-alert);stroke-width:1.5;stroke-dasharray:2 3;}
+    .link{stroke:var(--ce-ink);stroke-width:1.5;fill:none;}
+    .link-sec{stroke:var(--ce-primary);stroke-width:1.5;fill:none;}
+    .link-brg{stroke:var(--ce-accent);stroke-width:1.5;fill:none;stroke-dasharray:5 4;}
+    .link-api{stroke:var(--ce-success);stroke-width:1.5;fill:none;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
+    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
+    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
+    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ce-ink);}
+    .cap{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ce-ink);}
+    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:10.5px;fill:var(--ce-ink-muted);}
+    .tag{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:10px;letter-spacing:0.04em;}
+  ]]></style>
+
+  <rect class="bg" width="960" height="360"/>
+  <text class="title" x="48" y="42">Remote agentic workflow</text>
+  <text class="s" x="48" y="62">A thin client drives an agent that lives on a cloud VM, fenced by a security group and an IAM role.</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--ce-ink)"/>
+    </marker>
+    <marker id="arrow-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--ce-primary)"/>
+    </marker>
+    <marker id="arrow-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--ce-accent)"/>
+    </marker>
+    <marker id="arrow-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--ce-success)"/>
+    </marker>
+  </defs>
+
+  <!-- ===== Thin client (laptop) ===== -->
+  <g transform="translate(48,150)">
+    <rect class="card" x="0" y="0" width="150" height="96" rx="8"/>
+    <text class="h" x="16" y="26">Thin client</text>
+    <!-- laptop glyph -->
+    <rect x="18" y="40" width="60" height="36" rx="3" fill="none" stroke="var(--ce-primary)" stroke-width="1.5"/>
+    <line class="link" x1="12" y1="82" x2="84" y2="82"/>
+    <text class="s" x="94" y="52">laptop</text>
+    <text class="s" x="94" y="68">phone</text>
+    <text class="mono" x="16" y="90">ssh · VS Code</text>
+  </g>
+
+  <!-- SSH link: laptop -> VM -->
+  <path class="link-sec" d="M198,190 L300,190" marker-end="url(#arrow-p)"/>
+  <rect x="222" y="172" width="54" height="17" rx="4" fill="var(--ce-surface)" stroke="var(--ce-primary)" stroke-width="1"/>
+  <text class="tag" x="249" y="184" text-anchor="middle" fill="var(--ce-primary)">SSH</text>
+
+  <!-- ===== Cloud VM with nested boundaries ===== -->
+  <!-- outer IAM instance-role boundary -->
+  <rect class="iam" x="308" y="104" width="392" height="200" rx="14"/>
+  <text class="cap" x="322" y="122" fill="var(--ce-warn)">IAM instance role · scoped cloud identity</text>
+
+  <!-- inner security-group firewall -->
+  <rect class="sg" x="324" y="132" width="360" height="158" rx="10"/>
+  <text class="cap" x="338" y="149" fill="var(--ce-alert)">Security group · inbound SSH from known IP only</text>
+
+  <!-- EC2 VM card -->
+  <rect class="card" x="342" y="160" width="324" height="118" rx="8"/>
+  <text class="h" x="358" y="182">EC2 VM · tmux session</text>
+
+  <!-- long-running agent box -->
+  <rect class="inner" x="358" y="196" width="150" height="66" rx="6"/>
+  <rect x="358" y="196" width="6" height="66" rx="3" fill="var(--ce-primary)"/>
+  <text class="l" x="374" y="216">Coding agent</text>
+  <text class="s" x="374" y="234">long-running</text>
+  <text class="mono" x="374" y="252">tmux · persists</text>
+
+  <!-- Telegram / web bridge box -->
+  <rect class="inner" x="518" y="196" width="132" height="66" rx="6"/>
+  <rect x="518" y="196" width="6" height="66" rx="3" fill="var(--ce-accent)"/>
+  <text class="l" x="534" y="216">Bridge</text>
+  <text class="s" x="534" y="234">Telegram · web</text>
+  <text class="mono" x="534" y="252">send-keys</text>
+
+  <!-- agent <-> bridge internal link -->
+  <path class="link" d="M508,229 L518,229" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+
+  <!-- ===== LLM API (top right) ===== -->
+  <g transform="translate(742,104)">
+    <rect class="card" x="0" y="0" width="170" height="70" rx="8"/>
+    <text class="h" x="16" y="26">LLM API</text>
+    <text class="s" x="16" y="45">Claude · Gemini · GPT</text>
+    <text class="mono" x="16" y="61">HTTPS · outbound</text>
+  </g>
+  <!-- agent -> LLM API over 443 -->
+  <path class="link-api" d="M508,205 C560,150 660,139 742,139" marker-end="url(#arrow-s)"/>
+  <rect x="600" y="118" width="72" height="17" rx="4" fill="var(--ce-surface)" stroke="var(--ce-success)" stroke-width="1"/>
+  <text class="tag" x="636" y="130" text-anchor="middle" fill="var(--ce-success)">HTTPS · 443</text>
+
+  <!-- ===== Phone (bottom right) ===== -->
+  <g transform="translate(742,232)">
+    <rect class="card" x="0" y="0" width="170" height="72" rx="8"/>
+    <text class="h" x="16" y="26">Phone / chat</text>
+    <text class="s" x="16" y="45">notify · reply</text>
+    <text class="mono" x="16" y="61">async oversight</text>
+  </g>
+  <!-- bridge -> phone (relay) -->
+  <path class="link-brg" d="M650,240 C700,240 710,262 742,262" marker-end="url(#arrow-a)" marker-start="url(#arrow-a)"/>
+  <rect x="668" y="228" width="56" height="17" rx="4" fill="var(--ce-surface)" stroke="var(--ce-accent)" stroke-width="1"/>
+  <text class="tag" x="696" y="240" text-anchor="middle" fill="var(--ce-accent)">relay</text>
+
+  <!-- ===== Legend ===== -->
+  <g transform="translate(48,320)">
+    <line class="link-sec" x1="0" y1="8" x2="24" y2="8"/>
+    <text class="s" x="30" y="12">SSH control</text>
+    <line class="link-api" x1="128" y1="8" x2="152" y2="8"/>
+    <text class="s" x="158" y="12">HTTPS to model</text>
+    <line class="link-brg" x1="286" y1="8" x2="310" y2="8"/>
+    <text class="s" x="316" y="12">chat relay</text>
+    <rect class="iam" x="410" y="2" width="24" height="12" rx="3"/>
+    <text class="s" x="440" y="12">IAM role</text>
+    <rect class="sg" x="540" y="2" width="24" height="12" rx="3"/>
+    <text class="s" x="570" y="12">security group</text>
+  </g>
+</svg>
