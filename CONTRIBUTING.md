@@ -19,12 +19,16 @@ and the PR process.
 
 Every post uses the same shape. Keep it.
 
+**Metadata** lives in a `posts/NN-slug/frontmatter.yaml` sidecar
+(`slug, title, date, tags, hero, reading_time, part`) — never inline in
+`index.md`, and never restated in the body (no `> **Reading time:**` line).
+`index.md` starts directly at the `# H1`.
+
 **Top of post:**
 
 ```markdown
-> **TL;DR.** Two-sentence summary.
->
-> **Reading time:** ~N minutes.
+> **TL;DR.** Two-to-four-sentence summary. The first sentence names the claim;
+> the rest name what the post delivers.
 >
 > **After reading this you will be able to:**
 > - Three concrete capabilities. Each starts with a verb.
@@ -32,11 +36,13 @@ Every post uses the same shape. Keep it.
 > - …
 ```
 
-Then a hero diagram (SVG embedded inline if small; image link if large).
+Then a hero diagram (SVG embedded inline if small; image link if large) with a
+one-line italic caption underneath.
 
-**Body:** numbered sections (`## 1. …`, `## 2. …`). Third-person textbook
-voice. No "we", no "you", no marketing tone. Concrete numbers and
-citations beat assertions.
+**Body:** numbered sections (`## 1. …`, `## 2. …`). Textbook voice.
+Second-person "you" is fine when it addresses the reader directly and aids
+clarity; avoid first-person "we"/"I" (outside an explicit code-along) and any
+marketing tone. Concrete numbers and citations beat assertions.
 
 **Bottom of post:**
 

@@ -61,3 +61,6 @@ yarn-error.log*
 # ===== Diagram render byproducts =====
 *.drawio.bkp
 *.excalidraw.bak
+
+
+PLAN.md

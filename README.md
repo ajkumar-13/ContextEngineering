@@ -8,7 +8,7 @@ System prompt · tools · memory · retrieval · history · user instruction.
 
 [![License: CC BY 4.0](https://img.shields.io/badge/Prose-CC--BY--4.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![License: MIT](https://img.shields.io/badge/Code-MIT-green.svg)](LICENSE)
-[![Posts](https://img.shields.io/badge/posts-24-orange.svg)](#-the-series)
+[![Posts](https://img.shields.io/badge/posts-30-orange.svg)](#-the-series)
 [![Status](https://img.shields.io/badge/status-in%20progress-yellow.svg)](PLAN.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -22,7 +22,7 @@ System prompt · tools · memory · retrieval · history · user instruction.
 
 Most LLM applications fail not because the model is weak but because the **context** assembled around the user's question is wrong: the system prompt is too vague, the wrong chunks were retrieved, history has buried the rules, or the tools are described badly. *Context engineering* is the discipline of doing that assembly well — across all six layers — so that the model has the right information, in the right place, at the right cost.
 
-This repository is the source for **24 posts**, every **diagram** (as editable SVG with a shared design-token system), every **code companion** (runnable), plus a one-page **cheatsheet** and a printable **reference-architecture poster**.
+This repository is the source for **30 posts**, every **diagram**, every **code companion** (runnable), plus a one-page **cheatsheet** and a printable **reference-architecture poster**.
 
 > No marketing voice. Neutral, textbook tone. Examples first, formalism second. Framework-agnostic.
 
@@ -34,7 +34,7 @@ This repository is the source for **24 posts**, every **diagram** (as editable S
 
 1. [01 · Why context engineering](posts/01-why-context-engineering/index.md)
 2. [02 · The six layers of context](posts/02-six-layers-of-context/index.md)
-3. [06 · Write, select, compress, isolate](posts/06-write-select-compress-isolate/index.md)
+3. [07 · Write, select, compress, isolate](posts/07-write-select-compress-isolate/index.md)
 
 **If you have ten minutes, read the [one-page cheatsheet](CHEATSHEET.md).**
 
@@ -46,6 +46,9 @@ This repository is the source for **24 posts**, every **diagram** (as editable S
 
 ## 📚 The series
 
+Thirty posts in five parts. Reading order is linear; the six posts marked ★ were
+added after the first draft and slot into the flow where they belong.
+
 ### Part I — Foundations
 
 | #  | Title | Folder |
@@ -54,46 +57,52 @@ This repository is the source for **24 posts**, every **diagram** (as editable S
 | 02 | [The six layers of context](posts/02-six-layers-of-context/index.md) | `02-six-layers-of-context` |
 | 03 | [How LLMs actually read context](posts/03-how-llms-read-context/index.md) | `03-how-llms-read-context` |
 | 04 | [Tokens, windows, and budgets](posts/04-tokens-windows-budgets/index.md) | `04-tokens-windows-budgets` |
-| 05 | [Five context failure modes](posts/05-context-failure-modes/index.md) | `05-context-failure-modes` |
+| 05 ★ | [The economics of context — pricing, caching, latency](posts/05-economics-of-context/index.md) | `05-economics-of-context` |
+| 06 | [Five context failure modes](posts/06-context-failure-modes/index.md) | `06-context-failure-modes` |
 
 ### Part II — The four primitives (WSCI)
 
 | #  | Title | Folder |
 |----|-------|--------|
-| 06 | [Write, select, compress, isolate](posts/06-write-select-compress-isolate/index.md) | `06-write-select-compress-isolate` |
-| 07 | [Write strategies](posts/07-write-strategies/index.md) | `07-write-strategies` |
-| 08 | [Select strategies](posts/08-select-strategies/index.md) | `08-select-strategies` |
-| 09 | [RAG in depth](posts/09-rag-in-depth/index.md) | `09-rag-in-depth` |
-| 10 | [Compress strategies](posts/10-compress-strategies/index.md) | `10-compress-strategies` |
-| 11 | [Isolate strategies](posts/11-isolate-strategies/index.md) | `11-isolate-strategies` |
+| 07 | [Write, select, compress, isolate](posts/07-write-select-compress-isolate/index.md) | `07-write-select-compress-isolate` |
+| 08 | [Write strategies](posts/08-write-strategies/index.md) | `08-write-strategies` |
+| 09 | [Select strategies](posts/09-select-strategies/index.md) | `09-select-strategies` |
+| 10 ★ | [Data ingestion and document pipelines](posts/10-data-ingestion-pipelines/index.md) | `10-data-ingestion-pipelines` |
+| 11 | [RAG in depth](posts/11-rag-in-depth/index.md) | `11-rag-in-depth` |
+| 12 | [Compress strategies](posts/12-compress-strategies/index.md) | `12-compress-strategies` |
+| 13 | [Isolate strategies](posts/13-isolate-strategies/index.md) | `13-isolate-strategies` |
 
 ### Part III — The layers in depth
 
 | #  | Title | Folder |
 |----|-------|--------|
-| 12 | [The system prompt as software](posts/12-system-prompt-as-software/index.md) | `12-system-prompt-as-software` |
-| 13 | [Tools and MCP](posts/13-tools-and-mcp/index.md) | `13-tools-and-mcp` |
-| 14 | [Memory systems](posts/14-memory-systems/index.md) | `14-memory-systems` |
-| 15 | [Advanced retrieval](posts/15-advanced-retrieval/index.md) | `15-advanced-retrieval` |
+| 14 | [The system prompt as software](posts/14-system-prompt-as-software/index.md) | `14-system-prompt-as-software` |
+| 15 | [Tools and MCP](posts/15-tools-and-mcp/index.md) | `15-tools-and-mcp` |
+| 16 | [Memory systems](posts/16-memory-systems/index.md) | `16-memory-systems` |
+| 17 | [Advanced retrieval](posts/17-advanced-retrieval/index.md) | `17-advanced-retrieval` |
+| 18 ★ | [Context for reasoning models](posts/18-reasoning-model-context/index.md) | `18-reasoning-model-context` |
+| 19 ★ | [Multimodal context — images, PDF pages, and audio](posts/19-multimodal-context/index.md) | `19-multimodal-context` |
 
 ### Part IV — Production concerns
 
 | #  | Title | Folder |
 |----|-------|--------|
-| 16 | [Evaluation](posts/16-evaluation/index.md) | `16-evaluation` |
-| 17 | [Observability, tracing, and cost](posts/17-observability/index.md) | `17-observability` |
-| 18 | [Security and prompt injection](posts/18-security/index.md) | `18-security` |
-| 19 | [Long context vs. RAG — a decision framework](posts/19-long-context-vs-rag/index.md) | `19-long-context-vs-rag` |
+| 20 | [Evaluation](posts/20-evaluation/index.md) | `20-evaluation` |
+| 21 ★ | [Structured output and guardrails](posts/21-structured-output-guardrails/index.md) | `21-structured-output-guardrails` |
+| 22 | [Observability, tracing, and cost](posts/22-observability/index.md) | `22-observability` |
+| 23 | [Security and prompt injection](posts/23-security/index.md) | `23-security` |
+| 24 ★ | [Privacy, PII, and data governance](posts/24-privacy-and-governance/index.md) | `24-privacy-and-governance` |
+| 25 | [Long context vs. RAG — a decision framework](posts/25-long-context-vs-rag/index.md) | `25-long-context-vs-rag` |
 
 ### Part V — Workflow & builds
 
 | #  | Title | Folder |
 |----|-------|--------|
-| 20 | [The modern agentic workflow](posts/20-modern-agentic-workflow/index.md) | `20-modern-agentic-workflow` |
-| 21 | [Remote agentic workflow](posts/21-remote-agentic-workflow/index.md) | `21-remote-agentic-workflow` |
-| 22 | [Build #1 — RAG chatbot from scratch](posts/22-build-rag-chatbot/index.md) | `22-build-rag-chatbot` |
-| 23 | [Build #2 — MCP server from scratch](posts/23-build-mcp-server/index.md) | `23-build-mcp-server` |
-| 24 | [Capstone — Email reply agent](posts/24-capstone-email-reply-agent/index.md) | `24-capstone-email-reply-agent` |
+| 26 | [The modern agentic workflow](posts/26-modern-agentic-workflow/index.md) | `26-modern-agentic-workflow` |
+| 27 | [Remote agentic workflow](posts/27-remote-agentic-workflow/index.md) | `27-remote-agentic-workflow` |
+| 28 | [Build #1 — RAG chatbot from scratch](posts/28-build-rag-chatbot/index.md) | `28-build-rag-chatbot` |
+| 29 | [Build #2 — MCP server from scratch](posts/29-build-mcp-server/index.md) | `29-build-mcp-server` |
+| 30 | [Capstone — Email reply agent](posts/30-capstone-email-reply-agent/index.md) | `30-capstone-email-reply-agent` |
 
 ---
 
@@ -104,7 +113,6 @@ This repository is the source for **24 posts**, every **diagram** (as editable S
 | [`CHEATSHEET.md`](CHEATSHEET.md) | Single printable page: six layers, WSCI, five failure modes, debug checklist. |
 | [`GLOSSARY.md`](GLOSSARY.md) | Every term used in any post, alphabetised, one-line definitions. |
 | [`REFERENCES.md`](REFERENCES.md) | Master bibliography for every citation in the series. |
-| [`PLAN.md`](PLAN.md) | The master plan — thesis, sections, diagrams, and code per post. |
 | [`assets/poster/`](assets/poster/) | A2 reference-architecture poster: every concept on one canvas. |
 
 ---
@@ -114,7 +122,6 @@ This repository is the source for **24 posts**, every **diagram** (as editable S
 ```
 context-engineering/
 ├── README.md              ← you are here
-├── PLAN.md                ← master plan (single source of truth)
 ├── GLOSSARY.md            ← one-line term definitions
 ├── CHEATSHEET.md          ← printable single page
 ├── REFERENCES.md          ← master bibliography
@@ -127,10 +134,14 @@ context-engineering/
 │       ├── diagrams/      ← post-specific SVGs
 │       └── snippets/      ← inline code shown in the post
 │
-├── code/                  ← runnable companions for builds
-│   ├── 22-rag-chatbot/
-│   ├── 23-mcp-server-full/
-│   └── 24-email-reply-agent/
+├── code/                  ← runnable companions (offline-testable cores)
+│   ├── 11-rag-from-scratch/     ← chunk · BM25 · RRF
+│   ├── 15-tool-schemas/         ← token budget · schema validation
+│   ├── 15-mcp-quickstart/       ← ~60-line MCP server
+│   ├── 20-eval-ragas/           ← golden set · gate · judge
+│   ├── 28-rag-chatbot/          ← full build (Post 28)
+│   ├── 29-mcp-server-full/      ← full build (Post 29)
+│   └── 30-email-reply-agent/    ← capstone (Post 30)
 │
 ├── assets/
 │   ├── diagrams/
@@ -148,13 +159,17 @@ context-engineering/
 
 Runnable companions live under [`code/`](code/) and are MIT-licensed. They use plain Python and the official provider SDKs first; a framework appears only when it materially changes the shape of the code.
 
-| Build | Code | Post |
-|-------|------|------|
-| RAG chatbot | [`code/22-rag-chatbot/`](code/22-rag-chatbot/) | [Post 22](posts/22-build-rag-chatbot/index.md) |
-| MCP server (full) | [`code/23-mcp-server-full/`](code/23-mcp-server-full/) | [Post 23](posts/23-build-mcp-server/index.md) |
-| Email reply agent | [`code/24-email-reply-agent/`](code/24-email-reply-agent/) | [Post 24](posts/24-capstone-email-reply-agent/index.md) |
+| Companion | Code | Post |
+|-----------|------|------|
+| RAG from scratch (chunk · BM25 · RRF) | [`code/11-rag-from-scratch/`](code/11-rag-from-scratch/) | [Post 11](posts/11-rag-in-depth/index.md) |
+| Tool schemas (token budget · validation) | [`code/15-tool-schemas/`](code/15-tool-schemas/) | [Post 15](posts/15-tools-and-mcp/index.md) |
+| MCP quickstart (~60-line server) | [`code/15-mcp-quickstart/`](code/15-mcp-quickstart/) | [Post 15](posts/15-tools-and-mcp/index.md) |
+| Eval harness (golden set · gate · judge) | [`code/20-eval-ragas/`](code/20-eval-ragas/) | [Post 20](posts/20-evaluation/index.md) |
+| RAG chatbot (full build) | [`code/28-rag-chatbot/`](code/28-rag-chatbot/) | [Post 28](posts/28-build-rag-chatbot/index.md) |
+| MCP server (full build) | [`code/29-mcp-server-full/`](code/29-mcp-server-full/) | [Post 29](posts/29-build-mcp-server/index.md) |
+| Email reply agent (capstone) | [`code/30-email-reply-agent/`](code/30-email-reply-agent/) | [Post 30](posts/30-capstone-email-reply-agent/index.md) |
 
-Each code folder ships its own `README.md`, `pyproject.toml`, `.env.example`, and `tests/`.
+Each code folder ships its own `README.md`, `pyproject.toml`, `.env.example`, and `tests/`. The four smaller companions have an offline-runnable core: their whole test suite passes with no API key and no network.
 
 ---
 

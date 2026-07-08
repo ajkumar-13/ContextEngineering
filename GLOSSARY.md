@@ -6,6 +6,8 @@ One-line definitions for every term used in this series. Sorted alphabetically. 
 
 **Active learning.** Using human feedback (edits, accepts, rejects) on agent outputs as training signal for a future fine-tune or routing decision.
 
+**Adaptive thinking.** A reasoning-model mode where the model decides on its own how much internal reasoning to spend per request, rather than using a fixed budget.
+
 **Agent.** An LLM-driven program that can take multiple steps, call tools, and decide its own next action.
 
 **AGENTS.md.** A repository-level system prompt convention used by Codex, Cursor, and other coding agents — equivalent to `CLAUDE.md`.
@@ -24,6 +26,8 @@ One-line definitions for every term used in this series. Sorted alphabetically. 
 
 **Bookend packing.** Placing the most relevant retrieved chunk first and the second-most relevant last, with weaker chunks in the middle, to mitigate the lost-in-the-middle effect.
 
+**Cache breakpoint.** An explicit marker in the prompt telling the provider where a cacheable prefix ends, so the KV-cache up to that point can be stored and re-used.
+
 **Cache hit / cache miss.** Whether a request's prefix matches a previously stored prompt cache entry. Hits are billed at a fraction of the input rate.
 
 **Candidate generation.** The first stage of retrieval — producing a high-recall set (often ~50 items) that a reranker will refine.
@@ -38,9 +42,13 @@ One-line definitions for every term used in this series. Sorted alphabetically. 
 
 **ColBERT.** A late-interaction retrieval model that scores query–document similarity per-token, achieving high accuracy at a higher index cost.
 
+**ColPali.** A multimodal late-interaction retrieval model that embeds document page images directly, retrieving over visual layout without a separate OCR step.
+
 **Compaction.** The act of summarising a long conversation history into a shorter representation that preserves the essential state.
 
 **Compression.** The "C" in WSCI — reducing the size of items already in context (windowing, summarisation, pruning, tool-result clearing).
+
+**Constrained decoding.** Restricting the model's token sampling at generation time to only those tokens allowed by a grammar or schema, guaranteeing syntactically valid output.
 
 **Context engineering.** The discipline of deciding what enters an LLM's context window on every call — across all six layers — so that the model has the right information, in the right place, at the right cost.
 
@@ -58,11 +66,15 @@ One-line definitions for every term used in this series. Sorted alphabetically. 
 
 **Cross-encoder.** A model that takes a (query, document) pair and produces a relevance score. Used as a reranker after first-pass retrieval.
 
+**Data residency.** A requirement that data be stored and processed only within a specified geographic or legal jurisdiction.
+
 **Decay.** A periodic job that lowers the confidence of memory cells not recently confirmed, preventing stale facts from dominating recall.
 
 **Distraction.** A context-failure mode where irrelevant tokens crowd out relevant ones and the model attends to the wrong material.
 
 **Dual-LLM pattern.** A security pattern where one LLM processes untrusted content into structured output, and a second LLM (with no tools) acts on that output.
+
+**Effort (reasoning).** A provider parameter that sets how much reasoning a reasoning model should spend, trading answer quality against latency and cost.
 
 **Embedding.** A dense vector representation of a piece of text, used for similarity search.
 
@@ -82,6 +94,8 @@ One-line definitions for every term used in this series. Sorted alphabetically. 
 
 **Grounding.** Forcing the model to answer from supplied evidence rather than parametric knowledge. The point of RAG.
 
+**Guardrail.** A deterministic check placed around a model call — on the input, the output, or both — that blocks or rewrites unsafe or off-policy content.
+
 **Hallucination.** A model output that is fluent but factually wrong, typically because the relevant fact is not in the context.
 
 **Hook.** A script that runs at a specific point in the agent loop (pre-tool-call, post-edit, pre-commit, session-start, etc.) to enforce policy or augment behaviour.
@@ -96,11 +110,15 @@ One-line definitions for every term used in this series. Sorted alphabetically. 
 
 **Information retention ratio (IRR).** A measurement of how much task-relevant information survives a compression step, measured against a replay set.
 
+**Ingestion pipeline.** The offline sequence — parse, clean, chunk, embed, index — that turns raw source documents into a retrievable corpus.
+
 **Inter-agent bus.** A shared substrate (filesystem, message queue, database) through which isolated sub-agents communicate.
 
 **Iron triangle (of tools).** The trade-off between catalog size, per-tool description quality, and runtime selection cost — pick at most two.
 
 **Isolation.** The "I" in WSCI — running sub-tasks in their own context windows so noise, errors, and tool storms do not contaminate the parent.
+
+**Layout-aware parsing.** Document parsing that preserves visual structure — tables, columns, headings, reading order — instead of flattening a page to a raw text stream.
 
 **LLM-as-judge.** Using a model to score another model's outputs against a rubric. Subject to position bias, length bias, self-preference, and rubric drift.
 
@@ -118,9 +136,13 @@ One-line definitions for every term used in this series. Sorted alphabetically. 
 
 **MRCR — Multi-Round Coreference Resolution.** A long-context eval that tests pronoun and entity resolution across long passages.
 
+**Multimodal context.** Context that mixes text with other modalities — images, document page scans, audio — passed to a model that can attend across all of them.
+
 **Needle in a haystack (NIAH).** A class of long-context evals where a single fact is hidden in a long document and the model must retrieve it.
 
 **Observability.** The discipline of inspecting agent behaviour through traces, spans, and metrics so failures can be diagnosed.
+
+**OCR (optical character recognition).** Converting text embedded in images or scanned pages into machine-readable characters during document ingestion.
 
 **OWASP LLM Top 10.** OWASP's prioritised list of the most common security risks in LLM applications.
 
@@ -147,6 +169,8 @@ One-line definitions for every term used in this series. Sorted alphabetically. 
 **Recall@N.** The fraction of relevant items present in the top-N retrieved set.
 
 **ReAct.** A prompting pattern interleaving Reason–Act–Observe steps for tool-using agents.
+
+**Reasoning model.** A model trained to produce an internal chain of thinking tokens before its final answer, spending extra compute to improve hard-problem accuracy.
 
 **Reciprocal Rank Fusion (RRF).** A simple, parameter-light algorithm for merging multiple ranked lists into one.
 
@@ -176,13 +200,19 @@ One-line definitions for every term used in this series. Sorted alphabetically. 
 
 **Span.** A timed unit of work inside a trace; spans nest to form a tree of operations.
 
+**Structured output.** A provider feature that forces the model's response to conform to a supplied JSON schema, returning parseable data rather than free text.
+
 **Sub-agent.** A child LLM call invoked by a parent agent, running in its own isolated context window.
 
 **Supervisor topology.** Sub-agent pattern where one agent decomposes a task and delegates to specialised workers, then synthesises.
 
 **System prompt.** The first message in an LLM call; sets identity, rules, format, and available tools.
 
+**Tenant isolation.** Keeping each customer's data, indexes, and memory strictly partitioned so one tenant can never retrieve or influence another's context.
+
 **Text-to-SQL.** A retrieval pattern where the model generates a SQL query against a structured database instead of fetching unstructured chunks.
+
+**Thinking tokens.** The intermediate reasoning tokens a reasoning model generates before its answer — billed as output, and usually hidden or summarised in the response.
 
 **Token.** The unit the model reads and bills on. Roughly 0.75 English words per token.
 
@@ -197,6 +227,8 @@ One-line definitions for every term used in this series. Sorted alphabetically. 
 **Triager.** A small sub-agent whose only job is to classify a request and route it.
 
 **Trust boundary.** A line in the system across which input is treated as untrusted; filtering, validation, or sandboxing happens at the boundary.
+
+**Validate-and-retry.** A loop that parses or schema-checks a model's output and, on failure, re-prompts the model with the error until it produces valid output or a retry cap is hit.
 
 **Vector database.** A datastore optimised for nearest-neighbour search over embeddings.
 

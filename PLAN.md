@@ -5,7 +5,7 @@ A complete, free, practitioner-grade series on **Context Engineering for LLMs an
 This document is the **single source of truth** for the series:
 
 - The repository layout
-- The 24-post series outline (with thesis, sections, diagrams, code, and references for each post)
+- The 30-post series outline (with thesis, sections, diagrams, code, and references for each post)
 - The diagram system, writing style, and review checklist
 - The list of reference assets (glossary, cheatsheet, reference-architecture poster)
 
@@ -65,20 +65,19 @@ context-engineering-series/
 │   ...
 │   └── 24-capstone-email-reply-agent/
 │
-├── code/                              # Full runnable companions, one per post that needs it
-│   ├── 08-rag-from-scratch/
+├── code/                              # Runnable companions; smaller ones have an offline-testable core
+│   ├── 11-rag-from-scratch/           # Post 11 — chunk / BM25 / RRF
 │   │   ├── README.md
 │   │   ├── pyproject.toml
 │   │   ├── .env.example
 │   │   ├── src/
-│   │   ├── tests/
-│   │   └── notebooks/
-│   ├── 13-tool-schemas/
-│   ├── 14-mcp-server-quickstart/
-│   ├── 16-eval-with-ragas/
-│   ├── 22-rag-chatbot/
-│   ├── 23-mcp-server-full/
-│   └── 24-email-reply-agent/
+│   │   └── tests/
+│   ├── 15-tool-schemas/              # Post 15 — token budget + schema validation
+│   ├── 15-mcp-quickstart/           # Post 15 / 29 — ~60-line MCP server
+│   ├── 20-eval-ragas/               # Post 20 — golden set / gate / judge
+│   ├── 28-rag-chatbot/              # Post 28 — full build
+│   ├── 29-mcp-server-full/          # Post 29 — full build
+│   └── 30-email-reply-agent/        # Post 30 — capstone
 │
 ├── templates/
 │   ├── post-template.md               # Required headings, frontmatter shape
@@ -99,34 +98,40 @@ context-engineering-series/
 
 ## 3. The Series at a Glance
 
-24 posts in 5 parts + 3 reference assets. Reading order is linear, but each part is also a useful standalone unit.
+30 posts in 5 parts + 3 reference assets. Reading order is linear, but each part is also a useful standalone unit.
 
 | #   | Part                       | Title (working)                                                                  |
 | --- | -------------------------- | -------------------------------------------------------------------------------- |
 | 01  | I — Foundations            | From Prompt Engineering to Context Engineering                                   |
 | 02  | I                          | The Six Layers of an LLM's Context                                               |
 | 03  | I                          | How LLMs Read Context — Tokens, Windows, Attention, Lost-in-the-Middle           |
-| 04  | I                          | The Economics of Context — Tokens, Pricing, Prompt Caching, Latency              |
-| 05  | I                          | Context Failure Modes — Rot, Poisoning, Distraction, Confusion, Clash            |
-| 06  | II — WSCI Operating System | The WSCI Framework — Write / Select / Compress / Isolate                         |
-| 07  | II                         | WRITE — Scratchpads, `task.md`, Persistent Files, Plan Files                     |
-| 08  | II                         | SELECT (Part 1) — RAG Done Right                                                 |
-| 09  | II                         | SELECT (Part 2) — Advanced RAG (HyDE, Self-RAG, CRAG, GraphRAG, ColBERT/ColPali) |
-| 10  | II                         | COMPRESS — `/compact`, Summarisation, LLMLingua, Information Loss                |
-| 11  | II                         | ISOLATE — Sub-agents, Parallelism, "Don't Build Multi-Agents"                    |
-| 12  | III — Layers in Depth      | System Prompts — `CLAUDE.md` / `AGENTS.md` Anatomy                               |
-| 13  | III                        | Tools, Function Calling, and Structured Output                                   |
-| 14  | III                        | MCP — Model Context Protocol End-to-End                                          |
-| 15  | III                        | Memory — Short/Long-term, Episodic/Semantic/Procedural, Mem0/Letta/Zep           |
-| 16  | IV — Production            | Evaluation — Ragas, promptfoo, DeepEval, LLM-as-judge Pitfalls                   |
-| 17  | IV                         | Observability, Tracing, and Cost — LangSmith, Langfuse, Phoenix, Helicone        |
-| 18  | IV                         | Security — Prompt Injection, Indirect Injection via Tools / MCP                  |
-| 19  | IV                         | Long Context vs RAG — A Decision Framework (RULER, LongBench, BABILong, MRCR)    |
-| 20  | V — Workflow & Builds      | The Modern Agentic Workflow — Claude Code, Skills, Sub-agents, Hooks             |
-| 21  | V                          | Remote Agentic Workflow — EC2, VS Code SSH, tmux, OpenClaude, Telegram           |
-| 22  | V                          | Build #1 — RAG Chatbot from Scratch                                              |
-| 23  | V                          | Build #2 — MCP Server from Scratch                                               |
-| 24  | V                          | Capstone — Email Reply Agent (Gmail API, Vercel, Railway, Evals)                 |
+| 04  | I                          | Tokens, Windows, and Budgets                                                     |
+| 05  | I                          | The Economics of Context — Pricing, Prompt Caching, Latency                      |
+| 06  | I                          | Five Context Failure Modes — Rot, Poisoning, Distraction, Confusion, Clash       |
+| 07  | II — WSCI Operating System | The WSCI Framework — Write / Select / Compress / Isolate                         |
+| 08  | II                         | WRITE Strategies — Scratchpads, `task.md`, Persistent Files, Plan Files          |
+| 09  | II                         | SELECT Strategies — RAG Done Right                                               |
+| 10  | II                         | Data Ingestion & Document Pipelines                                              |
+| 11  | II                         | RAG in Depth — HyDE, Self-RAG, CRAG, GraphRAG, ColBERT/ColPali                   |
+| 12  | II                         | COMPRESS Strategies — `/compact`, Summarisation, LLMLingua, Information Loss     |
+| 13  | II                         | ISOLATE Strategies — Sub-agents, Parallelism, "Don't Build Multi-Agents"        |
+| 14  | III — Layers in Depth      | System Prompt as Software — `CLAUDE.md` / `AGENTS.md` Anatomy                    |
+| 15  | III                        | Tools and MCP — Function Calling, Model Context Protocol End-to-End              |
+| 16  | III                        | Memory Systems — Episodic/Semantic/Procedural, Mem0/Letta/Zep                    |
+| 17  | III                        | Advanced Retrieval                                                               |
+| 18  | III                        | Context for Reasoning Models — Thinking Budgets and Traces                       |
+| 19  | III                        | Multimodal Context — Images, PDF Pages, ColPali                                  |
+| 20  | IV — Production            | Evaluation — Ragas, promptfoo, DeepEval, LLM-as-judge Pitfalls                   |
+| 21  | IV                         | Structured Output & Guardrails — Constrained Decoding                            |
+| 22  | IV                         | Observability, Tracing, and Cost — LangSmith, Langfuse, Phoenix, Helicone        |
+| 23  | IV                         | Security — Prompt Injection, Indirect Injection via Tools / MCP                  |
+| 24  | IV                         | Privacy, PII, and Governance — Retention and Tenant Isolation                    |
+| 25  | IV                         | Long Context vs RAG — A Decision Framework (RULER, LongBench, BABILong, MRCR)    |
+| 26  | V — Workflow & Builds      | The Modern Agentic Workflow — Claude Code, Skills, Sub-agents, Hooks             |
+| 27  | V                          | Remote Agentic Workflow — EC2, VS Code SSH, tmux, OpenClaude, Telegram           |
+| 28  | V                          | Build #1 — RAG Chatbot from Scratch                                              |
+| 29  | V                          | Build #2 — MCP Server from Scratch                                               |
+| 30  | V                          | Capstone — Email Reply Agent (Gmail API, Vercel, Railway, Evals)                 |
 
 Reference assets shipped alongside:
 - `GLOSSARY.md` — every term used in any post, alphabetised, one-line definitions.
@@ -211,7 +216,13 @@ Each spec below is the brief a writer (human or agent) needs to draft the post. 
 - **Code.** Cost calculator (Python) given a turn's token breakdown.
 - **References.** Anthropic prompt caching docs; OpenAI prompt caching docs; Gemini context caching docs; Manus blog (KV-cache section).
 
-#### 05. Context Failure Modes — Rot, Poisoning, Distraction, Confusion, Clash
+#### 05. The Economics of Context — Pricing, Prompt Caching, Latency
+- **Thesis.** Every architectural decision in context engineering is also an economic one; ignoring the cost curve produces beautiful demos that can't ship.
+- **Sections.** Cost-per-1k-token table (Claude/GPT/Gemini) · Input vs output asymmetry · Prompt caching — what it caches, what it doesn't, why it reshapes the architecture · Latency budget for an agent turn · Worked example: one agent under three pricing models · Cost guardrails to ship.
+- **Diagrams.** (a) Cost-per-call stacked bar by layer. (b) Prompt-cache token flow, hit vs miss. (c) Latency waterfall.
+- **References.** Anthropic prompt caching docs; OpenAI prompt caching docs; Gemini context caching docs; Manus blog (KV-cache section).
+
+#### 06. Five Context Failure Modes — Rot, Poisoning, Distraction, Confusion, Clash
 - **Thesis.** Context degrades in five distinct ways; naming them is the first step to debugging an agent that "used to work".
 - **Sections.** Drew Breunig's taxonomy in detail · Chroma's "context rot" findings · How each failure mode shows up in a coding agent vs a customer-support agent · Detection signals · Mitigations mapped to WSCI · A debug checklist.
 - **Diagrams.** (a) Five-panel "before/after" of each failure mode. (b) Decision tree: symptom → likely failure mode → WSCI mitigation.
@@ -238,8 +249,14 @@ Each spec below is the brief a writer (human or agent) needs to draft the post. 
 - **Thesis.** RAG is the dominant Select primitive; doing it well is mostly a matter of good chunking, good embeddings, and a reranker.
 - **Sections.** What RAG is in WSCI terms · Chunking (fixed / recursive / semantic / parent-child / late chunking) · Embedding models in 2026 · Vector DBs in 2 paragraphs · Hybrid search (BM25 + dense) · Reranking (Cohere, BGE, Voyage) · Anthropic Contextual Retrieval (the +49% trick) · Putting it together.
 - **Diagrams.** Hero — RAG Pipeline. Chunking strategies side-by-side. Hybrid search Venn. Contextual Retrieval before/after.
-- **Code.** `code/08-rag-from-scratch/` — a runnable RAG chatbot, modernised with hybrid search + reranker + contextual retrieval.
+- **Code.** `code/11-rag-from-scratch/` — a runnable RAG chatbot, modernised with hybrid search + reranker + contextual retrieval.
 - **References.** Anthropic Contextual Retrieval (Sept 2024); Jina late chunking; Cohere Rerank docs; Voyage embeddings.
+
+#### 10. Data Ingestion & Document Pipelines
+- **Thesis.** Retrieval quality is capped by ingestion quality; parsing, OCR, table handling, and provenance are where most RAG systems silently lose accuracy.
+- **Sections.** The ingestion pipeline end-to-end · File formats and parsers (PDF, HTML, DOCX, slides) · OCR and layout-aware extraction · Tables and figures — the hard cases · Metadata and provenance (source, page, timestamp) · Deduplication and incremental re-indexing · Ingestion evals.
+- **Diagrams.** (a) Ingestion pipeline from raw file to indexed chunk. (b) Layout-aware parse of a table-heavy page. (c) Provenance metadata flowing through to a citation.
+- **References.** Unstructured docs; Docling; LlamaParse; Nougat/OCR papers; Anthropic Contextual Retrieval (provenance angle).
 
 #### 09. SELECT (Part 2) — Advanced RAG
 - **Thesis.** When vanilla RAG isn't enough, six named patterns cover almost every real failure: HyDE, query rewriting, agentic RAG, Self-RAG, CRAG, GraphRAG.
@@ -282,7 +299,7 @@ Each spec below is the brief a writer (human or agent) needs to draft the post. 
 - **Thesis.** MCP standardises *how* a tool exposes itself, which decouples LLM choice from tool choice; understanding host/client/server is enough to use 90% of it.
 - **Sections.** The problem MCP solves · Host vs Client vs Server · Transports (stdio, HTTP/SSE) · Resources vs Tools vs Prompts · Anatomy of a minimal MCP server · Anatomy of an MCP client integration · Security considerations (bridges to post 18) · The MCP ecosystem in 2026.
 - **Diagrams.** Hero — MCP Triangle. Sequence diagram for a tool call. Anatomy of a server.
-- **Code.** `code/14-mcp-server-quickstart/` — a 50-line server.
+- **Code.** `code/15-mcp-quickstart/` — a 50-line server.
 - **References.** MCP spec; Anthropic MCP launch post; community MCP registry.
 
 #### 15. Memory — Short-term, Long-term, Episodic, Semantic, Procedural
@@ -292,14 +309,32 @@ Each spec below is the brief a writer (human or agent) needs to draft the post. 
 - **Code.** A minimal Mem0-style memory layer in ~80 lines.
 - **References.** MemGPT/Letta paper; Mem0 docs; Zep/Graphiti paper; OpenAI memory product post.
 
+#### 18. Context for Reasoning Models — Thinking Budgets and Traces
+- **Thesis.** Reasoning models spend a thinking budget before answering, and that budget is a new context resource to engineer, not just a knob to max out.
+- **Sections.** What "reasoning"/"thinking" models actually do · Thinking budgets and effort levels · What belongs in the prompt vs what the model should derive · Reading and using reasoning traces · Interleaved thinking with tool calls · Cost and latency of thinking tokens · When a reasoning model is the wrong tool.
+- **Diagrams.** (a) Thinking-budget flow from prompt to trace to answer. (b) Accuracy vs thinking-token curve with a plateau. (c) Interleaved thinking and tool-call timeline.
+- **References.** Anthropic extended thinking docs; OpenAI reasoning models guide; DeepSeek-R1 paper; "Let's Verify Step by Step".
+
+#### 19. Multimodal Context — Images, PDF Pages, ColPali
+- **Thesis.** Not all context is text; images, rendered PDF pages, and screenshots are first-class context that changes how you retrieve and pack a window.
+- **Sections.** How vision-language models tokenise images · When to send an image vs its extracted text · PDF-page-as-image retrieval · ColPali / visual document retrieval · Screenshots for computer-use agents · Cost of image tokens · Multimodal evals.
+- **Diagrams.** (a) Image-to-tokens illustration. (b) Text-parse vs page-as-image retrieval, side by side. (c) ColPali late-interaction over page patches.
+- **References.** ColPali paper; Anthropic vision docs; OpenAI/Gemini image-input docs; "screenshots beat parsing" studies.
+
 ### Part IV — Production-Grade Practice
 
 #### 16. Evaluation — Ragas, promptfoo, DeepEval, LLM-as-judge Pitfalls
 - **Thesis.** Eval is the only thing that turns context engineering from craft into engineering; without evals, every change is vibes.
 - **Sections.** Why evals are the bottleneck · Offline vs online · Golden sets · Ragas for RAG · promptfoo for prompts · DeepEval for general · LLM-as-judge — the pitfalls (position bias, verbosity bias, self-preference) · Pairwise vs absolute · CI integration.
 - **Diagrams.** Eval pipeline diagram. Pitfall illustrations for LLM-as-judge.
-- **Code.** `code/16-eval-with-ragas/` — full eval suite over the post-08 RAG bot.
+- **Code.** `code/20-eval-ragas/` — full eval suite over the post-08 RAG bot.
 - **References.** Ragas paper/docs; promptfoo docs; "Judging LLM-as-a-judge" paper; LMSYS arena.
+
+#### 21. Structured Output & Guardrails — Constrained Decoding
+- **Thesis.** Free-form text is a liability in production; constrained decoding and guardrails turn model output into a contract you can rely on downstream.
+- **Sections.** Why structured output · JSON Schema, Pydantic, Outlines, Instructor · Constrained/grammar-based decoding under the hood · Native `response_format` vs tool-calling for structure · Guardrails — validation, retries, and repair · Input and output guardrails (topic, safety, PII) · Failure handling when the schema can't be met.
+- **Diagrams.** (a) Constrained-decoding token mask illustration. (b) Free-form vs schema-constrained reliability chart. (c) Guardrail pipeline: input → model → validate → repair.
+- **References.** OpenAI structured outputs; Anthropic tool use docs; Outlines paper; Guardrails AI / NeMo Guardrails docs.
 
 #### 17. Observability, Tracing, and Cost
 - **Thesis.** You cannot improve what you cannot see; tracing every call is non-negotiable past prototype.
@@ -314,6 +349,12 @@ Each spec below is the brief a writer (human or agent) needs to draft the post. 
 - **Diagrams.** Indirect-injection sequence diagram. Defence-in-depth layered diagram.
 - **Code.** A deliberately vulnerable agent + the patched version.
 - **References.** Simon Willison's prompt-injection corpus; OWASP LLM Top 10; Anthropic safety docs.
+
+#### 24. Privacy, PII, and Governance — Retention and Tenant Isolation
+- **Thesis.** Every token you retrieve, log, or cache is data you now govern; privacy and tenant isolation are context-engineering concerns, not a compliance afterthought.
+- **Sections.** PII in prompts, retrieval, and traces · Detection and redaction before the model sees it · Data retention and deletion (right-to-be-forgotten across a vector store) · Multi-tenant isolation — per-tenant indexes, filters, and key scoping · Provider data-use and zero-retention modes · Regional and residency constraints · A governance checklist.
+- **Diagrams.** (a) PII flow with redaction gates on ingest, prompt, and log. (b) Multi-tenant isolation boundary across index, cache, and traces. (c) Retention/deletion lifecycle.
+- **References.** OWASP LLM Top 10 (sensitive-information disclosure); NIST AI RMF; provider data-processing/zero-retention docs; Microsoft Presidio.
 
 #### 19. Long Context vs RAG — A Decision Framework
 - **Thesis.** Long context did not kill RAG; the choice between them is a function of recall depth, freshness, cost, and audit needs.
@@ -342,21 +383,21 @@ Each spec below is the brief a writer (human or agent) needs to draft the post. 
 - **Thesis.** A production-leaning RAG chatbot is ~500 lines if you've internalised Posts 08–09 and 16.
 - **Sections.** Spec · Architecture · Data ingestion · Retrieval pipeline · Generation · Eval · Deployment · What we deliberately left out.
 - **Diagrams.** End-to-end architecture. Sequence diagram of a single chat turn.
-- **Code.** `code/22-rag-chatbot/` — full repo with tests and a one-command demo.
+- **Code.** `code/28-rag-chatbot/` — full repo with tests and a one-command demo.
 - **References.** Posts 08, 09, 16.
 
 #### 23. Build #2 — MCP Server from Scratch
 - **Thesis.** Writing an MCP server is small and teaches you the protocol better than any blog post; this is that build.
 - **Sections.** Spec · Choice of transport · Implementing tools/resources/prompts · Testing with Claude Desktop · Publishing.
 - **Diagrams.** Server-internals diagram. Test-loop sequence.
-- **Code.** `code/23-mcp-server-full/`.
+- **Code.** `code/29-mcp-server-full/`.
 - **References.** Post 14; MCP spec.
 
 #### 24. Capstone — Email Reply Agent
 - **Thesis.** Putting all six layers, all four WSCI primitives, and a real eval suite into one product, end-to-end.
 - **Sections.** Product spec · Gmail API setup · Backend (Python/FastAPI) · Frontend (Next.js on Vercel) · DB on Railway · Memory of past replies · Eval suite · Deployment · What to ship next.
 - **Diagrams.** Product architecture. Data-flow diagram. Memory schema.
-- **Code.** `code/24-email-reply-agent/` — production-shaped repo.
+- **Code.** `code/30-email-reply-agent/` — production-shaped repo.
 - **References.** Posts 12, 13, 15, 16, 17.
 
 ---
@@ -404,11 +445,12 @@ A single A2-printable SVG that places every concept on one canvas — system pro
 
 ## 9. Decisions
 
-1. **Publishing order.** Strict numerical for the canonical reading path. Posts ship to the site **a Part at a time** once each Part is fully drafted and its diagrams polished — readers always consume a coherent unit, and the project never waits for all 24 to be perfect before anything goes live.
+1. **Publishing order.** Strict numerical for the canonical reading path. Posts ship to the site **a Part at a time** once each Part is fully drafted and its diagrams polished — readers always consume a coherent unit, and the project never waits for all 30 to be perfect before anything goes live.
 2. **Companion repo.** Hosted under the author's personal GitHub.
-3. **Cadence.** All 24 posts and the companion code are produced together; cadence is determined by readiness of each Part, not a fixed weekly schedule.
+3. **Cadence.** All 30 posts and the companion code are produced together; cadence is determined by readiness of each Part, not a fixed weekly schedule.
 4. **Mailing list / RSS.** Out of scope; handled by the author's site.
 5. **Translation.** English only for v1.
+6. **Series expansion.** Six posts (05, 10, 18, 19, 21, 24) were added after the initial 24-post plan, and the whole series was renumbered so that reading-order still equals post number.
 
 ---
 

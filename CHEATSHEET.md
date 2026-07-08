@@ -1,7 +1,5 @@
 # Cheatsheet — Context Engineering on one page
 
-> Print at A4. Pin near monitor. Re-read before every refactor.
-
 ---
 
 ## The six layers (in order)
@@ -42,7 +40,7 @@
 
 ## RAG pipeline (offline | online)
 
-**Offline:** chunk (400–600 tok, sentence-aware, overlap 50–100) → contextual header (1 LLM call/chunk) → embed → index (dense + BM25).
+**Offline:** ingest (parse / OCR / table-extract; attach provenance at ingest) → chunk (400–600 tok, sentence-aware, overlap 50–100) → contextual header (1 LLM call/chunk) → embed → index (dense + BM25).
 
 **Online:** query rewrite → hybrid search top-50 → RRF merge → cross-encoder rerank top-5 → bookend pack → generate with citations.
 
@@ -60,9 +58,7 @@
 # Tools        — what's available + when to use each
 ```
 
-Six rules for rules: *one concept per rule · motivated by real failure ·
-positive over negative · specific over vague · examples beat instructions ·
-reviewed like code.*
+Six rules for rules: *one concept per rule · motivated by real failure · positive over negative · specific over vague · examples beat instructions · reviewed like code.*
 
 ---
 
@@ -94,6 +90,18 @@ Each tool description has six elements:
 
 ---
 
+## Cost & caching
+
+- **Input vs output asymmetry** — output tokens cost ~5x input; keep generations tight.
+- **Cache read ≈ 10 %** of the base input price; **cache write = 1.25x** (5-min TTL) or **2x** (1-hour TTL) input.
+- **TTL tiers:** 5-minute (default) and 1-hour.
+- **Freeze the prefix** — stable system prompt and tools first, volatile / user content last, so the cached prefix stays intact.
+- **Watch the cache-hit rate** — a dip means the prefix is churning; find what moved.
+
+**Reasoning models:** thinking tokens count against the budget — keep reasoning traces out of downstream context and out of the cached prefix.
+
+---
+
 ## Eval pyramid
 
 ```
@@ -104,6 +112,8 @@ unit (chunker, prompt assembly, send-gate — pure functions)
 ```
 
 LLM-judge biases to watch: **position · length · self-preference · rubric drift.**
+
+**Guardrails:** validate output against a schema · retry-on-invalid · moderate / redact before returning.
 
 ---
 
