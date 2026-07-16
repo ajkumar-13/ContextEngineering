@@ -1,7 +1,80 @@
+---
 slug: 20-evaluation
 title: "20 · Evaluation"
+
+description: >
+  Learn how to systematically evaluate LLM applications using the
+  four-layer evaluation pyramid, regression testing, golden datasets,
+  LLM-as-a-judge, RAG-specific metrics, and production monitoring.
+  Build reliable CI evaluation pipelines that prevent regressions before
+  deployment.
+
+author: "Ajay"
+
 date: 2026-05-12
-tags: [context-engineering, evaluation]
+last_modified: 2026-05-12
+
+tags:
+  - context-engineering
+  - evaluation
+  - llm-evaluation
+  - ragas
+  - promptfoo
+  - deepeval
+  - llm-as-judge
+  - regression-testing
+  - production-ai
+
+category: Production Systems
+series: Context Engineering
+part: 4
+chapter: "Part IV — Production Concerns"
+
 hero: diagrams/00-hero-evaluation.svg
-reading_time: 12
-part: "Part IV — Production concerns"
+hero_alt: "Four-layer evaluation pyramid showing unit, component, end-to-end, and online evaluation with increasing cost and decreasing frequency"
+
+reading_time: 24
+
+toc: true
+draft: false
+
+keywords:
+  - Evaluation
+  - LLM Evaluation
+  - AI Evaluation
+  - Context Engineering
+  - Evaluation Pyramid
+  - Unit Testing
+  - Component Testing
+  - End-to-End Evaluation
+  - Online Evaluation
+  - Regression Testing
+  - Golden Dataset
+  - Golden Set
+  - LLM as Judge
+  - Pairwise Evaluation
+  - Absolute Evaluation
+  - Promptfoo
+  - Ragas
+  - DeepEval
+  - LangSmith Evaluation
+  - Faithfulness
+  - Answer Relevance
+  - Context Precision
+  - Context Recall
+  - Citation Validation
+  - Hallucination Detection
+  - CI/CD
+  - GitHub Actions
+  - Benchmarking
+  - Human Evaluation
+  - MT-Bench
+  - Chatbot Arena
+  - Production AI
+  - AI Agents
+
+canonical_url: ""
+
+prev: ../19-memory-in-production/
+next: ../21-structured-output-and-guardrails/
+---

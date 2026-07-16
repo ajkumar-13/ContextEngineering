@@ -1,7 +1,65 @@
-slug: 18-reasoning-model-context
-title: "18 · Context for reasoning models"
-date: 2026-05-14
-tags: [context-engineering, reasoning, thinking, budgets]
+---
+slug: 18-context-for-reasoning-models
+title: "18 · Context for Reasoning Models"
+
+description: >
+  Learn how reasoning models use thinking tokens, adaptive reasoning,
+  and effort controls to solve complex tasks. Explore token budgeting,
+  interleaved thinking, prompt caching, reasoning traces, and best
+  practices for integrating reasoning models into production AI systems.
+
+author: "Ajay"
+
+date: 2026-05-26
+last_modified: 2026-05-26
+
+tags:
+  - context-engineering
+  - reasoning-models
+  - thinking-tokens
+  - adaptive-thinking
+  - chain-of-thought
+  - prompt-caching
+  - ai-agents
+  - inference
+
+category: Components
+series: Context Engineering
+part: 3
+chapter: "Part III — Components"
+
 hero: diagrams/00-hero-reasoning-model-context.svg
-reading_time: 13
-part: "Part III — The layers in depth"
+hero_alt: "Illustration showing prompt input, adaptive thinking tokens, and final answer within an LLM context window"
+
+reading_time: 17
+
+toc: true
+draft: false
+
+keywords:
+  - Context Engineering
+  - Reasoning Models
+  - Thinking Tokens
+  - Adaptive Thinking
+  - Extended Thinking
+  - Effort Dial
+  - Chain of Thought
+  - CoT
+  - Interleaved Thinking
+  - Prompt Caching
+  - KV Cache
+  - Context Window
+  - Token Budget
+  - Reasoning Trace
+  - Claude
+  - OpenAI o-series
+  - DeepSeek R1
+  - AI Agents
+  - Inference
+  - Long Context
+
+canonical_url: ""
+
+prev: ../17-advanced-retrieval/
+next: ../19-multimodal-context/
+---

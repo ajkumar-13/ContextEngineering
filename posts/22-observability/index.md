@@ -98,7 +98,7 @@ Out of the dozens of metrics the trace store can compute, four are non-negotiabl
 
 **2. Latency p95.** The user-experienced metric. Average is a lie; tail is what matters. A jump in p95 with stable median often means a small fraction of sessions hit a slow path that needs a fix (uncached prefix, slow tool, sub-agent retry storm).
 
-**3. Quality (offline LLM-judge or thumbs).** The end-to-end eval score from Post 20, computed nightly on a sample of real traffic, plus the explicit-feedback rate. Without quality on the dashboard, cost and latency optimisations can silently degrade the product.
+**3. Quality (offline LLM-judge or thumbs).** The end-to-end eval score from [Post 20](../20-evaluation/index.md), computed nightly on a sample of real traffic, plus the explicit-feedback rate. Without quality on the dashboard, cost and latency optimisations can silently degrade the product.
 
 **4. Error rate, by kind.** Tool errors, schema-validation errors, refusal rate, timeout rate, retry rate. Each kind tells a different story; combined into one number they are useless.
 
@@ -110,11 +110,11 @@ Four dashboards (or one dashboard with four panels). Every team change reviews t
 
 A short field guide to what bugs look like in a trace.
 
-**Shape 1: context bloat.** The LLM span shows 80 000 input tokens. Drill into the prompt. The conversation history span shows 60 000 tokens because tool results were never cleared (Post 12, §4) and a 40-turn session accumulated. The fix is in the compression policy, not the model.
+**Shape 1: context bloat.** The LLM span shows 80 000 input tokens. Drill into the prompt. The conversation history span shows 60 000 tokens because tool results were never cleared ([Post 12](../12-compress-strategies/index.md), §4) and a 40-turn session accumulated. The fix is in the compression policy, not the model.
 
-**Shape 2: retrieval miss.** The retrieval span shows the right chunks were returned with high scores, but the LLM span's response cites a wrong fact. Drill into the prompt. The chunks were packed in the middle of the context, where attention is weakest (Post 03, §4). The fix is bookend layout (Post 09, §5).
+**Shape 2: retrieval miss.** The retrieval span shows the right chunks were returned with high scores, but the LLM span's response cites a wrong fact. Drill into the prompt. The chunks were packed in the middle of the context, where attention is weakest ([Post 03](../03-how-llms-read-context/index.md), §4). The fix is bookend layout ([Post 09](../09-select-strategies/index.md), §5).
 
-**Shape 3: tool storm.** The trace shows 15 tool calls in one turn, all to the same `search_*` tool with slightly different queries. Drill into the prompt. The tool descriptions are similar; the model is confused (Post 06, §3) and is brute-forcing. The fix is tool selection or tool-name disambiguation (Post 15, §4).
+**Shape 3: tool storm.** The trace shows 15 tool calls in one turn, all to the same `search_*` tool with slightly different queries. Drill into the prompt. The tool descriptions are similar; the model is confused ([Post 06](../06-context-failure-modes/index.md), §3) and is brute-forcing. The fix is tool selection or tool-name disambiguation ([Post 15](../15-tools-and-mcp/index.md), §4).
 
 **Shape 4: silent regression.** The dashboard shows cost dropped a week ago, say 20 % as a hypothetical. Champagne. Then quality dropped the same week. Drill into traces from before and after. A "cleanup" PR removed an instruction the model had been silently relying on. The fix is reverting the prompt and adding a fixture so it cannot happen again. This is exactly the case that **replays** catch, which the next section treats in full.
 

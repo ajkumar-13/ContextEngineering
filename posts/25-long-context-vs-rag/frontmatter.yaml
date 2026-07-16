@@ -1,7 +1,81 @@
+---
 slug: 25-long-context-vs-rag
-title: "25 · Long context vs. RAG — a decision framework"
-date: 2026-05-12
-tags: [context-engineering, long-context, rag]
+title: "25 · Long Context vs. RAG — A Decision Framework"
+
+description: >
+  Learn when to choose long-context models, Retrieval-Augmented Generation
+  (RAG), or a hybrid approach. Explore context-window limitations,
+  retrieval benchmarks, routing strategies, cost analysis, and production
+  architectures for building scalable AI systems.
+
+author: "Ajay"
+
+date: 2026-05-20
+last_modified: 2026-05-20
+
+tags:
+  - long-context
+  - rag
+  - retrieval
+  - context-engineering
+  - hybrid-search
+  - vector-database
+  - llm
+  - evaluation
+  - ai-agents
+  - production-ai
+
+category: Advanced Retrieval
+series: Context Engineering
+part: 5
+chapter: "Part V — End-to-End Applications"
+
 hero: diagrams/00-hero-long-context-vs-rag.svg
-reading_time: 12
-part: "Part IV — Production concerns"
+hero_alt: "Decision framework routing user queries between long-context models, RAG, and hybrid retrieval architectures"
+
+reading_time: 20
+
+toc: true
+draft: false
+
+keywords:
+  - Long Context
+  - Context Window
+  - Million Token Context
+  - RAG
+  - Retrieval Augmented Generation
+  - Long Context vs RAG
+  - Hybrid RAG
+  - Context Engineering
+  - Context Routing
+  - Query Router
+  - Hybrid Search
+  - Vector Database
+  - Semantic Search
+  - Dense Retrieval
+  - Sparse Retrieval
+  - BM25
+  - Reranking
+  - Prompt Caching
+  - Prefix Caching
+  - LongBench
+  - RULER
+  - BABILong
+  - NIAH
+  - Needle in a Haystack
+  - MRCR
+  - Gemini 2.5
+  - Claude
+  - GPT
+  - Cost Optimization
+  - Latency Optimization
+  - Production AI
+  - Enterprise AI
+  - AI Architecture
+  - LLM Engineering
+
+canonical_url: ""
+
+prev: ../24-inference-optimization/
+next: ../26-modern-agentic-workflow/
+---

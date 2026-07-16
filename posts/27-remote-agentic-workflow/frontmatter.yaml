@@ -1,7 +1,70 @@
+---
 slug: 27-remote-agentic-workflow
-title: "27 · Remote agentic workflow"
-date: 2026-05-12
-tags: [context-engineering, agentic-workflow, remote]
+title: "27 · Remote Agentic Workflow"
+
+description: >
+  Learn how to build a production-ready remote AI agent workspace using SSH,
+  tmux, cloud servers, VS Code Remote, and messaging bridges. Explore
+  persistent agent sessions, remote development, notifications, security,
+  and multi-device workflows for long-running coding agents.
+
+author: "Ajay"
+
+date: 2026-06-06
+last_modified: 2026-06-06
+
+tags:
+  - context-engineering
+  - remote-agents
+  - ai-agents
+  - ssh
+  - tmux
+  - cloud
+  - remote-development
+  - devops
+
+category: Case Studies
+series: Context Engineering
+part: 5
+chapter: "Part V — Case Studies"
+
 hero: diagrams/00-hero-remote-agentic-workflow.svg
-reading_time: 11
-part: "Part V — Workflow & builds"
+hero_alt: "Architecture of a remote AI agent running on a cloud server with SSH, tmux, VS Code Remote, and messaging bridges"
+
+reading_time: 16
+
+toc: true
+draft: false
+
+keywords:
+  - Context Engineering
+  - Remote Agent
+  - Remote Agentic Workflow
+  - AI Agents
+  - SSH
+  - tmux
+  - VS Code Remote
+  - Remote Development
+  - Cloud VM
+  - Amazon EC2
+  - Hetzner
+  - DigitalOcean
+  - Telegram Bot
+  - Notifications
+  - Session Persistence
+  - Thin Client
+  - Multi Device Workflow
+  - Agent Orchestration
+  - DevOps
+  - Infrastructure
+  - Security Groups
+  - IAM Roles
+  - Claude Code
+  - Aider
+  - Codex CLI
+
+canonical_url: ""
+
+prev: ../26-modern-agentic-workflow/
+next: ../28-build-rag-chatbot/
+---

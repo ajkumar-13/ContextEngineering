@@ -1,7 +1,68 @@
-slug: 24-privacy-and-governance
-title: "24 · Privacy, PII, and data governance"
-date: 2026-05-14
-tags: [context-engineering, privacy, pii, governance]
+---
+slug: 24-privacy-pii-data-governance
+title: "24 · Privacy, PII, and Data Governance"
+
+description: >
+  Learn how to build privacy-preserving LLM applications by governing
+  personal data across prompts, RAG, memory, tools, and observability.
+  Explore PII detection, redaction, retention policies, tenant isolation,
+  consent management, and regulatory compliance for production AI systems.
+
+author: "Ajay"
+
+date: 2026-06-03
+last_modified: 2026-06-03
+
+tags:
+  - context-engineering
+  - privacy
+  - pii
+  - data-governance
+  - compliance
+  - gdpr
+  - observability
+  - ai-agents
+
+category: Production Concerns
+series: Context Engineering
+part: 4
+chapter: "Part IV — Production Concerns"
+
 hero: diagrams/00-hero-privacy-and-governance.svg
-reading_time: 13
-part: "Part IV — Production concerns"
+hero_alt: "Data flow showing user input, RAG, memory, and tools passing through a trust boundary with PII detection, redaction, and governance before entering the model and trace store"
+
+reading_time: 17
+
+toc: true
+draft: false
+
+keywords:
+  - Context Engineering
+  - AI Privacy
+  - Data Governance
+  - Personally Identifiable Information
+  - PII
+  - GDPR
+  - CCPA
+  - Data Residency
+  - Zero Data Retention
+  - ZDR
+  - Trace Store
+  - Observability
+  - Data Retention
+  - Data Redaction
+  - Microsoft Presidio
+  - Named Entity Recognition
+  - NER
+  - Memory Governance
+  - Right to be Forgotten
+  - Tenant Isolation
+  - Multi-Tenant RAG
+  - Data Compliance
+  - AI Governance
+
+canonical_url: ""
+
+prev: ../23-security-and-guardrails/
+next: ../25-long-context-vs-rag/
+---

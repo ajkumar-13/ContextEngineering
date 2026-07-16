@@ -1,7 +1,65 @@
-slug: 23-security
-title: "23 · Security and prompt injection"
-date: 2026-05-12
-tags: [context-engineering, security, prompt-injection]
-hero: diagrams/00-hero-security.svg
-reading_time: 12
-part: "Part IV — Production concerns"
+---
+slug: 23-security-and-guardrails
+title: "23 · Security and Guardrails"
+
+description: >
+  Learn how to secure LLM applications against prompt injection, jailbreaks,
+  indirect attacks, tool abuse, data exfiltration, and memory poisoning.
+  Explore guardrails, permission models, sandboxing, policy enforcement,
+  and defense-in-depth strategies for production AI systems.
+
+author: "Ajay"
+
+date: 2026-06-02
+last_modified: 2026-06-02
+
+tags:
+  - context-engineering
+  - security
+  - guardrails
+  - prompt-injection
+  - jailbreak
+  - ai-agents
+  - sandboxing
+  - governance
+
+category: Production Concerns
+series: Context Engineering
+part: 4
+chapter: "Part IV — Production Concerns"
+
+hero: diagrams/00-hero-security-and-guardrails.svg
+hero_alt: "Defense-in-depth architecture for LLM applications showing prompt protection, tool permissions, sandboxing, and policy enforcement"
+
+reading_time: 15
+
+toc: true
+draft: false
+
+keywords:
+  - Context Engineering
+  - LLM Security
+  - AI Security
+  - Prompt Injection
+  - Indirect Prompt Injection
+  - Jailbreak
+  - Prompt Leakage
+  - Memory Poisoning
+  - Tool Abuse
+  - Data Exfiltration
+  - Guardrails
+  - Sandboxing
+  - Policy Enforcement
+  - Input Validation
+  - Output Validation
+  - Tool Permissions
+  - Least Privilege
+  - OWASP LLM
+  - AI Governance
+  - Defense in Depth
+
+canonical_url: ""
+
+prev: ../22-observability/
+next: ../24-deployment-and-operations/
+---

@@ -1,7 +1,94 @@
+---
 slug: 30-capstone-email-reply-agent
-title: "30 · Capstone — Email reply agent"
-date: 2026-05-12
-tags: [context-engineering, capstone, agents]
+title: "30 · Capstone — Email Reply Agent"
+
+description: >
+  Build a production-ready AI email reply agent that combines every major
+  concept from Context Engineering: system prompts, RAG, memory, MCP tools,
+  sub-agents, compression, evaluation, observability, guardrails, and secure
+  deployment. Learn how to architect, deploy, and monitor a real-world LLM
+  application end to end.
+
+author: "Ajay"
+
+date: 2026-05-20
+last_modified: 2026-05-20
+
+tags:
+  - capstone
+  - email-agent
+  - ai-agents
+  - rag
+  - memory
+  - gmail
+  - mcp
+  - observability
+  - evaluation
+  - guardrails
+  - production-ai
+  - context-engineering
+
+category: Capstone Projects
+series: Context Engineering
+part: 5
+chapter: "Part V — End-to-End Applications"
+
 hero: diagrams/00-hero-capstone-email-reply-agent.svg
-reading_time: 14
-part: "Part V — Workflow & builds"
+hero_alt: "Architecture of an AI email reply agent showing Gmail integration, RAG, memory, sub-agents, human approval, and secure send gate"
+
+reading_time: 30
+
+toc: true
+draft: false
+
+keywords:
+  - Email Reply Agent
+  - AI Email Assistant
+  - Context Engineering
+  - Capstone Project
+  - AI Agents
+  - Gmail API
+  - Gmail Agent
+  - Email Automation
+  - Email Drafting
+  - Human in the Loop
+  - HITL
+  - Retrieval Augmented Generation
+  - RAG
+  - Memory Systems
+  - Episodic Memory
+  - Semantic Memory
+  - Procedural Memory
+  - MCP
+  - Model Context Protocol
+  - Tool Calling
+  - Sub Agents
+  - Agent Isolation
+  - Context Compression
+  - Thread Summarization
+  - Evaluation
+  - LLM as Judge
+  - Observability
+  - Tracing
+  - Cost Monitoring
+  - Guardrails
+  - Send Gate
+  - Security
+  - OAuth
+  - Gmail OAuth
+  - FastAPI
+  - Next.js
+  - Vercel
+  - Railway
+  - PostgreSQL
+  - pgvector
+  - ChromaDB
+  - Claude
+  - Production AI
+  - Agent Architecture
+
+canonical_url: ""
+
+prev: ../29-multimodal-agent/
+next: ""
+---

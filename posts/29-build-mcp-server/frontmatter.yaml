@@ -1,7 +1,71 @@
-slug: 29-build-mcp-server
-title: "29 · Build #2 — MCP server from scratch"
-date: 2026-05-12
-tags: [context-engineering, build, mcp]
+---
+slug: 29-build-mcp-server-from-scratch
+title: "29 · Build #2 — MCP Server from Scratch"
+
+description: >
+  Build a production-style Model Context Protocol (MCP) server from scratch.
+  Learn how to implement tools, resources, prompts, typed validation,
+  permission boundaries, structured outputs, AGENTS.md, host integration,
+  testing, and security best practices for real-world AI agents.
+
+author: "Ajay"
+
+date: 2026-06-08
+last_modified: 2026-06-08
+
+tags:
+  - context-engineering
+  - mcp
+  - tools
+  - ai-agents
+  - model-context-protocol
+  - python
+  - fastmcp
+  - build-guide
+
+category: Case Studies
+series: Context Engineering
+part: 5
+chapter: "Part V — Case Studies"
+
 hero: diagrams/00-hero-build-mcp-server.svg
-reading_time: 13
-part: "Part V — Workflow & builds"
+hero_alt: "Architecture of an MCP server showing hosts, clients, tools, resources, prompts, and transports"
+
+reading_time: 20
+
+toc: true
+draft: false
+
+keywords:
+  - Context Engineering
+  - Model Context Protocol
+  - MCP
+  - FastMCP
+  - Python SDK
+  - Tool Calling
+  - Function Calling
+  - MCP Server
+  - AI Agents
+  - JSON-RPC
+  - stdio
+  - Streamable HTTP
+  - Resources
+  - Prompts
+  - AGENTS.md
+  - Structured Output
+  - Pydantic
+  - JSON Schema
+  - Permission Boundaries
+  - Tool Validation
+  - Claude Desktop
+  - Cursor
+  - Continue
+  - Testing
+  - Security
+  - Production AI
+
+canonical_url: ""
+
+prev: ../28-build-rag-chatbot/
+next: ../30-capstone-email-reply-agent/
+---

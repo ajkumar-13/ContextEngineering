@@ -1,7 +1,84 @@
-slug: 22-observability
-title: "22 · Observability, tracing, and cost"
-date: 2026-05-12
-tags: [context-engineering, observability]
+---
+slug: 22-observability-tracing-and-cost
+title: "22 · Observability, Tracing, and Cost"
+
+description: >
+  Learn how to make LLM systems observable and debuggable using traces,
+  spans, dashboards, and production monitoring. Explore instrumentation,
+  cost engineering, replay-based regression detection, privacy, and modern
+  observability platforms for AI agents.
+
+author: "Ajay"
+
+date: 2026-05-20
+last_modified: 2026-05-20
+
+tags:
+  - observability
+  - tracing
+  - llm-observability
+  - ai-agents
+  - telemetry
+  - opentelemetry
+  - langsmith
+  - langfuse
+  - phoenix
+  - braintrust
+  - helicone
+  - dashboards
+  - cost-engineering
+  - monitoring
+  - evaluation
+
+category: Production Systems
+series: Context Engineering
+part: 4
+chapter: "Part IV — Production & Deployment"
+
 hero: diagrams/00-hero-observability.svg
-reading_time: 11
-part: "Part IV — Production concerns"
+hero_alt: "Trace tree showing an AI agent workflow with spans for retrieval, model calls, tool execution, and dashboard metrics for cost, latency, quality, and error rate"
+
+reading_time: 22
+
+toc: true
+draft: false
+
+keywords:
+  - LLM Observability
+  - AI Observability
+  - Tracing
+  - Distributed Tracing
+  - Trace
+  - Span
+  - OpenTelemetry
+  - OTel
+  - LangSmith
+  - Langfuse
+  - Phoenix
+  - Braintrust
+  - Helicone
+  - Agent Monitoring
+  - Prompt Monitoring
+  - Token Usage
+  - Cost Tracking
+  - Latency Monitoring
+  - Error Rate
+  - Dashboard
+  - Cost Engineering
+  - Prompt Caching
+  - Replay Testing
+  - Regression Detection
+  - Evaluation
+  - Production AI
+  - AI Agents
+  - RAG Monitoring
+  - Tool Calls
+  - Privacy
+  - PII
+  - GenAI Semantic Conventions
+
+canonical_url: ""
+
+prev: ../21-deployment-patterns/
+next: ../23-security/
+---

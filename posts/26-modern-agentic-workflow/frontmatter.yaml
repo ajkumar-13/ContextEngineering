@@ -1,7 +1,83 @@
+---
 slug: 26-modern-agentic-workflow
-title: "26 · The modern agentic workflow"
-date: 2026-05-12
-tags: [context-engineering, agentic-workflow]
+title: "26 · The Modern Agentic Workflow"
+
+description: >
+  Learn how modern AI coding agents like Claude Code, Cursor, Aider, Cline,
+  Continue, and Codex CLI operate. Explore the agent loop, AGENTS.md,
+  skills, hooks, sub-agents, orchestration patterns, and workflow best
+  practices for building productive AI-assisted software development.
+
+author: "Ajay"
+
+date: 2026-05-20
+last_modified: 2026-05-20
+
+tags:
+  - ai-agents
+  - agentic-workflow
+  - claude-code
+  - cursor
+  - aider
+  - codex-cli
+  - agents-md
+  - skills
+  - hooks
+  - sub-agents
+  - orchestration
+  - context-engineering
+
+category: Advanced Agent Systems
+series: Context Engineering
+part: 5
+chapter: "Part V — End-to-End Applications"
+
 hero: diagrams/00-hero-modern-agentic-workflow.svg
-reading_time: 12
-part: "Part V — Workflow & builds"
+hero_alt: "Modern AI coding workflow showing AGENTS.md, skills, hooks, sub-agents, tool execution, planning, and iterative development"
+
+reading_time: 22
+
+toc: true
+draft: false
+
+keywords:
+  - Agentic Workflow
+  - Modern AI Agents
+  - AI Coding Assistant
+  - Coding Agents
+  - Claude Code
+  - Cursor
+  - Aider
+  - Continue
+  - Codex CLI
+  - Cline
+  - Replit Agent
+  - AGENTS.md
+  - CLAUDE.md
+  - System Prompt
+  - Project Instructions
+  - Skills
+  - Agent Skills
+  - Hooks
+  - Tool Calling
+  - Model Context Protocol
+  - MCP
+  - Sub Agents
+  - Multi Agent Systems
+  - Orchestrator Pattern
+  - Agent Loop
+  - Repository Context
+  - Context Engineering
+  - Prompt Engineering
+  - Context Compression
+  - Software Engineering
+  - AI Development Workflow
+  - Development Automation
+  - Human in the Loop
+  - AI Pair Programming
+
+canonical_url: ""
+
+prev: ../25-long-context-models/
+next: ../27-remote-agentic-workflow/
+---

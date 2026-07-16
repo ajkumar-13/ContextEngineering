@@ -1,7 +1,81 @@
+---
 slug: 17-advanced-retrieval
-title: "17 · Advanced retrieval"
-date: 2026-05-12
-tags: [context-engineering, retrieval, graphrag]
+title: "17 · Advanced Retrieval"
+
+description: >
+  Go beyond standard RAG with advanced retrieval techniques including
+  GraphRAG, ColBERT late interaction, text-to-SQL, and long-context routing.
+  Learn how to build retrieval routers that select the optimal retrieval
+  strategy based on query type and corpus structure.
+
+author: "Ajay"
+
+date: 2026-05-20
+last_modified: 2026-05-20
+
+tags:
+  - advanced-retrieval
+  - rag
+  - graphrag
+  - colbert
+  - text-to-sql
+  - retrieval-routing
+  - hybrid-rag
+  - vector-search
+  - ai-agents
+  - context-engineering
+
+category: Retrieval Engineering
+series: Context Engineering
+part: 3
+chapter: "Part III — Retrieval & Memory"
+
 hero: diagrams/00-hero-advanced-retrieval.svg
-reading_time: 12
-part: "Part III — The layers in depth"
+hero_alt: "A query router dispatching requests to GraphRAG, SQL retrieval, ColBERT, long-context loading, and standard hybrid RAG"
+
+reading_time: 22
+
+toc: true
+draft: false
+
+keywords:
+  - Advanced Retrieval
+  - Retrieval Engineering
+  - Retrieval Augmented Generation
+  - RAG
+  - Hybrid RAG
+  - GraphRAG
+  - Microsoft GraphRAG
+  - Knowledge Graph
+  - Entity Extraction
+  - Graph Traversal
+  - Multi-hop Retrieval
+  - Multi-hop Reasoning
+  - ColBERT
+  - ColBERTv2
+  - Late Interaction
+  - MaxSim
+  - PLAID
+  - Dense Retrieval
+  - Cross Encoder
+  - Hybrid Search
+  - BM25
+  - Text-to-SQL
+  - SQL Generation
+  - Schema Retrieval
+  - Query Routing
+  - Retrieval Router
+  - Long Context
+  - Prompt Caching
+  - Whole Document Retrieval
+  - Semantic Search
+  - Vector Database
+  - Context Engineering
+  - AI Agents
+  - Production AI
+
+canonical_url: ""
+
+prev: ../16-memory-systems/
+next: ../18-context-evaluation/
+---

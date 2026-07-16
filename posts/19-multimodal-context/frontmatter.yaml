@@ -1,7 +1,68 @@
+---
 slug: 19-multimodal-context
-title: "19 · Multimodal context — images, PDF pages, and audio"
-date: 2026-05-14
-tags: [context-engineering, multimodal, vision, retrieval]
+title: "19 · Multimodal Context — Images, PDF Pages, and Audio"
+
+description: >
+  Learn how modern multimodal LLMs process images, PDF pages, audio, and
+  video alongside text. Explore vision-language models, multimodal RAG,
+  OCR, document understanding, image retrieval, audio transcription, and
+  best practices for building production multimodal AI systems.
+
+author: "Ajay"
+
+date: 2026-05-27
+last_modified: 2026-05-27
+
+tags:
+  - context-engineering
+  - multimodal
+  - vision
+  - audio
+  - pdf
+  - rag
+  - document-understanding
+  - retrieval
+
+category: Components
+series: Context Engineering
+part: 3
+chapter: "Part III — Components"
+
 hero: diagrams/00-hero-multimodal-context.svg
+hero_alt: "Multimodal AI pipeline combining text, images, PDF pages, audio, and video into a unified context for an LLM"
+
 reading_time: 13
-part: "Part III — The layers in depth"
+
+toc: true
+draft: false
+
+keywords:
+  - Context Engineering
+  - Multimodal AI
+  - Vision Language Models
+  - VLM
+  - Multimodal LLM
+  - Multimodal RAG
+  - OCR
+  - Document Understanding
+  - PDF Parsing
+  - Image Retrieval
+  - Visual Grounding
+  - Audio Transcription
+  - Speech Recognition
+  - Whisper
+  - Vision Transformers
+  - CLIP
+  - Gemini
+  - GPT-4o
+  - Claude Vision
+  - Image Embeddings
+  - Cross Modal Retrieval
+  - Video Understanding
+  - AI Agents
+
+canonical_url: ""
+
+prev: ../18-context-for-reasoning-models/
+next: ../20-building-reliable-agents/
+---

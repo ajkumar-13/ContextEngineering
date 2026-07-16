@@ -1,7 +1,78 @@
-slug: 21-structured-output-guardrails
-title: "21 · Structured output and guardrails"
-date: 2026-05-14
-tags: [context-engineering, structured-output, guardrails, validation]
+---
+slug: 21-structured-output-and-guardrails
+title: "21 · Structured Output and Guardrails"
+
+description: >
+  Learn how to make LLM responses reliable, typed, and production-ready using
+  JSON Schema, response_format, tool calling, constrained decoding, validation,
+  retry loops, and runtime guardrails. Explore schema enforcement, moderation,
+  PII filtering, and output safety for AI applications.
+
+author: "Ajay"
+
+date: 2026-05-20
+last_modified: 2026-05-20
+
+tags:
+  - structured-output
+  - guardrails
+  - json-schema
+  - response-format
+  - tool-calling
+  - constrained-decoding
+  - validation
+  - ai-agents
+  - llm-engineering
+  - production-ai
+
+category: Production Systems
+series: Context Engineering
+part: 4
+chapter: "Part IV — Production & Deployment"
+
 hero: diagrams/00-hero-structured-output-guardrails.svg
-reading_time: 13
-part: "Part IV — Production concerns"
+hero_alt: "Response validation pipeline showing schema validation, retry loop, moderation, PII filtering, and safe structured output"
+
+reading_time: 20
+
+toc: true
+draft: false
+
+keywords:
+  - Structured Output
+  - Guardrails
+  - JSON Schema
+  - response_format
+  - Tool Calling
+  - Tool Choice
+  - Function Calling
+  - Grammar Constrained Decoding
+  - Constrained Decoding
+  - JSON Mode
+  - Strict Mode
+  - Schema Validation
+  - Output Validation
+  - Validate and Retry
+  - Retry Loop
+  - Pydantic
+  - Instructor
+  - Outlines
+  - Structured Responses
+  - AI Safety
+  - Content Moderation
+  - PII Filtering
+  - Personally Identifiable Information
+  - Refusal Handling
+  - Runtime Validation
+  - Runtime Guardrails
+  - Guardrails AI
+  - NVIDIA NeMo Guardrails
+  - Production AI
+  - LLM Engineering
+  - AI Agents
+
+canonical_url: ""
+
+prev: ../20-evaluation/
+next: ../22-observability/
+---

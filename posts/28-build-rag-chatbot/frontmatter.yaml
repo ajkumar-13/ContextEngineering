@@ -1,7 +1,87 @@
-slug: 28-build-rag-chatbot
-title: "28 · Build #1 — RAG chatbot from scratch"
-date: 2026-05-12
-tags: [context-engineering, build, rag]
+---
+slug: 28-build-rag-chatbot-from-scratch
+title: "28 · Build #1 — RAG Chatbot from Scratch"
+
+description: >
+  Build a production-ready Retrieval-Augmented Generation (RAG) chatbot from
+  scratch using hybrid retrieval, contextual chunking, reranking, prompt
+  engineering, citation generation, evaluation with Ragas, and deployment
+  best practices. Learn how every component maps to Context Engineering
+  principles.
+
+author: "Ajay"
+
+date: 2026-05-20
+last_modified: 2026-05-20
+
+tags:
+  - rag
+  - chatbot
+  - retrieval
+  - vector-database
+  - hybrid-search
+  - reranking
+  - evaluation
+  - ai-agents
+  - production-ai
+  - context-engineering
+
+category: Build Projects
+series: Context Engineering
+part: 5
+chapter: "Part V — End-to-End Applications"
+
 hero: diagrams/00-hero-build-rag-chatbot.svg
-reading_time: 14
-part: "Part V — Workflow & builds"
+hero_alt: "Architecture of a production RAG chatbot showing ingestion, hybrid retrieval, reranking, prompt assembly, generation, and evaluation"
+
+reading_time: 28
+
+toc: true
+draft: false
+
+keywords:
+  - RAG
+  - Retrieval Augmented Generation
+  - RAG Chatbot
+  - Build RAG
+  - Context Engineering
+  - Hybrid Retrieval
+  - Dense Retrieval
+  - Sparse Retrieval
+  - BM25
+  - Reciprocal Rank Fusion
+  - RRF
+  - Cross Encoder
+  - Reranking
+  - Contextual Retrieval
+  - Contextual Chunking
+  - Chunk Headers
+  - Semantic Search
+  - Embeddings
+  - Voyage AI
+  - ChromaDB
+  - pgvector
+  - Vector Database
+  - Cohere Rerank
+  - Prompt Engineering
+  - System Prompt
+  - Citation Generation
+  - Bookend Prompting
+  - Lost in the Middle
+  - Ragas
+  - Faithfulness
+  - Context Precision
+  - Context Recall
+  - Answer Relevancy
+  - Evaluation
+  - FastAPI
+  - Python
+  - LLM Engineering
+  - AI Chatbot
+  - Production AI
+
+canonical_url: ""
+
+prev: ../27-modern-agentic-workflow/
+next: ../29-build-mcp-server/
+---
