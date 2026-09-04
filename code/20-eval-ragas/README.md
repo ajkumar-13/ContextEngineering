@@ -2,9 +2,7 @@
 
 Companion code for **[Post 20 — Evaluation](../../posts/20-evaluation/index.md)**.
 
-A small, honest eval harness that mirrors the eval pyramid: cheap deterministic
-checks at the base, an LLM judge at the top, and a **regression gate** that blocks a
-deploy on a drop.
+A small, honest eval harness that mirrors the eval pyramid: cheap deterministic checks at the base, an LLM judge at the top, and a **regression gate** that blocks a deploy on a drop.
 
 ```
 Offline base (no key, unit-tested, CI-ready):
@@ -44,14 +42,10 @@ from evalkit.judge import faithfulness
 faithfulness(answer, context)   # 1 if every claim is supported by the context, else 0
 ```
 
-The judge is biased — it favours the first option, longer answers, and its own
-family's outputs. `judge.py` documents the mitigations (run pairs both orders,
-length-normalise, judge with a different model family).
+The judge is biased — it favours the first option, longer answers, and its own family's outputs. `judge.py` documents the mitigations (run pairs both orders, length-normalise, judge with a different model family).
 
 ## What's stubbed / deliberately small
 
-- **`answer_match` is a blunt containment check**, enough to catch regressions on a
-  golden set without a judge; faithfulness/relevancy are the judge's and Ragas' job.
+- **`answer_match` is a blunt containment check**, enough to catch regressions on a golden set without a judge; faithfulness/relevancy are the judge's and Ragas' job.
 - **The 5% gate tolerance is a default**, set per metric to what your traffic allows.
-- **`ragas` is the batteries-included alternative** for the online metrics; install
-  the `ragas` extra. The core stays dependency-free so the gate runs in CI.
+- **`ragas` is the batteries-included alternative** for the online metrics; install the `ragas` extra. The core stays dependency-free so the gate runs in CI.

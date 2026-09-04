@@ -1,12 +1,8 @@
 # RAG from scratch (`ragkit`)
 
-Companion code for **[Post 11 — RAG in depth](../../posts/11-rag-in-depth/index.md)**
-(with roots in [Post 09 — Select strategies](../../posts/09-select-strategies/index.md)
-and upstream parsing in [Post 10 — Data ingestion](../../posts/10-data-ingestion-pipelines/index.md)).
+Companion code for **[Post 11 — RAG in depth](../../posts/11-rag-in-depth/index.md)**  (with roots in [Post 09 — Select strategies](../../posts/09-select-strategies/index.md) and upstream parsing in [Post 10 — Data ingestion](../../posts/10-data-ingestion-pipelines/index.md)).
 
-A tiny, readable RAG pipeline in plain Python. It is deliberately split so that the
-interesting retrieval logic runs and tests **offline**, and only the last step —
-turning retrieved chunks into an answer — needs a provider key.
+A tiny, readable RAG pipeline in plain Python. It is deliberately split so that the interesting retrieval logic runs and tests **offline**, and only the last step — turning retrieved chunks into an answer — needs a provider key.
 
 ```
 Offline core (no dependencies, unit-tested):
@@ -53,9 +49,6 @@ print(answer("What does prompt caching cost?", [(src, text) for text in packed])
 
 ## What's stubbed / deliberately small
 
-- **Tokens are approximated by words** in `chunk` so the numbers are reproducible
-  offline; a production pipeline counts real model tokens.
-- **Dense embeddings and cross-encoder rerank are left as the online extra** — the
-  offline core shows the lexical half and the fusion that combines the two.
-- **Ingestion reads only `.md`/`.txt`.** Real-world parsing (PDF, HTML, tables, OCR)
-  is the subject of Post 10.
+- **Tokens are approximated by words** in `chunk` so the numbers are reproducible offline; a production pipeline counts real model tokens.
+- **Dense embeddings and cross-encoder rerank are left as the online extra** — the offline core shows the lexical half and the fusion that combines the two.
+- **Ingestion reads only `.md`/`.txt`.** Real-world parsing (PDF, HTML, tables, OCR) is the subject of Post 10.
