@@ -7,6 +7,10 @@
 > - Specify the metadata fields every memory or scratchpad row needs to remain useful.
 > - Avoid the three classes of bug that turn a useful memory store into an active liability.
 
+![The four write destinations and how long each one lasts](diagrams/00-hero-write-strategies.svg)
+
+*Four destinations, four lifetimes, and one rule that governs all of them: every write carries metadata.*
+
 ---
 
 ## 1. Why writing is hard
@@ -19,9 +23,9 @@ The discipline that prevents this can be summarised in a single rule: **every wr
 
 ## 2. Memory stores
 
-![Episodic, semantic, procedural memory taxonomy](../../assets/diagrams/exports/08-memory-taxonomy.svg)
+![The three kinds of memory a write path keeps apart, and the nine fields every memory row carries](diagrams/01-memory-write-schema.svg)
 
-*The three kinds of memory a write path must keep apart: episodic events, semantic facts, and procedural rules, each with its own decay and access policy.*
+*The three kinds a write path must keep apart, and the row that holds them. The taxonomy is Post 16's subject; the schema and the write triggers are this post's.*
 
 A memory store is the persistent counterpart to the in-prompt memory layer ([Post 16](../16-memory-systems/index.md)). It holds three kinds of data, often in three different tables:
 
@@ -170,6 +174,10 @@ The second most common mistake is to **never re-index**. Documents change; embed
 ---
 
 ## 6. The "what to write where" cheat sheet
+
+![Eight things an agent learns, each with the destination it belongs in and how long it lasts](diagrams/02-what-to-write-where.svg)
+
+*The last two rows are the ones that cause incidents: transient data and secrets belong in no store at all.*
 
 | Information | Destination | Lifetime |
 |---|---|---|

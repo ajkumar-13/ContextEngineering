@@ -28,8 +28,8 @@ series: Context Engineering
 part: 2
 chapter: "Part II — The Four Primitives (WSCI)"
 
-hero: ../diagrams/08-write-strategies/hero.png
-hero_alt: "Taxonomy of episodic, semantic, and procedural memory used by AI agents"
+hero: diagrams/00-hero-write-strategies.svg
+hero_alt: "The four write destinations — memory store, scratchpad, repository docs, embedding index — with the lifetime of each"
 
 reading_time: 12
 
