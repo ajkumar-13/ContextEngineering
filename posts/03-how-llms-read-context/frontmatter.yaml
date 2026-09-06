@@ -27,7 +27,7 @@ series: Context Engineering
 part: 1
 chapter: "Part I — Foundations"
 
-hero: ../03-how-llms-read-context/diagrams/01-lost-in-the-middle.svg
+hero: diagrams/03-lost-in-the-middle.svg
 hero_alt: "Illustration of the Lost-in-the-Middle U-curve showing recall across a long context window"
 
 reading_time: 14

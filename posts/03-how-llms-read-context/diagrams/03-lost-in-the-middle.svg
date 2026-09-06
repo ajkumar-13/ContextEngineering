@@ -1,97 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-labelledby="t d">
-  <title id="t">Lost-in-the-Middle: U-shaped Recall Across the Context Window</title>
-  <desc  id="d">A line plot of an LLM's accuracy at retrieving a relevant fact as a function of where the fact sits in a long input. Accuracy is high when the fact is near the start of the context, drops to a minimum somewhere in the middle, and recovers when the fact is near the end. After Liu et al., 2023, "Lost in the Middle: How Language Models Use Long Contexts".</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="t d">
+  <title id="t">Lost in the middle: U-shaped recall across the context window</title>
+  <desc id="d">A hand-drawn line plot. The horizontal axis is where a relevant fact sits in a long context, from the start through the twenty-fifth percentile, the middle, and the seventy-fifth percentile to the end. The vertical axis is retrieval accuracy from twenty to seventy-five per cent. The curve starts high at about seventy-five per cent, falls to a marked trough of roughly forty per cent at the middle, and climbs back to about seventy-three per cent at the end. Annotations note that the system prompt sits at the high left end and that the user instruction belongs at the high right end. A caption states the plot is stylised after Liu and colleagues, 2023, and that exact numbers vary by model and task while the shape does not.</desc>
 
   <style><![CDATA[
-    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;}
-    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-alert:#D88880;--ce-neutral-1:#1F2229;}}
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-2:#CFCFC8;--ce-neutral-3:#8E8E88;--ce-on-fill:#FFFDF9;--ce-on-accent:#1A1A1A;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-2:#2C3038;--ce-neutral-3:#6E6E68;--ce-on-fill:#14161A;--ce-on-accent:#1A1A1A;}}
     .bg{fill:var(--ce-bg);}
-    .card{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
-    .axis{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;}
-    .grid{stroke:var(--ce-ink-subtle);stroke-width:0.5;fill:none;stroke-dasharray:3 4;}
-    .curve{stroke:var(--ce-primary);stroke-width:2.5;fill:none;}
-    .fill {fill:var(--ce-primary);fill-opacity:0.08;stroke:none;}
-    .annot{stroke:var(--ce-accent);stroke-width:1.25;fill:none;stroke-dasharray:5 4;}
-    .dot{fill:var(--ce-primary);}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
-    .label{font-family:Inter,system-ui,sans-serif;font-weight:500;font-size:14px;fill:var(--ce-ink);}
-    .small{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
-    .accent-text{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:13px;fill:var(--ce-accent);}
+    text{dominant-baseline:auto;}
   ]]></style>
 
   <rect class="bg" width="960" height="540"/>
-
-  <text class="title" x="48" y="48">Lost in the Middle</text>
-  <text class="small" x="48" y="68">Accuracy at finding a relevant fact, by where the fact sits in a long context.</text>
-
-  <!-- Plot area: x 100..900, y 110..460 -->
-  <rect class="card" x="80" y="100" width="840" height="380" rx="12"/>
-
-  <!-- Gridlines (horizontal at 25/50/75%) -->
-  <g class="grid">
-    <line x1="120" y1="170" x2="900" y2="170"/>
-    <line x1="120" y1="245" x2="900" y2="245"/>
-    <line x1="120" y1="320" x2="900" y2="320"/>
-    <line x1="120" y1="395" x2="900" y2="395"/>
-  </g>
-
-  <!-- Axes -->
-  <line class="axis" x1="120" y1="440" x2="900" y2="440"/>
-  <line class="axis" x1="120" y1="440" x2="120" y2="130"/>
-
-  <!-- Y axis ticks -->
-  <g class="small" text-anchor="end">
-    <text x="112" y="174">75%</text>
-    <text x="112" y="249">60%</text>
-    <text x="112" y="324">45%</text>
-    <text x="112" y="399">30%</text>
-    <text x="112" y="444">20%</text>
-  </g>
-
-  <!-- X axis ticks -->
-  <g class="small" text-anchor="middle">
-    <text x="120" y="460">start</text>
-    <text x="315" y="460">25%</text>
-    <text x="510" y="460">middle</text>
-    <text x="705" y="460">75%</text>
-    <text x="900" y="460">end</text>
-  </g>
-
-  <!-- Filled area under curve, then the curve itself.
-       Curve is a U-shape: high at left, dips in the middle, high at right.
-       Coordinates chosen to give a clear, asymmetric U. -->
-  <path class="fill"
-        d="M120,170
-           C 200,180 280,260 360,330
-           S 510,400 660,335
-           C 780,290 850,200 900,170
-           L 900,440 L 120,440 Z"/>
-  <path class="curve"
-        d="M120,170
-           C 200,180 280,260 360,330
-           S 510,400 660,335
-           C 780,290 850,200 900,170"/>
-
-  <!-- Highlight the trough -->
-  <line class="annot" x1="510" y1="395" x2="510" y2="130"/>
-  <circle class="dot" cx="510" cy="395" r="5"/>
-  <text class="accent-text" x="525" y="392">↑ trough — minimum recall</text>
-
-  <!-- "Put the question here" annotation near the right edge -->
-  <circle class="dot" cx="895" cy="172" r="5"/>
-  <text class="accent-text" x="888" y="160" text-anchor="end">put the user instruction here</text>
-
-  <!-- "System prompt sits here" annotation near left edge -->
-  <circle class="dot" cx="125" cy="172" r="5"/>
-  <text class="accent-text" x="135" y="160">system prompt sits here</text>
-
-  <!-- Axis labels -->
-  <text class="label" x="510" y="498" text-anchor="middle">position of relevant fact in the context window</text>
-  <g transform="translate(46,290) rotate(-90)">
-    <text class="label" text-anchor="middle">retrieval accuracy</text>
-  </g>
-
-  <!-- Citation -->
-  <text class="small" x="900" y="528" text-anchor="end">Stylised after Liu et al., 2023.  Exact numbers vary by model and task.</text>
+<text xml:space="preserve" x="40" y="38.24" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="22" fill="var(--ce-ink)">Lost in the middle</text><text xml:space="preserve" x="40" y="61.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink-muted)">Accuracy at finding a relevant fact, by where the fact sits in a long context.</text><text xml:space="preserve" x="120" y="88.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">retrieval accuracy</text><path d="M120.16 110.15C390.72 110.83 661.11 110.62 899.88 110.16M119.94 109.92C349.69 110.13 579.29 110.24 900.06 110" fill="none" stroke="var(--ce-border)" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.5 5"/><text xml:space="preserve" x="108" y="112.12" text-anchor="end" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">75%</text><path d="M119.94 191.81C290.23 191.36 460.25 191.42 900.12 191.8M119.97 191.8C327.28 192.39 534.48 192.3 900.06 191.75" fill="none" stroke="var(--ce-border)" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.5 5"/><text xml:space="preserve" x="108" y="193.94" text-anchor="end" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">60%</text><path d="M120.05 273.79C345.75 273.27 571.38 273.27 900.05 273.76M120.01 273.67C304.87 273.12 489.67 273.16 900.06 273.65" fill="none" stroke="var(--ce-border)" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.5 5"/><text xml:space="preserve" x="108" y="275.76" text-anchor="end" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">45%</text><path d="M120.16 355.45C401.27 355.5 682.52 355.45 899.97 355.41M120.04 355.39C282.46 355.22 444.87 355.22 900.06 355.4" fill="none" stroke="var(--ce-border)" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.5 5"/><text xml:space="preserve" x="108" y="357.57" text-anchor="end" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">30%</text><path d="M119.94 410.15C300.78 410.13 481.33 410.35 899.9 410.1M120.08 409.99C416.05 410.21 711.9 410.17 900.07 410.03" fill="none" stroke="var(--ce-border)" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.5 5"/><text xml:space="preserve" x="108" y="412.12" text-anchor="end" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">20%</text><path d="M120.14 99.99C119.71 194.18 119.45 287.66 120.37 409.79M119.87 100.13C119.89 208.79 119.58 317.31 120.18 409.89" fill="none" stroke="var(--ce-ink-muted)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M119.92 409.87C383.83 410.64 648.26 410.85 899.91 409.99M119.95 410.11C304.34 411.07 488.79 411.05 899.98 410.01" fill="none" stroke="var(--ce-ink-muted)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M120.21 410.2C120.04 412.58 120.02 415.34 120.08 417.09M119.98 409.93C120.09 412.22 119.96 414.53 120.09 417.06" fill="none" stroke="var(--ce-ink-muted)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="120" y="433.04" text-anchor="middle" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink-muted)">start</text><path d="M314.93 409.99C315 411.92 315.09 413.29 314.98 416.86M315.03 410C315.1 411.95 315 414.01 315.1 416.97" fill="none" stroke="var(--ce-ink-muted)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="315" y="433.04" text-anchor="middle" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink-muted)">25%</text><path d="M510.07 410.2C509.96 412.24 510.15 414.46 509.88 417.05M510.07 410.08C510.12 411.9 510.04 413.7 510.1 417.08" fill="none" stroke="var(--ce-ink-muted)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="510" y="433.04" text-anchor="middle" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink-muted)">middle</text><path d="M705.21 410C704.92 412.56 704.8 415.63 705.2 416.82M704.91 409.94C705.09 411.63 705.03 413.39 705.1 416.99" fill="none" stroke="var(--ce-ink-muted)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="705" y="433.04" text-anchor="middle" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink-muted)">75%</text><path d="M899.93 410.21C899.93 411.9 899.92 413.58 900.1 417.01M899.95 410.02C899.89 411.36 900.07 412.88 899.9 417.1" fill="none" stroke="var(--ce-ink-muted)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="900" y="433.04" text-anchor="middle" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink-muted)">end</text><path d="M120.53 109.98C151.43 140.45 184.19 172.73 217.02 204.22M119.99 110.69C156.06 145.17 192.72 180.37 216.23 202.8M217.71 201.7C247.43 215.85 281.1 230.88 316.59 247.71M217.59 202.72C243.58 214.65 270.58 226.47 314.5 246.45M315.27 245.17C347.42 258.11 381.48 269.28 413.48 278.62M314.76 246.13C340.28 254.5 365.41 262.66 412.05 279.37M413.06 279.07C443.18 284.62 476.77 287.52 511.55 294.76M412.78 278.58C436.71 281.87 463.31 287.67 509.66 295.85M511.08 294.25C534.91 287.88 562.16 283.09 607.87 273.87M509.37 294.84C546.72 287.8 582.45 279.04 606.44 273.58M606.51 273.57C643.76 253.41 684.77 229.92 705.85 220.22M606.55 273.45C628.3 260.89 647.91 250.54 704.45 219.74M703.68 219.15C737.44 201.49 771.51 185.28 802.7 169.73M705.74 219.67C743.56 198.83 780.75 179.65 802.17 169.49M801.53 170.39C834.12 151.65 869.37 135.4 899.36 119.71M802.76 170.3C830.15 155.89 856.57 142.22 900.73 121.68" fill="none" stroke="var(--ce-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M509.2 288.93C510.72 288.73 513.22 289.4 514.44 290.2C515.66 290.99 516.12 292.31 516.49 293.71C516.86 295.12 517.2 297.29 516.66 298.61C516.13 299.93 514.7 301.01 513.27 301.65C511.85 302.29 509.71 302.9 508.12 302.45C506.54 301.99 504.62 300.23 503.77 298.92C502.92 297.61 502.8 295.96 503.03 294.57C503.26 293.19 504.09 291.51 505.14 290.59C506.19 289.68 508.57 289.38 509.34 289.07C510.11 288.76 509.78 288.63 509.76 288.74M508.74 288.96C510.24 288.72 513.28 288.96 514.73 289.85C516.19 290.73 517.3 292.86 517.48 294.26C517.66 295.65 516.63 297.03 515.82 298.23C515.01 299.43 513.89 300.9 512.61 301.46C511.34 302.02 509.56 301.92 508.18 301.61C506.8 301.29 505.22 300.77 504.33 299.59C503.44 298.41 502.75 296.01 502.86 294.51C502.97 293 503.94 291.66 505 290.57C506.06 289.47 508.59 288.33 509.21 287.95C509.83 287.57 508.66 288.14 508.75 288.29" fill="var(--ce-alert)" stroke="none"/><path d="M507.24 288.01C508.71 287.45 512.37 288.12 513.86 288.78C515.36 289.44 515.66 290.52 516.21 291.96C516.75 293.4 517.61 295.91 517.13 297.43C516.65 298.95 514.77 300.27 513.34 301.08C511.91 301.9 509.95 302.47 508.56 302.32C507.17 302.18 505.85 301.24 505 300.23C504.15 299.21 503.55 297.75 503.43 296.24C503.31 294.72 503.37 292.43 504.26 291.11C505.14 289.79 507.98 288.75 508.74 288.34C509.49 287.93 508.62 288.37 508.8 288.64M509.21 287.8C510.52 287.52 511.61 288.46 512.83 289.36C514.06 290.26 516.04 291.92 516.54 293.21C517.03 294.49 516.3 295.54 515.8 297.07C515.31 298.6 515 301.57 513.57 302.38C512.15 303.2 508.93 302.56 507.26 301.96C505.59 301.36 504.52 299.82 503.57 298.79C502.61 297.76 501.42 297.36 501.52 295.78C501.63 294.2 503.03 290.63 504.21 289.31C505.39 287.98 507.48 287.87 508.61 287.83C509.73 287.79 511.04 288.95 510.96 289.05" fill="none" stroke="var(--ce-ink)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="510" y="322.49" text-anchor="middle" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-alert)">trough: minimum recall</text><text xml:space="preserve" x="140" y="126.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">the system prompt sits here</text><text xml:space="preserve" x="676" y="350.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">put the user instruction here</text><path d="M859.4 335.7C870.15 275.82 880.16 215.57 892.89 139.52M859.72 336.19C866.79 295.61 873.76 255.13 893.04 140.25" fill="none" stroke="var(--ce-ink-subtle)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.5 5"/><text xml:space="preserve" x="120" y="462.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">position of the relevant fact in the context window</text><text xml:space="preserve" x="40" y="497.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink-muted)">Stylised after Liu et al., 2023. Exact numbers vary by model and task; the shape does not.</text>
 </svg>
