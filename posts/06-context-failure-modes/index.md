@@ -113,6 +113,10 @@ There is also a fourth, sneaky cause: a tool that returns enormous payloads. The
 
 When a bug report arrives, walk the five questions in order. The first that earns a yes is almost always the right one.
 
+![Five diagnostic questions asked in order, each yes leading to the failure mode it diagnoses](diagrams/02-diagnostic-walk.svg)
+
+*The walk is ordered on purpose: the cheapest checks come first, and the spine continues past the fifth question to the case where none of them fits.*
+
 1. **Is the answer fluent but off-topic?** → Distraction. Look at the retrieved set first, the system prompt second.
 2. **Is the answer consistent with the rules but the rules were violated?** → Confusion. Audit the system prompt and tool descriptions for ambiguity.
 3. **Does the answer contradict itself, or contradict an earlier turn?** → Conflict. Check memory and retrieval for two sources disagreeing.
@@ -122,6 +126,10 @@ When a bug report arrives, walk the five questions in order. The first that earn
 The same mode wears different clothes in different products. In a **coding agent**, Distraction looks like editing the wrong file, Tool-storm like re-running the test suite in a loop, Lost-in-the-middle like forgetting a constraint stated fifty files ago. In a **customer-support agent**, the same three read as answering a shipping question with a returns policy, repeatedly querying the orders API, and dropping a detail the customer gave ten turns back. The diagnosis is identical; only the surface report differs.
 
 A small remainder are model bugs (the model genuinely cannot reason about this task at this size) or systems bugs (rate limits, truncated responses, malformed tool returns). Both are separately diagnosable; neither is a context bug.
+
+![Which failure modes leave a metric you can alert on, and which need an LLM judge](diagrams/03-detection-signals.svg)
+
+*Three of the five announce themselves in a counter you already have. Two do not, which is why sampled transcripts stay part of the job.*
 
 **Detection signals.** Each mode also leaves a fingerprint in your traces that you can alert on before users complain. Distraction shows up as falling retrieval precision (the fraction of retrieved chunks that were actually relevant); Tool-storm as tool-calls-per-turn or tokens-per-turn spiking above their usual band; Lost-in-the-middle as accuracy that correlates negatively with prompt length. Conflict and Confusion are harder to catch automatically and usually surface through an LLM-judge on sampled transcripts. Instrumenting these signals is the subject of [Post 22](../22-observability/index.md).
 

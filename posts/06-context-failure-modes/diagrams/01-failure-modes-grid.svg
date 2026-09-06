@@ -1,66 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 380" role="img" aria-labelledby="t d">
   <title id="t">Five context failure modes mapped to layers</title>
-  <desc id="d">A five-by-three matrix mapping the five failure modes (distraction, confusion, conflict, lost-in-the-middle, tool-storm) to the layer most often responsible (system, tools, memory, RAG, history) and to the first-fix to apply.</desc>
+  <desc id="d">A hand-drawn table of five rows, one per context failure mode, with columns for the symptom users report, the layer the mode originates in, and the cheapest first fix. Distraction produces a fluent but off-topic answer from retrieval or the system prompt, and is fixed by tightening Select and adding a reranker. Confusion is the right information with the wrong choice, from the system prompt or tools, fixed by explicit exemplified rules. Conflict is an internally contradictory answer from memory or retrieval, fixed with a provenance and precedence rule. Lost in the middle is a long context whose middle is ignored, from retrieval or history, fixed by bookend packing. Tool-storm is tool calls without progress, from the tools layer, fixed by trimming the catalogue and capping the loop. A caption notes the small remainder are model or systems bugs, not context bugs.</desc>
+
   <style><![CDATA[
-    :root{--ce-bg:#FAFAF7;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-surface:#FFFFFF;}
-    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-warn:#D4B58A;--ce-alert:#D88880;--ce-surface:#16181C;}}
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-2:#CFCFC8;--ce-neutral-3:#8E8E88;--ce-on-fill:#FFFDF9;--ce-on-accent:#1A1A1A;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-2:#2C3038;--ce-neutral-3:#6E6E68;--ce-on-fill:#14161A;--ce-on-accent:#1A1A1A;}}
     .bg{fill:var(--ce-bg);}
-    .row{fill:var(--ce-surface);stroke:var(--ce-ink);stroke-width:1;}
-    .name{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:13px;fill:var(--ce-ink);}
-    .l{font-family:Inter,system-ui,sans-serif;font-weight:500;font-size:12px;fill:var(--ce-ink);}
-    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ce-ink-muted);}
-    .pill{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:#FFFFFF;}
-    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:18px;fill:var(--ce-ink);}
+    text{dominant-baseline:auto;}
   ]]></style>
+
   <rect class="bg" width="820" height="380"/>
-  <text class="title" x="32" y="32">Five failure modes, layer source, first-fix</text>
-
-  <!-- Header -->
-  <text class="h" x="40"  y="62">Mode</text>
-  <text class="h" x="220" y="62">Symptom</text>
-  <text class="h" x="500" y="62">Layer</text>
-  <text class="h" x="610" y="62">First-fix</text>
-
-  <!-- Row 1: Distraction -->
-  <rect class="row" x="32" y="72" width="756" height="48" rx="6"/>
-  <rect x="40"  y="84" width="124" height="22" rx="11" fill="var(--ce-accent)"/>
-  <text class="pill" x="102" y="100" text-anchor="middle">Distraction</text>
-  <text class="l" x="220" y="100">fluent answer, off topic</text>
-  <text class="l" x="500" y="100">RAG / system</text>
-  <text class="l" x="610" y="100">tighten Select; add reranker</text>
-
-  <!-- Row 2: Confusion -->
-  <rect class="row" x="32" y="124" width="756" height="48" rx="6"/>
-  <rect x="40" y="136" width="124" height="22" rx="11" fill="var(--ce-warn)"/>
-  <text class="pill" x="102" y="152" text-anchor="middle">Confusion</text>
-  <text class="l" x="220" y="152">right info present, wrong choice</text>
-  <text class="l" x="500" y="152">system / tools</text>
-  <text class="l" x="610" y="152">explicit rules; examples</text>
-
-  <!-- Row 3: Conflict -->
-  <rect class="row" x="32" y="176" width="756" height="48" rx="6"/>
-  <rect x="40" y="188" width="124" height="22" rx="11" fill="var(--ce-alert)"/>
-  <text class="pill" x="102" y="204" text-anchor="middle">Conflict</text>
-  <text class="l" x="220" y="204">internally contradictory answer</text>
-  <text class="l" x="500" y="204">memory / RAG</text>
-  <text class="l" x="610" y="204">provenance + precedence rule</text>
-
-  <!-- Row 4: Lost in middle -->
-  <rect class="row" x="32" y="228" width="756" height="48" rx="6"/>
-  <rect x="40" y="240" width="124" height="22" rx="11" fill="var(--ce-primary)"/>
-  <text class="pill" x="102" y="256" text-anchor="middle">Lost-in-middle</text>
-  <text class="l" x="220" y="256">long context, middle ignored</text>
-  <text class="l" x="500" y="256">RAG / history</text>
-  <text class="l" x="610" y="256">bookend packing</text>
-
-  <!-- Row 5: Tool storm -->
-  <rect class="row" x="32" y="280" width="756" height="48" rx="6"/>
-  <rect x="40" y="292" width="124" height="22" rx="11" fill="var(--ce-success)"/>
-  <text class="pill" x="102" y="308" text-anchor="middle">Tool-storm</text>
-  <text class="l" x="220" y="308">tool calls without progress</text>
-  <text class="l" x="500" y="308">tools (layer 02)</text>
-  <text class="l" x="610" y="308">trim catalog; cap loop</text>
-
-  <text class="s" x="32" y="354">Walk these five in order on every bug report. The first yes is almost always the right one. The remaining 5% are model or systems bugs.</text>
+<text xml:space="preserve" x="32" y="38.24" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="22" fill="var(--ce-ink)">Five failure modes, layer source, first-fix</text><text xml:space="preserve" x="32" y="61.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink-muted)">Each mode has one symptom, one layer it originates in, and one cheap thing to try first.</text><text xml:space="preserve" x="32" y="92.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">Mode</text><text xml:space="preserve" x="180" y="92.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">Symptom</text><text xml:space="preserve" x="396" y="92.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">Originates in</text><text xml:space="preserve" x="536" y="92.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">First-fix</text><path d="M33.17 107.34C31.65 115.85 31.17 123.17 31.44 136.4M31.91 108.06C31.62 117.54 31.47 127.17 31.84 135.79" fill="none" stroke="var(--ce-accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="46" y="124.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink)">Distraction</text><text xml:space="preserve" x="180" y="124.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">fluent answer, off topic</text><text xml:space="preserve" x="396" y="124.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">RAG / system</text><text xml:space="preserve" x="536" y="124.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink)">tighten Select; add a reranker</text><path d="M31.92 144.23C207.25 144.19 382.15 144.51 787.84 144.14M32.11 143.99C318.97 144.31 605.65 144.25 788.1 144.05" fill="none" stroke="var(--ce-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M33.18 152.56C31.27 159.58 32.63 166.09 32.13 178.86M31.5 152.14C31.94 159.19 32.21 166.76 31.9 180.57" fill="none" stroke="var(--ce-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="46" y="168.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink)">Confusion</text><text xml:space="preserve" x="180" y="168.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">right info present, wrong choice</text><text xml:space="preserve" x="396" y="168.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">system / tools</text><text xml:space="preserve" x="536" y="168.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink)">explicit, exemplified rules</text><path d="M31.92 187.99C217.44 187.52 402.99 187.13 787.98 187.83M32.03 188C253.81 187.54 475.4 187.55 788.11 187.96" fill="none" stroke="var(--ce-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M33.19 195.37C32.91 203.31 31.32 211.42 32.82 223.72M32.28 196.22C31.89 206.45 31.38 217.55 31.96 224.15" fill="none" stroke="var(--ce-accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="46" y="212.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink)">Conflict</text><text xml:space="preserve" x="180" y="212.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">internally contradictory answer</text><text xml:space="preserve" x="396" y="212.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">memory / RAG</text><text xml:space="preserve" x="536" y="212.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink)">provenance + precedence rule</text><path d="M31.92 232.24C227.63 232.37 423.35 232.22 788.12 232.01M31.95 232.02C188.41 231.02 345.15 231.09 787.88 232.12" fill="none" stroke="var(--ce-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M33.2 240.58C32.53 247.05 32.77 256.75 31.1 268.57M31.86 240.3C32.21 248.1 32.11 255.93 32.02 267.72" fill="none" stroke="var(--ce-warn)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="46" y="256.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink)">Lost in the middle</text><text xml:space="preserve" x="180" y="256.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">long context, middle ignored</text><text xml:space="preserve" x="396" y="256.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">RAG / history</text><text xml:space="preserve" x="536" y="256.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink)">bookend packing</text><path d="M31.92 276C237.82 275.23 444.19 275.32 787.77 276.18M32.1 276.03C274.46 276.48 517.06 276.63 787.89 276.03" fill="none" stroke="var(--ce-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M30.81 283.39C32.14 293.18 31.83 302.07 31.79 311.03M31.44 284.39C32.16 289.76 32.48 295.52 32.07 312.5" fill="none" stroke="var(--ce-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="46" y="300.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink)">Tool-storm</text><text xml:space="preserve" x="180" y="300.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">tool calls without progress</text><text xml:space="preserve" x="396" y="300.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">tools (layer 02)</text><text xml:space="preserve" x="536" y="300.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink)">trim catalogue; cap the loop</text><text xml:space="preserve" x="32" y="343.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink)">Walk these five in order on every bug report. The first yes is almost always the right one.</text><text xml:space="preserve" x="32" y="363.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink-muted)">The small remainder are model bugs or systems bugs; neither is a context bug.</text>
 </svg>
