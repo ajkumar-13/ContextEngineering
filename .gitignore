@@ -10,6 +10,7 @@ desktop.ini
 # ===== Workspace-only folders (not shipped) =====
 templates/
 tools/
+assets/
 assets/diagrams/src/
 assets/diagrams/style/
 
