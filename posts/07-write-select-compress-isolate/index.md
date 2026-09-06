@@ -7,7 +7,7 @@
 > - Pick the right operation for any of the five failure modes.
 > - Read the rest of the series knowing where each technique fits.
 
-![The WSCI framework](../07-write-select-compress-isolate/diagrams/01-wsci-quadrants.svg)
+![The WSCI framework](diagrams/01-wsci-quadrants.svg)
 
 *The four WSCI operations arranged by direction (information in or out) and scope (one context window or several).*
 
@@ -107,6 +107,10 @@ The single rule worth memorising: **isolate when the sub-task has a clean input 
 
 ## 6. Mapping the six layers onto WSCI
 
+![Each context layer paired with the WSCI operation that primarily manages it](diagrams/02-layers-to-wsci.svg)
+
+*Operations own layers. No layer needs all four, and the pairings chain: memory is Written before it is Selected.*
+
 The four operations describe *what* to do with context; the six layers of [Post 02](../02-six-layers-of-context/index.md) describe *where* the context lives. They compose. Each layer is managed primarily by one operation, with a secondary operation for the cases the first cannot reach.
 
 | Layer (Post 02) | Primary operation | How it shows up |
@@ -123,6 +127,10 @@ Two readings fall out of this table. First, no layer needs all four operations, 
 ---
 
 ## 7. WSCI vs. the five failure modes
+
+![The five failure modes of Post 06, each with a first-line WSCI operation and a fallback](diagrams/03-wsci-vs-failures.svg)
+
+*Every first-fix in the failure catalogue is one of these four operations, with a second-line operation behind it.*
 
 The reason WSCI is worth memorising is that the four operations map cleanly onto the five failure modes catalogued in [Post 06](../06-context-failure-modes/index.md). Those five are **distraction, confusion, conflict, lost-in-the-middle, and tool-storm**; each has a first-line operation and a fallback.
 

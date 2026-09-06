@@ -28,7 +28,7 @@ series: Context Engineering
 part: 2
 chapter: "Part II — The Four Primitives (WSCI)"
 
-hero: ../../assets/diagrams/exports/02-wsci-quadrants.svg
+hero: diagrams/01-wsci-quadrants.svg
 hero_alt: "The WSCI framework showing the four primitive operations: Write, Select, Compress, and Isolate"
 
 reading_time: 10
