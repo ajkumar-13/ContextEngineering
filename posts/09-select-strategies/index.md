@@ -19,9 +19,9 @@ A naïve reading of the WSCI framework treats Select and RAG (retrieval-augmente
 
 Each of these is a Select. Each can be analysed as a four-stage pipeline:
 
-![The four-stage Select pipeline: query, candidates, re-rank, pack](../09-select-strategies/diagrams/04-rag-pipeline.svg)
+![The four levers of Select, from user turn to packed prompt](diagrams/00-hero-select-pipeline.svg)
 
-*The Select pipeline: construct a query, generate a broad candidate set, re-rank it down, and pack the survivors into the prompt.*
+*The Select pipeline: construct a query, generate a broad candidate set, re-rank it down, and pack the survivors into the prompt. Two numbers run through all of it — top-N for recall, top-k for budget.*
 
 ```
        query                    candidates            re-rank             pack
@@ -98,6 +98,10 @@ The re-ranker has chosen 5 chunks. They will not necessarily fit. Packing decide
 
 The same four levers apply to the three other Select problems with small adaptations.
 
+![The same Select pipeline applied to documents, tool schemas, memory rows, and labelled examples](diagrams/01-four-corpora.svg)
+
+*Swap the corpus and tune the parameters. Only the technology inside each box changes.*
+
 **Tool selection.** The "corpus" is the tool catalog. Each tool's schema (name, description, parameters) is one document; embed it offline. At inference time, embed the user turn (after query rewriting), retrieve top-50 candidates by hybrid search over tool schemas, re-rank, and pack the surviving handful of schemas into the tools layer. A large MCP (Model Context Protocol, the emerging standard for exposing external tools to a model) deployment can expose hundreds of tools; running them through this Select pipeline so that only the few relevant ones reach the prompt is exactly the pattern [Post 15](../15-tools-and-mcp/index.md) develops. Without it, the agent's prompt is unusable; with it, the agent always has a small, focused toolbox.
 
 **Memory recall.** The corpus is the memory store. Each memory row is one document. The query is constructed from the *intent* of the current turn ("what does this user usually want when they say X?") rather than its surface text. Re-ranking can mix relevance with **recency** and **confidence**: a 0.9-relevance memory from two years ago may rank below a 0.7-relevance one from yesterday. Packing should respect the memory layer's small budget (Post 04: 5–10 %).
@@ -111,6 +115,10 @@ In every case the four boxes above describe what to build; the implementation is
 ## 7. Tuning the system
 
 A short list of dials, ordered by how often they are the right thing to turn:
+
+![Seven Select dials in priority order, and the two metrics to wire up first](diagrams/02-tuning-order.svg)
+
+*The order is the point. Recall@N and citation accuracy come before any of the dials, because without them every turn is a guess.*
 
 1. **Re-ranker on/off.** The single largest quality lever. Always on for production search; optional for low-stakes lookups.
 2. **`k`, the number of packed items.** Default 5; tune down to 3 for terse retrievals and up to 10 for synthesis tasks. More than 10 almost always loses to better re-ranking.

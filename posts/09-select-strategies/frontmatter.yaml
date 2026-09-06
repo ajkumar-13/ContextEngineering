@@ -28,8 +28,8 @@ series: Context Engineering
 part: 2
 chapter: "Part II — The Four Primitives (WSCI)"
 
-hero: ../09-select-strategies/diagrams/04-rag-pipeline.svg
-hero_alt: "The four-stage Select pipeline showing query construction, candidate generation, re-ranking, and prompt packing"
+hero: diagrams/00-hero-select-pipeline.svg
+hero_alt: "The four levers of Select — query construction, candidate generation, re-ranking, and packing — from user turn to packed prompt"
 
 reading_time: 16
 
