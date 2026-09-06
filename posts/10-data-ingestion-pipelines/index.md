@@ -7,7 +7,7 @@
 > - Preserve tables, structure, and provenance through the pipeline instead of flattening them into unusable text.
 > - Stand up incremental re-indexing so a corpus that changes daily does not silently rot.
 
-![Ingestion pipeline: raw PDF, HTML, scan and spreadsheet sources feed a parse and OCR stage, then clean, enrich, chunk and index (dense plus lexical), with the parse, clean and enrich stages marked as where retrieval quality is set upstream.](../10-data-ingestion-pipelines/diagrams/00-hero-data-ingestion-pipelines.svg)
+![Ingestion pipeline: raw PDF, HTML, scan and spreadsheet sources feed a parse and OCR stage, then clean, enrich, chunk and index (dense plus lexical), with the parse, clean and enrich stages marked as where retrieval quality is set upstream.](diagrams/00-hero-data-ingestion-pipelines.svg)
 *Retrieval quality is decided upstream: what the parser keeps or drops is what the model can ever retrieve.*
 
 ---
@@ -57,6 +57,10 @@ PDF is not one format; it is at least three, and each needs a different extracto
 
 **OCR for scans.** A scanned document is an *image* of text; there is no text layer to extract. Optical character recognition (OCR, recognising characters from pixels) is the only option. Tesseract (Smith, 2007) is the long-standing open-weight engine; cloud OCR services and modern vision-language models are the higher-accuracy, higher-cost alternatives. OCR introduces its own error class ("rn" read as "m", a dropped decimal point), so measure character-level accuracy on a sample before trusting a scanned corpus.
 
+![Three PDF extraction strategies: born-digital first, escalating to OCR when there is no text layer and to a layout-aware parser when reading order or tables are mangled](diagrams/01-pdf-decision.svg)
+
+*Two escalations out of one starting point, and the failure each strategy brings with it.*
+
 The decision procedure is simple and worth hard-coding: **try born-digital extraction; if the text layer is empty or the page is an image, fall back to OCR; if reading order or tables are mangled, escalate to a layout-aware parser.** A single corpus often needs all three, because it contains all three kinds of PDF.
 
 ---
@@ -66,6 +70,10 @@ The decision procedure is simple and worth hard-coding: **try born-digital extra
 Tables are where naive extraction fails most destructively, and where the failure is easiest to miss because the output still *looks* like text.
 
 Consider a pricing table. To a human it is a grid: rows are products, columns are tiers, and a cell's meaning comes from its row and column headers. A born-digital text extractor that reads glyphs left-to-right, top-to-bottom flattens that grid into a stream: `Product A Basic $10 Pro $20 Product B Basic $15 Pro $30`. The two-dimensional relationship that carried all the meaning, *which price belongs to which product and tier*, is gone. When a user later asks "what is the Pro price for Product B?", the retrieved chunk contains all four numbers and no reliable way for the model to bind `$30` to the right cell. The answer is often confidently wrong.
+
+![A pricing grid flattened into a single stream by a naive extractor, beside the same table preserved as Markdown](diagrams/02-table-flattening.svg)
+
+*The same four numbers survive both readings. Only one of them still says which price belongs to which product.*
 
 The fix is to preserve the grid. A table-aware parser emits the table as **Markdown or HTML**, keeping rows, columns, and headers intact:
 

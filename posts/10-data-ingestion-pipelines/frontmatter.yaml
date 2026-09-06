@@ -28,7 +28,7 @@ series: Context Engineering
 part: 2
 chapter: "Part II — The Four Primitives (WSCI)"
 
-hero: ../10-data-ingestion-pipelines/diagrams/00-hero-data-ingestion-pipelines.svg
+hero: diagrams/00-hero-data-ingestion-pipelines.svg
 hero_alt: "Document ingestion pipeline showing parsing, cleaning, enrichment, chunking, and indexing for production RAG systems"
 
 reading_time: 15
