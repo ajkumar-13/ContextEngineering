@@ -25,8 +25,8 @@ series: Context Engineering
 part: 1
 chapter: "Part I — Foundations"
 
-hero: ../diagrams/02-six-layers-of-context.svg
-hero_alt: "Diagram showing the six layers of a modern LLM context window"
+hero: diagrams/00-hero-six-layers.svg
+hero_alt: "The six layers of a context window, bracketed by lifetime: stable prefix, per-turn injection, growing tail, and trigger"
 
 reading_time: 14
 

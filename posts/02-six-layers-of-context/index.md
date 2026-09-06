@@ -7,9 +7,9 @@
 > - Identify each layer in a raw Anthropic, OpenAI, or Gemini request.
 > - Predict which layer is responsible for a given category of failure.
 
-![The six layers of the context window](../../assets/diagrams/exports/01-context-window-stack.svg)
+![The six layers of a context window, bracketed by lifetime](diagrams/00-hero-six-layers.svg)
 
-*The context window as a priority-ordered stack: stable prefix at the bottom, the current user turn on top, with the "lost in the middle" attention curve (Liu et al., 2023) overlaid on the right.*
+*The context window as a priority-ordered stack, bracketed by lifetime rather than by number: the stable prefix that caches, the per-turn injection that costs, the tail that overflows, and the trigger that arrives last. The bars on the right are effective attention (Liu et al., 2023).*
 
 ---
 
@@ -241,7 +241,13 @@ Three reasons the order in the table is not arbitrary.
 
 ## 12. A pragmatic mental model
 
-The whole point of the six-layer split is diagnostic. When an application misbehaves, the symptom the user reports almost always points at a specific layer. The table below maps common complaints to the layer to inspect first. It is a starting heuristic, not a law: some bugs span layers, and the pointers name the post where each is treated in depth.
+The whole point of the six-layer split is diagnostic. When an application misbehaves, the symptom the user reports almost always points at a specific layer.
+
+![Six reported symptoms, each mapped to the context layer most likely at fault](diagrams/02-symptom-to-layer.svg)
+
+*A user complains in the language of layer 06. The layer at fault is usually one of the other five.*
+
+The table below maps common complaints to the layer to inspect first. It is a starting heuristic, not a law: some bugs span layers, and the pointers name the post where each is treated in depth.
 
 | Symptom the user reports | Most likely layer | Look at | Treated in |
 |---|---|---|---|
