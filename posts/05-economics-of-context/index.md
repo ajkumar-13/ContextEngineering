@@ -46,6 +46,10 @@ Notice the horizontal spread again: output tokens cost roughly five times input 
 
 Ingesting the prompt is *prefill*: the model processes every input token in a single parallel pass, filling its attention cache in one shot. Generating the answer is *decode*: each output token requires a full forward pass through the model, and each pass depends on the one before it, so output cannot be parallelised the way input can (Pope et al., 2022). Output tokens are simply more expensive to produce, and the price reflects it.
 
+![Prefill runs in one parallel pass while decode runs one forward pass per token; two priced calls show six times the input costing about the same as a seventh of the output](diagrams/01-input-output-asymmetry.svg)
+
+*The mechanism on the left, the consequence on the right: the bill follows the answer, not the prompt.*
+
 The operational consequence surprises teams: **a short prompt with a long answer can cost more than a long prompt with a short one.** Take a 2,000-token input that yields a 1,500-token generation against a 12,000-token input that yields a 200-token generation, at the mid-tier rates above. The first costs about `2000/1e6 x $3 + 1500/1e6 x $15 ≈ $0.029`; the second about `12000/1e6 x $3 + 200/1e6 x $15 ≈ $0.039`. Six times the input, yet a comparable bill, because the short-prompt call generated seven times as much text (figures illustrative, at the section 2 rates).
 
 Long generations therefore dominate cost in exactly the workloads that produce them: verbose chain-of-thought, agents that narrate every step, code assistants that regenerate a whole file to change one line. The cheapest optimisation in the book is often a lower `max_tokens` and a system-prompt instruction to be terse, because it attacks the five-times-priced side of the ledger. Trimming the prompt saves input dollars; trimming the answer saves output dollars, and output dollars are worth five of the other kind.
@@ -72,7 +76,7 @@ The architectural consequence is one word: **discipline.** Freeze the system pro
 
 ```text
   request layout, front (cached) → back (fresh)
-  ┌──────────────────────────────────────────────┐
+  ┌───────────────────────────────────────────────┐
   │  TOOLS      schemas, frozen        ┐          │
   │  SYSTEM     prompt, frozen         ├ stable   │ ← cache this prefix
   │  EXEMPLARS  few-shot, frozen       ┘  (cached)│
@@ -80,7 +84,7 @@ The architectural consequence is one word: **discipline.** Freeze the system pro
   │  HISTORY    older turns            ┐          │
   │  RETRIEVAL  this turn's chunks     ├ volatile │ ← recomputed each call
   │  USER       latest message         ┘          │
-  └──────────────────────────────────────────────┘
+  └───────────────────────────────────────────────┘
   one changed byte above the breakpoint invalidates
   everything below it, back to full input price
 ```
@@ -99,6 +103,10 @@ $$
 *Prefill* scales with input length: the model must process every prompt token before it can emit the first output token, so a long context means a long wait to **time-to-first-token** (TTFT), the moment the user sees anything happen. *Decode* scales with output length: each generated token adds one forward pass, roughly constant per token at a given model size.
 
 Streaming hides decode time by showing tokens as they arrive, but it cannot hide prefill, which happens before the first token exists. This is why a long-context agent feels sluggish to first token even with streaming on: the user is waiting through prefill of tens of thousands of tokens.
+
+![Three turn timelines on one scale: a cold long-context turn, the same turn warm, and a cold short-context turn](diagrams/02-latency-budget.svg)
+
+*Decode is the same length in all three. Prefill is what a cache read deletes, and prefill is what the user waits through.*
 
 Here is the connection to section 4. A cache read skips prefill for the cached prefix, because the model reloads stored attention state instead of recomputing it. On a request whose 40k-token prefix is cached and whose 500-token tail is fresh, the model prefills only the 500 new tokens, so time-to-first-token collapses toward the small-prompt case. Caching therefore buys the same architectural move twice: cheaper *and* faster on every hit. In an interactive product, where TTFT is what users perceive as "responsiveness", the latency win often justifies the caching work on its own, with the cost saving as a bonus.
 

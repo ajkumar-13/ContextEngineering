@@ -1,101 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
   <title id="t">The economics of prompt caching</title>
-  <desc id="d">Two side-by-side request bars price the same 10,500-token input. The left bar is a cache miss: the whole prompt is billed at full input price and the stable system-and-tools prefix pays an extra 1.25 times write premium to populate the cache. The right bar is a cache hit: the same frozen prefix re-reads from cache at about a tenth of the input price, while only the small volatile suffix, the latest user turn and this turn's retrieval, pays full rate. A note records that a hit also skips prefill of the cached prefix, so it cuts latency as well as cost.</desc>
+  <desc id="d">Two hand-drawn bars of identical width price the same 10,500-token input. The upper bar is a cache miss: the 4,600-token stable prefix bills at full price plus a 1.25 times write premium, the volatile suffix bills at full price, and the input costs about three and a sixth cents. The lower bar is a cache hit: the same prefix is re-read at roughly a tenth of the price while the suffix is unchanged, and the input costs about one and nine tenths cents. A dashed line marks the cache breakpoint between the frozen system-and-tools prefix and the volatile suffix carrying this turn's message and retrieval. A caption notes the hit also cuts latency, because skipping prefill of the cached prefix collapses time-to-first-token toward the small-prompt case.</desc>
 
   <style><![CDATA[
-    :root{
-      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
-      --ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;
-      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
-      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-3:#8E8E88;
-    }
-    @media (prefers-color-scheme:dark){
-      :root{
-        --ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;
-        --ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;
-        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
-        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-3:#6E6E68;
-      }
-    }
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-2:#CFCFC8;--ce-neutral-3:#8E8E88;--ce-on-fill:#FFFDF9;--ce-on-accent:#1A1A1A;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-2:#2C3038;--ce-neutral-3:#6E6E68;--ce-on-fill:#14161A;--ce-on-accent:#1A1A1A;}}
     .bg{fill:var(--ce-bg);}
-    .card{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
-    .track{fill:var(--ce-neutral-1);stroke:var(--ce-border);stroke-width:1;}
-    .seg{stroke:var(--ce-bg);stroke-width:1.5;}
-    .write{fill:none;stroke:var(--ce-alert);stroke-width:1.5;stroke-dasharray:4 3;}
-    .tick{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;}
-    .lead{stroke:var(--ce-ink-subtle);stroke-width:1;fill:none;}
-    .brk{stroke:var(--ce-ink-muted);stroke-width:1;stroke-dasharray:3 3;fill:none;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
-    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
-    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ce-ink);}
-    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
-    .lab{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:#FFFFFF;}
-    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ce-ink-muted);}
-    .monb{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-weight:700;font-size:13px;fill:var(--ce-ink);}
+    text{dominant-baseline:auto;}
   ]]></style>
 
   <rect class="bg" width="960" height="360"/>
-  <text class="title" x="48" y="44">Cache miss vs cache hit, same 10,500-token input</text>
-  <text class="s" x="48" y="64">A hit re-reads the frozen prefix at about a tenth of the price; only the volatile suffix pays full rate.</text>
-
-  <!-- shared price scale: bar area x 300..900 = 600px wide -->
-  <!-- full-price equivalents: prefix 4,600 tok, suffix 5,900 tok. -->
-  <!-- MISS bar: prefix billed at 1.25x (4600*1.25=5750 units) + suffix 5900 = 11650 units at full rate -->
-  <!-- HIT  bar: prefix billed at 0.10x (4600*0.10=460 units)  + suffix 5900 = 6360 units at full rate -->
-  <!-- scale: 11650 units -> 600px  => 0.05150 px/unit -->
-
-  <!-- ===================== MISS row ===================== -->
-  <text class="h" x="48" y="112">Cache miss</text>
-  <text class="s" x="48" y="130">first call, or prefix changed</text>
-
-  <!-- prefix @1.25x = 5750 units = 296px; suffix = 5900 units = 304px -->
-  <rect class="track" x="300" y="98" width="600" height="40" rx="5"/>
-  <rect class="seg" x="300" y="98" width="296" height="40" fill="var(--ce-primary)"/>
-  <rect class="seg" x="596" y="98" width="304" height="40" fill="var(--ce-accent)"/>
-  <rect class="write" x="300" y="98" width="296" height="40" rx="5"/>
-  <text class="lab" x="448" y="123" text-anchor="middle">prefix at full price + 1.25x write</text>
-  <text class="lab" x="748" y="123" text-anchor="middle">suffix at full price</text>
-  <text class="monb" x="900" y="90" text-anchor="end">~$0.0315 input</text>
-
-  <!-- ===================== HIT row ===================== -->
-  <text class="h" x="48" y="204">Cache hit</text>
-  <text class="s" x="48" y="222">prefix byte-stable, warm cache</text>
-
-  <!-- prefix @0.10x = 460 units = 24px; suffix = 5900 units = 304px -->
-  <rect class="track" x="300" y="190" width="600" height="40" rx="5"/>
-  <rect class="seg" x="300" y="190" width="24" height="40" fill="var(--ce-success)"/>
-  <rect class="seg" x="324" y="190" width="304" height="40" fill="var(--ce-accent)"/>
-  <text class="lab" x="466" y="215" text-anchor="middle">suffix at full price</text>
-  <text class="monb" x="900" y="182" text-anchor="end">~$0.0191 input</text>
-
-  <!-- callout to the tiny cached prefix on the hit bar -->
-  <line class="lead" x1="312" y1="190" x2="312" y2="168"/>
-  <line class="lead" x1="312" y1="168" x2="360" y2="168"/>
-  <text class="s" x="366" y="172">cached prefix re-read at ~0.1x price</text>
-
-  <!-- ===================== stable / volatile legend under bars ===================== -->
-  <!-- align brackets to the full-price footprint: prefix 4600 tok = 237px, suffix 304px -->
-  <line class="tick" x1="300" y1="240" x2="300" y2="250"/>
-  <line class="tick" x1="537" y1="240" x2="537" y2="250"/>
-  <line class="tick" x1="300" y1="250" x2="537" y2="250"/>
-  <text class="l" x="418" y="268" text-anchor="middle">Stable prefix</text>
-  <text class="s" x="418" y="284" text-anchor="middle">system + tools, frozen</text>
-
-  <line class="tick" x1="537" y1="240" x2="537" y2="250"/>
-  <line class="tick" x1="900" y1="240" x2="900" y2="250"/>
-  <line class="tick" x1="537" y1="250" x2="900" y2="250"/>
-  <text class="l" x="718" y="268" text-anchor="middle">Volatile suffix</text>
-  <text class="s" x="718" y="284" text-anchor="middle">this turn's user message + retrieval</text>
-
-  <!-- breakpoint marker between prefix and suffix in the legend -->
-  <line class="brk" x1="537" y1="90" x2="537" y2="238"/>
-  <text class="mono" x="537" y="82" text-anchor="middle">breakpoint</text>
-
-  <!-- ===================== bottom note: latency ===================== -->
-  <g transform="translate(48,304)">
-    <rect class="card" width="852" height="40" rx="8"/>
-    <circle cx="24" cy="20" r="6" fill="var(--ce-success)"/>
-    <text class="l" x="42" y="24">A hit also cuts latency: skipping prefill of the cached prefix collapses time-to-first-token toward the small-prompt case.</text>
-  </g>
+<text xml:space="preserve" x="40" y="38.24" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="22" fill="var(--ce-ink)">Cache miss versus cache hit, on the same 10 500-token input</text><text xml:space="preserve" x="40" y="61.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink-muted)">A hit re-reads the frozen prefix at about a tenth of the price. Only the volatile suffix pays full rate.</text><text xml:space="preserve" x="40" y="124.88" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="14" fill="var(--ce-ink)">Cache miss</text><text xml:space="preserve" x="40" y="144.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">first call, or the</text><text xml:space="preserve" x="40" y="157.87" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">prefix changed</text><g opacity="0.3"><path d="M159.57 103.13C248 103.81 338.55 106.17 449.24 102.71C455.54 104.89 455.64 108.24 459.28 110.09C455.03 126.15 455.64 137.56 455.1 147.98C457.9 153.8 455.54 158.4 446.41 153.42C387.15 155.35 323.25 155.7 158.45 154.98C152.06 157.27 149.08 152.36 148.24 145.72C148.84 132.41 150.3 119.29 152.49 115.13C151.67 105.37 151.99 103.75 156.7 105.78C158.67 104 158.67 104 158.67 104" fill="var(--ce-alert)" stroke="none"/><path d="M159.12 104.68C269.16 101.2 381.6 101.96 448.35 103.14M158.23 103.54C268.44 105.29 378.16 105.4 448.11 104.42M448.33 104C453.81 102.51 458.75 104.93 457.12 113.48M446.66 102.94C454.73 104.59 454.82 107.13 457.12 114.15M456.06 111.79C458.31 122.18 455.47 133.52 458.12 149.28M457 111.93C456.69 119.91 456.37 128.92 456.91 147.8M457 147.33C458.56 152.56 455.09 155.25 447.53 154.4M458.33 148.68C457.58 152.05 456.19 156.95 446.59 154.16M448.43 155.36C370.29 156.07 292.88 154.68 159.96 156.11M448.23 155.31C379.66 157.7 311.5 156.99 158.24 156.07M158.67 156C153.66 155.3 149.57 151.53 150.96 146.48M160.47 155.25C154.59 156.95 151.66 154.55 151.51 145.42M150.09 148.81C152.28 135.85 150.69 127.06 149.12 111.83M150.69 146.56C149.63 140.14 150.55 132.66 149.81 113.49M150 112.67C151.1 105.61 154.75 102.85 156.77 103.53M148.18 113.81C148.33 106.98 151.34 104.55 157.03 105.46M158.67 104C158.67 104 158.67 104 158.67 104M158.67 104C158.67 104 158.67 104 158.67 104" fill="none" stroke="var(--ce-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></g><text xml:space="preserve" x="162" y="122.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink)">prefix at full price</text><text xml:space="preserve" x="162" y="142.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">+ 1.25x write premium</text><g opacity="0.55"><path d="M464.12 102.72C582.58 104.16 701 105.65 842.18 102.88C846.18 102.53 848.49 105.45 851.75 110.39C849.46 127.37 847.52 140.42 850.15 146.81C850.96 152.73 844.6 158.35 843.6 154.29C729.59 157.5 614.93 156.95 465.83 154.48C460.13 157.07 454.67 151.62 458.38 148.4C455.12 136.66 457.84 128.64 454.7 111.92C454.61 106.69 462.05 105.26 463.21 105.65C465.67 104 465.67 104 465.67 104" fill="var(--ce-neutral-2)" stroke="none"/><path d="M466.04 105.16C575.08 102.16 683.59 102.17 841.7 104.96M465.71 104.27C555.07 102.18 644.01 102.44 841.79 104.13M841.33 104C846.9 103.99 848.46 105.61 850.17 113.23M840.9 104.43C848.57 101.78 851.4 108.99 852.11 110.98M851.43 113.78C851.29 120.82 851.22 128.72 848.43 146.94M850.11 112.37C849.41 123.7 848.98 133.35 850.7 148.01M850 147.33C850.34 153.64 847.57 157.98 840.56 155.12M850.58 146.87C849.47 155.05 848.23 154.69 842.56 154.8M842.27 156.18C735.31 157.02 630.7 158.56 466.45 155.23M841.05 156.43C700.34 157.08 560.45 158.09 465.65 156.32M465.67 156C461.61 154.42 457.24 153.11 456.4 147.69M467.27 157.56C462.17 156.92 455.7 152.9 456.72 148.73M455.63 146.32C456.61 140.45 456.22 133.85 456.4 110.69M457.37 148.17C456.17 139.25 456.32 130 457.35 112.03M457 112.67C457.48 106.74 460.75 104.49 464.41 104.98M457.16 112.38C456.02 106.45 459.82 102.15 467.92 104.02M465.67 104C465.67 104 465.67 104 465.67 104M465.67 104C465.67 104 465.67 104 465.67 104" fill="none" stroke="var(--ce-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></g><text xml:space="preserve" x="469" y="122.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink)">suffix at full price</text><text xml:space="preserve" x="469" y="142.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">this turn's message + retrieval</text><text xml:space="preserve" x="860" y="133.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink)">~$0.0315</text><text xml:space="preserve" x="40" y="216.88" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="14" fill="var(--ce-ink)">Cache hit</text><text xml:space="preserve" x="40" y="236.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">prefix byte-stable,</text><text xml:space="preserve" x="40" y="249.87" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">cache warm</text><g opacity="0.34"><path d="M158.94 196.88C252.3 196.03 345.19 196.85 449.65 194.42C453.68 194.99 455.19 197.08 457.7 202.99C459.67 216.61 457.82 232.95 456.06 241.67C458.08 242.61 454.12 250.25 448.57 248.03C371.46 247 293.08 248.17 159.7 248.29C155.28 248.66 150.06 247.33 152.47 240.56C151.87 230.22 151.9 225.48 148.54 202.7C149.9 201.33 150.75 195.09 160.43 197.41C158.67 196 158.67 196 158.67 196" fill="var(--ce-success)" stroke="none"/><path d="M159.14 195.95C246.72 198.51 333.55 197.04 449.64 195.25M158.2 196.44C260.86 197.87 361.38 197.12 448.97 195.63M448.33 196C454.09 194.96 456.88 198.97 457.26 204.73M446.39 195.43C452.66 197.37 456.35 200.1 458.5 205.83M455.18 205.77C457.48 213.02 454.97 216.98 458.06 238.25M457.33 205.24C456.61 212.35 457.97 220.35 457.28 238.42M457 239.33C458.91 243.81 453.52 247.43 447.62 248.55M456.1 239.25C458.86 243.85 453.31 246.77 446.29 248.07M448.59 246.93C358.94 248.68 270.52 251.18 158.99 247.95M449 247.98C376.39 250.22 303.04 249.37 157.96 247.54M158.67 248C152.52 248.64 151.59 244.28 150.29 238.09M159.86 246.17C151.73 248.86 151.98 246.2 150.74 238.14M149.72 241.33C149.8 230.72 151.8 225.56 149.96 204.41M149.74 239.41C150.25 227.48 148.86 214.69 149.42 205.1M150 204.67C149.25 197.01 151.76 195.77 158.71 195.86M150.13 205.5C150.41 197.4 151.18 193.94 159.48 197.75M158.67 196C158.67 196 158.67 196 158.67 196M158.67 196C158.67 196 158.67 196 158.67 196" fill="none" stroke="var(--ce-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></g><text xml:space="preserve" x="162" y="214.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink)">re-read at about 0.1x</text><text xml:space="preserve" x="162" y="234.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">no prefill to redo</text><g opacity="0.55"><path d="M466.77 196.13C588.09 196.35 713.6 196.6 842.52 194.65C849.52 197.83 848.05 199.5 850.17 203.29C848.89 217.83 849.69 230.61 851.11 240.5C851.15 246.75 848.39 250.2 840.56 248.89C710.02 249.35 579.93 249.47 466.84 247.54C458.15 248.46 455.66 246.58 457.41 238.03C458.15 227.53 459.43 215.76 455.96 204.69C458.04 197.44 460.8 196.61 466.94 197.28C465.67 196 465.67 196 465.67 196" fill="var(--ce-neutral-2)" stroke="none"/><path d="M466.06 196.57C543.25 194.28 622.22 194.92 840.31 197.04M465.69 195.79C543.59 194.75 622.14 194.32 841.27 195.48M841.33 196C847.18 196.44 850.59 199.65 850.31 204.48M840.63 196.93C846.51 194.56 848.33 197.36 848.89 202.66M850.55 203.77C850.46 214.59 850.72 226.04 848.37 239.91M850.44 203.67C849.33 216.14 850.58 226.78 849.07 238.62M850 239.33C850.7 244.9 846 246.16 840.65 249.27M848.36 237.44C850.75 246.84 845.35 249.11 842.26 248.71M842.39 247.82C720.69 247.64 601.74 247.48 465.67 247.1M841.67 247.76C695.67 249.6 549.57 250.5 465.43 247.89M465.67 248C460.47 247.75 455.27 245.86 455.73 239.29M466.65 248.47C459.31 248.83 456.02 244.55 455.95 241.45M455.27 238.83C458.89 228.39 458.09 218.49 457.24 203.27M456.42 239.02C457.55 231.52 457.4 225.9 456.95 205.63M457 204.67C455.63 198.14 461.76 197.42 466.35 197.3M455.12 204.06C458.1 196.87 459.66 196.14 465.76 196.31M465.67 196C465.67 196 465.67 196 465.67 196M465.67 196C465.67 196 465.67 196 465.67 196" fill="none" stroke="var(--ce-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></g><text xml:space="preserve" x="469" y="214.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink)">suffix at full price</text><text xml:space="preserve" x="469" y="234.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-muted)">unchanged from above</text><text xml:space="preserve" x="860" y="225.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink)">~$0.0191</text><path d="M456.8 92.29C457.83 151.57 457.34 210.65 457.12 260.4M457.27 91.72C457.03 150.56 456.84 209.49 456.99 259.8" fill="none" stroke="var(--ce-ink)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="9 7"/><text xml:space="preserve" x="457" y="85.04" text-anchor="middle" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink)">breakpoint</text><text xml:space="preserve" x="150" y="278.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">Stable prefix: system + tools, frozen</text><text xml:space="preserve" x="469" y="278.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">Volatile suffix: this turn</text><text xml:space="preserve" x="40" y="313.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink-muted)">A hit cuts latency as well as cost: skipping prefill of the cached prefix collapses</text><text xml:space="preserve" x="40" y="333.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink-muted)">time-to-first-token toward the small-prompt case.</text>
 </svg>
