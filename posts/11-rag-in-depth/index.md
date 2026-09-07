@@ -7,7 +7,7 @@
 > - Apply the three techniques that consistently lift quality (contextual retrieval, hybrid + RRF, cross-encoder reranking).
 > - Wire up the minimum eval harness that tells you whether a change actually helped.
 
-![The RAG pipeline](../11-rag-in-depth/diagrams/04-rag-pipeline.svg)
+![The RAG pipeline](diagrams/04-rag-pipeline.svg)
 
 *The RAG pipeline: an offline half (chunk, enrich, embed, index) that sets the quality ceiling, and an online half (query, retrieve, re-rank, pack, generate) that decides how close you get to it.*
 
@@ -25,6 +25,10 @@ This post focuses on the engineering choices in each half that actually move the
 
 A chunk is the unit retrieval returns. It is the granularity at which the system says "this is what was relevant". Get it wrong and no amount of fancy retrieval will recover.
 
+![Three splitter families in order of preference, chunk size as three zones, and overlap drawn as two genuinely overlapping bars](diagrams/01-chunking-choices.svg)
+
+*Splitter first, then size, then overlap. The vector database is nowhere on this figure because it barely moves the outcome.*
+
 **Chunk size.** The empirical sweet spot for prose is 400–600 tokens with 10–20 % overlap. Smaller chunks (100–200) win on precision but lose self-containment: the model gets a fragment without enough surrounding context to use it. Larger chunks (1 000+) waste budget: the prompt fills up with paragraphs that touch the answer rather than carrying it.
 
 **Splitter choice.** Three families, in order of preference:
@@ -38,6 +42,10 @@ For code, split by symbol (function, class, module). A 1 200-token function is o
 **Overlap.** Adjacent chunks share 10–20 % of their tokens so a fact that lives at a chunk boundary survives in at least one chunk in full. Overlap is cheap (it grows the index linearly) and prevents a category of "the answer is right there but split across two chunks" misses.
 
 **Parent-child and late chunking.** Two refinements that decouple the unit that is *retrieved* from the unit that is *embedded*. Parent-child (small-to-big) retrieval embeds and searches small child chunks for precision, then hands the model the larger parent chunk they belong to for context. Late chunking (Günther et al., 2024) runs the whole document through a long-context embedding model first and only splits the token embeddings into chunks afterwards, so each chunk vector already reflects its neighbours. Both trade a little index complexity for better recall on boundary-spanning facts; reach for them once fixed chunking has plateaued.
+
+![A chunk carrying a document and summary prefix, beside three bars showing 35, 49 and 67 per cent reductions in retrieval failures](diagrams/02-contextual-retrieval.svg)
+
+*One cheap call per chunk at index time, and the three published numbers it buys.*
 
 **Contextual retrieval.** Anthropic's name for a single offline trick: prepend each chunk with a one-or-two-sentence summary of *the document it came from*. The chunk now carries enough context to make sense in isolation. The cost is one cheap LLM call per chunk at index time (one-off; cacheable). The reported lift is about 35% fewer retrieval failures with contextual embeddings alone, about 49% when combined with a contextual BM25 keyword index (BM25 is the classic sparse lexical ranker), and about 67% once a reranker is added (Anthropic, 2024). The contextual-embeddings step alone is the largest single offline improvement most teams will ever ship.
 

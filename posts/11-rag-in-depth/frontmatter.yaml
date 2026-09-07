@@ -29,7 +29,7 @@ series: Context Engineering
 part: 2
 chapter: "Part II — The Four Primitives (WSCI)"
 
-hero: ../11-rag-in-depth/diagrams/04-rag-pipeline.svg
+hero: diagrams/04-rag-pipeline.svg
 hero_alt: "Production Retrieval-Augmented Generation pipeline showing offline indexing and online retrieval"
 
 reading_time: 18
