@@ -7,7 +7,7 @@
 > - Specify the input and output contracts a sub-agent needs to be safe to deploy.
 > - Pick among sequential, fan-out / fan-in, and supervisor topologies.
 
-![Sub-agent isolation](../13-isolate-strategies/diagrams/06-subagent-isolation.svg)
+![Sub-agent isolation](diagrams/06-subagent-isolation.svg)
 
 *A parent agent delegates a scoped task to a sub-agent with its own clean context; only the structured result returns, leaving the parent's window uncluttered.*
 
@@ -45,6 +45,10 @@ A "clean contract" means three things:
 2. **The output is structured and finite.** The parent knows what shape of result to expect (a JSON object, a list of titles, a single number). The sub-agent cannot return "a conversation".
 3. **The work is meaningfully self-contained.** The sub-agent does not need ongoing access to the parent's evolving state.
 
+![The three-part contract test, with five example sub-tasks each marked yes, no, or borderline](diagrams/02-isolate-or-not.svg)
+
+*All three criteria have to hold at once. The five examples are what calibrate the rule against real work.*
+
 A few examples to anchor the rule.
 
 | Task | Isolate? | Why |
@@ -60,6 +64,10 @@ When a sub-task fails this test, *do not* try to isolate it anyway with prompt e
 ---
 
 ## 4. The three topologies
+
+![Three multi-agent wirings drawn side by side: a sequential pipeline, fan-out and fan-in, and a supervisor with workers](diagrams/01-three-topologies.svg)
+
+*The first two are workflows, with the control flow written by the engineer. Only the third hands the next step to the model.*
 
 Three ways to wire sub-agents together account for almost every production multi-agent system.
 

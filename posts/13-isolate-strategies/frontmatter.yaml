@@ -28,7 +28,7 @@ series: Context Engineering
 part: 2
 chapter: "Part II — The Four Primitives (WSCI)"
 
-hero: ../../assets/diagrams/exports/06-subagent-isolation.svg
+hero: diagrams/06-subagent-isolation.svg
 hero_alt: "Parent agent delegating tasks to isolated sub-agents with independent context windows"
 
 reading_time: 19
