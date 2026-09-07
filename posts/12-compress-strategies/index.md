@@ -189,6 +189,10 @@ Note that Claude Code's `/clear` (reset the whole conversation) is not the same 
 
 ## 9. The two triggers: 80 % and 95 %
 
+![The four priority classes stacked from never-trim to trim-eagerly, beside a budget gauge marked with the 95, 80 and 60 per cent lines](diagrams/02-priority-and-triggers.svg)
+
+*A policy is these two things together: a stack of classes that never changes, and two thresholds that decide when to walk it.*
+
 A compression *policy* is two thresholds and a reaction at each. The two numbers below are illustrative defaults (a useful starting point, not a measured law); tune them to your own token-usage variance.
 
 - **At 80 % of the budget (*soft trigger*).** Run the cheap operations: tool-result clearing, P3 priority pruning. If this brings the prompt under 60 %, stop. This is the routine maintenance pass; it should happen frequently enough that the user never notices.
@@ -215,6 +219,10 @@ This is the same gate as the RAG eval ([Post 11](../11-rag-in-depth/index.md), Â
 ---
 
 ## 11. Picking among the six
+
+![Six compression techniques compared by token-reduction range on one shared scale, with what survives each](diagrams/01-six-techniques.svg)
+
+*The ranges share one scale, so the comparison is a length rather than an arithmetic exercise. What survives is the column that decides.*
 
 A short decision sketch.
 
