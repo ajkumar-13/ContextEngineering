@@ -8,7 +8,7 @@
 > - Decide when MCP is the right integration choice and when bespoke glue still wins.
 > - Choose between a tool call and a structured `response_format` for a given task.
 
-![MCP has three roles: the host application, an MCP client inside it, and one or more MCP servers exposing tools, resources, and prompts](../15-tools-and-mcp/diagrams/05-mcp-triangle.svg)
+![MCP has three roles: the host application, an MCP client inside it, and one or more MCP servers exposing tools, resources, and prompts](diagrams/05-mcp-triangle.svg)
 
 *The Model Context Protocol in one picture: a host embeds an MCP client that speaks the protocol to one or more servers, each exposing tools, resources, and prompts. The design tensions those tools create, catalogued in [§2](#2-the-iron-triangle), are this post's real subject.*
 
@@ -23,6 +23,10 @@ That is the entire problem. Everything else in this post is a way of resolving i
 ---
 
 ## 2. The iron triangle
+
+![A triangle whose vertices are catalogue size, description quality, and runtime selection, with a card for each pair a design can keep](diagrams/01-iron-triangle.svg)
+
+*Each edge is a pair you can keep. The card beneath it names what that costs, and what it looks like when it goes wrong.*
 
 Three properties of a tool catalogue trade off against each other.
 
@@ -41,6 +45,10 @@ A production design picks two and accepts the trade-off on the third *consciousl
 ---
 
 ## 3. Designing a single tool
+
+![The six components of a tool description, numbered, beside one search_orders description that carries all six](diagrams/02-tool-description.svg)
+
+*The numbers on the left match the numbers in the gutter on the right, so each component can be found in a real description.*
 
 Treat a tool description like a function docstring that an unfamiliar contractor will read once. Six things every description should carry:
 

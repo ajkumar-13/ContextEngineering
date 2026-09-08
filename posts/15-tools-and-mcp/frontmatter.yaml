@@ -28,7 +28,7 @@ series: Context Engineering
 part: 3
 chapter: "Part III — Components"
 
-hero: ../15-tools-and-mcp/diagrams/05-mcp-triangle.svg
+hero: diagrams/05-mcp-triangle.svg
 hero_alt: "Model Context Protocol architecture showing a host application, MCP client, and multiple MCP servers exposing tools, resources, and prompts"
 
 reading_time: 18
