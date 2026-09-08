@@ -55,6 +55,10 @@ A prompt missing one of these blocks is not necessarily wrong, but you should be
 
 A small set of practices that, applied consistently, prevent the most common failure modes.
 
+![Six cards, one per rule, several pairing the wording to avoid with the wording to write instead](diagrams/01-six-rules.svg)
+
+*Four of the six come down to a substitution. The other two are habits rather than edits, which is why they read differently.*
+
 **1. One concept per rule.** "Never refund over $1 000 without manager approval and always cite sources" is two rules. Split them. Rules joined by "and" hide partial compliance.
 
 **2. Motivated by failure, not by speculation.** Add a rule when a real interaction went wrong; do not add a rule because a hypothetical future interaction might. Speculative rules accumulate and contradict. A useful trick: every rule carries a comment with the date and the issue id that motivated it.
@@ -132,9 +136,9 @@ Each rule carries the issue id that motivated it (rule #2 from Section 3). Swapp
 
 A production prompt is often large: several thousand tokens before any conversation begins. Naïvely, every call pays for it. **Prompt caching** removes that cost: the host stores the **KV-cache** of the prefix (the model's cached internal representation of those tokens; see [Post 03](../03-how-llms-read-context/index.md), §6) and reuses it for subsequent calls that share the same prefix.
 
-![Prompt cache flow](../../assets/diagrams/exports/07-prompt-cache-flow.svg)
+![The same prompt billed as a cache miss and a cache hit, with the cache_control marker between the stable prefix and the volatile suffix, and the read rate, write premium, minimum prefix length and marker behaviour listed](diagrams/02-prompt-cache-order.svg)
 
-*Stable prefix first, dynamic content last: a cache hit reuses the prefix's KV-cache and bills those tokens at the cache-read rate; any change to the prefix invalidates the cache from that point on.*
+*Stable prefix first, dynamic content last. A hit reads the prefix at about a tenth; any change to it invalidates the cache from that point to the end of the request.*
 
 This makes the *order* of the prompt operationally important:
 
