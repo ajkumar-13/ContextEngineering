@@ -28,7 +28,7 @@ series: Context Engineering
 part: 3
 chapter: "Part III — Components"
 
-hero: ../16-memory-systems/diagrams/08-memory-taxonomy.svg
+hero: diagrams/08-memory-taxonomy.svg
 hero_alt: "Taxonomy of episodic, semantic, and procedural memory used in AI agent architectures"
 
 reading_time: 18

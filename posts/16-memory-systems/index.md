@@ -7,7 +7,7 @@
 > - Specify the minimum metadata each memory cell needs.
 > - Avoid the four classes of bug that turn a memory store into an active liability.
 
-![Memory taxonomy](../16-memory-systems/diagrams/08-memory-taxonomy.svg)
+![Memory taxonomy](diagrams/08-memory-taxonomy.svg)
 
 *The three-kind memory taxonomy: episodic (events), semantic (facts and preferences), and procedural (rules and how-tos), each with its own write trigger, retrieval strategy, and decay policy.*
 
@@ -100,11 +100,19 @@ Because there is no ranking to tune, a procedural cell does not need a `confiden
 
 The contrast with semantic memory is exact: semantic retrieval asks *"what facts are similar to this turn?"* and ranks by relevance; procedural retrieval asks *"which triggers are true right now?"* and returns every match, unranked.
 
+![The three long-term memory kinds compared on what they store, when they are written, how they are retrieved, and whether they decay](diagrams/01-three-kinds-compared.svg)
+
+*Lined up on the same four questions, procedural stops looking like a variant of the other two.*
+
 **Decay.** Procedural memory does *not* decay. Stale rules are removed by humans, not by time. A confidence score is meaningless here.
 
 ---
 
 ## 6. The retrieval orchestrator
+
+![Three memory retrievals in fixed order — procedural rules, then semantic facts, then episodic recall — wrapped behind one context assembler](diagrams/02-retrieval-orchestrator.svg)
+
+*Rules first can save the other two entirely. Episodic last means most turns never pay for it.*
 
 A live agent with all three memories needs to answer, on every turn, three questions:
 
