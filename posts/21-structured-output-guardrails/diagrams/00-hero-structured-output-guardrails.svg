@@ -1,132 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
   <title id="t">Structured output and guardrails: the response control loop</title>
-  <desc id="d">A left-to-right control loop on the model's response. Raw output enters a validate-against-schema gate. Valid output passes right into a moderation and redaction gate and is returned to the consumer. Invalid output is rejected and loops back downward, with the validation error appended to the messages, to prompt a retry through the model. The retry path is capped at three attempts before a hard error is raised.</desc>
+  <desc id="d">A hand-drawn control loop. Raw model output enters a validate-against-schema step checking types, required fields, and enums. Valid output passes to a moderation and redaction step covering content, personal data, and leaked system detail, and is returned as a typed record safe to store. Invalid output follows a path back to the model with the validation error appended to the messages, because the error names the wrong field and so is itself the repair instruction; the loop is capped at three attempts before raising a hard error the dashboard counts. Captions note that constrained decoding removes the syntactic retry while a semantic retry still earns its place, and that a loop which silently swallows exhaustions hides a real regression.</desc>
 
   <style><![CDATA[
-    :root{
-      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
-      --ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;
-      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
-      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-3:#8E8E88;
-    }
-    @media (prefers-color-scheme:dark){
-      :root{
-        --ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;
-        --ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;
-        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
-        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-3:#6E6E68;
-      }
-    }
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-2:#CFCFC8;--ce-neutral-3:#8E8E88;--ce-on-fill:#FFFDF9;--ce-on-accent:#1A1A1A;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-2:#2C3038;--ce-neutral-3:#6E6E68;--ce-on-fill:#14161A;--ce-on-accent:#1A1A1A;}}
     .bg{fill:var(--ce-bg);}
-    .node{fill:var(--ce-surface);stroke:var(--ce-ink);stroke-width:1.5;}
-    .gate-ok{fill:var(--ce-surface);stroke:var(--ce-primary);stroke-width:1.5;}
-    .gate-guard{fill:var(--ce-surface);stroke:var(--ce-success);stroke-width:1.5;}
-    .flow{fill:none;stroke:var(--ce-ink);stroke-width:1.5;}
-    .flow-ok{fill:none;stroke:var(--ce-success);stroke-width:1.5;}
-    .flow-bad{fill:none;stroke:var(--ce-alert);stroke-width:1.5;stroke-dasharray:5 4;}
-    .lead{fill:none;stroke:var(--ce-ink-muted);stroke-width:1;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
-    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
-    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:13px;fill:var(--ce-ink);}
-    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
-    .ok{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ce-success);text-transform:uppercase;letter-spacing:0.05em;}
-    .bad{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ce-alert);text-transform:uppercase;letter-spacing:0.05em;}
-    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ce-ink-muted);}
-    .monoi{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ce-ink);}
+    text{dominant-baseline:auto;}
   ]]></style>
 
   <rect class="bg" width="960" height="360"/>
-
-  <defs>
-    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="var(--ce-ink)"/>
-    </marker>
-    <marker id="ar-ok" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="var(--ce-success)"/>
-    </marker>
-    <marker id="ar-bad" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="var(--ce-alert)"/>
-    </marker>
-  </defs>
-
-  <text class="title" x="48" y="44">The response control loop</text>
-  <text class="s" x="48" y="64">Validate against a schema, retry on failure, moderate before returning.</text>
-
-  <!-- ============ Top row: forward path ============ -->
-  <!-- y centre of main row -->
-  <!-- Model output -->
-  <g transform="translate(48,120)">
-    <rect class="node" width="150" height="72" rx="8"/>
-    <text class="h" x="16" y="26">Model output</text>
-    <text class="mono" x="16" y="47">raw response</text>
-    <text class="mono" x="16" y="62">text / JSON</text>
-  </g>
-
-  <!-- arrow model -> validate -->
-  <line class="flow" x1="198" y1="156" x2="248" y2="156" marker-end="url(#ar)"/>
-
-  <!-- Validate gate (diamond-ish rounded box) -->
-  <g transform="translate(250,120)">
-    <rect class="gate-ok" width="170" height="72" rx="8"/>
-    <text class="h" x="16" y="26">validate(schema)</text>
-    <text class="s" x="16" y="47">JSON Schema · types,</text>
-    <text class="s" x="16" y="62">required, enums</text>
-  </g>
-
-  <!-- valid arrow -> moderation -->
-  <line class="flow-ok" x1="420" y1="156" x2="560" y2="156" marker-end="url(#ar-ok)"/>
-  <text class="ok" x="490" y="148" text-anchor="middle">valid</text>
-
-  <!-- Moderation / redaction gate -->
-  <g transform="translate(562,120)">
-    <rect class="gate-guard" width="180" height="72" rx="8"/>
-    <text class="h" x="16" y="26">moderate · redact</text>
-    <text class="s" x="16" y="47">content · PII · leaked</text>
-    <text class="s" x="16" y="62">system detail</text>
-  </g>
-
-  <!-- returned arrow -> consumer -->
-  <line class="flow-ok" x1="742" y1="156" x2="782" y2="156" marker-end="url(#ar-ok)"/>
-
-  <!-- Returned / consumer -->
-  <g transform="translate(784,120)">
-    <rect class="node" width="128" height="72" rx="8"/>
-    <text class="h" x="16" y="26">Returned</text>
-    <text class="s" x="16" y="47">typed record,</text>
-    <text class="s" x="16" y="62">safe to store</text>
-  </g>
-
-  <!-- ============ Retry loop: invalid path ============ -->
-  <!-- down from validate gate -->
-  <line class="flow-bad" x1="335" y1="192" x2="335" y2="252" marker-end="url(#ar-bad)"/>
-  <text class="bad" x="345" y="222" text-anchor="start">invalid</text>
-
-  <!-- Append-error node (below validate) -->
-  <g transform="translate(230,254)">
-    <rect class="node" width="210" height="66" rx="8"/>
-    <text class="h" x="16" y="24">append error → retry</text>
-    <text class="monoi" x="16" y="45">messages += [error]</text>
-    <text class="mono" x="16" y="59">the error is the fix instruction</text>
-  </g>
-
-  <!-- loop back left to model, then up -->
-  <!-- from append node left edge to under model, then up into model -->
-  <path class="flow-bad" d="M230 287 L123 287 L123 192" marker-end="url(#ar-bad)"/>
-  <text class="mono" x="150" y="305" text-anchor="start">re-prompt</text>
-
-  <!-- attempt cap annotation -->
-  <line class="lead" x1="440" y1="287" x2="500" y2="287"/>
-  <g transform="translate(502,262)">
-    <rect width="200" height="52" rx="8" fill="var(--ce-bg)" stroke="var(--ce-border)" stroke-width="1"/>
-    <text class="l" x="14" y="22">Cap the loop</text>
-    <text class="s" x="14" y="40">3 attempts, then hard error</text>
-  </g>
-
-  <!-- guardrail bracket under forward path -->
-  <line class="lead" x1="250" y1="104" x2="742" y2="104"/>
-  <line class="lead" x1="250" y1="104" x2="250" y2="112"/>
-  <line class="lead" x1="742" y1="104" x2="742" y2="112"/>
-  <text class="h" x="496" y="96" text-anchor="middle" fill="var(--ce-ink-muted)">Output guardrail layer</text>
-
+<text xml:space="preserve" x="40" y="38.24" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="22" fill="var(--ce-ink)">The response control loop</text><text xml:space="preserve" x="40" y="61.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink-muted)">Validate against a schema, retry on failure, moderate before returning. A fluent answer that will not parse is an incident.</text><path d="M55.29 107.21C109.03 106.75 160.54 106.89 196.01 106.1C205.09 108.47 208.73 110.18 207.43 118.28C212.41 135.49 207.78 154.5 211.93 172.36C212.59 181.21 204.41 188.43 195.42 184.58C144.07 184.83 90.37 187.94 54.41 187.15C46.37 187.41 41.75 179.57 41.35 171C40.8 156.59 41.43 134.81 40.47 120.47C39.17 109.78 44.98 106.47 51.69 106.12C53.33 106 53.33 106 53.33 106" fill="var(--ce-surface)" stroke="none"/><path d="M52.6 104.89C97.81 107.95 143.59 105.62 197.64 107.05M54.32 106.67C82.79 106.78 114 105.39 196.34 105.46M196.67 106C203.86 106.19 211.28 112.03 210.09 117.64M198.17 107.94C207.14 105.4 208.5 112.51 208.79 121.39M210.14 118.46C210.57 131.34 211.21 145.21 211.57 170.84M210.6 118.97C210.53 136.47 210.94 152.13 210.71 172.33M210 172.67C211.04 180.28 206.88 187.44 195.84 185.25M209.16 172.55C209.78 181.56 205.21 186.92 197.55 183.73M195.87 187.06C141.46 184.18 82.1 186.05 51.35 187.08M196.08 186.66C147.89 187.42 98.34 186.73 53.73 186.47M53.33 186C43.25 184.56 41.78 180.25 42 172.35M55.27 186.38C44.23 185.43 40.56 181.03 41.17 174.69M38.39 173.14C38.87 158.17 37.82 145.31 41.6 119.25M39.57 173.48C39.41 159.13 39.52 145.9 40.79 118.47M40 119.33C38.85 111.08 45.64 107.75 52.34 104.57M38.19 120.11C40.93 112.42 46.51 105.09 53.71 106.88M53.33 106C53.33 106 53.33 106 53.33 106M53.33 106C53.33 106 53.33 106 53.33 106" fill="none" stroke="var(--ce-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M46.16 116.14C46.05 137.58 44.66 157.49 44.1 178.17M44.52 114.41C45.14 132.92 44.79 152 45.41 177.01" fill="none" stroke="var(--ce-neutral-2)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="58" y="125.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink)">Model output</text><text xml:space="preserve" x="58" y="149.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">raw response</text><text xml:space="preserve" x="58" y="165.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">text or JSON</text><path d="M260.79 103.88C312.39 105.24 363.92 107.71 428.05 104.15C434.63 104.53 438.49 109.01 441.75 117.05C439.37 141.16 437.42 161.33 440.15 172.15C440.96 181.18 433.04 188.35 428.93 184.29C379.22 188.4 326.96 187.5 263.6 183.49C254.69 187.07 247.67 180.06 251.38 173.73C248.17 156.9 250.89 143.79 247.7 118.58C247.61 110.24 256.6 107.26 260.88 107.65C263.33 106 263.33 106 263.33 106" fill="var(--ce-surface)" stroke="none"/><path d="M263.95 107.91C311.79 103.77 358.76 103.8 427.26 107.57M263.41 106.45C302.68 104.8 341.25 105.23 427.42 106.21M426.67 106C435.35 105.99 438.46 109.16 440.17 119.89M426.24 106.43C437.02 103.78 441.4 112.54 442.11 117.64M441.43 120.45C441.31 131.51 441.24 143.43 438.43 172.27M440.11 119.03C439.28 135.87 438.85 151.01 440.7 173.34M440 172.67C440.34 182.09 436.01 187.98 425.89 185.12M440.58 172.2C439.47 183.49 436.68 184.69 427.89 184.8M428.2 186.29C380.38 186.39 336.41 188.92 264.63 184.74M426.2 186.71C364.93 186.25 305.03 187.9 263.31 186.52M263.33 186C256.17 184.42 250.24 181.56 249.4 173.02M264.93 187.56C256.73 186.92 248.7 181.34 249.72 174.06M248.63 171.65C249.46 161.77 249.07 151.14 249.4 117.35M250.37 173.51C249.16 159.7 249.31 145.56 250.35 118.69M250 119.33C250.48 110.3 255.31 106.49 262.08 106.98M250.16 119.04C249.02 110 254.38 104.15 265.58 106.02M263.33 106C263.33 106 263.33 106 263.33 106M263.33 106C263.33 106 263.33 106 263.33 106" fill="none" stroke="var(--ce-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M254.57 115.55C254.34 134.87 254.48 154.84 253.87 176.09M255.17 115.48C254.63 135.52 254.62 155.04 254.86 177.45" fill="none" stroke="var(--ce-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="268" y="125.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink)">validate(schema)</text><text xml:space="preserve" x="268" y="149.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">JSON Schema: types,</text><text xml:space="preserve" x="268" y="165.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">required, enums</text><path d="M213.96 146.93C219.64 146.34 231 144.72 246.22 144.1M211.16 146.23C220.79 145.78 230.25 146.02 245.83 146.95" fill="none" stroke="var(--ce-ink)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M235.96 141.51 L246 146 L235.96 150.49" fill="none" stroke="var(--ce-ink)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M493.7 107.17C545.8 105.41 597.29 106.5 658.43 103.9C665.12 104.99 668.19 108.64 670.7 117.66C672.73 138.49 670.89 162.04 669.06 175C671.08 179.05 665.57 188.25 656.9 186.03C613.39 184.4 568.11 185.97 494.71 186.39C486.83 186.66 480.06 183.77 482.47 173.89C481.84 159.29 481.87 150.29 478.54 117.36C479.9 112.88 482.31 105.09 495.1 107.41C493.33 106 493.33 106 493.33 106" fill="var(--ce-surface)" stroke="none"/><path d="M493.97 105.93C543.23 108.46 591.49 106.51 658.41 105M492.71 106.59C551.42 107.53 607.27 106.54 657.52 105.5M656.67 106C665.54 104.96 669.88 110.52 670.26 119.4M654.72 105.43C664.11 107.37 669.35 111.66 671.5 120.5M668.18 120.44C670.36 131.45 667.85 139.17 671.06 171.59M670.33 119.9C669.75 131.41 671.1 143.8 670.28 171.75M670 172.67C671.91 180.26 664.97 185.43 655.95 186.55M669.1 172.58C671.86 180.29 664.76 184.77 654.62 186.07M657 184.57C606 185.9 556.63 189.23 493.77 185.93M657.55 185.97C616.59 187.89 574.64 186.75 492.4 185.39M493.33 186C484.08 186.64 481.59 180.72 480.29 171.42M494.52 184.17C483.28 186.86 481.98 182.64 480.74 171.48M479.72 174.66C479.84 159.94 481.84 150.68 479.96 119.07M479.74 172.74C480.06 154.11 478.67 134.62 479.42 119.77M480 119.33C479.25 108.56 483.32 105.77 493.37 105.86M480.13 120.16C480.41 108.95 482.74 103.94 494.15 107.75M493.33 106C493.33 106 493.33 106 493.33 106M493.33 106C493.33 106 493.33 106 493.33 106" fill="none" stroke="var(--ce-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M484.58 114.36C484.06 135.07 486.04 157.09 484.56 176.94M484.76 115.57C485.23 130.25 485.64 144.76 484.92 177.03" fill="none" stroke="var(--ce-warn)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="498" y="125.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink)">moderate · redact</text><text xml:space="preserve" x="498" y="149.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">content · PII ·</text><text xml:space="preserve" x="498" y="165.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">leaked system detail</text><path d="M443.98 144.95C453.32 144.88 460.21 145.28 477.36 145.53M442.47 146.37C454.8 145.7 466.83 146.51 475.93 146.24" fill="none" stroke="var(--ce-ink)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M465.96 141.51 L476 146 L465.96 150.49" fill="none" stroke="var(--ce-ink)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="444" y="133.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-success)">valid</text><path d="M723.63 106.67C754.82 105.74 782.15 106.96 867.13 105.33C876.56 104.67 877.85 109.07 879.46 120.09C881 137.89 881.87 156.62 878.65 170.54C877.76 180.04 876.78 188.13 864.54 184.58C829.73 188.32 794.94 188.43 722.54 185.44C712.4 186.19 708.52 180.3 709.4 171.47C711.98 163.77 709.73 149.12 707.78 116.81C710.83 112.49 712.49 105.16 723.96 105.39C723.33 106 723.33 106 723.33 106" fill="var(--ce-surface)" stroke="none"/><path d="M722.65 106.95C775.31 107.04 824.14 106.79 867.07 107.34M724.23 105.08C773.49 105.71 823.06 106.05 866.63 105.34M866.67 106C874.42 107.08 881.54 112.11 880.37 120.15M867.62 104.93C877.61 106.95 881.56 109.86 881.55 120.77M878.39 118.43C878.89 131.16 880.19 144.41 881.46 172.79M879.25 119.59C879.59 137.76 879.37 155.83 879.46 173.56M880 172.67C881.74 182.79 873.75 187.8 866.02 185.56M878.7 173.7C877.74 181.15 874.05 187.17 866.94 187.57M866.27 185.89C828.53 186.6 787.15 186.87 722.77 186.65M866.12 186.44C814.08 188.27 759.66 187.22 723.01 185.07M723.33 186C714.96 187.24 711.83 181.75 710.66 171.56M724.05 184.21C713.1 185.26 711.21 180.33 709.63 171.52M711.66 174.17C708.83 160.71 710.96 143.91 709.28 120.41M709.66 173.18C709.28 155.04 710.76 136.42 710 119.68M710 119.33C709.14 109.87 713.66 105.61 722.22 105.23M708.1 119.47C710.49 109.26 716.19 104.47 724.01 107.46M723.33 106C723.33 106 723.33 106 723.33 106M723.33 106C723.33 106 723.33 106 723.33 106" fill="none" stroke="var(--ce-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M716.19 114.97C714.39 138.16 713.72 164.25 716.16 175.95M714.47 114.66C715.3 129.49 715 144.77 715.59 176.94" fill="none" stroke="var(--ce-success)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="728" y="125.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink)">Returned</text><text xml:space="preserve" x="728" y="149.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">a typed record,</text><text xml:space="preserve" x="728" y="165.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">safe to store</text><path d="M672.66 145.97C682.08 145.38 694.22 147.47 706.03 147.86M671.99 146.86C683.96 146.39 696.78 146.54 705.04 146.09" fill="none" stroke="var(--ce-ink)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M695.96 141.51 L706 146 L695.96 150.49" fill="none" stroke="var(--ce-ink)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M344.73 189.59C345.15 203.29 344.13 215.56 345.62 225.51M345.08 189.69C344.94 199.19 344.97 209.06 345.02 226.25M345.02 225.63C278.45 225.42 213.29 225.91 139.91 225.74M344.66 225.84C283.94 225.33 222.96 225.16 140.16 226.19M139.79 225.31C140.56 216.52 139.29 207.39 139.5 190.76M139.88 226.2C140.01 214.73 140.38 203.55 140.24 190.28" fill="none" stroke="var(--ce-alert)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M139.4 207.58C139.69 203.94 141.04 198.66 139.26 189.74M141.34 205.66C139.87 200.33 139.68 194.48 139.26 189.35" fill="none" stroke="var(--ce-alert)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M136.15 200.3 L140 190 L145.1 199.74" fill="none" stroke="var(--ce-alert)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="352" y="203.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-alert)">invalid</text><text xml:space="preserve" x="180" y="242.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink)">append the error and re-prompt  ·  messages += [error]</text><text xml:space="preserve" x="180" y="259.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">the validation error names the wrong field, so it is the repair instruction</text><text xml:space="preserve" x="180" y="275.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">cap the loop at three attempts, then raise a hard error the dashboard counts</text><text xml:space="preserve" x="40" y="317.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink)">Constrained decoding removes the syntactic retry. A semantic retry — valid JSON that breaks a cross-field invariant — still earns its place.</text><text xml:space="preserve" x="40" y="339.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink-muted)">A loop that silently swallows exhaustions hides a real regression, so count them as a first-class error kind.</text>
 </svg>

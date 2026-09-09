@@ -24,6 +24,10 @@ This is the failure the input layers cannot prevent. A prompt can be perfectly a
 
 ## 2. The mechanisms that make output typed
 
+![Four rungs of output guarantee, from a prompt instruction up to grammar-constrained decoding, each with what it still leaves to you](diagrams/01-guarantee-ladder.svg)
+
+*The last column is the one that matters at design time: which rung you are on decides how much defensive code you still owe.*
+
 There is a ladder of guarantees here, from "asked nicely" at the bottom to "valid by construction" at the top. Knowing which rung a given technique sits on tells you exactly how much defensive code you still need downstream.
 
 **JSON Schema and `response_format`.** Every major provider now accepts a schema alongside the prompt and a flag that says "return an object matching this". OpenAI exposes it as `response_format` with a JSON Schema (OpenAI, "Structured Outputs" docs); Anthropic supports the same intent through its tool-use and structured-output paths (Anthropic, "Tool use" docs). The schema is the contract: field names, types, which keys are required, which values are drawn from an enum. The wire format underneath is always JSON Schema, whatever SDK sugar sits on top.
@@ -40,13 +44,13 @@ There is a ladder of guarantees here, from "asked nicely" at the bottom to "vali
 
 ```
    ┌─────────────────────────────────────────────┐
-   │  grammar-constrained decoding                │  valid JSON by construction
+   │  grammar-constrained decoding               │  valid JSON by construction
    ├─────────────────────────────────────────────┤
-   │  strict response_format / JSON Schema        │  provider-enforced shape
+   │  strict response_format / JSON Schema       │  provider-enforced shape
    ├─────────────────────────────────────────────┤
-   │  tool-call arguments (schema-validated)      │  provider-enforced shape
+   │  tool-call arguments (schema-validated)     │  provider-enforced shape
    ├─────────────────────────────────────────────┤
-   │  "please reply in JSON" in the prompt        │  best-effort, must validate
+   │  "please reply in JSON" in the prompt       │  best-effort, must validate
    └─────────────────────────────────────────────┘
 ```
 
@@ -55,6 +59,10 @@ There is a ladder of guarantees here, from "asked nicely" at the bottom to "vali
 ---
 
 ## 3. `response_format` versus `tool_choice`: is the answer the payload?
+
+![response_format beside tools and tool_choice, with the three tool_choice settings and the test that picks between them](diagrams/02-payload-or-action.svg)
+
+*The presence of a menu, and of the option to call nothing, is the whole test.*
 
 The single most useful distinction on the output side is whether the model's job is to *return data* or to *choose an action*. Both produce a schema-conforming JSON object; the intent, and therefore the right mechanism, differs.
 
