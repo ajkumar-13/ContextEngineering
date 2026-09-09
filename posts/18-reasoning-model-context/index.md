@@ -36,8 +36,8 @@ Three properties matter for context engineering.
 
 ```
        ┌──────────────── effort dial ────────────────┐
- low ──┤ medium ──┤ high ──┤ xhigh ──┤ max            │
-       └──────────────────────────────────────────────┘
+ low ──┤ medium ──┤ high ──┤ xhigh ──┤ max           │
+       └─────────────────────────────────────────────┘
           more readily spends thinking tokens  ─────▶
 
  request ─▶ [ thinking tokens (adaptive) ] ─▶ [ answer tokens ]
@@ -67,6 +67,10 @@ A back-of-the-envelope worth internalising: if a hard agentic turn spends, illus
 
 ## 4. Keep traces out of downstream context
 
+![A trace lifecycle strip above three cards naming the destinations a raw reasoning trace must not reach, and how each one fails](diagrams/01-trace-hygiene.svg)
+
+*Three destinations, three different failures. Only one of them is about tokens.*
+
 This is the rule that separates a well-engineered reasoning agent from a leaky one. **A raw reasoning trace is a working note, not a durable artefact.** It exists to help the model produce *this* turn's answer, and its job ends there. Three places it must not end up.
 
 **Not in the next turn's prompt.** The strong temptation, especially in agent loops, is to append the full thinking trace to the conversation history so the next turn "remembers how it reasoned". Resist it. Raw traces are long, bloating the window and the bill on every subsequent turn, and they are noisy, full of discarded hypotheses, false starts, and self-corrections that read, out of context, like conclusions. Re-feeding them can actively mislead the next turn into treating a rejected branch as an accepted fact. The correct move is to carry forward the *answer* (and any decisions or facts it produced), and either **summarise the reasoning to a short note** or **drop it entirely**. This is precisely the compress operation from [Post 12](../12-compress-strategies/index.md): a trace is the highest-volume, lowest-durability content in the whole context, so it is the first thing to shrink or clear.
@@ -80,6 +84,10 @@ The unifying principle: **traces are ephemeral by default.** Design the loop so 
 ---
 
 ## 5. Interleaved thinking and tool calls
+
+![A classic tool-use loop above an interleaved-thinking loop, with what to keep at full fidelity and what to treat as compressible](diagrams/02-interleaved-thinking.svg)
+
+*The change is where the thinking sits. What follows from it is that there are now N thinking segments to budget for, not one.*
 
 The single most useful capability the reasoning models added for agents is **interleaved thinking**: the model can think, call a tool, see the result, think again about that result, and then call the next tool or answer. Reasoning is no longer a single block at the front; it is woven between tool results (Anthropic, "Extended thinking").
 
