@@ -14,7 +14,11 @@
 
 ## 1. When standard RAG hits its ceiling
 
-Vanilla RAG (chunk, embed, hybrid retrieve, rerank, pack) handles factoid questions over collections of independent documents extremely well. As a rule of thumb it covers most production retrieval needs, and the advanced techniques below earn their keep on the residue. (The exact split is illustrative and depends entirely on your corpus and query mix.) It runs into trouble in four recurring shapes:
+Vanilla RAG (chunk, embed, hybrid retrieve, rerank, pack) handles factoid questions over collections of independent documents extremely well. As a rule of thumb it covers most production retrieval needs, and the advanced techniques below earn their keep on the residue. (The exact split is illustrative and depends entirely on your corpus and query mix.) ![Four question shapes vanilla RAG cannot serve, each with an example, why it fails, and the technique it needs](diagrams/01-four-ceilings.svg)
+
+*The hero shows the router from the technique side. This is the same picture from the problem side.*
+
+It runs into trouble in four recurring shapes:
 
 1. **Multi-hop questions.** *"Which suppliers are downstream of vendors that failed our 2024 audit?"* The answer requires *joining* facts from multiple documents; no single chunk contains it.
 2. **Long-document questions.** *"Summarise the key risks raised in this 200-page filing."* The answer needs the *whole* document, not the best 5 chunks.
@@ -89,6 +93,10 @@ The trick that makes this affordable is **prompt caching** ([Post 14](../14-syst
 ---
 
 ## 6. The router
+
+![The four techniques compared on what they fix, offline cost, online cost, engineering overhead, and when to ship](diagrams/02-technique-costs.svg)
+
+*Lined up, three of the four are visibly not first builds, and the cheapest one is the one teams skip.*
 
 The pattern that ties this post together: **a small router in front of the retrieval system** that picks the technique per query.
 
