@@ -54,6 +54,10 @@ The pyramid is the right shape because each layer catches different bugs at diff
 
 ## 3. The three families of metrics
 
+![Three metric families — deterministic, LLM-as-judge, and human — above the two orthogonal scoring shapes, pairwise and absolute](diagrams/01-metric-families.svg)
+
+*Family and shape are two independent choices. Pairwise picks between variants; absolute is the only one that can gate a build.*
+
 Each layer can be scored in three ways.
 
 **Deterministic.** Exact match, JSON schema validity, regex match, BLEU/ROUGE for translation, citation-presence-and-validity. Cheap, repeatable, narrow. Use wherever the answer space is constrained enough to enumerate.
@@ -134,6 +138,10 @@ Pair these with two cheaper metrics: **citation validity** (does every cited sou
 ---
 
 ## 6. The four LLM-judge failure modes
+
+![The four LLM-judge failure modes — position bias, length bias, self-preference, and rubric drift — each with its mitigation](diagrams/02-judge-failure-modes.svg)
+
+*Three were measured in the paper that named the method. The fourth only appears months later, which is why it needs a calendar rather than a fix.*
 
 LLM-as-judge is indispensable and treacherous in equal measure. Three of the four biases below were identified and measured by Zheng et al. in the paper that named the LLM-as-judge method (Zheng et al., 2023); the fourth (rubric drift) is an operational hazard the same discipline guards against.
 

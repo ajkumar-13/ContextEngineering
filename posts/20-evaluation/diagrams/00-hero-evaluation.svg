@@ -1,88 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 390" role="img" aria-labelledby="t d">
   <title id="t">The four-layer evaluation pyramid</title>
-  <desc id="d">A four-tier pyramid of software evaluation for LLM systems. The wide base is the unit layer: deterministic pure functions such as chunkers, parsers and schema validators, run on every commit, cheap and fast. Above it is the component layer: individual pieces like the retriever, reranker and judge, each with its own metric and fixtures, run on every relevant pull request. Above that is the end-to-end layer: the full pipeline answering gold-set fixtures, regression-gated, run on load-bearing pull requests. The narrow top tier is the online layer: real production traffic and the approval rate, the slowest and most expensive but truest signal. A vertical axis on the left shows that moving up the pyramid means running less often and paying more per run.</desc>
+  <desc id="d">A hand-drawn pyramid of four tiers drawn to scale, widest at the base. Tier one, unit, covers pure functions, chunkers, parsers, and schema validators and runs on every commit at near-zero cost. Tier two, component, covers the retriever, reranker, and judge, each with its own metric and fixtures, and runs on every relevant pull request. Tier three, end-to-end, runs gold fixtures through the full pipeline as a regression gate on every load-bearing pull request. Tier four, online, is production traffic and approval rate, monitored continuously. An arrow up the left side marks that each tier up runs less often and costs more. A caption states that every tier above unit rests on a golden set grown from real failures, kept small and human-reviewed, because fifty carefully labelled cases catch more regressions than a thousand noisy ones.</desc>
 
   <style><![CDATA[
-    :root{
-      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
-      --ce-border:#D9D9D4;
-      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
-      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-grid:rgba(26,26,26,0.06);
-    }
-    @media (prefers-color-scheme:dark){
-      :root{
-        --ce-bg:#161512;--ce-surface:#1E1D1A;--ce-ink:#F1EEE8;--ce-ink-muted:#A6A29B;
-        --ce-border:#2A2D33;
-        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
-        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-grid:rgba(241,238,232,0.08);
-      }
-    }
+    :root{--ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;--ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;--ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;--ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-2:#CFCFC8;--ce-neutral-3:#8E8E88;--ce-on-fill:#FFFDF9;--ce-on-accent:#1A1A1A;}
+    @media (prefers-color-scheme:dark){:root{--ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;--ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;--ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;--ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-2:#2C3038;--ce-neutral-3:#6E6E68;--ce-on-fill:#14161A;--ce-on-accent:#1A1A1A;}}
     .bg{fill:var(--ce-bg);}
-    .tier{stroke:var(--ce-bg);stroke-width:1.5;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
-    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
-    .tname{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:14px;fill:#FFFFFF;}
-    .tdesc{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11.5px;fill:#FFFFFF;fill-opacity:0.92;}
-    .cad{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-weight:500;font-size:10.5px;fill:var(--ce-ink-muted);}
-    .axis{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;}
-    .axlab{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ce-ink-muted);}
-    .grid{stroke:var(--ce-grid);stroke-width:0.75;}
-    .end{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
+    text{dominant-baseline:auto;}
   ]]></style>
 
-  <rect class="bg" width="960" height="360"/>
-  <text class="title" x="48" y="46">The four-layer evaluation pyramid</text>
-  <text class="sub" x="48" y="66">Cheap deterministic checks at the base, expensive online signal at the top. Each tier up runs less often and costs more.</text>
-
-  <!-- horizontal guide lines aligned to tier bands -->
-  <line class="grid" x1="180" y1="112" x2="812" y2="112"/>
-  <line class="grid" x1="180" y1="168" x2="812" y2="168"/>
-  <line class="grid" x1="180" y1="224" x2="812" y2="224"/>
-  <line class="grid" x1="180" y1="280" x2="812" y2="280"/>
-
-  <!-- ==== Pyramid ==== apex ~x=496, base half-width 316, tiers 52px tall + 4px gap ==== -->
-
-  <!-- Tier 4: ONLINE (top, narrowest) -->
-  <polygon class="tier" fill="var(--ce-alert)"
-    points="440,112 552,112 573,160 419,160"/>
-  <text class="tname" x="496" y="130" text-anchor="middle">4 · ONLINE</text>
-  <text class="tdesc" x="496" y="150" text-anchor="middle">production traffic · approval rate</text>
-
-  <!-- Tier 3: END-TO-END -->
-  <polygon class="tier" fill="var(--ce-accent)"
-    points="415,164 577,164 598,212 394,212"/>
-  <text class="tname" x="496" y="182" text-anchor="middle">3 · END-TO-END</text>
-  <text class="tdesc" x="496" y="202" text-anchor="middle">gold fixtures · regression-gated</text>
-
-  <!-- Tier 2: COMPONENT -->
-  <polygon class="tier" fill="var(--ce-primary)"
-    points="390,216 602,216 623,264 369,264"/>
-  <text class="tname" x="496" y="234" text-anchor="middle">2 · COMPONENT</text>
-  <text class="tdesc" x="496" y="254" text-anchor="middle">retriever · reranker · judge</text>
-
-  <!-- Tier 1: UNIT (base, widest) -->
-  <polygon class="tier" fill="var(--ce-success)"
-    points="365,268 627,268 648,316 344,316"/>
-  <text class="tname" x="496" y="286" text-anchor="middle">1 · UNIT</text>
-  <text class="tdesc" x="496" y="306" text-anchor="middle">pure functions · chunkers · parsers · schema</text>
-
-  <!-- ==== Left axis: cadence + cost ==== -->
-  <line class="axis" x1="150" y1="112" x2="150" y2="316"/>
-  <polygon fill="var(--ce-ink-muted)" points="150,106 146,116 154,116"/>
-  <text class="axlab" x="140" y="118" text-anchor="end">less often</text>
-  <text class="axlab" x="140" y="132" text-anchor="end">more cost</text>
-  <text class="axlab" x="140" y="308" text-anchor="end">every commit</text>
-  <text class="axlab" x="140" y="322" text-anchor="end">near-free</text>
-
-  <!-- ==== Right side: run cadence per tier ==== -->
-  <text class="end" x="700" y="118">run cadence</text>
-  <text class="cad" x="700" y="140">online monitoring</text>
-  <line class="axis" x1="682" y1="136" x2="690" y2="136"/>
-  <text class="cad" x="700" y="192">load-bearing PRs</text>
-  <line class="axis" x1="682" y1="188" x2="690" y2="188"/>
-  <text class="cad" x="700" y="244">every relevant PR</text>
-  <line class="axis" x1="682" y1="240" x2="690" y2="240"/>
-  <text class="cad" x="700" y="296">every commit</text>
-  <line class="axis" x1="682" y1="292" x2="690" y2="292"/>
+  <rect class="bg" width="960" height="390"/>
+<text xml:space="preserve" x="40" y="38.24" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="22" fill="var(--ce-ink)">The four-layer evaluation pyramid</text><text xml:space="preserve" x="40" y="61.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ce-ink-muted)">Cheap deterministic checks at the base, expensive online signal at the top. Each tier up runs less often and costs more.</text><g opacity="0.34"><path d="M354.32 97.02C442.17 96.98 528.15 97.1 586.78 96.08C591.98 98.47 593.73 98.29 592.43 102.62C597.4 112.78 592.78 124.75 596.93 134.03C597.59 139.1 591.29 144.43 586.09 140.58C501.81 140.92 415.36 143.54 353.57 142.97C349.48 143.41 346.75 137.46 346.35 132.67C345.82 126.04 346.45 112.04 345.47 104.8C344.17 97.89 348.09 96.47 351.02 96.12C352.67 96 352.67 96 352.67 96" fill="var(--ce-alert)" stroke="none"/><path d="M352.05 95.07C425.6 98.35 499.63 96.39 588.16 96.88M353.5 96.56C401.26 96.67 451.34 95.5 587.06 95.55M587.33 96C590.75 96.19 596.28 100.14 595.09 101.97M588.83 97.94C594.03 95.4 593.5 100.62 593.79 105.73M595.14 102.79C595.48 109.76 596.12 117.73 596.57 132.51M595.6 103.31C595.55 113.77 595.96 122.39 595.71 134M595 134.33C596.04 138.17 593.77 143.44 586.51 141.25M594.16 134.21C594.78 139.45 592.1 142.92 588.21 139.73M586.66 142.89C495.96 140.53 401.1 142.11 351 142.91M586.84 142.56C507.02 143.68 426.08 143.1 353 142.4M352.67 142C346.36 140.56 346.78 138.14 347 134.02M354.61 142.38C347.34 141.43 345.56 138.92 346.17 136.35M343.39 134.81C344.08 125.38 343.03 118.06 346.6 103.59M344.57 135.14C344.24 126.41 344.34 118.79 345.79 102.8M345 103.67C343.85 99.19 348.75 97.75 351.67 94.57M343.19 104.44C345.93 100.53 349.62 95.09 353.05 96.88M352.67 96C352.67 96 352.67 96 352.67 96M352.67 96C352.67 96 352.67 96 352.67 96" fill="none" stroke="var(--ce-ink)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></g><text xml:space="preserve" x="359" y="113.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink)">4 · ONLINE</text><text xml:space="preserve" x="359" y="130.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">production traffic · approval rate</text><g opacity="0.34"><path d="M266.67 148.14C421.11 149.15 572.71 148.84 672.07 147.98C679.82 148.1 678.59 152.71 682.1 154.92C678.63 165.99 681.86 174.39 678.79 184.86C677.45 190.04 677.56 196.38 670.08 193.45C572.51 195.08 474.31 193.15 268.58 194C260.35 195.21 260.34 193.91 259.29 187.35C260.1 181.8 261.99 172.42 260.89 153.59C260.31 151.21 260.95 149.99 265.54 148C267.67 148 267.67 148 267.67 148" fill="var(--ce-warn)" stroke="none"/><path d="M267.26 147.95C356.74 146.37 444.27 146.76 673.2 147.87M267.46 147.85C375.51 150.3 482.82 149.69 672.74 147.5M672.33 148C675.84 149.67 681.99 148.82 680.14 153.73M671.08 147.44C675.28 149.19 682.08 149.88 680.78 154.56M678.51 156.79C679.76 166.96 679.17 178.05 678.89 186.17M680.71 155.74C680.29 167.27 680.59 178.26 679.51 186.2M680 186.33C679.82 191.25 678.25 194.16 671.54 193.97M678.41 184.41C678.68 189.85 676.14 192.66 671.58 192.37M672.67 192.99C589.37 191.73 504.91 193 268.55 193.82M671.82 194.16C558.24 195.13 444.37 195.08 268.19 194.5M267.67 194C262.31 195.68 258.46 191.73 260.44 187.22M269.4 192.69C262.92 193.4 262.2 189.27 259.38 187.06M260.94 188.31C261.15 175.46 261.3 163.81 261.88 154.45M259.25 186.76C260.8 177.72 260.13 168.52 259.32 155.34M260 155.67C258.23 152.32 262.75 147.4 267.32 148.01M260.17 155C261.62 152 261.5 149.28 267.33 147.45M267.67 148C267.67 148 267.67 148 267.67 148M267.67 148C267.67 148 267.67 148 267.67 148" fill="none" stroke="var(--ce-ink)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></g><text xml:space="preserve" x="274" y="165.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink)">3 · END-TO-END</text><text xml:space="preserve" x="274" y="182.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">gold fixtures · regression-gated</text><g opacity="0.34"><path d="M182.54 199.72C402.49 201.19 623.42 200.7 757.22 199.94C762.47 197.74 763.44 201.92 766.57 207.22C765.06 219.2 765.73 229.23 765.84 240.89C762.52 240.98 763.82 248.33 759.26 246.31C568.23 246.1 381.89 246.25 183.54 245.54C176.42 247 173.94 245.17 177.43 236.83C174.39 231.42 172.33 220.52 176.31 207.58C176.46 204.53 179 198.3 185.25 199.88C182.67 200 182.67 200 182.67 200" fill="var(--ce-accent)" stroke="none"/><path d="M182.38 200.37C369 199.36 555.81 199.24 756.58 199.39M182.78 200.32C367.91 199.01 553.28 198.69 757.24 200.3M757.33 200C760.93 199.15 763.7 201.5 765.18 209.48M757.32 200.93C761.12 198.38 766.06 203.74 763.17 207.98M765.89 206.78C764.71 214.02 762.9 222.1 765.2 239.82M765.81 208.18C765.02 214.65 765.22 223.86 765.3 238.41M765 238.33C763.61 244.34 762.73 244.89 756.57 246.69M766.67 238.6C767.17 244.85 760.18 247 759.55 245.01M756.53 245.73C631.66 247.13 505.52 246.6 183.13 245.31M757.64 245.97C630.66 247.7 503.82 247.91 182.46 245.73M182.67 246C178.27 246.79 174.13 245.31 173.89 236.42M184.2 246.99C178.5 245.37 174.25 244.22 177.19 237.77M174.48 237.82C174.23 231.67 175.57 221.82 173.16 209.31M175.93 238.38C175.36 227.02 175.92 216.25 174.86 207.87M175 207.67C176.61 201.45 176.76 201.04 182.96 201.46M173.16 209.56C172.72 203.47 177.98 198.88 181.61 198.01M182.67 200C182.67 200 182.67 200 182.67 200M182.67 200C182.67 200 182.67 200 182.67 200" fill="none" stroke="var(--ce-ink)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></g><text xml:space="preserve" x="189" y="217.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink)">2 · COMPONENT</text><text xml:space="preserve" x="189" y="234.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">retriever · reranker · judge</text><g opacity="0.34"><path d="M98.12 251.34C387.65 253.58 674.92 252.81 842.29 251.89C845.11 252.57 848.29 256.34 851.05 259.52C851.49 267.21 849.61 278.87 847.69 291.72C847.58 297.12 844.88 300.28 843.25 299.18C686.55 297.55 528.9 299.23 96.68 297.08C92.5 298.8 87.53 296.42 90.37 291.51C89 281.05 88.19 268.63 91.73 261.57C87.4 252.65 91.85 251.82 99.76 251.75C97.67 252 97.67 252 97.67 252" fill="var(--ce-success)" stroke="none"/><path d="M97.38 252.77C270.48 252.61 442.13 253.7 841.81 252.48M98.04 251.95C380.55 253.03 662.46 252.82 842.66 252.16M842.33 252C846.03 252.64 849.41 254.18 850.23 261.23M843.56 250.43C846.97 252.17 850.03 253 850.17 261.41M849.26 260.78C849.66 271.22 850.63 282.42 851.52 289.48M850.92 260.61C850.43 270.16 850.52 279.73 849.09 290.61M850 290.33C851.39 297.42 847.21 299.62 841.6 299.41M850.93 288.79C851.06 295.25 848.82 296.75 842.91 297.65M842.09 298.19C669.78 295.36 495.76 296.59 97.96 298.35M842.51 297.82C575.25 300.68 308.45 300.33 97.68 297.91M97.67 298C94.22 297.9 89.81 294.89 91.33 289.62M98.99 297.3C94.08 297.35 90.89 294.57 90.4 288.47M88.03 291.32C91.3 277.75 89.84 267.56 88.44 260.17M90.61 289.99C89.92 278.33 89.71 265.98 90.4 260.41M90 259.67C91 254.59 90.76 250.68 98.61 250.9M90.14 260.12C88.41 254.95 94.46 253.08 95.89 253.17M97.67 252C97.67 252 97.67 252 97.67 252M97.67 252C97.67 252 97.67 252 97.67 252" fill="none" stroke="var(--ce-ink)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></g><text xml:space="preserve" x="104" y="269.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink)">1 · UNIT</text><text xml:space="preserve" x="104" y="286.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-muted)">pure functions · chunkers · parsers · schema</text><text xml:space="preserve" x="40" y="320.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ce-ink-subtle)">Cadence, bottom to top: every commit · every relevant PR · every load-bearing PR · continuous monitoring.</text><path d="M63.97 291.94C60.14 218.54 59.94 148.85 62.79 100.81M61.81 289.3C62.78 228.5 61.58 167.84 62.88 100.6" fill="none" stroke="var(--ce-ink-subtle)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M57.51 110.04 L62 100 L66.49 110.04" fill="none" stroke="var(--ce-ink-subtle)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="74" y="117.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-subtle)">less often</text><text xml:space="preserve" x="74" y="133.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ce-ink-subtle)">more cost</text><text xml:space="preserve" x="40" y="341.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink)">Every tier above unit rests on a golden set. Grow it from real failures — every production incident becomes one new case —</text><text xml:space="preserve" x="40" y="363.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ce-ink-muted)">and keep it small and human-reviewed: fifty carefully labelled cases catch more regressions than a thousand noisy ones.</text>
 </svg>
