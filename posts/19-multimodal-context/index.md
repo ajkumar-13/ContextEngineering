@@ -61,6 +61,10 @@ The failure mode to avoid is choosing one method for the whole corpus. Real docu
 
 Once a corpus is a stack of page images, retrieval faces a choice that mirrors §3. The traditional path is **OCR-then-text-RAG**: run OCR over every page, chunk and embed the extracted text, and retrieve with the hybrid pipeline from [Post 11](../11-rag-in-depth/index.md). This works, but it inherits every OCR error and throws away everything the layout encoded. A chart becomes a caption; a table becomes a mangled run of numbers; a figure becomes nothing.
 
+![Two retrieval pipelines over page images: OCR-then-text-RAG above, and patch-level visual retrieval below, with what each keeps and loses](diagrams/01-visual-vs-ocr-retrieval.svg)
+
+*The losses in the upper lane all happen at one stage. That is why the lower lane, which deletes that stage, can answer questions the upper one cannot.*
+
 The alternative is **visual retrieval**: embed the page image directly and retrieve on the pixels, skipping OCR entirely. The reference technique is **ColPali** (Faysse et al., 2024), which applies the same late-interaction idea that [Post 17](../17-advanced-retrieval/index.md) covers for ColBERT, but over image patches instead of text tokens. ColPali keeps one vector per image patch, embeds the query tokens, and scores a page by the sum-of-max (MaxSim) similarity between query tokens and patch vectors, exactly the late-interaction mechanism from Post 17 lifted into the visual domain. Because it never runs OCR, it retrieves on the visual content directly: it can match a query about a bar chart to the page that contains the chart, something OCR-then-text-RAG cannot do because the chart was never text.
 
 Faysse et al. report that ColPali outperforms standard OCR-then-embed retrieval pipelines on their document-retrieval benchmark (ViDoRe), while also being simpler to run because it removes the OCR and layout-parsing stages (Faysse et al., 2024); treat the exact margins as workload-dependent and measure on your own corpus, as this series advises for every retrieval claim.
@@ -96,6 +100,10 @@ The second is **native audio input**, where a model accepts the waveform directl
 Two accounting facts change the moment images enter the window.
 
 First, **images count against the window and the bill as tokens**. There is no separate "image budget". A prompt with 30k tokens of text and 20k tokens of images is a 50k-token prompt for every purpose: the window ceiling, the input price, the latency of the prefill described in [Post 04](../04-tokens-windows-budgets/index.md). When you size an agent that sends images, count the image tokens in the same envelope as the text.
+
+![A prompt bar with a stable reference image before the cache boundary and a live screenshot after it, plus the three screenshot-stream disciplines](diagrams/02-image-cache-boundary.svg)
+
+*The rule is positional: stable pixels early where they cache, volatile pixels late where their churn costs nothing before them.*
 
 Second, **caching applies to image tokens too, with a sharp caveat**. Anthropic's prompt caching stores a token prefix and reuses it, with cache reads costing roughly 10% of the base input price and cache writes costing 1.25× input for the 5-minute tier or 2× for the 1-hour tier ([Post 03](../03-how-llms-read-context/index.md); Anthropic, "Prompt caching" documentation). Image tokens can sit inside a cached prefix like any other tokens, so a large document image stable across many turns is an excellent caching candidate: pay the write once, read it back cheaply thereafter. The caveat is that caching keys on an exact match of the prefix. A screenshot that changes every turn, as in a computer-use loop, cannot be cached, because each new image breaks the prefix. The design rule follows: put stable images (a reference document, a fixed diagram) early in the prompt where they can be cached, and put volatile images (the live screenshot) late, after the cache boundary, so the churn does not invalidate the cacheable prefix.
 
