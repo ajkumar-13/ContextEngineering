@@ -28,6 +28,10 @@ Inbox triage is a knowledge-worker tax. A draft-reply agent that actually unders
 - **Security**: `send_email` is the most dangerous tool in the inbox.
 - **Evaluation**: held-out replies as ground truth; LLM-as-judge for tone fidelity.
 
+![The nine context-engineering layers this build exercises, what each does here, and the post in the series that covers it](diagrams/01-every-lever.svg)
+
+*The capstone is an index to the series as much as a build: every layer is present because not having it bites.*
+
 The Gmail tool layer is a direct application of the tool-and-MCP design from [Post 15](../15-tools-and-mcp/index.md): typed tools with narrow scopes, a dangerous action (`send`) gated behind a deterministic check.
 
 A capstone that hits all of these is also realistic: every box is there because *not* having it bites in production.
@@ -38,12 +42,12 @@ A capstone that hits all of these is also realistic: every box is there because 
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                       email-reply agent                           │
+│                       email-reply agent                          │
 │                                                                  │
-│  ┌─────────────┐   ┌────────────┐   ┌────────────────────────┐  │
-│  │   triager   │ → │   drafter  │ → │  reviewer / send-gate  │  │
-│  │ (sub-agent) │   │ (main agent)   │ (deterministic + user) │  │
-│  └─────────────┘   └────────────┘   └────────────────────────┘  │
+│  ┌─────────────┐   ┌────────────┐   ┌────────────────────────┐   │
+│  │   triager   │ → │   drafter  │ → │  reviewer / send-gate  │   │
+│  │ (sub-agent) │   │ (main agent)   │ (deterministic + user) │   │
+│  └─────────────┘   └────────────┘   └────────────────────────┘   │
 │        ↑                  ↑                                      │
 │        │                  │                                      │
 │   Gmail tools       RAG over prior replies                       │
@@ -187,6 +191,10 @@ The point is the cost arithmetic ([Post 13](../13-isolate-strategies/index.md), 
 ---
 
 ## 8. The send-gate
+
+![Draft, human review, send-gate, send — with the three deterministic checks the gate runs](diagrams/02-send-gate.svg)
+
+*The order is the argument: a human can approve a draft that still breaks a rule, so the gate runs after them rather than instead of them.*
 
 Even after the human approves, a deterministic guard runs before the actual `send_email` call:
 

@@ -86,6 +86,10 @@ Optional but worth adding the same day:
 
 ## 4. Persistence and handoff
 
+![What survives a disconnect, beside the two ways a bridge gets a reply into a running agent, and the three events worth notifying on](diagrams/01-persistence-and-handoff.svg)
+
+*The session outliving the connection is the easy half. The reply path is the half that decides whether the setup is usable away from the desk.*
+
 The killer feature of the remote setup: sessions persist. The mechanics:
 
 - **`tmux` sessions** outlive SSH. `tmux attach -t acme-api` reconnects to whatever was running.
@@ -133,6 +137,10 @@ A useful reality check: **measure both sides**. The trace store from Post 22 cap
 ---
 
 ## 7. Security on a remote agent
+
+![Seven things fenced on a remote agent box, the control that fences each, and why none of them is a prompt rule](diagrams/02-remote-controls.svg)
+
+*Sections 3 and 7 give two overlapping lists. This is the single one a reader can work through.*
 
 The remote box runs an agent with shell access and (probably) deploy credentials. A short list of the controls that matter:
 

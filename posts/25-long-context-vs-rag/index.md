@@ -50,6 +50,10 @@ This is the question the marketing diagrams never answer. Long-context models ad
 
 ## 3. What long-context benchmarks really show
 
+![Five long-context benchmarks with what each adds to the task, what it finds, and whether performance degrades](diagrams/01-benchmark-gap.svg)
+
+*Read down the last column: the one benchmark that barely degrades is the one the marketing is built on.*
+
 A short tour of the empirical situation as of early 2026.
 
 **Needle-in-a-haystack (NIAH).** The best-marketed test: hide a single random fact (the "needle") inside a long context, ask the model to retrieve it. Modern frontier models (Claude Opus 4.x and Sonnet 4.5, Gemini 2.5, and current frontier GPT models) score in the high nineties on standard single-needle NIAH well past 100 k tokens, and stay strong toward the top of their advertised windows. Those specific percentages are illustrative of the pattern rather than pinned to one vendor's leaderboard; the point is that this benchmark is behind the "long context just works" pitch.
@@ -69,6 +73,10 @@ This is the empirical foundation of the decision framework. Long context is grea
 ---
 
 ## 4. When long context wins
+
+![Where long context wins and where RAG wins, as two lists read against each other](diagrams/02-when-each-wins.svg)
+
+*Neither column is a default for the other's cases, and the left one holds only while the prefix stays cacheable.*
 
 Concrete cases where loading the corpus beats retrieving from it.
 

@@ -24,6 +24,10 @@ Goal: a small, real MCP server for the same imaginary Acme product as the RAG bu
 - **Parameter validation** with a typed schema.
 - **Structured results** that the model can use directly without re-parsing.
 - **A permission boundary** that requires confirmation for `issue_refund` over $1 000.
+
+![Three steps of a gated write tool — the model proposes, the server checks a threshold in code, the host confirms out of band](diagrams/02-permission-boundary.svg)
+
+*The model proposes and the server decides. A threshold written in the prompt is a suggestion; the same threshold in code is a boundary.*
 - **An `AGENTS.md`** the host loads to teach the agent how to use the server safely.
 
 What is *not* in scope: a full DB, multi-tenant auth, signed audit logs, OAuth flows. Those are extensions; the core works without them.
@@ -45,6 +49,10 @@ The methods that matter for a starter server:
 The official Python SDK (`mcp`, installable via `pip install mcp`) wraps all of this and is used throughout (Model Context Protocol, "Python SDK", 2024–25). Its `FastMCP` helper turns plain Python functions into MCP tools, resources, and prompts through decorators, so most of the wire protocol stays invisible.
 
 ### Choice of transport: stdio vs HTTP
+
+![stdio compared with HTTP across process model, reach, authentication, attack surface, and what each suits](diagrams/01-transport-choice.svg)
+
+*Four of the five rows are conveniences. The authentication row is the one that turns a config flag into a security decision.*
 
 The two transports differ on more than syntax, and the choice has security consequences:
 

@@ -54,6 +54,10 @@ Every one of these four channels is also, downstream, a write into the trace sto
 
 The place to act on regulated data is the **trust boundary**: the point where external text crosses into your context (or into your trace store). This is the same boundary Post 23 §3 uses for injection filtering, and it is efficient to run both checks in the same pass. The difference is intent: injection filtering looks for adversarial *instructions*; PII filtering looks for regulated *data*.
 
+![Three PII-detection layers in increasing cost, the tradeoff that redaction can destroy the task, and the three places redaction applies differently](diagrams/01-detect-and-redact.svg)
+
+*Detection layers cheapest first. Redaction is a scalpel, and where it is applied matters more than whether it is.*
+
 **Detection** typically layers three techniques, cheapest first:
 
 - **Regex and format rules** catch structured PII: card numbers (with a Luhn check), national identifiers, email addresses, phone numbers. Fast, deterministic, and high-precision on formats that have a checksum.
@@ -75,6 +79,10 @@ Redaction is a scalpel, not a firehose: run detection at the boundary once, reda
 ## 4. Retention and residency of logged prompts
 
 Once you accept that traces are copies of prompts, two questions follow immediately: how long do you keep them, and where do they physically live.
+
+![Three retention tiers along a time axis — full fidelity, redacted, hard deletion — beside residency and the zero-retention trap](diagrams/02-retention-tiers.svg)
+
+*The regulation sets the shape, not the number. The engineering point is that a lifecycle rule enforces it, not a remembered script.*
 
 **Retention.** A trace store without a retention policy grows without bound, and every day of extra retention is extra exposure and extra scope for a subject-access or deletion request. The policy is set by the regulatory environment, not by disk being cheap (Post 22, §7). GDPR's storage-limitation principle requires that personal data be kept no longer than necessary for the purpose it was collected for (EU, "GDPR" Art. 5(1)(e), 2016); it does not name a number, so any specific window is your policy choice. Common practice is a short, tiered scheme, offered here as an illustrative shape rather than a mandated figure:
 

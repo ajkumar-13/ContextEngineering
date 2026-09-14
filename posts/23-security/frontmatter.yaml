@@ -28,7 +28,7 @@ series: Context Engineering
 part: 4
 chapter: "Part IV — Production Concerns"
 
-hero: diagrams/00-hero-security-and-guardrails.svg
+hero: diagrams/00-hero-security.svg
 hero_alt: "Defense-in-depth architecture for LLM applications showing prompt protection, tool permissions, sandboxing, and policy enforcement"
 
 reading_time: 15

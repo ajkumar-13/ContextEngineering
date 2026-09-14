@@ -33,6 +33,10 @@ What is *not* in scope: streaming UI, multi-tenant auth, GraphRAG, fine-tuning, 
 
 Before the code, the shape. The system has two phases. **Offline (ingest)** runs once per corpus change: read each document, split it into overlapping chunks, prepend a contextual header to each chunk, embed the chunks, and write them to both a dense vector index and a sparse BM25 (Best Match 25, a keyword-ranking function) index. **Online (a chat turn)** runs on every question: embed the query, run dense and sparse retrieval in parallel, fuse the two rankings with reciprocal rank fusion (RRF), rerank the survivors with a cross-encoder, pack the top few into a bookended prompt, call the generator, and return the answer with its source citations. The eval harness replays a fixture set of questions through the same online path and scores the results.
 
+![The five modules of the build, each mapped to the stage of the flow it owns, plus the shared eval and model-client helpers](diagrams/01-module-map.svg)
+
+*Which file owns which stage is the most useful thing to know before opening any of them.*
+
 The five modules map one-to-one onto that flow: `ingest.py` is the offline phase; `retrieve.py`, `prompt.py`, and `chat.py` are the online phase; `eval.py` wraps the online phase in a scorer. A `llm.py` helper holds the shared model clients (including the cheap model used for headers).
 
 ```
@@ -198,6 +202,10 @@ The pipeline is the four-stage shape from [Post 09](../09-select-strategies/inde
 ---
 
 ## 5. Prompt assembly: bookend packing with citations
+
+![Five reranked chunks packed into a prompt best-first and second-best-last, with the weakest in the middle and the question placed last](diagrams/02-packed-prompt.svg)
+
+*The ranking on the left and the order on the right are not the same sequence. That difference is the whole of bookend packing.*
 
 ```python
 # src/rag/prompt.py

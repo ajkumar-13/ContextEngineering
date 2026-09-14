@@ -108,6 +108,10 @@ Four dashboards (or one dashboard with four panels). Every team change reviews t
 
 ## 5. Reading a trace: four common bug shapes
 
+![Four bug shapes as they appear in a trace: what the trace shows, what the prompt shows on drilling in, and where the fix actually lives](diagrams/01-bug-shapes.svg)
+
+*The last column is the useful one: not one of these four is fixed in the model.*
+
 A short field guide to what bugs look like in a trace.
 
 **Shape 1: context bloat.** The LLM span shows 80 000 input tokens. Drill into the prompt. The conversation history span shows 60 000 tokens because tool results were never cleared ([Post 12](../12-compress-strategies/index.md), §4) and a 40-turn session accumulated. The fix is in the compression policy, not the model.
@@ -123,6 +127,10 @@ The pattern: most LLM bugs are *visible in the trace* once the right things are 
 ---
 
 ## 6. Replays and regression detection
+
+![The three-step replay loop — capture, re-run, diff — beside the contrast between a curated eval set and a harvested replay corpus](diagrams/02-replay-loop.svg)
+
+*The traces already exist. Freezing a sample and wiring the diff into the review gate is the whole of the new work.*
 
 Traces are not only a forensic record; they are a **fixture library**. Because a trace stores the full input to every call, any past interaction can be re-run against a new prompt, a new model, or a new retrieval config, and the outputs compared. This is the online counterpart to the offline eval set in [Post 20](../20-evaluation/index.md): the eval set is curated in advance, whereas a replay corpus is harvested from production traffic and grows for free.
 

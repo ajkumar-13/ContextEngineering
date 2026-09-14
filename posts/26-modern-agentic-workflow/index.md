@@ -142,6 +142,10 @@ The skill marketplaces (Anthropic's Agent Skills, third-party MCP directories, c
 
 ## 5. Sub-agents and the orchestrator pattern
 
+![The four-step orchestrator handshake, with the argument against sub-agents and the rule that reconciles the two views](diagrams/02-orchestrator-handshake.svg)
+
+*The summary is what keeps the parent's window small, and it is also what makes the child's failures invisible.*
+
 Modern hosts let the main agent spawn sub-agents for scoped tasks. The patterns the field has converged on ([Post 13](../13-isolate-strategies/index.md), §2 and §4):
 
 - **Research sub-agent.** "Read these three files and tell me how `process_order` is wired." The sub-agent does the reads; the parent gets a summary and keeps its context clean.
@@ -178,6 +182,10 @@ fi
 ```
 
 The agent edits a file, the hook runs `ruff`, and if the file is malformed the failure lands back in the agent's context on the next turn, so it self-corrects without the user intervening. That is the whole idea; the rest is choosing good points to attach to.
+
+![Seven hook points in the agent loop, what teams attach to each, and why each one is a hook rather than a rule in the project prompt](diagrams/01-hook-points.svg)
+
+*The third column is the interesting one: each of these fails differently when written as prose instead.*
 
 Common hook points and what teams use them for:
 
