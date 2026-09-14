@@ -15,6 +15,7 @@ assets/diagrams/src/
 assets/diagrams/style/
 /poster/README.md
 /poster/*.excalidraw
+/posts/*/diagrams/excalidraw/
 
 # ===== Loose notes / drafts / archives =====
 # Root-only loose .txt notes (don't ignore data fixtures under code/**/*.txt)

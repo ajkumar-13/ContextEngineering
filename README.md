@@ -30,6 +30,7 @@ This repository contains the complete **Context Engineering** series:
 - **40+ diagrams** illustrating every major concept
 - **7 runnable code companions** with full test suites (offline-testable cores)
 - **One-page cheatsheet** for quick reference
+- **One-page poster** — the whole series on a single hand-drawn A2 sheet
 - **Glossary and bibliography** with every term and citation
 
 **The approach:** No marketing voice. Neutral, textbook tone. Examples first, formalism second. Framework-agnostic (applies to any LLM API, any framework).
@@ -135,6 +136,7 @@ added after the first draft and slot into the flow where they belong.
 | [`CHEATSHEET.md`](CHEATSHEET.md) | Single printable page: six layers, WSCI, five failure modes, debug checklist. |
 | [`GLOSSARY.md`](GLOSSARY.md) | Every term used in any post, alphabetised, one-line definitions. |
 | [`REFERENCES.md`](REFERENCES.md) | Master bibliography for every citation in the series. |
+| [`poster/`](poster/) | *One page of context engineering* — thirty posts in eight panels, drawn by hand, light and dark. Prints at A2. |
 | [`assets/poster/`](assets/poster/) | A2 reference-architecture poster: every concept on one canvas. |
 
 ---
@@ -150,10 +152,15 @@ context-engineering/
 ├── CONTRIBUTING.md        ← style guide and PR rules
 ├── LICENSE                ← CC-BY 4.0 (prose) + MIT (code)
 │
+├── poster/                ← the drawn one-page reference sheet
+│   ├── one-page-of-context-engineering.svg
+│   └── one-page-of-context-engineering.excalidraw
+│
 ├── posts/                 ← one folder per post
 │   └── NN-kebab-slug/
 │       ├── index.md       ← the post
 │       ├── diagrams/      ← post-specific SVGs
+│       │   └── excalidraw/  ← the editable scenes behind them
 │       └── snippets/      ← inline code shown in the post
 │
 ├── code/                  ← runnable companions (offline-testable cores)
