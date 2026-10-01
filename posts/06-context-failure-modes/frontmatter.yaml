@@ -1,4 +1,4 @@
----
+id: ctx-006
 slug: 06-context-failure-modes
 title: "06 · Five Context Failure Modes"
 
@@ -25,7 +25,7 @@ tags:
 
 category: Foundations
 series: Context Engineering
-part: 1
+part: "Part I - Foundations"
 chapter: "Part I — Foundations"
 
 hero: diagrams/01-failure-modes-grid.svg
@@ -56,4 +56,3 @@ canonical_url: ""
 
 prev: ../05-economics-of-context/
 next: ../07-write-select-compress-isolate/
----

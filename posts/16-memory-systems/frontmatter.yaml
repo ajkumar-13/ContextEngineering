@@ -1,4 +1,4 @@
----
+id: ctx-016
 slug: 16-memory-systems
 title: "16 · Memory Systems"
 
@@ -25,7 +25,7 @@ tags:
 
 category: Components
 series: Context Engineering
-part: 3
+part: "Part III - Layers in depth"
 chapter: "Part III — Components"
 
 hero: diagrams/08-memory-taxonomy.svg
@@ -62,4 +62,3 @@ canonical_url: ""
 
 prev: ../15-tools-and-mcp/
 next: ../17-advanced-retrieval/
----

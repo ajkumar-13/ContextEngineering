@@ -1,4 +1,4 @@
----
+id: ctx-017
 slug: 17-advanced-retrieval
 title: "17 · Advanced Retrieval"
 
@@ -27,7 +27,7 @@ tags:
 
 category: Retrieval Engineering
 series: Context Engineering
-part: 3
+part: "Part III - Layers in depth"
 chapter: "Part III — Retrieval & Memory"
 
 hero: diagrams/00-hero-advanced-retrieval.svg
@@ -78,4 +78,3 @@ canonical_url: ""
 
 prev: ../16-memory-systems/
 next: ../18-context-evaluation/
----

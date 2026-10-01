@@ -1,4 +1,4 @@
----
+id: ctx-020
 slug: 20-evaluation
 title: "20 · Evaluation"
 
@@ -27,7 +27,7 @@ tags:
 
 category: Production Systems
 series: Context Engineering
-part: 4
+part: "Part IV - Production-grade practice"
 chapter: "Part IV — Production Concerns"
 
 hero: diagrams/00-hero-evaluation.svg
@@ -77,4 +77,3 @@ canonical_url: ""
 
 prev: ../19-memory-in-production/
 next: ../21-structured-output-and-guardrails/
----

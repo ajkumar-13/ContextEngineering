@@ -1,4 +1,4 @@
----
+id: ctx-002
 slug: 02-six-layers-of-context
 title: "02 · The Six Layers of Context"
 
@@ -22,7 +22,7 @@ tags:
 
 category: Foundations
 series: Context Engineering
-part: 1
+part: "Part I - Foundations"
 chapter: "Part I — Foundations"
 
 hero: diagrams/00-hero-six-layers.svg
@@ -47,4 +47,3 @@ canonical_url: ""
 
 prev: ../01-why-context-engineering/
 next: ../03-how-llms-read-context/
----

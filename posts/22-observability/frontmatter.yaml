@@ -1,4 +1,4 @@
----
+id: ctx-022
 slug: 22-observability-tracing-and-cost
 title: "22 · Observability, Tracing, and Cost"
 
@@ -32,7 +32,7 @@ tags:
 
 category: Production Systems
 series: Context Engineering
-part: 4
+part: "Part IV - Production-grade practice"
 chapter: "Part IV — Production & Deployment"
 
 hero: diagrams/00-hero-observability.svg
@@ -81,4 +81,3 @@ canonical_url: ""
 
 prev: ../21-deployment-patterns/
 next: ../23-security/
----

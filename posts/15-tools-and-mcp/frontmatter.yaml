@@ -1,4 +1,4 @@
----
+id: ctx-015
 slug: 15-tools-and-mcp
 title: "15 · Tools and MCP"
 
@@ -25,7 +25,7 @@ tags:
 
 category: Components
 series: Context Engineering
-part: 3
+part: "Part III - Layers in depth"
 chapter: "Part III — Components"
 
 hero: diagrams/05-mcp-triangle.svg
@@ -65,4 +65,3 @@ canonical_url: ""
 
 prev: ../14-system-prompt-as-software/
 next: ../16-memory-systems/
----

@@ -1,4 +1,4 @@
----
+id: ctx-001
 slug: 01-why-context-engineering
 title: "01 · Why context engineering — and why now"
 
@@ -20,7 +20,7 @@ tags:
 
 category: Foundations
 series: Context Engineering
-part: 1
+part: "Part I - Foundations"
 chapter: "Part I — Foundations"
 
 hero: diagrams/01-timeline.svg
@@ -43,5 +43,3 @@ canonical_url: ""
 
 prev: null
 next: ../02-six-layers-of-context/
-
----

@@ -1,4 +1,4 @@
----
+id: ctx-003
 slug: 03-how-llms-read-context
 title: "03 · How LLMs Actually Read Context"
 
@@ -24,7 +24,7 @@ tags:
 
 category: Foundations
 series: Context Engineering
-part: 1
+part: "Part I - Foundations"
 chapter: "Part I — Foundations"
 
 hero: diagrams/03-lost-in-the-middle.svg
@@ -51,4 +51,3 @@ canonical_url: ""
 
 prev: ../02-six-layers-of-context/
 next: ../04-tokens-windows-budgets/
----

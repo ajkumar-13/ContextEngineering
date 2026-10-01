@@ -1,4 +1,4 @@
----
+id: ctx-007
 slug: 07-write-select-compress-isolate
 title: "07 · Write, Select, Compress, Isolate"
 
@@ -25,7 +25,7 @@ tags:
 
 category: The Four Primitives
 series: Context Engineering
-part: 2
+part: "Part II - The WSCI operating system"
 chapter: "Part II — The Four Primitives (WSCI)"
 
 hero: diagrams/01-wsci-quadrants.svg
@@ -56,4 +56,3 @@ canonical_url: ""
 
 prev: ../06-context-failure-modes/
 next: ../08-write-strategies/
----

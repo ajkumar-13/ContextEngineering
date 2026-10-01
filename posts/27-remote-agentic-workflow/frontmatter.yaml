@@ -1,4 +1,4 @@
----
+id: ctx-027
 slug: 27-remote-agentic-workflow
 title: "27 · Remote Agentic Workflow"
 
@@ -25,7 +25,7 @@ tags:
 
 category: Case Studies
 series: Context Engineering
-part: 5
+part: "Part V - Workflow and builds"
 chapter: "Part V — Case Studies"
 
 hero: diagrams/00-hero-remote-agentic-workflow.svg
@@ -67,4 +67,3 @@ canonical_url: ""
 
 prev: ../26-modern-agentic-workflow/
 next: ../28-build-rag-chatbot/
----

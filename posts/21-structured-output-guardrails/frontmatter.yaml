@@ -1,4 +1,4 @@
----
+id: ctx-021
 slug: 21-structured-output-and-guardrails
 title: "21 · Structured Output and Guardrails"
 
@@ -27,7 +27,7 @@ tags:
 
 category: Production Systems
 series: Context Engineering
-part: 4
+part: "Part IV - Production-grade practice"
 chapter: "Part IV — Production & Deployment"
 
 hero: diagrams/00-hero-structured-output-guardrails.svg
@@ -75,4 +75,3 @@ canonical_url: ""
 
 prev: ../20-evaluation/
 next: ../22-observability/
----

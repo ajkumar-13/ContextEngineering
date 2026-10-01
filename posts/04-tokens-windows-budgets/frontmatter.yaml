@@ -1,4 +1,4 @@
----
+id: ctx-004
 slug: 04-tokens-windows-budgets
 title: "04 · Tokens, Windows, and Budgets"
 
@@ -24,7 +24,7 @@ tags:
 
 category: Foundations
 series: Context Engineering
-part: 1
+part: "Part I - Foundations"
 chapter: "Part I — Foundations"
 
 hero: diagrams/00-hero-token-window-budget.svg
@@ -54,4 +54,3 @@ canonical_url: ""
 
 prev: ../03-how-llms-read-context/
 next: ../05-context-lifecycle/
----

@@ -1,4 +1,4 @@
----
+id: ctx-013
 slug: 13-isolate-strategies
 title: "13 · Isolate Strategies"
 
@@ -25,7 +25,7 @@ tags:
 
 category: The Four Primitives
 series: Context Engineering
-part: 2
+part: "Part II - The WSCI operating system"
 chapter: "Part II — The Four Primitives (WSCI)"
 
 hero: diagrams/06-subagent-isolation.svg
@@ -66,4 +66,3 @@ canonical_url: ""
 
 prev: ../12-compress-strategies/
 next: ../14-system-prompts/
----

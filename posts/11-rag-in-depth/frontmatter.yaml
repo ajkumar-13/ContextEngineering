@@ -1,4 +1,4 @@
----
+id: ctx-011
 slug: 11-rag-in-depth
 title: "11 · RAG in Depth"
 
@@ -26,7 +26,7 @@ tags:
 
 category: The Four Primitives
 series: Context Engineering
-part: 2
+part: "Part II - The WSCI operating system"
 chapter: "Part II — The Four Primitives (WSCI)"
 
 hero: diagrams/04-rag-pipeline.svg
@@ -67,4 +67,3 @@ canonical_url: ""
 
 prev: ../10-data-ingestion-document-pipelines/
 next: ../12-compress-strategies/
----

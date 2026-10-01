@@ -1,4 +1,4 @@
----
+id: ctx-030
 slug: 30-capstone-email-reply-agent
 title: "30 · Capstone — Email Reply Agent"
 
@@ -30,7 +30,7 @@ tags:
 
 category: Capstone Projects
 series: Context Engineering
-part: 5
+part: "Part V - Workflow and builds"
 chapter: "Part V — End-to-End Applications"
 
 hero: diagrams/00-hero-capstone-email-reply-agent.svg
@@ -91,4 +91,3 @@ canonical_url: ""
 
 prev: ../29-multimodal-agent/
 next: ""
----

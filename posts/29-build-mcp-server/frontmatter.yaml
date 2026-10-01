@@ -1,4 +1,4 @@
----
+id: ctx-029
 slug: 29-build-mcp-server-from-scratch
 title: "29 · Build #2 — MCP Server from Scratch"
 
@@ -25,7 +25,7 @@ tags:
 
 category: Case Studies
 series: Context Engineering
-part: 5
+part: "Part V - Workflow and builds"
 chapter: "Part V — Case Studies"
 
 hero: diagrams/00-hero-build-mcp-server.svg
@@ -68,4 +68,3 @@ canonical_url: ""
 
 prev: ../28-build-rag-chatbot/
 next: ../30-capstone-email-reply-agent/
----

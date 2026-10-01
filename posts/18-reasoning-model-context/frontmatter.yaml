@@ -1,4 +1,4 @@
----
+id: ctx-018
 slug: 18-context-for-reasoning-models
 title: "18 · Context for Reasoning Models"
 
@@ -25,7 +25,7 @@ tags:
 
 category: Components
 series: Context Engineering
-part: 3
+part: "Part III - Layers in depth"
 chapter: "Part III — Components"
 
 hero: diagrams/00-hero-reasoning-model-context.svg
@@ -62,4 +62,3 @@ canonical_url: ""
 
 prev: ../17-advanced-retrieval/
 next: ../19-multimodal-context/
----

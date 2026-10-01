@@ -1,4 +1,4 @@
----
+id: ctx-005
 slug: 05-economics-of-context
 title: "05 · The Economics of Context — Pricing, Caching, and Latency"
 
@@ -26,7 +26,7 @@ tags:
 
 category: Foundations
 series: Context Engineering
-part: 1
+part: "Part I - Foundations"
 chapter: "Part I — Foundations"
 
 hero: diagrams/00-hero-economics-of-context.svg
@@ -57,4 +57,3 @@ canonical_url: ""
 
 prev: ../04-tokens-windows-budgets/
 next: ../06-context-failure-modes/
----

@@ -1,4 +1,4 @@
----
+id: ctx-025
 slug: 25-long-context-vs-rag
 title: "25 · Long Context vs. RAG — A Decision Framework"
 
@@ -27,7 +27,7 @@ tags:
 
 category: Advanced Retrieval
 series: Context Engineering
-part: 5
+part: "Part IV - Production-grade practice"
 chapter: "Part V — End-to-End Applications"
 
 hero: diagrams/00-hero-long-context-vs-rag.svg
@@ -78,4 +78,3 @@ canonical_url: ""
 
 prev: ../24-inference-optimization/
 next: ../26-modern-agentic-workflow/
----

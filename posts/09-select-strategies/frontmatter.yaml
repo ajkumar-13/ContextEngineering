@@ -1,4 +1,4 @@
----
+id: ctx-009
 slug: 09-select-strategies
 title: "09 · Select Strategies"
 
@@ -25,7 +25,7 @@ tags:
 
 category: The Four Primitives
 series: Context Engineering
-part: 2
+part: "Part II - The WSCI operating system"
 chapter: "Part II — The Four Primitives (WSCI)"
 
 hero: diagrams/00-hero-select-pipeline.svg
@@ -64,4 +64,3 @@ canonical_url: ""
 
 prev: ../08-write-strategies/
 next: ../10-data-ingestion-document-pipelines/
----

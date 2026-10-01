@@ -1,4 +1,4 @@
----
+id: ctx-024
 slug: 24-privacy-pii-data-governance
 title: "24 · Privacy, PII, and Data Governance"
 
@@ -25,7 +25,7 @@ tags:
 
 category: Production Concerns
 series: Context Engineering
-part: 4
+part: "Part IV - Production-grade practice"
 chapter: "Part IV — Production Concerns"
 
 hero: diagrams/00-hero-privacy-and-governance.svg
@@ -65,4 +65,3 @@ canonical_url: ""
 
 prev: ../23-security-and-guardrails/
 next: ../25-long-context-vs-rag/
----
