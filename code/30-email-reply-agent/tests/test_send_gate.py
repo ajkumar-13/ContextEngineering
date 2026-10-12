@@ -11,7 +11,7 @@ def _thread(body: str) -> list[dict]:
 
 
 def test_send_gate_ok_on_clean_draft():
-    d = "Hi Anika,\n\nThursday at 14:00 IST works. Best, Shrirat"
+    d = "Hi Anika,\n\nThursday at 14:00 IST works. Best, Ajay"
     assert send_gate(d, _thread("Following up. Best, Anika")).ok
 
 
