@@ -1,0 +1,721 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-013",
+  "next_ordinal": 17,
+  "questions": [
+    {
+      "id": "ctx-013-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "contract-test",
+        "sub-agents"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Which of these four tasks fails the clean-contract test for handing work to a sub-agent?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Find the three most relevant papers and return their titles",
+          "correct": false,
+          "feedback": "This one passes: the input is clear, the output is a short structured list, and the work needs nothing from the parent's evolving state."
+        },
+        {
+          "key": "b",
+          "text": "Help think through the architecture of a new feature",
+          "correct": true,
+          "feedback": "Right: there is no clean output contract. The value of the task is the conversation itself, which a sub-agent cannot hand back as a finite result."
+        },
+        {
+          "key": "c",
+          "text": "Run the test suite and return the names of the failing tests",
+          "correct": false,
+          "feedback": "This one passes, and it is a strong case: the tool output is large and the structured result is small."
+        },
+        {
+          "key": "d",
+          "text": "Read a 200-page contract and return a summary of it",
+          "correct": false,
+          "feedback": "This one passes: the input is clear, the output is bounded, and the source never needs to enter the parent's window."
+        }
+      ],
+      "explanation": "Section 3 isolates only when the input is fully specified, the output is structured and finite, and the work is self-contained. Thinking through an architecture fails the second test: its value is the back-and-forth, not a result of known shape.",
+      "hints": [
+        "Check each task for a result whose shape the parent knows in advance."
+      ]
+    },
+    {
+      "id": "ctx-013-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "topologies",
+        "workflow-vs-agent"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In which of these designs does the model, rather than code written by the engineer, decide what happens next?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Three model calls that parse, then analyse, then format, in a fixed order",
+          "correct": false,
+          "feedback": "Each stage is a model call, but the order is fixed in code: this is a sequential pipeline, a workflow."
+        },
+        {
+          "key": "b",
+          "text": "A parent that sends one review task per file to ten workers and merges their results",
+          "correct": false,
+          "feedback": "The fan-out and the merge are fixed by the engineer; the workers run model calls, but none of them chooses the next step."
+        },
+        {
+          "key": "c",
+          "text": "A supervisor model that picks which worker to call after reading each result",
+          "correct": true,
+          "feedback": "Right: a supervisor decides call by call which worker to call next, so the model, not the code, chooses the next step."
+        },
+        {
+          "key": "d",
+          "text": "A merge call that combines the partial results of five workers into one answer",
+          "correct": false,
+          "feedback": "A merge call is the fan-in step of a workflow; it combines results but does not choose what runs next."
+        }
+      ],
+      "explanation": "Section 4: in the sequential and fan-out designs the engineer writes the control flow, which makes them workflows in Anthropic's sense. The supervisor is where the model starts choosing the next step.",
+      "hints": [
+        "Ask, for each design, whether the order of the calls could be written down before the run starts."
+      ]
+    },
+    {
+      "id": "ctx-013-q03",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o1",
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 3,
+      "tags": [
+        "input-scoping",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "To be safe, a team passes the parent's whole conversation, now 40,000 tokens, into the prompt of each of five sub-agents. What does this do?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Each sub-agent re-reads the parent's clutter, and every delegation grows in cost with the conversation",
+          "correct": true,
+          "feedback": "Right: the sub-agents inherit the parent's window, so the isolation that kept their windows small is gone and the bill grows with the conversation."
+        },
+        {
+          "key": "b",
+          "text": "It makes the sub-agents more reliable, since more context can only help a model answer the question it is given",
+          "correct": false,
+          "feedback": "More context is not free help: irrelevant material is what distracts a model, and the point of isolation is a window scoped to the sub-task."
+        },
+        {
+          "key": "c",
+          "text": "Nothing changes in cost, because the repeated conversation will be served from the cache",
+          "correct": false,
+          "feedback": "Caching lowers the price of a re-read prefix at best; it does not shrink the window each sub-agent has to read, and five sub-agents still read it five times."
+        },
+        {
+          "key": "d",
+          "text": "Only the parent's window grows, since the sub-agents return short structured results",
+          "correct": false,
+          "feedback": "The returns may be short, but the inputs are now each at least 40,000 tokens; the growth is in the sub-agents' windows."
+        }
+      ],
+      "explanation": "Sections 7 and 8 call this the wrong pattern: passing the parent's full window into a sub-agent brings back every problem isolation was meant to remove, and the design pays the single agent's re-reads once per worker. Good sub-agent design is largely good input scoping.",
+      "hints": [
+        "Think about what each sub-agent's window contains after the change.",
+        "Compare the size of each sub-agent's input with the parent's window."
+      ]
+    },
+    {
+      "id": "ctx-013-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "sandboxing",
+        "vocabulary"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In this post, what does sandboxing a tool mean?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Running the tool in a locked-down container with reduced privileges so that it cannot harm the host",
+          "correct": false,
+          "feedback": "That is the security sense of the word, containment and privilege separation, which post 23 covers; this post means something else."
+        },
+        {
+          "key": "b",
+          "text": "Deciding what a tool's result contributes to the window, and keeping the rest out",
+          "correct": true,
+          "feedback": "Right: here sandboxing is output-scoping. The command's full output goes to a file and only the fields the model needs reach its window."
+        },
+        {
+          "key": "c",
+          "text": "Giving the tool to a separate sub-agent that has its own model and window",
+          "correct": false,
+          "feedback": "That is the sub-agent pattern; sandboxing is the second, structural species of isolation and needs no extra model call."
+        },
+        {
+          "key": "d",
+          "text": "Testing a tool on sample inputs before letting the agent call it in production",
+          "correct": false,
+          "feedback": "Testing a tool is good practice, but it is not what this post calls sandboxing."
+        }
+      ],
+      "explanation": "Section 6 defines sandboxing as running the tool somewhere whose noisy output never enters the model's window, and separates this output-scoping sense from the security sense of containment.",
+      "hints": [
+        "The section that introduces the term says which of two senses of the word it means."
+      ]
+    },
+    {
+      "id": "ctx-013-q05",
+      "type": "mcq",
+      "track": "connect",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 3,
+      "tags": [
+        "failure-modes",
+        "wsci"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Post 06 maps each of its five failure modes to the operations that fix it. For which two modes does it list isolate among the operations?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Distraction and confusion",
+          "correct": false,
+          "feedback": "Post 06 fixes both with select: tighter retrieval for distraction, and select of rules for confusion."
+        },
+        {
+          "key": "b",
+          "text": "Conflict and tool-storm",
+          "correct": false,
+          "feedback": "Tool-storm is right, but conflict's operations are select and compress: provenance stamps, a precedence rule and deduplication."
+        },
+        {
+          "key": "c",
+          "text": "Lost-in-the-middle and tool-storm",
+          "correct": true,
+          "feedback": "Right: lost-in-the-middle (compress, isolate) can split the work across sub-agents with shorter windows, and tool-storm (select, isolate) can give a sub-agent a small, scoped toolkit."
+        },
+        {
+          "key": "d",
+          "text": "Lost-in-the-middle and distraction",
+          "correct": false,
+          "feedback": "Lost-in-the-middle is right, but distraction is fixed by select alone: a lower top-k, a reranker, a scoped index."
+        }
+      ],
+      "explanation": "Post 06's table of fixes lists isolate for lost-in-the-middle (compress, isolate) and tool-storm (select, isolate). Both are failures of one overloaded window: too long an input, or too large a toolkit, which a sub-agent with a scoped window and scoped tools avoids.",
+      "hints": [
+        "Isolate helps where one window is overloaded, by length or by tools.",
+        "One of the two modes is about long inputs."
+      ],
+      "connects": [
+        "ctx-006"
+      ]
+    },
+    {
+      "id": "ctx-013-q06",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "contract",
+        "validation"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A sub-agent's prompt already says \"Do not return prose outside the JSON object.\" Give the reason the parent still checks each reply against the output schema in code.",
+      "answer": {
+        "model": "A prompt instruction is a request, not a guarantee: a sub-agent that can return prose will sometimes do it. The check in code catches a malformed reply at the boundary, before the parent acts on it.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess)\\b)(?=\\s*(?:\\S+\\s+){5}\\S)(?![\\s\\S]*\\b(no need|not needed|unnecessary|redundant|isn'?t needed|is not needed|pointless|not necessary)\\b)(?![\\s\\S]*\\b(prompt|instruction)s? (alone )?(guarantees?|ensures?|enforces?|is enough|are enough|suffices?|is sufficient|are sufficient)\\b)(?![\\s\\S]*\\b(models?|it|llms?|sub-?agents?) (always|reliably) (follows?|obeys?|complies|returns? (valid )?json|respects?)\\b)(?![\\s\\S]*\\bnever (returns?|produces?|writes?|outputs?) prose\\b)(?=[\\s\\S]*(\\bnot (a )?guarant|\\bno guarantee|\\bnot always\\b|doesn'?t always|does not always|won'?t always|\\bsometimes\\b|\\bcan\\b|\\bmay\\b|\\bmight\\b|\\bcould\\b|\\bstill\\b|\\bignor|\\bdisobey|\\brequest\\b|\\bonly asks?\\b|\\basks?\\b|unreliab|not reliab|\\bnot enforced|\\bdoesn'?t enforce|\\bdoes not enforce|\\bcan'?t enforce|\\bcannot enforce|non-?determin|probabilis|\\bslips?\\b|\\bdrift))(?=[\\s\\S]*(malformed|prose|invalid|\\bwrong|\\bbad\\b|broken|\\bbreak|error|mismatch|(doesn'?t|does not|not) match|\\bcatch|\\bcaught|\\bfail|propagat|before the parent|boundary|garbage|unexpected|missing|extra key|\\bschema|\\bformat))[\\s\\S]*$"
+        ]
+      },
+      "explanation": "Section 5: a prompt asks and code enforces. A sub-agent allowed to return prose will sometimes return prose, so the reply is validated against the schema at the integration boundary, where a malformed reply fails loudly instead of propagating; the snippet's prose reply is rejected this way.",
+      "hints": [
+        "Ask whether a model always does what its prompt says.",
+        "Think about what happens to a malformed reply that nobody checks."
+      ]
+    },
+    {
+      "id": "ctx-013-q07",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "sandboxing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A coding agent runs a command that prints thousands of log lines. In the sandbox pattern of this post, where does that full output go, and what does the model receive instead?",
+      "answer": {
+        "model": "The full output is captured to a file on disk, kept for a human to debug with; the model receives only a small structured result, the few fields a wrapper extracts (for example ok, exit code, warnings, a summary line).",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess)\\b)(?=\\s*(?:\\S+\\s+){5}\\S)(?![\\s\\S]*\\b(full|whole|entire|complete|all( of)?( the)?|raw) (output|log|stdout|logs|text)s? (goes|go|is sent|are sent|is passed|are passed|is pasted|are pasted|enters?|reaches?|gets?|is appended|are appended|is added|are added|is fed|are fed) (in)?(to )?(the )?(model|window|context|prompt)\\b)(?![\\s\\S]*\\b(model|llm|agent|window|context) (receives?|gets?|sees?|reads?) (the )?(full|whole|entire|complete|raw|all)\\b)(?![\\s\\S]*(?<!structured )(?<!small )(?<!extracted )(?<!json )(?<!wrapper's )(?<!filtered )(?<!summarised )\\b(output|log|logs|stdout|everything)( lines)? (goes|go|is sent|are sent|is passed|are passed|is pasted|are pasted|is given|are given|is appended|are appended|is added|are added|is fed|are fed) (in)?to (the )?(model|window|context|prompt)\\b)(?![\\s\\S]*\\b(output|log|logs|stdout) (is|are|gets?) (discarded|deleted|thrown away|lost)\\b)(?![\\s\\S]*\\b(discard|delete|throw away)s? (the )?(full |whole |entire )?(output|log|logs|stdout)\\b)(?=[\\s\\S]*(\\bfile|\\bdisk|\\blog file|\\.log\\b|\\bsaved\\b|\\bwritten\\b|\\bwrites?\\b|\\bstored?\\b|\\bkept\\b|\\bcaptured?\\b|\\bpersist))(?=[\\s\\S]*(structured|\\bfields?\\b|summary|\\bsmall\\b|\\bfew\\b|\\bjson\\b|\\bstatus\\b|exit code|\\bok\\b|success|\\bonly\\b|extract|\\bresult\\b|what it needs|needed|relevant))[\\s\\S]*$"
+        ]
+      },
+      "explanation": "Section 6's mechanism: the command runs in a child process, its output is captured to a file, a small wrapper extracts the fields the model needs, and only those fields return to the model. The snippet keeps a 133-line log on disk and passes 38 tokens.",
+      "hints": [
+        "Two destinations are involved: one for humans, one for the model.",
+        "Think of what the wrapper extracts."
+      ]
+    },
+    {
+      "id": "ctx-013-q08",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 5,
+      "tags": [
+        "cost",
+        "fan-out"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A one-shot job, with no tool calls and illustrative sizes: four documents of 6,000 tokens each and a 1,500-token preamble at the start of every window. One agent reads the preamble and all four documents. The isolated design gives each of four workers the preamble and one document, each worker answers in 500 tokens, and a merge call reads the preamble and the four answers. Give the input tokens of each design.",
+      "answer": {
+        "parts": [
+          {
+            "label": "one agent, input tokens",
+            "value": 25500,
+            "tolerance": 0,
+            "unit": "tokens"
+          },
+          {
+            "label": "four workers and the merge call, input tokens",
+            "value": 33500,
+            "tolerance": 0,
+            "unit": "tokens"
+          }
+        ]
+      },
+      "precision_note": "One agent: 1,500 + 4 × 6,000 = 25,500. Workers: 4 × (1,500 + 6,000) = 30,000; merge: 1,500 + 4 × 500 = 3,500; total 33,500. This is loop(prefix, 0, 0, 0, out) of snippets/isolation_cost.py with these sizes. Forgetting the merge call gives 30,000; paying the preamble once gives 29,000.",
+      "explanation": "Section 8's one-shot case: splitting pays the preamble once per window and adds a merge call that reads the workers' answers, so with no re-reading to save, the isolated design reads more input than the single agent.",
+      "hints": [
+        "Every window starts with the preamble.",
+        "Add the four worker inputs and the merge call's input."
+      ]
+    },
+    {
+      "id": "ctx-013-q09",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 6,
+      "tags": [
+        "cost",
+        "agent-loop"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent loop re-reads its whole window on every call. It starts at 1,000 tokens, makes 6 tool calls of 100 tokens each, each returning a 1,500-token result, and ends with a call that writes a 500-token answer (illustrative sizes). Give its total input tokens and its total cost at 3 dollars per million input tokens and 15 dollars per million output tokens.",
+      "answer": {
+        "parts": [
+          {
+            "label": "total input tokens",
+            "value": 40600,
+            "tolerance": 0,
+            "unit": "tokens"
+          },
+          {
+            "label": "total cost",
+            "value": 0.1383,
+            "tolerance": 0.002,
+            "unit": "dollars"
+          }
+        ]
+      },
+      "precision_note": "Seven calls; call c (0 to 6) reads 1,000 + c × (100 + 1,500). Input = 7 × 1,000 + 1,600 × (0 + 1 + ... + 6) = 7,000 + 33,600 = 40,600; output = 6 × 100 + 500 = 1,100. Cost = 40,600 × 3 / 1,000,000 + 1,100 × 15 / 1,000,000 = 0.1218 + 0.0165 = 0.1383. This is loop(1000, 6, 100, 1500, 500) of snippets/isolation_cost.py. Counting each result once instead of re-reading gives 16,600 tokens (0.0663 dollars), and pricing the output at the input rate gives 0.1251 dollars; the tolerance accepts 0.138 and 0.14 and rejects both.",
+      "explanation": "Section 8's loop() function: every call re-reads the prefix and everything appended before it, so the input grows with the square of the number of steps. The tool results dominate the bill long before the answer is written.",
+      "hints": [
+        "List what the window holds at each of the seven calls.",
+        "Call c reads the starting 1,000 tokens plus c rounds of call and result."
+      ]
+    },
+    {
+      "id": "ctx-013-q10",
+      "type": "numeric",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 6,
+      "tags": [
+        "cost",
+        "agent-loop",
+        "window-size"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Take the agent-loop case of this post: a 2,000-token preamble, five pieces of work, four tool calls per piece of 100 tokens each, each returning 2,000 tokens. Each loop ends with one more call that writes the answer or the result after its last tool result. How many input tokens does that final call of the single agent read, and how many does the final call of one worker read?",
+      "answer": {
+        "parts": [
+          {
+            "label": "single agent, last call",
+            "value": 44000,
+            "tolerance": 0,
+            "unit": "tokens"
+          },
+          {
+            "label": "one worker, last call",
+            "value": 10400,
+            "tolerance": 0,
+            "unit": "tokens"
+          }
+        ]
+      },
+      "precision_note": "Single agent: its last call follows 20 rounds of call and result, so it reads 2,000 + 20 × (100 + 2,000) = 44,000. Worker: its last call follows 4 rounds, so it reads 2,000 + 4 × 2,100 = 10,400. Both are the c = steps term of loop() in snippets/isolation_cost.py. Leaving out the 100-token calls gives 42,000 and 10,000.",
+      "explanation": "Section 8: isolation keeps each worker's window to its own results, so a worker never reads more than its own four rounds, while the single agent's window holds all twenty. This is the window size the model has to read, which prompt caching does not shrink.",
+      "hints": [
+        "Each round of the loop appends one tool call and one tool result.",
+        "The single agent has done all five pieces before its last call; a worker only its own."
+      ]
+    },
+    {
+      "id": "ctx-013-q11",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 15,
+      "tags": [
+        "contract",
+        "validation",
+        "json"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A literature sub-agent's output contract is a JSON object with exactly one key, `papers`, holding a list of at most 3 objects, each with exactly the keys `title` and `doi`, both non-empty strings. The starter `validate` parses the reply but accepts almost anything that parses. Make it raise `ValueError` for every reply that breaks the contract, and return the list of `(title, doi)` pairs otherwise.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "import json\n\n\ndef validate(raw):\n    \"\"\"Check a sub-agent's reply against its output contract.\n\n    The contract: a JSON object with exactly one key, \"papers\", holding a list of at most 3 objects,\n    each with exactly the keys \"title\" and \"doi\", both non-empty strings.\n    Return a list of (title, doi) tuples; raise ValueError for any reply that breaks the contract.\n    \"\"\"\n    data = json.loads(raw)\n    return [(p[\"title\"], p[\"doi\"]) for p in data[\"papers\"]]\n",
+      "solution": "import json\n\n\ndef validate(raw):\n    \"\"\"Check a sub-agent's reply against its output contract.\n\n    The contract: a JSON object with exactly one key, \"papers\", holding a list of at most 3 objects,\n    each with exactly the keys \"title\" and \"doi\", both non-empty strings.\n    Return a list of (title, doi) tuples; raise ValueError for any reply that breaks the contract.\n    \"\"\"\n    data = json.loads(raw)  # prose raises json.JSONDecodeError, a ValueError\n    if not isinstance(data, dict) or set(data) != {\"papers\"}:\n        raise ValueError(\"the reply must be an object with the single key papers\")\n    papers = data[\"papers\"]\n    if not isinstance(papers, list) or len(papers) > 3:\n        raise ValueError(\"papers must be a list of at most 3 entries\")\n    out = []\n    for p in papers:\n        if not isinstance(p, dict) or set(p) != {\"title\", \"doi\"}:\n            raise ValueError(\"each paper must have exactly title and doi\")\n        if not all(isinstance(p[k], str) and p[k].strip() for k in (\"title\", \"doi\")):\n            raise ValueError(\"title and doi must be non-empty strings\")\n        out.append((p[\"title\"], p[\"doi\"]))\n    return out\n",
+      "tests": "import json\n\ngood = {\"papers\": [{\"title\": \"Lost in the Middle\", \"doi\": \"10.1162/tacl_a_00638\"},\n                   {\"title\": \"AutoGen\", \"doi\": \"10.48550/arXiv.2308.08155\"}]}\nassert validate(json.dumps(good)) == [(\"Lost in the Middle\", \"10.1162/tacl_a_00638\"),\n                                      (\"AutoGen\", \"10.48550/arXiv.2308.08155\")]\nassert validate(json.dumps({\"papers\": []})) == []\nthree = {\"papers\": [{\"title\": f\"T{i}\", \"doi\": f\"10.1/{i}\"} for i in range(3)]}\nassert len(validate(json.dumps(three))) == 3\n\n\ndef rejects(reply):\n    try:\n        validate(reply)\n    except ValueError:\n        return True\n    return False\n\n\nbad = [\n    \"Here are the three papers you asked for.\",                                    # prose\n    json.dumps([{\"title\": \"A\", \"doi\": \"10.1/a\"}]),                                 # a list, not an object\n    json.dumps({\"papers\": good[\"papers\"], \"note\": \"found quickly\"}),               # an extra top-level key\n    json.dumps({\"results\": good[\"papers\"]}),                                       # the wrong key\n    json.dumps({\"papers\": \"Lost in the Middle\"}),                                  # papers not a list\n    json.dumps({\"papers\": [{\"title\": f\"T{i}\", \"doi\": f\"10.1/{i}\"} for i in range(4)]}),   # four papers\n    json.dumps({\"papers\": [{\"title\": \"A\"}]}),                                      # doi missing\n    json.dumps({\"papers\": [{\"title\": \"A\", \"doi\": \"10.1/a\", \"year\": 2023}]}),       # an extra field\n    json.dumps({\"papers\": [{\"title\": \"A\", \"doi\": 1234}]}),                         # doi not a string\n    json.dumps({\"papers\": [{\"title\": \"\", \"doi\": \"10.1/a\"}]}),                      # empty title\n    json.dumps({\"papers\": [{\"title\": \"A\", \"doi\": \"\"}]}),                           # empty doi\n    json.dumps({\"papers\": [\"Lost in the Middle\"]}),                                # entry not an object\n]\nfor reply in bad:\n    assert rejects(reply), \"accepted a reply that breaks the contract: \" + reply\nprint(\"all contract checks pass\")\n",
+      "entry": "python -c \"exec(open('solution.py').read()); exec(open('tests.py').read())\"",
+      "expected_output": "all contract checks pass\n",
+      "explanation": "Section 5: the second half of a contract is a check of the reply in code at the boundary, before the parent uses it. The check has to cover the shape (an object with one key), the bounds (at most 3 entries), the fields of every entry and their types; json.JSONDecodeError is a ValueError, so prose is rejected by the parse itself.",
+      "hints": [
+        "List every way a reply can break the contract: the top level, the list, and each entry.",
+        "Check the keys with set equality so that missing and extra keys both fail, and check the length and the types."
+      ]
+    },
+    {
+      "id": "ctx-013-q12",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "sandboxing",
+        "mechanism"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the steps of a sandboxed tool call in the order they happen, from the agent's request to the model's next call.",
+      "items": [
+        {
+          "key": "a",
+          "text": "A small wrapper extracts the fields the model needs."
+        },
+        {
+          "key": "b",
+          "text": "The agent calls a tool that runs the command."
+        },
+        {
+          "key": "c",
+          "text": "Only the extracted fields are returned to the model."
+        },
+        {
+          "key": "d",
+          "text": "The command runs in a child process."
+        },
+        {
+          "key": "e",
+          "text": "The child process's output is captured to a file."
+        }
+      ],
+      "answer": [
+        "b",
+        "d",
+        "e",
+        "a",
+        "c"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 6 lists the mechanism: the agent calls a tool, the tool runs the command in a child process, the output is captured to a file kept for debugging, a wrapper extracts the fields the model needs, and only those fields return to the model.",
+      "hints": [
+        "The output has to be captured before anything can be extracted from it."
+      ]
+    },
+    {
+      "id": "ctx-013-q13",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "topologies"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each topology to the work it fits and its main risk. One entry on the right fits none of the three.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Sequential pipeline"
+        },
+        {
+          "key": "b",
+          "text": "Fan-out and fan-in"
+        },
+        {
+          "key": "c",
+          "text": "Supervisor and workers"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "The same review over ten files; the bugs collect in the merge step"
+        },
+        {
+          "key": "b",
+          "text": "One agent with one long, compacted context; nothing is split at all"
+        },
+        {
+          "key": "c",
+          "text": "Parse, then analyse, then format; the latency of the steps adds up"
+        },
+        {
+          "key": "d",
+          "text": "A decomposition that is itself part of the work; the coordinator may do the work itself"
+        }
+      ],
+      "answer": {
+        "a": "c",
+        "b": "a",
+        "c": "d"
+      },
+      "explanation": "Section 4: a sequential pipeline fits clear hand-offs and pays in latency; fan-out and fan-in fits doing the same thing for each item and concentrates its bugs in the merge; a supervisor fits open-ended problems and risks doing every worker's job in its own window. A single agent with a compacted context is section 9's alternative, not a topology.",
+      "hints": [
+        "Ask which wiring does the same task many times in parallel."
+      ]
+    },
+    {
+      "id": "ctx-013-q14",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "9",
+      "est_minutes": 12,
+      "tags": [
+        "steelman",
+        "multi-agent",
+        "contract-test"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A team proposes a report writer built from three sub-agents running in parallel on one shared draft: a researcher that adds sources, a writer that rewrites sections, and a critic that edits whatever it judges weak. They pass messages to each other as free text. Critique the design with Cognition's argument and this post's contract test, and propose what to keep and what to change.",
+      "kind": "critique",
+      "solution": "1. **The contract test fails.** None of the three has a fully specified input or a structured, finite output: each reads a draft that the others are changing, and returns free text (section 3). The work is not self-contained, because every agent needs the others' evolving state.\n2. **Cognition's principles apply directly.** The agents share only slices of each other's reasoning, against the first principle (share context and full traces); and their parallel edits carry implicit decisions that collide, against the second (actions carry implicit decisions, and conflicting decisions carry bad results). The essay's conclusion, that collaborating agents give fragile systems, is the predicted symptom: the critic and the writer undo each other's changes.\n3. **It is the team-of-personalities anti-pattern** of section 10: roles without contracts, impressive in a demo, unreliable on real tasks.\n4. **What to keep.** The source search passes the test: given a topic, return up to N sources with titles, identifiers and one-line relevance notes. That can be a sub-agent with a validated output schema, run in parallel if there are several topics.\n5. **What to change.** Writing and critique share one evolving draft, so they belong in a single agent with the full trace, as Cognition recommends; a critique pass can be a later step of that agent, or a separate call whose input is the finished draft and whose output is a structured list of issues, applied by the writer, never parallel edits to the same text.",
+      "rubric": [
+        {
+          "criterion": "Applies the three-part contract test and says which parts fail and why",
+          "points": 2
+        },
+        {
+          "criterion": "Connects the failure to Cognition's two principles (shared context, conflicting implicit decisions)",
+          "points": 2
+        },
+        {
+          "criterion": "Identifies a sub-task that does pass the test and gives it a structured output",
+          "points": 2
+        },
+        {
+          "criterion": "Keeps the shared-draft work in one agent or makes the critique a sequential step with a structured output",
+          "points": 2
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Sections 3, 9 and 10: Cognition's failures trace to sub-tasks isolated without clean contracts. The reconciliation is to isolate only what passes the test (here, the source search) and keep the shared, evolving reasoning (the draft) inside one agent.",
+      "hints": [
+        "Apply the three tests of section 3 to each of the three roles.",
+        "Ask which of the three roles could return a result whose shape is known in advance."
+      ]
+    },
+    {
+      "id": "ctx-013-q15",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 12,
+      "tags": [
+        "compress-vs-isolate",
+        "design"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A coding agent's history fills with test logs and file dumps from its own tool calls, and quality drops late in long sessions. One proposal is to compress the history with a rolling summary, as in post 12; another is to move the test runs and file reads into sub-agents. Using post 06's account of the failure and this post's cost arithmetic, decide which change, or which combination, to make first, and say what each costs.",
+      "kind": "connect",
+      "solution": "1. **The failure.** Long sessions whose windows fill with tool output show lost-in-the-middle, and possibly tool-storm if the payloads are large; post 06 lists compress and isolate as the operations behind their fixes.\n2. **Compression (post 12)** shrinks what is already in the window: cheap to add, but lossy, and it runs after the noise has entered and been paid for at least once; a summary can drop the one log line that later matters.\n3. **Isolation** keeps the noise out in the first place: a test-runner sub-agent or a sandbox wrapper returns a structured result (pass or fail and the failing names), so the parent's window grows by tens of tokens instead of thousands, as the snippet of section 2 shows (1,418 tokens in the worker, 33 in the parent).\n4. **Cost.** In section 8's loop case, keeping each piece's tool results out of the shared window cut the input from 483,000 to 173,000 illustrative tokens; the price is a preamble per worker, extra calls, and a contract that must be clean. Test runs and file reads pass the contract test; the reasoning about the code does not, so it stays in the parent.\n5. **Decision.** Sandbox or isolate the noisy tools first (the cheapest and most direct fix), then compress what remains of a long history with a rolling summary; measure both on a replay of long sessions.",
+      "rubric": [
+        {
+          "criterion": "Names the failure in post 06's terms and the operations post 06 assigns to it",
+          "points": 2
+        },
+        {
+          "criterion": "States what compression costs: lossy, applied after the tokens entered",
+          "points": 2
+        },
+        {
+          "criterion": "Uses this post's arithmetic or snippet output to show what isolation saves and costs",
+          "points": 2
+        },
+        {
+          "criterion": "Applies the contract test to decide what to isolate and keeps the shared reasoning in the parent",
+          "points": 2
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Section 8 shows that isolation saves most where one window would otherwise re-read other work's tool results, and section 3 limits it to sub-tasks with clean contracts. Post 06 lists compress and isolate together for lost-in-the-middle; the two combine rather than compete.",
+      "hints": [
+        "Ask whether the noisy tool output has to enter the parent's window at all.",
+        "Check which of the tool calls pass the contract test of section 3."
+      ],
+      "connects": [
+        "ctx-012",
+        "ctx-006"
+      ]
+    },
+    {
+      "id": "ctx-013-q16",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 3,
+      "tags": [
+        "prompt-caching",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In the agent-loop case of this post, the single agent's re-read window is mostly a prefix that a prompt cache could serve. Which statement about turning on prompt caching for the single agent is right?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "It removes the case for isolation, since cached re-reads cost nothing at all",
+          "correct": false,
+          "feedback": "Cache reads are cheaper, not free (0.1 times the base input price for most Anthropic models, as post 05 cites), and the window is just as full."
+        },
+        {
+          "key": "b",
+          "text": "It narrows the dollar gap, but the model still reads the same full window",
+          "correct": true,
+          "feedback": "Right: caching bills a re-read prefix at a fraction of the input rate, but the tokens are still in the window the model attends over on every call."
+        },
+        {
+          "key": "c",
+          "text": "It shrinks the single agent's window, since cached tokens leave the context",
+          "correct": false,
+          "feedback": "Cached tokens are still part of the context; the cache saves recomputation and price, not room in the window."
+        },
+        {
+          "key": "d",
+          "text": "It makes the isolated design cost more, since workers cannot use a cache",
+          "correct": false,
+          "feedback": "Workers can cache their own preambles too; and caching does not change what each window contains."
+        }
+      ],
+      "explanation": "Section 8: prompt caching bills a re-read prefix at a fraction of the input rate and so narrows the dollar gap of the loop case, but it does not shrink the window the model has to read. Isolation's main gain, a window holding only one piece's results, is untouched.",
+      "hints": [
+        "Separate what a cache changes (price, compute) from what it does not (the window's contents).",
+        "Post 05 gives the cache-read price as a multiple of the base rate."
+      ]
+    }
+  ]
+}

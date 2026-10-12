@@ -1,91 +1,105 @@
-# 13 · Isolate strategies
+# 13 - Isolate strategies
 
-> **TL;DR.** *Isolate* is the WSCI operation that gives up on a single context window and uses several. The two patterns that recur in production are **sub-agents** (a parent decomposes a task and delegates pieces to children with their own clean contexts) and **sandboxing** (tool execution happens in a process whose noisy output never enters the model's context). Done well, isolation is among the strongest structural quality levers once retrieval is in place. Done badly, it multiplies the token bill while introducing coordination bugs that the single-agent design did not have.
+> **TL;DR.** Isolate is the operation of write, select, compress, isolate (WSCI) that stops using a single context window and uses several. Its two recurring patterns are sub-agents, where a parent hands a scoped task to a child with a clean window of its own and gets back only a structured result, and sandboxing, where a tool runs in a process whose noisy output never enters the model's window. Isolation pays when a sub-task has a clean input and output contract, and costs more than it saves when it does not; this post gives the test, the topologies, the contract, the cost arithmetic and the case against splitting at all.
 >
-> **After reading this you will be able to:**
-> - Decide when a task should be isolated and when it should not.
-> - Specify the input and output contracts a sub-agent needs to be safe to deploy.
-> - Pick among sequential, fan-out / fan-in, and supervisor topologies.
+> **Prerequisites:** [Post 07](../07-write-select-compress-isolate/index.md).
+> **Safe to skip?** Skip it if a sub-agent's input and output contract can already be written, a sandbox wrapper can already be built, and the token cost of a fan-out can already be set against that of a single agent.
+>
+> **After reading, you will be able to:**
+>
+> - Decide whether a task should be isolated by testing its input contract, its output contract and its independence from the parent's state.
+> - Specify the input and output contracts of a sub-agent, and validate its result against the output contract before the parent uses it.
+> - Choose among sequential, fan-out and fan-in, and supervisor topologies, and say which of them leave the next step to the model.
+> - Keep noisy tool output out of the window with a sandbox that returns only the fields the model needs.
+> - Work out the token cost of an isolated design against a single agent, and say when isolation lowers the bill and when it raises it.
 
-![Sub-agent isolation](diagrams/06-subagent-isolation.svg)
+![A parent window of 26 tokens sends a typed task to a worker window, which fills with three test-runner calls and their logs, 9 messages and 1,418 tokens. Only a validated result returns, and the parent grows by 33 tokens; none of the 85 log lines reaches it.](diagrams/01-subagent-isolation.svg)
 
-*A parent agent delegates a scoped task to a sub-agent with its own clean context; only the structured result returns, leaving the parent's window uncluttered.*
+*The worker's window holds the noise; the parent's window holds the answer. Counts printed by snippets/orchestrator.py.*
 
 ---
 
-## 1. Why isolation matters
+## 1. The question: when is one window not enough?
 
-Single-agent designs hit a wall around the place where four things happen at once: the conversation is long, the toolbox is large, multiple sub-tasks compete for attention, and at least one sub-task generates noisy intermediate output (logs, search results, file dumps). Beyond that wall, every WSCI (write / select / compress / isolate) lever applied to a single context (bigger compression, harder selection, tighter writing) gets diminishing returns. Isolation breaks the wall by *splitting the problem*: each piece runs in its own context, with its own tools, its own memory, its own budget. Anthropic reports meaningful quality gains from this decomposition on research-style tasks, at a corresponding rise in token cost (Anthropic, "How we built our multi-agent research system", 2025).
+A single context window comes under strain when the conversation is long, the toolbox large, several sub-tasks compete for attention, and at least one produces noisy output (logs, search results, file dumps). The other operations of [post 07](../07-write-select-compress-isolate/index.md) (tighter writing, harder selection, heavier compression) then give less and less, because all the work still shares one window; [post 06](../06-context-failure-modes/index.md) lists isolate among the fixes for lost-in-the-middle and tool-storm, two failures of one overloaded window. Isolation changes the structure instead: each piece of work runs in its own window, with its own tools and budget. The question of this post is when that split is worth what it costs.
 
-The structural argument is symmetric to the one for microservices over monoliths. A sub-task with a clean contract is a service; the orchestrator is a router; the failure modes are smaller, but they are different, and the cost of getting the contracts wrong is higher.
+Anthropic's account of its Research feature ("How we built our multi-agent research system", June 2025) gives one measured answer for research tasks. A system with Claude Opus 4 as the lead agent and Claude Sonnet 4 sub-agents outperformed a single Claude Opus 4 agent by 90.2% on Anthropic's internal research evaluation; the same post reports that, in Anthropic's data, agents use about 4 times more tokens than chat interactions and multi-agent systems about 15 times more. Better answers and a larger bill arrive together.
 
-**Workflow versus agent.** Before reaching for sub-agents, it helps to name the two shapes isolation can take. Anthropic draws a useful line between a *workflow* (LLM calls wired together on predetermined paths, where the control flow is written by the engineer) and an *agent* (where the model itself decides the next step at run time) (Anthropic, "Building Effective AI Agents", 2024). A workflow is deterministic and cheaper to reason about; an agent is flexible but harder to bound. The three topologies in Section 4 span this line: sequential and fan-out / fan-in are workflows; the supervisor is an agent. The default advice follows from it: prefer the simplest composition that solves the problem, and add autonomy only when a fixed path cannot.
+**Workflow versus agent.** A multi-call system takes one of two shapes. Anthropic's "Building Effective AI Agents" (December 2024) defines workflows as systems where models and tools are orchestrated through predefined code paths, and agents as systems where the model directs its own process and tool use. A workflow is predictable and cheaper to reason about; an agent is flexible and harder to bound. The same post recommends the simplest solution possible, adding complexity only when needed, and this post does the same.
 
 ---
 
 ## 2. The pattern: sub-agents
 
-A sub-agent is an LLM call (or chain of calls) launched by a parent agent with three things scoped: an **input** (a focused task description and the data it needs), a **toolkit** (only the tools relevant to this sub-task), and an **output contract** (the shape of the result the parent expects).
+A sub-agent is a model call, or a loop of calls, launched by a parent agent with three things scoped: an **input** (a focused task description and the data it needs), a **toolkit** (only the tools this sub-task uses) and an **output contract** (the shape of the result the parent expects).
 
-The parent does not see the sub-agent's intermediate work. It sees the input it sent and the output it received. The intermediate context (tool calls, retries, scratchpad notes, full document reads) lives and dies inside the sub-agent's window.
+The parent sees the input it sent and the output it received, and nothing in between: the tool calls, retries, scratchpad notes and full document reads live and die inside the sub-agent's window.
 
-This is the property that makes isolation powerful. A research sub-agent that reads, for example, ten large documents to answer a single question contributes *one short answer* to the parent's context, not the full source material behind it. A debugging sub-agent that tries seven hypotheses contributes *the one that worked*, not the six that didn't. The parent's context stays focused on the problem it is solving; the sub-agent's context stays focused on the piece it was asked to solve.
+That property is the point. A research sub-agent that reads ten long documents adds one short answer to the parent's window, not the documents; a debugging sub-agent that tries seven hypotheses adds the one that worked, not the six that failed.
+
+The snippet `snippets/orchestrator.py` shows the property without a framework. A release agent delegates a test run to a worker, the worker calls a test-runner tool on three files whose verbose logs fill its own window, and the parent appends only the worker's validated result to its own message list. The worker's model is a scripted stand-in that makes the tool calls a model would make, so the script runs offline with no application programming interface (API) key; it shows which tokens land in which window, counted with the `o200k_base` encoding of `tiktoken`. Running `uv run python posts/13-isolate-strategies/snippets/orchestrator.py` from the series root prints:
+
+```text
+worker window: 9 messages, 1418 tokens (3 test logs, 85 log lines)
+parent window: 26 tokens before the call, 59 after (+33)
+returned to the parent: {"passed": 73, "failed": ["tests/test_db.py::test_migration_rollback", "tests/test_auth.py::test_token_expiry"]}
+log lines in the parent window: 0
+a prose reply is rejected by the contract check: JSONDecodeError
+```
+
+The worker's window held 1,418 tokens; the parent's grew by 33, and the script asserts that none of the 85 log lines reached it. The figure at the top of the post draws the two windows side by side.
 
 ---
 
 ## 3. When to isolate (and when not to)
 
-The single rule worth memorising:
+The rule:
 
 > **Isolate when the sub-task has a clean input contract and a clean output contract. Do not isolate otherwise.**
 
-A "clean contract" means three things:
+A clean contract means three things, all at once:
 
-1. **The input is fully specified.** The sub-agent does not need to ask the parent clarifying questions. If it does, the round-trip cost defeats the saving.
-2. **The output is structured and finite.** The parent knows what shape of result to expect (a JSON object, a list of titles, a single number). The sub-agent cannot return "a conversation".
-3. **The work is meaningfully self-contained.** The sub-agent does not need ongoing access to the parent's evolving state.
+1. **The input is fully specified.** The sub-agent does not need to ask the parent clarifying questions. If it does, the round trips cost more than the split saves.
+2. **The output is structured and finite.** The parent knows what shape of result to expect (a JavaScript Object Notation (JSON) object, a list of titles, a single number). A sub-agent cannot return "a conversation".
+3. **The work is self-contained.** The sub-agent does not need ongoing access to the parent's evolving state.
 
-![The three-part contract test, with five example sub-tasks each marked yes, no, or borderline](diagrams/02-isolate-or-not.svg)
-
-*All three criteria have to hold at once. The five examples are what calibrate the rule against real work.*
-
-A few examples to anchor the rule.
+Five example tasks calibrate the rule:
 
 | Task | Isolate? | Why |
 |---|---|---|
-| "Find the three most relevant papers and return their titles + DOIs" | **Yes** | Input clear; output structured; self-contained |
-| "Read this 200-page contract and return a summary" | **Yes** | Input clear; output structured; the source never needs to enter the parent context |
-| "Run the test suite and return pass/fail + failing-test names" | **Yes** | Tool result is enormous; structured output is small |
+| "Find the three most relevant papers and return their titles and digital object identifiers" | **Yes** | Input clear; output structured; self-contained |
+| "Read this 200-page contract and return a summary" | **Yes** | Input clear; output bounded; the source never needs to enter the parent's window |
+| "Run the test suite and return pass or fail and the failing tests' names" | **Yes** | The tool output is large; the structured result is small |
 | "Help me think through the architecture of this feature" | **No** | No clean output contract; the value is the conversation |
-| "Decide whether to escalate this ticket" | **Borderline** | Yes if the rules are documented; no if the decision needs context the parent has |
+| "Decide whether to escalate this ticket" | **Borderline** | Yes if the escalation rules are written down; no if the decision needs context only the parent holds |
 
-When a sub-task fails this test, *do not* try to isolate it anyway with prompt engineering. The result is the worst of both worlds: a chatty sub-agent that needs context the parent has to reload, paying twice for tokens to get a worse answer than a single agent would have produced.
+Isolating a sub-task that fails this test gives the worst of both designs: a chatty sub-agent that needs context the parent has to reload, paying twice for a worse answer.
 
 ---
 
 ## 4. The three topologies
 
-![Three multi-agent wirings drawn side by side: a sequential pipeline, fan-out and fan-in, and a supervisor with workers](diagrams/01-three-topologies.svg)
+Three wirings cover the designs this series uses, drawn side by side below.
 
-*The first two are workflows, with the control flow written by the engineer. Only the third hands the next step to the model.*
+![Three panels: a sequential chain of workers A, B and C; a parent fanning out to N parallel workers whose results a merge step combines; and a supervisor exchanging calls with three workers in a loop. The first two are marked as workflows with the flow in code; under the third, the model picks the next step.](diagrams/02-three-topologies.svg)
 
-Three ways to wire sub-agents together account for almost every production multi-agent system.
+*In the first two the engineer writes the control flow; only the supervisor hands the next step to the model.*
 
-**Sequential pipeline.** Sub-agent A produces an output that is the input to sub-agent B, whose output is the input to sub-agent C. Each sub-agent has a single job. The pattern fits clear hand-offs: parse → analyse → format. The risk is end-to-end latency (each step is serial); the strength is auditability (each stage's input and output is logged independently).
+**Sequential pipeline.** Sub-agent A's output is sub-agent B's input, and B's output is C's. Each sub-agent has one job, and the pattern fits clear hand-offs: parse, then analyse, then format. The risk is latency, because every step waits for the one before; the strength is auditability, because each stage's input and output can be logged on its own. "Building Effective AI Agents" calls this prompt chaining.
 
-**Fan-out / fan-in (map-reduce).** A parent issues *N* identical sub-tasks in parallel; each returns a partial result; the parent (or a final reducer sub-agent) merges them. The pattern fits "do this thing for each of these items": research three competitors, summarise each chapter, run the same diff against ten files. Latency is the latency of the slowest worker. Cost scales linearly with *N*. The reduction step is where most bugs hide: the merging logic is what guarantees consistency.
+**Fan-out and fan-in (map-reduce).** A parent issues *N* sub-tasks of the same kind in parallel, and the parent or a final reducer call merges their partial results. The pattern fits "do this for each of these items": research three competitors, summarise each chapter, review ten files. The latency is that of the slowest worker, the token cost grows linearly with *N* (section 8), and the merge step is where the bugs collect, because it is the one place the partial results meet. The same post calls it parallelisation by sectioning.
 
-**Supervisor / worker.** A persistent supervisor agent decides, turn by turn, which worker to call and how to combine results. The pattern fits open-ended problems where the decomposition itself is part of the work: agentic research, complex coding tasks, end-to-end customer-support sessions. The supervisor's prompt is the most carefully engineered piece of the system; without disciplined prompting it becomes a generalist that re-implements every worker's behaviour and the workers become decorative. Concretely: a supervisor that is supposed to delegate to a coding worker starts writing the patch itself inside its own context, so the worker is never called and its clean isolated window buys nothing.
+**Supervisor and workers.** A supervisor model decides, call by call, which worker to call next and how to combine the results. The pattern fits open-ended problems where the decomposition is itself part of the work: agentic research, complex coding tasks, long support sessions. Its prompt needs the most care; without it, the supervisor becomes a generalist that does every worker's job itself: told to delegate a patch, it writes the patch in its own window, and the worker's clean window buys nothing.
 
-A practical rule: **start with sequential or fan-out / fan-in.** Reach for supervisor topologies only when the decomposition genuinely cannot be planned ahead of time.
+The first two are workflows in Anthropic's sense. The supervisor is where the model starts choosing the next step. Anthropic's nearest pattern, orchestrator-workers (a central model breaks a task down, delegates the parts and synthesises the results), is still listed among its workflows; a supervisor that also loops until it judges the task finished sits on the agent side of the line. The practical rule: **start with a sequential or fan-out design**, and reach for a supervisor only when the decomposition cannot be planned ahead of time.
 
 ---
 
 ## 5. Designing the contract
 
-The sub-agent's prompt is half spec and half guard-rail. A skeleton that travels well:
+A sub-agent's prompt is half specification and half guard-rail. A skeleton that travels well:
 
-```
+```text
 You are the {role} sub-agent.
 
 Your task: {one paragraph, no ambiguity}.
@@ -109,118 +123,168 @@ Constraints:
   { "error": "budget_exhausted", "partial": <best effort> }.
 ```
 
-The constraints section is where most novice designs are weakest. A sub-agent that *can* return prose will return prose, sometimes. A sub-agent that *can* exceed its budget will exceed its budget, sometimes. The constraints are the contract.
+The constraints are where first designs are weakest. A sub-agent allowed to return prose will sometimes return prose; one allowed to exceed its budget will sometimes exceed it.
 
-A second discipline that pays for itself: **validate the sub-agent's output against the schema** before the parent uses it. A small schema check (Pydantic, Zod, JSON Schema) catches the malformed-output case at the integration boundary instead of letting it propagate.
+A prompt asks; code enforces. The other half of the contract is a check of the reply against the output schema at the boundary, before the parent uses it, so that a malformed reply fails loudly instead of propagating. In `snippets/orchestrator.py` both halves are a few lines of the standard library:
+
+```python
+@dataclass(frozen=True)
+class TestTask:  # the input contract: everything the worker needs, and nothing else
+    paths: list[str]
+
+
+@dataclass(frozen=True)
+class TestReport:  # the output contract: structured and finite
+    passed: int
+    failed: list[str]
+
+
+def validate(raw: str) -> TestReport:
+    """Check the worker's reply against the output contract before the parent uses it."""
+    data = json.loads(raw)  # a prose reply fails here
+    ok = (isinstance(data, dict) and set(data) == {"passed", "failed"}
+          and isinstance(data["passed"], int) and isinstance(data["failed"], list)
+          and all(isinstance(name, str) for name in data["failed"]))
+    if not ok:
+        raise ValueError("the reply does not match the output contract")
+    return TestReport(data["passed"], data["failed"])
+```
+
+The last line of the output in section 2 is this check at work: a prose reply ("All tests passed except two, see above.") is rejected before the parent reads it. A schema library (Pydantic, Zod, JSON Schema) does the same job at scale.
 
 ---
 
 ## 6. The pattern: sandboxing
 
-Sandboxing is the second species of isolation, and it is structural rather than agentic. The principle: **execute the tool somewhere whose noisy output never enters the model's context.** A note on the word: *sandboxing* here means output-scoping (deciding what a tool result contributes to the context), not the security sense of containment and privilege isolation, which Post 23 covers. The two share a name and a spirit (keep the dangerous thing away from the model) but solve different problems.
+Sandboxing is the second species of isolation, and it is structural rather than agentic. The principle: **run the tool somewhere whose noisy output never enters the model's window.** Sandboxing here means output-scoping, deciding what a tool result contributes to the window, not the security sense of containment and privilege separation, which [post 23](../23-security/index.md) covers.
 
-The motivating example is `npm install`. A coding agent runs `npm install` to set up a project; the command produces thousands of lines of progress logs, deprecation warnings, and peer-dependency complaints, of which the model needs to know one fact (it succeeded) or three (it failed, the failing package, the failing line). Piping the entire stdout into the model's next prompt is wasteful and distracting; piping a structured `{ ok: true, duration_ms: 8742 }` is sufficient.
+The motivating example is `npm install`. A coding agent runs it to set up a project; it prints pages of progress lines, deprecation warnings and peer-dependency complaints, of which the model needs one fact (it succeeded) or three (it failed, the failing package, the failing line). Pasting the whole output into the next call is wasteful and distracting.
 
 The mechanism:
 
 - The agent calls a tool that runs the command in a child process.
-- The child process's stdout / stderr is captured to a file (kept for debugging).
-- A small wrapper extracts the structured result the model actually needs.
-- *Only the structured result returns to the model.*
+- The child process's standard output and error are captured to a file, kept for debugging (the snippet's lives in a temporary directory).
+- A small wrapper extracts the fields the model needs.
+- Only those fields return to the model.
 
-For the model, the rest of the output does not exist. For the human debugger, it is one `cat` away.
+`snippets/sandbox.py` does exactly this with a stand-in install command (a child process that prints a package-manager-style log; nothing is installed). Its wrapper is one function, and `uv run python posts/13-isolate-strategies/snippets/sandbox.py` prints:
 
-The pattern generalises. **Code interpreter results** can be sandboxed (return the value, not the print stream). **Web-fetch results** can be sandboxed (return the cleaned text, not the raw HTML). **Database queries** can be sandboxed (return the rows, not the connection chatter). Anything where the *signal* of a tool result is small relative to its *noise* is a sandboxing candidate.
+```text
+full log: 133 lines, 2385 tokens (kept in install.log)
+returned to the model: {"ok": true, "exit_code": 0, "warnings": 12, "summary": "added 120 packages in 8s", "log": "install.log"}
+38 tokens, 63 times fewer than the full log
+```
 
-Sandboxing is mechanically the easiest thing in this post and one of the largest practical wins; it lives in the tooling layer rather than the model layer, which is part of why it is often missed in agent design discussions.
+![A child process prints a 133-line install log of 2,385 tokens to a file on disk; a wrapper passes a five-field result of 38 tokens, 63 times fewer, into the model's window.](diagrams/03-sandbox-wrapper.svg)
+
+*The model's window receives the five fields; the log stays on disk. Counts printed by snippets/sandbox.py.*
+
+As the figure shows, for the model the rest of the output does not exist; for a human debugging the run, it is one file read away. The pattern generalises: a code interpreter can return the value, not the print stream; a web fetch, the cleaned text, not the raw markup; a database query, the rows, not the connection chatter. Any tool whose signal is small next to its noise is a candidate.
 
 ---
 
 ## 7. Memory across isolated agents
 
-A sub-agent that is isolated from the parent's *running context* still needs a way to learn from history. Two patterns:
+A sub-agent cut off from the parent's window still needs what earlier calls learned. Two patterns:
 
-- **Shared external memory.** The sub-agent has read access to the same memory store as the parent (Post 16). It writes its findings there, with provenance attribution to itself. Best for episodic and semantic facts that future calls, by either the parent or by other sub-agents, should benefit from.
-- **Hand-back summary.** The sub-agent's output includes a 2–3 sentence "what I learned" addendum. The parent appends this to its own memory or scratchpad. Best for facts specific to *this* parent task.
+- **Shared external memory.** The sub-agent has read access to the same memory store as the parent ([post 16](../16-memory-systems/index.md)) and writes its findings there with provenance, naming itself as the source. Best for episodic and semantic facts that later calls, by the parent or by other sub-agents, should benefit from.
+- **Hand-back summary.** The sub-agent's output contract includes a field of two or three sentences on what it learned, and the parent appends that to its own memory or scratchpad. Best for facts specific to this parent task.
 
-The wrong pattern: pass the parent's full context into the sub-agent. This re-introduces every problem isolation was meant to solve.
+The wrong pattern is to pass the parent's full window into the sub-agent, which brings back every problem isolation was meant to remove.
 
 ---
 
 ## 8. The cost arithmetic
 
-Take an illustrative fan-out of 5 sub-agents that each consume 10 k input plus 1 k output tokens. Their combined input is 5 × 10 k = 50 k tokens (the same 50 k a single call would have processed), but each sub-agent also emits its own 1 k output and rebuilds its own preamble, so the multi-agent bill lands *above* the single call rather than below it, even before the orchestrator's merge call. The rough factor depends entirely on how much preamble each worker duplicates; the numbers here are illustrative, not a benchmark. The break-even calculation is:
+Whether isolation lowers or raises the bill depends on one thing: whether the single agent would have re-read tokens that a worker can keep to itself. `snippets/isolation_cost.py` writes the arithmetic out for two cases with illustrative sizes: five independent pieces of work, a 2,000-token preamble (system prompt and tools) at the start of every window, and prices at Claude Sonnet 4.5's rates as of early 2026, 3 dollars per million input tokens and 15 dollars per million output tokens (Anthropic, "Pricing", consulted October 2026). One function prices any agent loop that re-reads its whole window on every call:
 
+```python
+def loop(prefix, steps, step_out, result, final_out):
+    """Input and output tokens of one agent loop that re-reads its whole window on every call.
+
+    The window starts at prefix tokens. Each of the steps is a model call that writes a step_out-token
+    tool call and gets back a result-token tool result; one last call writes final_out tokens.
+    """
+    calls = steps + 1
+    tokens_in = sum(prefix + c * (step_out + result) for c in range(calls))
+    tokens_out = steps * step_out + final_out
+    return tokens_in, tokens_out
 ```
-single_cost  ≈ (sum of all inputs in one prompt) × in_price
-              + (single output) × out_price
 
-multi_cost   ≈ Σ (sub-agent input + preamble) × in_price
-              + Σ (sub-agent output) × out_price
-              + (orchestrator merge call) × out_price
+**One shot.** Each piece is an 8,000-token document pasted into the prompt, with no tool calls. One agent reads the preamble and all five documents, $2{,}000 + 5 \times 8{,}000 = 42{,}000$ input tokens, and writes a 1,000-token answer. Five workers each read the preamble and one document, $5 \times 10{,}000 = 50{,}000$ tokens, and write 1,000 tokens each; a merge call reads the preamble and the five answers, 7,000 tokens, and writes the final 1,000.
+
+**Agent loop.** Each piece needs four tool calls of 100 tokens that return 2,000 tokens each. One agent makes all twenty in one window, so every call re-reads every earlier result. Each worker makes its four in its own window and returns a 300-token result, and the orchestrator's own loop makes five delegate calls and reads five results. The script prints:
+
+```text
+one shot
+  one agent                  42000 in  1000 out  0.1410 dollars
+  orchestrator and workers   57000 in  6000 out  0.2610 dollars
+agent loop
+  one agent                 483000 in  3000 out  1.4940 dollars
+  orchestrator and workers  173000 in  5000 out  0.5940 dollars
 ```
 
-Multi-agent wins when *the sum of sub-agent inputs is meaningfully smaller than the single combined prompt*, because each sub-agent only needed its own slice. It loses when each sub-agent has to rebuild a near-complete view of the world.
+![Bars of input tokens. One shot: one agent 42,000; orchestrator and workers 57,000, the workers 50,000 and the merge 7,000. Agent loop: one agent 483,000; orchestrator and workers 173,000, the workers 155,000 and the orchestrator 18,000. Illustrative sizes.](diagrams/04-isolation-cost.svg)
 
-The corollary: **good sub-agent design is largely good input scoping**. A design that stuffs the entire conversation into every sub-agent prompt is a signal that the problem cannot be cleanly isolated, and the single-agent approach should be reconsidered.
+*Fanning out a one-shot job only adds preambles and a merge; fanning out a loop stops every call re-reading every other piece's tool results.*
+
+In the one-shot case isolation costs more: the preamble is paid five times instead of once, five answers are written instead of one, and the merge call is extra, so the bill is 0.2610 dollars against 0.1410. In the loop case it costs less, 0.5940 dollars against 1.4940: every call the single agent makes on the fifth piece re-reads the sixteen tool results of the four pieces already finished, while a worker's calls read only its own results. The figure sets the two cases side by side. Prompt caching ([post 05](../05-economics-of-context/index.md)) bills a re-read prefix at a fraction of the input rate and so narrows the dollar gap of the loop case, but it does not shrink the window the model has to read.
+
+The arithmetic holds the amount of work fixed, and real systems do not: in Anthropic's figures of section 1, multi-agent systems use about 15 times the tokens of a chat against about 4 for a single agent, so the saving here is a property of input scoping, not a forecast of a bill. That is the useful corollary: **good sub-agent design is largely good input scoping.** A design that stuffs the whole conversation into every sub-agent's prompt pays the single agent's re-reads once per worker, and is a sign that the problem cannot be cleanly isolated.
 
 ---
 
 ## 9. The steelman: "Don't Build Multi-Agents"
 
-Everything so far argues *for* isolation. The strongest argument *against* it deserves equal room, because it is right more often than beginners expect.
+Everything so far argues for isolation; the strongest argument against it deserves equal room.
 
-Cognition, the team behind the Devin coding agent, published a widely read counterpoint titled "Don't Build Multi-Agents" (Cognition, 2025). Its case rests on three claims:
+Walden Yan of Cognition, the team behind the Devin coding agent, published "Don't Build Multi-Agents" (June 2025). It rests on two principles, stated in the essay as "Share context, and share full agent traces, not just individual messages" and "Actions carry implicit decisions, and conflicting decisions carry bad results":
 
-- **Context does not share cleanly.** When work is split across agents, each one holds only a slice of the reasoning that produced the others' outputs. Decisions made implicitly by one sub-agent are invisible to the next, so the pieces drift apart. A single agent carrying the full trajectory never has this problem.
-- **Actions carry implicit decisions, and parallel actions conflict.** Two sub-agents working at once each make assumptions the other cannot see; when their outputs are merged, those assumptions collide. Merging conflicting work back into one coherent result is often harder than doing the work in one place to begin with.
-- **Multi-agent systems are fragile.** More agents mean more hand-off boundaries, and every boundary is a place where information is dropped or misread. Reliability tends to fall as the agent count rises, not climb.
+- **Context does not share cleanly.** When work is split across agents, each holds only a slice of the reasoning behind the others' outputs. In the essay's example, a task to build a Flappy Bird clone is split in two: one sub-agent builds a background in the style of a different game, the other a bird that looks and moves nothing like the original, and the agent that combines them inherits both misunderstandings.
+- **Parallel actions conflict.** Two sub-agents working at once each make assumptions the other cannot see; when their outputs are merged, the assumptions collide, and the essay concludes that "running multiple agents in collaboration only results in fragile systems."
 
-Cognition's practical recommendation is to prefer a single agent with a long, well-managed context, and to use *context engineering* (the subject of this whole series) rather than added agents wherever possible. When work genuinely must be split, they favour having one agent do the splitting and the reassembly rather than letting many agents negotiate among themselves.
+The essay's recommendation is a single-threaded, linear agent, in which every action sees the full trace of the decisions before it, and, for tasks too long for one window, a model whose job is to compress the history of actions and conversation into its key details. It describes Claude Code's sub-agents, as of June 2025, as a design that respects the principles: the sub-agent is usually given a question to answer rather than code to write, and never works in parallel with the main agent. Anthropic's research post makes the same point from the other side: domains that need all agents to share the same context, or that involve many dependencies between agents, are a poor fit for multi-agent systems today, and most coding tasks offer fewer truly parallel sub-tasks than research does.
 
-How does this reconcile with the isolate-when-contracts-are-clean rule from Section 3? The two positions agree more than they conflict. Cognition's failures all trace to the *same* root the rule guards against: **unclean contracts**. Context that does not share, actions that conflict, hand-offs that drop information — these are exactly what happens when a sub-task is isolated *without* a fully specified input and a structured, finite output. The rule is the reconciliation: isolate only where the contract is clean (a summary of a document, a test run, a scoped search — see the Section 3 table), and keep everything whose value is the *shared, evolving reasoning* inside one agent. Read the steelman as a warning against the demo-driven "team of personalities" design (Section 10), not against sandboxing a noisy tool or fanning out ten independent file diffs. The right default is a single agent; a multi-agent design needs a real reason, and a clean contract is that reason.
+The two positions agree more than they conflict. Every failure Cognition describes traces to what the rule of section 3 guards against: a sub-task isolated without a fully specified input and a structured, finite output. The rule is the reconciliation: isolate only where the contract is clean (a document summary, a test run, a scoped search), and keep everything whose value is the shared, evolving reasoning inside one agent. The steelman is a warning against the "team of personalities" of section 10, not against sandboxing a noisy tool or fanning out ten independent file reviews. The default is one agent; a multi-agent design needs a reason, and a clean contract is that reason.
 
 ---
 
-## 10. Anti-patterns
+## 10. What can go wrong?
 
-A short tour of mistakes that recur.
-
-- **Sub-agents-as-microservices for their own sake.** Splitting a task into three sub-agents because the architecture diagram looks better. The hosted system pays 3× the bill and inherits a coordination bug.
-- **The "team of personalities" topology.** "Critic" + "writer" + "researcher" with no clean contracts between them. Looks impressive in a demo, fails on the second real task.
-- **Sub-agent with the parent's full context as input.** Defeats the point.
-- **No output schema.** The parent receives free-form prose and has to regex it. Brittle.
-- **Unbounded recursion.** A sub-agent calls a sub-sub-agent calls a sub-sub-sub-agent. Each layer multiplies cost. Cap depth explicitly.
-- **Sandboxing forgotten on the noisy tools.** `git log`, `npm install`, `pytest -v`, `kubectl logs`: all routinely dumped wholesale into the model's context.
+- **Splitting for the diagram.** A task is cut into three sub-agents because the architecture drawing looks better. The bill grows with every preamble and merge call, and quality does not move.
+- **The team of personalities.** A "critic", a "writer" and a "researcher" with no contracts between them. It demos well and fails on the second real task, the critic and the writer undoing each other's changes.
+- **The parent's full window as the sub-agent's input.** The sub-agent receives the whole conversation "to be safe"; its answers are no better than the parent's, and every delegation costs more as the conversation grows.
+- **No output schema.** The parent receives free-form prose and parses it with a regular expression. It works until a sub-agent phrases its answer differently, and then the parent acts on a half-parsed result without any error.
+- **Unbounded recursion.** A sub-agent calls a sub-sub-agent, which calls another. Each level adds a full loop, and a run that should take minutes runs for an hour; a depth cap and a per-task budget in the orchestrator's code stop it.
+- **Sandboxing forgotten on the noisy tools.** `git log`, `npm install`, `pytest -v` and `kubectl logs` are passed to the model whole. The window fills after a few tool calls, and the question and the earlier evidence drift towards the middle of the input.
 
 ---
 
 ## Common pitfalls
 
-- **Isolating tasks without clean contracts.** Worse than not isolating.
-- **Skipping schema validation on sub-agent output.** Bugs propagate quietly.
-- **Forgetting sandboxing on noisy commands.** Free win left on the table.
-- **Persistent supervisor topology when sequential would do.** Higher cost, more bugs.
-- **Re-passing parent context.** The cost arithmetic stops working.
-- **No depth or budget cap on sub-agent chains.** A sub-agent loop can quietly burn the day's budget.
+1. **Isolating a task without clean contracts.** It is worse than not isolating: the sub-agent asks for context the parent has to resend.
+2. **Skipping the check of the sub-agent's output.** A malformed result propagates quietly; validate it against the schema at the boundary.
+3. **A supervisor where a sequential pipeline would do.** It costs more, is harder to test, and adds the model's choices to the list of things that can go wrong.
+4. **Re-passing the parent's context.** The cost arithmetic of section 8 stops working, and the sub-agent inherits the parent's clutter.
+5. **No depth or budget cap on sub-agent chains.** A delegation loop can burn a day's budget unnoticed; enforce the cap in code, not in a prompt.
 
 ---
 
 ## Further reading
 
-- Anthropic Engineering, *"Building Effective AI Agents"* (December 2024): the workflow-versus-agent distinction, plus orchestrator-worker and evaluator-optimiser patterns.
-- Anthropic Engineering, *"How we built our multi-agent research system"* (2025): sub-agent isolation in production, and the quality-versus-cost trade-off cited in Section 1.
-- Cognition AI, *"Don't Build Multi-Agents"* (June 2025): the counterpoint steelman in Section 9 — shared context, action conflict, and multi-agent fragility.
-- LangChain, *"LangGraph: Multi-Agent Systems"* (2024 docs): supervisor and swarm topologies.
-- Wu, Q. *et al.*, *"AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation"* (2023).
-- OpenAI, *"Swarm: Lightweight multi-agent orchestration"* (2024).
+- Anthropic Engineering, "Building Effective AI Agents" (December 2024): workflows against agents, prompt chaining, parallelisation and orchestrator-workers.
+- Anthropic Engineering, "How we built our multi-agent research system" (June 2025): sub-agents in production, the 90.2% result and the token multipliers of section 1, and where multi-agent designs fit poorly.
+- Cognition (Walden Yan), "Don't Build Multi-Agents" (June 2025): the counter-argument of section 9.
+- Anthropic, "Pricing" (consulted October 2026): the rates of section 8.
+- LangChain, LangGraph documentation (2024 to 2025): supervisor and swarm topologies as library patterns.
+- Wu, Q. *et al.*, "AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation" (2023).
+- OpenAI, "Swarm" (GitHub repository, 2024): an experimental, educational library of hand-offs between agents, since replaced by the OpenAI Agents SDK.
 
-Full citations in [REFERENCES.md](../../REFERENCES.md).
+Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
 ---
 
 ## What to read next
 
-- **[Post 26 — Modern agentic workflow](../26-modern-agentic-workflow/index.md)**: sub-agents and the orchestrator pattern in editor-based tools.
-- **[Post 15 — Tools and MCP](../15-tools-and-mcp/index.md)**: sandboxing in the tool layer.
-- **[Post 23 — Security](../23-security/index.md)**: isolation as a defence-in-depth control.
+- **[Post 14 - The system prompt as software](../14-system-prompt-as-software/index.md):** opens Part III with layer 01, where a sub-agent's contract is written.
+- **[Post 26 - The modern agentic workflow](../26-modern-agentic-workflow/index.md):** sub-agents and the orchestrator pattern as coding hosts ship them.

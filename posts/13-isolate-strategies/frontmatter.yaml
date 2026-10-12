@@ -1,68 +1,26 @@
 id: ctx-013
 slug: 13-isolate-strategies
-title: "13 · Isolate Strategies"
-
-description: >
-  Learn how to scale AI systems beyond a single context window using the
-  Isolate primitive of the WSCI framework. Explore sub-agents,
-  sandboxing, workflow topologies, supervisor architectures, and the
-  engineering principles for building reliable multi-agent systems.
-
-author: "Ajay"
-
+title: "13 - Isolate strategies"
+summary: "When to split work across several context windows: sub-agents with clean input and output contracts, sandboxes that keep tool noise out of the window, three topologies, the cost arithmetic, and the case against multi-agent designs."
 date: 2026-05-21
-last_modified: 2026-05-21
-
-tags:
-  - context-engineering
-  - wsci
-  - isolate
-  - multi-agent
-  - sub-agents
-  - sandboxing
-  - orchestration
-  - ai-agents
-
-category: The Four Primitives
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part II - The WSCI operating system"
-chapter: "Part II — The Four Primitives (WSCI)"
-
-hero: diagrams/06-subagent-isolation.svg
-hero_alt: "Parent agent delegating tasks to isolated sub-agents with independent context windows"
-
-reading_time: 19
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - WSCI
-  - Isolate
-  - Multi-Agent Systems
-  - AI Agents
-  - Sub-Agents
-  - Agent Orchestration
-  - Supervisor Agent
-  - Worker Agent
-  - Sequential Workflow
-  - Fan-Out Fan-In
-  - Map Reduce
-  - Sandboxing
-  - Tool Isolation
-  - Context Isolation
-  - Context Window
-  - Agent Contracts
-  - JSON Schema
-  - Workflow vs Agent
-  - Anthropic
-  - LangGraph
-  - AutoGen
-  - OpenAI Swarm
-  - Cognition Devin
-
-canonical_url: ""
-
-prev: ../12-compress-strategies/
-next: ../14-system-prompts/
+level: intermediate
+reading_time: 18
+tags: [context-engineering, wsci, isolate, sub-agents, sandboxing, multi-agent, orchestration]
+hero: diagrams/01-subagent-isolation.svg
+prerequisites: [ctx-007]
+code: optional
+outcomes:
+  - id: o1
+    text: "Decide whether a task should be isolated by testing its input contract, its output contract and its independence from the parent's state."
+  - id: o2
+    text: "Specify the input and output contracts of a sub-agent, and validate its result against the output contract before the parent uses it."
+  - id: o3
+    text: "Choose among sequential, fan-out and fan-in, and supervisor topologies, and say which of them leave the next step to the model."
+  - id: o4
+    text: "Keep noisy tool output out of the window with a sandbox that returns only the fields the model needs."
+  - id: o5
+    text: "Work out the token cost of an isolated design against a single agent, and say when isolation lowers the bill and when it raises it."
+recommended: [ctx-012]

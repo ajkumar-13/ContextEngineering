@@ -1,0 +1,203 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="ctx-04-isolation-cost-title" aria-describedby="ctx-04-isolation-cost-desc">
+<title id="ctx-04-isolation-cost-title">Isolation adds tokens to one shot and saves them in a loop</title>
+<desc id="ctx-04-isolation-cost-desc">Two panels of horizontal bars of input tokens, illustrative sizes. One shot, five 8,000-token documents and no tool calls: one agent reads 42,000 tokens; the orchestrator and workers read 57,000, 50,000 in the five workers and 7,000 in the merge call; 0.1410 against 0.2610 dollars. Agent loop, four tool calls per piece returning 2,000 tokens each: one agent reads 483,000 tokens; the orchestrator and workers read 173,000, 155,000 in the workers and 18,000 in the orchestrator; 1.4940 against 0.5940 dollars.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-blue { fill: var(--ctx-blue); }
+  .f-blue-ink { fill: var(--ctx-blue-ink); }
+  .f-ink { fill: var(--ctx-ink); }
+  .f-ink-muted { fill: var(--ctx-ink-muted); }
+  .f-surface { fill: var(--ctx-surface); }
+  .s-blue { stroke: var(--ctx-blue); }
+  .s-ink { stroke: var(--ctx-ink); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+  .s-surface { stroke: var(--ctx-surface); }
+</style>
+<defs>
+<marker id="ctx-04-isolation-cost-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+<clipPath id="ctx-04-isolation-cost-clip-1"><rect x="240" y="144" width="480" height="128"/></clipPath>
+<clipPath id="ctx-04-isolation-cost-clip-2"><rect x="240" y="400" width="480" height="128"/></clipPath>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="720"/>
+<text x="40" y="48" class="t-title" data-w="718">Isolation adds tokens to one shot and saves them in a loop</text>
+<text x="40" y="76" class="t-subtitle" data-w="669">Input tokens of five pieces of work. Illustrative sizes, computed by snippets/isolation_cost.py.</text>
+<text x="40" y="128" class="t-head" data-w="399">One shot: five documents pasted in, no tool calls</text>
+<g data-grid="skip">
+<path d="M240,144V272M400,144V272M560,144V272M720,144V272" class="gridline"/>
+<text x="240" y="292" text-anchor="middle" class="t-tick" data-w="8">0</text>
+<text x="400" y="292" text-anchor="middle" class="t-tick" data-w="42">20,000</text>
+<text x="560" y="292" text-anchor="middle" class="t-tick" data-w="42">40,000</text>
+<text x="720" y="292" text-anchor="middle" class="t-tick" data-w="42">60,000</text>
+<g clip-path="url(#ctx-04-isolation-cost-clip-1)">
+<rect x="240" y="164" width="336" height="24" class="f-ink s-surface w1" data-fit="skip"/>
+<rect x="576" y="164" width="0" height="24" class="f-ink-muted s-surface w1" data-fit="skip"/>
+<rect x="576" y="164" width="0" height="24" class="f-blue s-surface w1" data-fit="skip"/>
+<rect x="240" y="228" width="0" height="24" class="f-ink s-surface w1" data-fit="skip"/>
+<rect x="240" y="228" width="400" height="24" class="f-ink-muted s-surface w1" data-fit="skip"/>
+<rect x="640" y="228" width="56" height="24" class="f-blue s-surface w1" data-fit="skip"/>
+</g>
+<path d="M240,144V272" class="axis"/>
+<text x="40" y="181" class="t-label" data-w="68">one agent</text>
+<text x="408" y="181" text-anchor="middle" class="t-value f-surface" data-w="0"></text>
+<text x="584" y="181" class="t-value" data-w="47">42,000</text>
+<text x="40" y="245" class="t-label" data-w="168">orchestrator and workers</text>
+<text x="440" y="245" text-anchor="middle" class="t-value f-surface" data-w="47">50,000</text>
+<text x="668" y="245" text-anchor="middle" class="t-value f-surface" data-w="38">7,000</text>
+<text x="704" y="245" class="t-value" data-w="47">57,000</text>
+</g>
+<text x="40" y="328" class="t-note" data-w="443">One agent 0.1410 dollars, orchestrator and workers 0.2610 dollars</text>
+<text x="40" y="384" class="t-head" data-w="457">Agent loop: four tool calls per piece, 2,000-token results</text>
+<g data-grid="skip">
+<path d="M240,400V528M336,400V528M432,400V528M528,400V528M624,400V528M720,400V528" class="gridline"/>
+<text x="240" y="548" text-anchor="middle" class="t-tick" data-w="8">0</text>
+<text x="336" y="548" text-anchor="middle" class="t-tick" data-w="50">100,000</text>
+<text x="432" y="548" text-anchor="middle" class="t-tick" data-w="50">200,000</text>
+<text x="528" y="548" text-anchor="middle" class="t-tick" data-w="50">300,000</text>
+<text x="624" y="548" text-anchor="middle" class="t-tick" data-w="50">400,000</text>
+<text x="720" y="548" text-anchor="middle" class="t-tick" data-w="50">500,000</text>
+<g clip-path="url(#ctx-04-isolation-cost-clip-2)">
+<rect x="240" y="420" width="463.68" height="24" class="f-ink s-surface w1" data-fit="skip"/>
+<rect x="703.68" y="420" width="0" height="24" class="f-ink-muted s-surface w1" data-fit="skip"/>
+<rect x="703.68" y="420" width="0" height="24" class="f-blue s-surface w1" data-fit="skip"/>
+<rect x="240" y="484" width="0" height="24" class="f-ink s-surface w1" data-fit="skip"/>
+<rect x="240" y="484" width="148.8" height="24" class="f-ink-muted s-surface w1" data-fit="skip"/>
+<rect x="388.8" y="484" width="17.28" height="24" class="f-blue s-surface w1" data-fit="skip"/>
+</g>
+<path d="M240,400V528" class="axis"/>
+<text x="40" y="437" class="t-label" data-w="68">one agent</text>
+<text x="471.84" y="437" text-anchor="middle" class="t-value f-surface" data-w="0"></text>
+<text x="711.68" y="437" class="t-value" data-w="55">483,000</text>
+<text x="40" y="501" class="t-label" data-w="168">orchestrator and workers</text>
+<text x="414.08" y="501" class="t-value" data-w="194"><tspan class="f-ink-muted">155,000</tspan><tspan class="f-ink-muted"> + </tspan><tspan class="f-blue-ink">18,000</tspan> = 173,000</text>
+</g>
+<text x="40" y="584" class="t-note" data-w="443">One agent 1.4940 dollars, orchestrator and workers 0.5940 dollars</text>
+<text x="40" y="604" class="t-note" data-w="737">Dollars at Claude Sonnet 4.5's rates: 3 and 15 dollars per million tokens (Anthropic's pricing page, early 2026).</text>
+<rect x="40" y="624" width="16" height="16" class="f-ink s-ink w1"/>
+<text x="72" y="636" class="t-label" data-w="68">one agent</text>
+<rect x="168" y="624" width="16" height="16" class="f-ink-muted s-ink-muted w1"/>
+<text x="200" y="636" class="t-label" data-w="53">workers</text>
+<rect x="280" y="624" width="16" height="16" class="f-blue s-blue w1"/>
+<text x="312" y="636" class="t-label" data-w="174">orchestrator or merge call</text>
+<text x="40" y="684" class="t-note" data-w="695">Splitting a one-shot job pays the preamble five times; a split loop stops re-reading other pieces' results.</text>
+</svg>
