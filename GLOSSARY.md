@@ -50,7 +50,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Compaction.** Replacing a long conversation history with a shorter summary that keeps the state the task needs. A compress technique (post 12).
 
-**Compress.** The third of the four operations (WSCI): shrinking what is already in the window, by windowing, summarisation, tool-result clearing, priority pruning, or token-level compression (post 12).
+**Compress.** The third of the four operations (WSCI): shrinking what is already in the window, by windowing, summarisation, tool-result clearing, priority pruning, semantic chunking, or token-level compression (post 12).
 
 **Confusion.** The failure mode in which the right information is present but the model applies the wrong rule or makes the wrong choice, because the rules about it are implicit, ambiguous or buried. The first fix is explicit, motivated, exemplified rules (post 06).
 
@@ -68,7 +68,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Context window.** The maximum number of tokens a model can take in one call, prompt and output together. A hard ceiling set by the model (post 04).
 
-**Contextual retrieval.** Anthropic's technique of prepending a short, LLM-generated description of the surrounding document to each chunk before it is embedded and indexed (Anthropic, 2024; post 11).
+**Contextual retrieval.** Anthropic's technique of prepending to each chunk a short, model-written context that situates it within its document, before the chunk is embedded and indexed with BM25 (Anthropic, 2024; post 11).
 
 **Conversation buffer.** The recent user and assistant turns held in the prompt for the current session; the near end of layer 05, conversation history.
 
@@ -136,7 +136,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Long-context routing.** Deciding per query whether to answer by retrieval or by loading whole documents into the window (posts 17 and 25).
 
-**LongBench.** A bilingual, multitask benchmark of long-context understanding across question answering, summarisation, and code (Bai et al., 2023).
+**LongBench.** A bilingual, multitask benchmark of long-context understanding across question answering, summarisation, and code (Bai et al., arXiv 2023, ACL 2024).
 
 **Lost-in-the-middle.** The finding that models use information at the start and the end of a long context better than information in the middle (Liu et al., 2023), and the failure mode named after it (post 06).
 
@@ -166,7 +166,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Prefix caching.** Another name for prompt caching.
 
-**Priority pruning.** A compress technique that drops items by priority band (keep, keep if room, summarise, drop) rather than by age (post 12).
+**Priority pruning.** A compress technique that drops entries by priority class (P0 never trimmed to P3 trimmed first), lowest class first, rather than by age (post 12).
 
 **Procedural memory.** Long-term memory of how to do things: rules, skills, and routines, each with a trigger, the rule it injects, and its scope (post 16).
 
@@ -188,7 +188,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Recall@N.** The fraction of the relevant items that appear in the top-N candidate set. The series' measure of the candidate-generation stage (post 09).
 
-**Reciprocal rank fusion (RRF).** A parameter-light method for merging ranked lists: each item scores $\sum_i 1/(k + r_i)$ over the lists it appears in, where $r_i$ is its rank in list $i$ and $k$ is a damping constant, often 60, unrelated to top-k (Cormack et al., 2009; post 11).
+**Reciprocal rank fusion (RRF).** A parameter-light method for merging ranked lists: each item scores $\sum_i 1/(k + r_i)$ over the lists it appears in, where $r_i$ is its rank in list $i$ and $k$ is a damping constant, often 60, unrelated to top-k (Cormack et al., 2009; posts 09 and 11).
 
 **Regression suite.** A fixed set of inputs and expected outputs run on every prompt or pipeline change to detect quality drops (posts 14 and 20).
 
@@ -198,7 +198,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **RULER.** A long-context benchmark from NVIDIA that extends needle tests with multi-needle retrieval, multi-hop tracing, aggregation, and question answering, and reports an effective context length (Hsieh et al., 2024).
 
-**Sandboxing.** Running a tool or a sub-agent in a confined process or container so that its output and its side effects cannot reach the parent's context or systems (posts 13 and 15).
+**Sandboxing.** In post 13's sense, output-scoping: running a tool so that its full output goes to a file and only the fields the model needs enter the window; the security sense, containment of side effects and privileges, is post 23's (posts 13, 15, and 23).
 
 **Scratchpad.** A working area the agent writes to and reads from during a task, outside the window, such as a plan file (post 08).
 
@@ -220,7 +220,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Sub-agent.** A child model call invoked by a parent agent, running in its own isolated context window and returning only a structured result (post 13).
 
-**Supervisor topology.** A sub-agent pattern in which one agent decomposes a task, delegates parts to specialised workers, and synthesises their results (post 13).
+**Supervisor topology.** A sub-agent pattern in which a supervisor model decides, call by call, which worker to call next and how to combine the results; of the three topologies, the only one that leaves the next step to the model (post 13).
 
 **System prompt.** Layer 01: the instructions sent first on every call. In the five-block form it carries identity, rules, format, knowledge, and tool-use guidance; the tool schemas themselves are layer 02 (post 14).
 

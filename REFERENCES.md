@@ -65,33 +65,37 @@ Citation style: author or organisation, title in quotation marks, venue or publi
 
 ## Post 07 - Write, select, compress, isolate
 
-- Context Engineering for Agents (Martin), Effective context engineering for AI agents, What is context engineering?, Karpathy: see Post 01.
+- **Anthropic.** "Manage costs effectively." *Claude Code documentation*, consulted 12 October 2026. https://code.claude.com/docs/en/costs: automatic compaction, `/compact` instructions, and the token cost of agent teams.
+- Context Engineering for Agents (Martin), Effective context engineering for AI agents, What is context engineering?: see Post 01. Introducing Contextual Retrieval: see Post 02. Agent Skills: see Post 15. Claude Code documentation (compaction commands): see Post 12.
 
 ## Post 08 - Write strategies
 
 - **Anthropic Engineering.** "Building Effective AI Agents." *Anthropic blog*, December 2024. https://www.anthropic.com/engineering/building-effective-agents
-- **LangChain Blog.** "Memory for Agents." 2024. https://blog.langchain.com/memory-for-agents/
-- **agents.md project.** "AGENTS.md: a simple, open format for guiding coding agents." 2025. https://agents.md/
+- **Chase, H.** "Memory for Agents." *LangChain blog*, 19 October 2024. https://www.langchain.com/blog/memory-for-agents
+- **Anthropic.** "How Claude remembers your project." *Claude Code documentation*, consulted 12 October 2026. https://code.claude.com/docs/en/memory
+- **agents.md project.** "AGENTS.md: a simple, open format for guiding coding agents." Stewarded by the Agentic AI Foundation under the Linux Foundation; consulted October 2026. https://agents.md/
 - **Park, J. S. *et al.*** "Generative Agents: Interactive Simulacra of Human Behavior." *UIST 2023* (arXiv:2304.03442). https://arxiv.org/abs/2304.03442
-- Introducing Contextual Retrieval: see Post 02.
+- Context Engineering for Agents (Martin), Effective context engineering for AI agents: see Post 01. Introducing Contextual Retrieval: see Post 02. Agent Skills: see Post 15.
 
 ## Post 09 - Select strategies
 
 - **Karpukhin, V. *et al.*** "Dense Passage Retrieval for Open-Domain Question Answering." *EMNLP 2020* (arXiv:2004.04906). https://arxiv.org/abs/2004.04906
 - **Robertson, S., Zaragoza, H.** "The Probabilistic Relevance Framework: BM25 and Beyond." *Foundations and Trends in Information Retrieval*, 2009.
-- **Cormack, G. V., Clarke, C. L. A., Buettcher, S.** "Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods." *SIGIR 2009*: the reciprocal rank fusion paper.
+- **Cormack, G. V., Clarke, C. L. A., Büttcher, S.** "Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods." *SIGIR 2009*: the reciprocal rank fusion paper.
 - **Gao, L., Ma, X., Lin, J., Callan, J.** "Precise Zero-Shot Dense Retrieval without Relevance Labels." *ACL 2023* (arXiv:2212.10496, 2022). https://arxiv.org/abs/2212.10496: HyDE.
 - **Cohere.** "Rerank." *Cohere documentation*. https://docs.cohere.com/
 - **Voyage AI.** "Rerankers." *Voyage AI documentation*. https://docs.voyageai.com/
 - **BAAI.** "bge-reranker-v2" model cards. https://huggingface.co/BAAI/bge-reranker-v2-m3
-- Introducing Contextual Retrieval: see Post 02.
+- **Carbonell, J., Goldstein, J.** "The Use of MMR, Diversity-Based Reranking for Reordering Documents and Producing Summaries." *SIGIR 1998*: maximal marginal relevance.
+- Introducing Contextual Retrieval: see Post 02. Lost in the Middle (Liu et al.): see Post 01.
 
 ## Post 10 - Data ingestion and document pipelines
 
 - **Smith, R.** "An Overview of the Tesseract OCR Engine." *ICDAR 2007*.
 - **Barbaresi, A.** "Trafilatura: A Web Scraping Library and Command-Line Tool for Text Discovery and Extraction." *ACL 2021 (system demonstrations)*. https://trafilatura.readthedocs.io/
 - **Mozilla.** "Readability." *GitHub*. https://github.com/mozilla/readability: main-content extraction.
-- **Docling, Unstructured, LlamaParse.** Layout-aware document-parsing toolkits, cited as a class. https://github.com/DS4SD/docling, https://unstructured.io/, https://docs.llamaindex.ai/
+- **Docling, Unstructured, LlamaParse.** Layout-aware document-parsing toolkits, cited as a class; documentation consulted October 2026. https://github.com/docling-project/docling, https://unstructured.io/, https://developers.llamaindex.ai/python/cloud/llamaparse/
+- **pdfminer.six, pdfplumber, PyMuPDF.** Text-layer extraction libraries for born-digital PDFs, cited as a class; documentation consulted October 2026. https://github.com/pdfminer/pdfminer.six, https://github.com/jsvine/pdfplumber, https://pymupdf.readthedocs.io/
 - **Smock, B., Pesala, R., Abraham, R.** "PubTables-1M: Towards Comprehensive Table Extraction from Unstructured Documents." *CVPR 2022* (arXiv:2110.00061). https://arxiv.org/abs/2110.00061
 - Introducing Contextual Retrieval: see Post 02.
 
@@ -100,21 +104,28 @@ Citation style: author or organisation, title in quotation marks, venue or publi
 - Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (Lewis et al.): see Post 01.
 - **Khattab, O., Zaharia, M.** "ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT." *SIGIR 2020* (arXiv:2004.12832). https://arxiv.org/abs/2004.12832
 - **Saad-Falcon, J. *et al.*** "ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems." *NAACL 2024* (arXiv:2311.09476, 2023). https://arxiv.org/abs/2311.09476
-- **Asai, A. *et al.*** "Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection." *arXiv:2310.11511*, 2023. https://arxiv.org/abs/2310.11511
-- Introducing Contextual Retrieval: see Post 02. Reciprocal rank fusion: see Post 09.
+- **Günther, M., Mohr, I., Williams, D. J., Wang, B., Xiao, H.** "Late Chunking: Contextual Chunk Embeddings Using Long-Context Embedding Models." *arXiv:2409.04701*, 2024. https://arxiv.org/abs/2409.04701
+- **Muennighoff, N., Tazi, N., Magne, L., Reimers, N.** "MTEB: Massive Text Embedding Benchmark." *EACL 2023* (arXiv:2210.07316, 2022). https://arxiv.org/abs/2210.07316
+- **Voyage AI.** "Text embeddings" (model list). *Voyage AI documentation*, consulted October 2026. https://docs.voyageai.com/docs/embeddings
+- **LlamaIndex.** "SentenceSplitter." *LlamaIndex documentation*, consulted October 2026. https://docs.llamaindex.ai/
+- Introducing Contextual Retrieval: see Post 02. Reciprocal rank fusion, BM25 and Beyond (Robertson and Zaragoza), HyDE, rerankers: see Post 09.
 
 ## Post 12 - Compress strategies
 
-- **Anthropic.** "Claude Code." *Anthropic documentation* (auto-compaction and the conversation budget), 2024 to 2025. https://docs.anthropic.com/en/docs/claude-code
+- **Anthropic.** "How Claude Code works" and "Commands." *Claude Code documentation*, consulted 12 October 2026. https://code.claude.com/docs/en/how-claude-code-works, https://code.claude.com/docs/en/commands: automatic compaction (older tool outputs cleared first, then a summary), `/compact [instructions]`, `/clear`.
+- **Jiang, H., Wu, Q., Lin, C.-Y., Yang, Y., Qiu, L.** "LLMLingua: Compressing Prompts for Accelerated Inference of Large Language Models." *EMNLP 2023* (arXiv:2310.05736). https://arxiv.org/abs/2310.05736
+- **Pan, Z. *et al.*** "LLMLingua-2: Data Distillation for Efficient and Faithful Task-Agnostic Prompt Compression." *Findings of ACL 2024* (arXiv:2403.12968). https://arxiv.org/abs/2403.12968
+- **Xu, F., Shi, W., Choi, E.** "RECOMP: Improving Retrieval-Augmented LMs with Compression and Selective Augmentation." *arXiv:2310.04408*, 2023. https://arxiv.org/abs/2310.04408
 - **Bai, Y. *et al.*** "LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding." *ACL 2024* (arXiv:2308.14508, 2023). https://arxiv.org/abs/2308.14508
-- Context Engineering for Agents (Martin), Lost in the Middle: see Post 01.
+- Context Engineering for Agents (Martin), Lost in the Middle: see Post 01. Context windows: see Post 04.
 
 ## Post 13 - Isolate strategies
 
-- **Anthropic Engineering.** "How we built our multi-agent research system." *Anthropic blog*, June 2025. https://www.anthropic.com/engineering/built-multi-agent-research-system
+- **Anthropic Engineering.** "How we built our multi-agent research system." *Anthropic blog*, 13 June 2025. https://www.anthropic.com/engineering/built-multi-agent-research-system
 - **Wu, Q. *et al.*** "AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation." *arXiv:2308.08155*, 2023. https://arxiv.org/abs/2308.08155
-- **OpenAI.** "Swarm: Lightweight multi-agent orchestration." GitHub, 2024. https://github.com/openai/swarm
-- Building Effective AI Agents: see Post 08. LangGraph: see Post 06.
+- **OpenAI.** "Swarm" (experimental, educational; since replaced by the OpenAI Agents SDK). *GitHub repository*, 2024. https://github.com/openai/swarm
+- **Yan, W. (Cognition).** "Don't Build Multi-Agents." *Cognition blog*, 12 June 2025. https://cognition.ai/blog/dont-build-multi-agents (now served at https://cognition.com/blog/dont-build-multi-agents): the counter-argument of post 13, section 9.
+- Building Effective AI Agents: see Post 08. LangGraph: see Post 06. Pricing (Anthropic): see Post 01.
 
 ## Post 14 - The system prompt as software
 
@@ -126,9 +137,9 @@ Citation style: author or organisation, title in quotation marks, venue or publi
 ## Post 15 - Tools and MCP
 
 - **Model Context Protocol.** "Specification" (current revision). https://modelcontextprotocol.io/
-- **Anthropic Engineering.** "Equipping agents for the real world with Agent Skills." *Anthropic blog*, October 2025. https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
+- **Anthropic Engineering.** "Equipping agents for the real world with Agent Skills." *Anthropic blog*, 16 October 2025. https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
 - **Anthropic Engineering.** "Code execution with MCP: building more efficient agents." *Anthropic blog*, November 2025. https://www.anthropic.com/engineering/code-execution-with-mcp
-- **Cognition AI.** "Don't Build Multi-Agents." *Cognition blog*, June 2025. https://cognition.ai/blog/dont-build-multi-agents: the counterpoint argument.
+- Don't Build Multi-Agents (Yan, Cognition): see Post 13.
 - Introducing the Model Context Protocol: see Post 01. Function calling (OpenAI): see Post 02.
 
 ## Post 16 - Memory systems
@@ -220,7 +231,7 @@ Citation style: author or organisation, title in quotation marks, venue or publi
 
 - **Cursor.** "Rules and Composer." *Documentation*, 2025. https://docs.cursor.com/
 - **Aider.** "Architect mode and conventions." *Documentation*, 2024 to 2025. https://aider.chat/docs/
-- Claude Code documentation: see Post 12. AGENTS.md: see Post 08. Agent Skills, Don't Build Multi-Agents: see Post 15.
+- Claude Code documentation: see Post 12. AGENTS.md: see Post 08. Agent Skills: see Post 15. Don't Build Multi-Agents: see Post 13.
 
 ## Post 27 - Remote agentic workflow
 

@@ -46,7 +46,7 @@ A bug report that fits none of the five is a model problem, not a context proble
 
 ## The select pipeline and RAG
 
-**Offline:** source, parse (born-digital extraction, layout-aware parsing, or OCR), clean, enrich (provenance at ingest), chunk, index (dense and BM25). Default chunk for prose: 400 to 600 tokens, sentence-aware, 10 to 20 percent overlap. Contextual retrieval adds a short generated header to each chunk before indexing (Anthropic, 2024).
+**Offline:** source, parse (born-digital extraction, layout-aware parsing, or OCR), clean, enrich (provenance at ingest), chunk, index (dense and BM25). Illustrative starting chunk for prose: 400 to 600 tokens, sentence-aware, 10 to 20 percent overlap (not a measurement). Contextual retrieval adds a short generated header to each chunk before indexing (Anthropic, 2024).
 
 **Online:** query (rewrite, HyDE, decompose), candidates (dense top-30 plus BM25 top-30, fused by reciprocal rank fusion into a top-50 candidate set), rerank (a cross-encoder keeps the top-5), pack (bookends, citations, dedupe), generate. These are the series' recommended starting defaults, not measurements ([post 09](posts/09-select-strategies/index.md)).
 
@@ -92,7 +92,7 @@ Six rules for rules: one concept per rule; motivated by a real failure; positive
 - Hard trigger at **95 percent**: summarise or semantically chunk the older part of the conversation; keep the original turns in a separate log.
 - Check every summary policy with the information retention ratio on a replay set (a teaching construct, not a standard metric).
 
-The thresholds are the series' recommended defaults ([post 12](posts/12-compress-strategies/index.md)).
+The thresholds are the series' illustrative defaults, to be tuned per workload; Claude Code's documentation states no default percentage ([post 12](posts/12-compress-strategies/index.md)).
 
 ---
 
