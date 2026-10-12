@@ -9,21 +9,22 @@ Citation style: author or organisation, title in quotation marks, venue or publi
 ## Post 01 - Why context engineering, and why now
 
 - **Karpathy, A.** "+1 for 'context engineering' over 'prompt engineering'." *Post on X*, 25 June 2025: popularised the term and gave the definition quoted in post 01.
-- **Martin, L.** "Context Engineering for Agents." *Personal blog*, 23 June 2025, https://rlancemartin.github.io/2025/06/23/context_engineering/; republished on the *LangChain blog*, July 2025, https://blog.langchain.com/context-engineering-for-agents/: the source of the write, select, compress, isolate operations this series abbreviates as WSCI.
-- **Anthropic Engineering.** "Effective context engineering for AI agents." *Anthropic blog*, September 2025. https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
+- **Martin, L.** "Context Engineering for Agents." *Personal blog*, 23 June 2025, https://rlancemartin.github.io/2025/06/23/context_engineering/; adapted on the *LangChain blog* as "Context Engineering" (The LangChain Team), 2 July 2025, https://www.langchain.com/blog/context-engineering-for-agents: the source of the write, select, compress, isolate operations this series abbreviates as WSCI.
+- **Anthropic Engineering.** "Effective context engineering for AI agents." *Anthropic blog*, 29 September 2025. https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
 - **IBM Think.** "What is context engineering?" *IBM Think*, 2025. https://www.ibm.com/think/topics/context-engineering
 - **Horthy, D.** "12-Factor Agents." *humanlayer/12-factor-agents*, GitHub, 2025. https://github.com/humanlayer/12-factor-agents
 - **OpenAI.** "Function calling and other API updates." *OpenAI blog*, June 2023. https://openai.com/index/function-calling-and-other-api-updates/
 - **Anthropic.** "Introducing the Model Context Protocol." *Anthropic blog*, November 2024. https://www.anthropic.com/news/model-context-protocol
 - **Liu, N. F., Lin, K., Hewitt, J., Paranjape, A., Bevilacqua, M., Petroni, F., Liang, P.** "Lost in the Middle: How Language Models Use Long Contexts." *TACL*, 2024 (arXiv:2307.03172, 2023). https://arxiv.org/abs/2307.03172
-- **Anthropic.** "Pricing." *Anthropic*, per-million-token rates as of early 2026. https://www.anthropic.com/pricing
+- **Anthropic.** "Pricing." *Claude API documentation*, per-million-token rates as of early 2026, consulted October 2026. https://platform.claude.com/docs/en/about-claude/pricing
+- **Lewis, P. *et al.*** "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." *NeurIPS 2020* (arXiv:2005.11401). https://arxiv.org/abs/2005.11401: the paper that named retrieval-augmented generation (RAG), cited by post 01 for the date.
 
 ## Post 02 - The six layers of context
 
-- **Anthropic.** "Prompt caching." *Anthropic documentation*, 2024 to 2025. https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching
+- **Anthropic.** "Prompt caching." *Claude API documentation*, consulted October 2026. https://platform.claude.com/docs/en/build-with-claude/prompt-caching
 - **Anthropic.** "Introducing Contextual Retrieval." *Anthropic blog*, September 2024. https://www.anthropic.com/news/contextual-retrieval
 - **OpenAI.** "Function calling." *OpenAI documentation*. https://platform.openai.com/docs/guides/function-calling
-- **OpenAI.** "API reference" (Chat Completions and Responses). *OpenAI documentation*. https://platform.openai.com/docs/api-reference
+- **OpenAI.** "API reference" (Chat Completions and Responses). *OpenAI documentation*. https://developers.openai.com/api/reference/
 - **Google.** "Generating content" (`generateContent`). *Gemini API documentation*. https://ai.google.dev/api/generate-content
 - Effective context engineering for AI agents, What is context engineering?, Lost in the Middle: see Post 01.
 
@@ -33,27 +34,34 @@ Citation style: author or organisation, title in quotation marks, venue or publi
 - **Su, J. *et al.*** "RoFormer: Enhanced Transformer with Rotary Position Embedding." *arXiv:2104.09864*, 2021. https://arxiv.org/abs/2104.09864
 - **Hsieh, C.-P. *et al.*** "RULER: What's the Real Context Size of Your Long-Context Language Models?" *NVIDIA, arXiv:2404.06654*, 2024. https://arxiv.org/abs/2404.06654
 - **Press, O., Smith, N. A., Lewis, M.** "Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation." *ICLR 2022* (arXiv:2108.12409). https://arxiv.org/abs/2108.12409
-- Lost in the Middle: see Post 01. Prompt caching: see Post 02.
+- **OpenAI.** "Tokenizer" (interactive). https://platform.openai.com/tokenizer; and the `tiktoken` library, https://github.com/openai/tiktoken
+- **Sennrich, R., Haddow, B., Birch, A.** "Neural Machine Translation of Rare Words with Subword Units." *ACL 2016* (arXiv:1508.07909). https://arxiv.org/abs/1508.07909: byte-pair encoding adapted to sub-word segmentation for neural machine translation (the algorithm itself is Gage, 1994).
+- **Kamradt, G.** "Needle In A Haystack: Pressure Testing LLMs." *GitHub repository*, 2023. https://github.com/gkamradt/LLMTest_NeedleInAHaystack
+- **Hong, K., Troynikov, A., Huber, J.** "Context Rot: How Increasing Input Tokens Impacts LLM Performance." *Chroma Research*, 14 July 2025. https://www.trychroma.com/research/context-rot
+- Lost in the Middle, Pricing: see Post 01. Prompt caching: see Post 02.
 
 ## Post 04 - Tokens, windows, and budgets
 
-- **OpenAI.** "Tokenizer" (interactive). https://platform.openai.com/tokenizer; and the `tiktoken` library, https://github.com/openai/tiktoken
-- **Anthropic.** "Token counting." *Anthropic documentation*, 2024 to 2025. https://docs.anthropic.com/en/docs/build-with-claude/token-counting
-- **Google.** "Long context." *Gemini API documentation*, 2024 to 2025. https://ai.google.dev/gemini-api/docs/long-context
-- **Sennrich, R., Haddow, B., Birch, A.** "Neural Machine Translation of Rare Words with Subword Units." *ACL 2016* (arXiv:1508.07909). https://arxiv.org/abs/1508.07909: the original byte-pair encoding paper.
+- **Anthropic.** "Token counting." *Anthropic documentation*, 2024 to 2026. https://docs.anthropic.com/en/docs/build-with-claude/token-counting
+- **Google.** "Long context." *Gemini API documentation*, page updated 22 June 2026, consulted October 2026. https://ai.google.dev/gemini-api/docs/long-context
+- **Anthropic.** "Context windows." *Claude API documentation*, consulted October 2026. https://platform.claude.com/docs/en/build-with-claude/context-windows: what counts toward the window, the overflow behaviour, and the window sizes by model.
+- **Ji, Y. (Manus).** "Context Engineering for AI Agents: Lessons from Building Manus." *Manus blog*, 18 July 2025. https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus: the KV cache hit rate as the metric to watch for a production agent; timestamps in the prefix.
 - **Pope, R. *et al.*** "Efficiently Scaling Transformer Inference." *MLSys 2023* (arXiv:2211.05102, 2022). https://arxiv.org/abs/2211.05102: prefill and decode mechanics.
-- Prompt caching: see Post 02.
+- Tokenizer and `tiktoken`, Neural Machine Translation of Rare Words with Subword Units: see Post 03. Pricing: see Post 01. Prompt caching: see Post 02.
 
 ## Post 05 - The economics of context: pricing, caching, and latency
 
-- Pricing (Anthropic): see Post 01. Prompt caching (Anthropic): see Post 02. Efficiently Scaling Transformer Inference (Pope et al.): see Post 04.
+- **OpenAI.** "Prompt caching." *OpenAI API documentation*, consulted 12 October 2026. https://developers.openai.com/api/docs/guides/prompt-caching
+- **Google.** "Context caching." *Gemini API documentation*, consulted 12 October 2026. https://ai.google.dev/gemini-api/docs/caching
+- Pricing (Anthropic): see Post 01. Prompt caching (Anthropic): see Post 02. Context Engineering for AI Agents (Ji, Manus), Efficiently Scaling Transformer Inference (Pope et al.): see Post 04.
 
 ## Post 06 - Five context failure modes
 
-- **Breunig, D.** "How Long Contexts Fail." *Personal blog*, June 2025. https://www.dbreunig.com/: the essay the failure-mode taxonomy starts from.
+- **Breunig, D.** "How Long Contexts Fail." *Personal blog*, 22 June 2025. https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html: the essay the failure-mode taxonomy starts from.
+- **Laban, P., Hayashi, H., Zhou, Y., Neville, J.** "LLMs Get Lost In Multi-Turn Conversation." *arXiv:2505.06120*, 2025. https://arxiv.org/abs/2505.06120: the 39 percent drop on sharded prompts that Breunig quotes.
 - **Greshake, K. *et al.*** "Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection." *arXiv:2302.12173*, 2023. https://arxiv.org/abs/2302.12173
 - **LangChain.** "LangGraph documentation." 2024 to 2025. https://langchain-ai.github.io/langgraph/
-- Lost in the Middle, Effective context engineering for AI agents: see Post 01.
+- Lost in the Middle, Effective context engineering for AI agents: see Post 01. RULER, Context Rot: see Post 03.
 
 ## Post 07 - Write, select, compress, isolate
 
@@ -89,7 +97,7 @@ Citation style: author or organisation, title in quotation marks, venue or publi
 
 ## Post 11 - RAG in depth
 
-- **Lewis, P. *et al.*** "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." *NeurIPS 2020* (arXiv:2005.11401). https://arxiv.org/abs/2005.11401
+- Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (Lewis et al.): see Post 01.
 - **Khattab, O., Zaharia, M.** "ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT." *SIGIR 2020* (arXiv:2004.12832). https://arxiv.org/abs/2004.12832
 - **Saad-Falcon, J. *et al.*** "ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems." *NAACL 2024* (arXiv:2311.09476, 2023). https://arxiv.org/abs/2311.09476
 - **Asai, A. *et al.*** "Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection." *arXiv:2310.11511*, 2023. https://arxiv.org/abs/2310.11511

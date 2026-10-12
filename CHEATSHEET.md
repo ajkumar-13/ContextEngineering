@@ -32,13 +32,13 @@ The system prompt's tools block holds only the guidance on when to use each tool
 
 ## The five failure modes
 
-| Mode | Symptom | First fix | Operation |
+| Mode | Symptom | Fixes (first fix first) | Operation |
 |---|---|---|---|
 | Distraction | The model latches on to irrelevant material | Lower top-k, add a reranker, scope the index | Select |
 | Confusion | The right information is present, the wrong choice is made | Explicit, motivated, exemplified rules; push rules into code | Select (of rules) |
-| Conflict | Contradictory information in the window | Provenance and recency stamp plus a precedence rule; dedupe the candidates | Compress, select |
+| Conflict | Contradictory information in the window | Provenance and recency stamp plus a precedence rule; dedupe the candidates | Select, compress |
 | Lost-in-the-middle | Long context, the middle is ignored | Bookend packing; summarise old history; split into sub-agents | Compress, isolate |
-| Tool-storm | Repeated, redundant, or useless tool calls | Trim the catalogue, add a stop budget, cap result size | Isolate, select |
+| Tool-storm | Repeated, redundant, or useless tool calls | Trim the catalogue, add a stop budget, cap result size | Select, isolate |
 
 A bug report that fits none of the five is a model problem, not a context problem ([post 06](posts/06-context-failure-modes/index.md)). Poisoning is a security term ([post 23](posts/23-security/index.md)).
 
@@ -98,10 +98,10 @@ The thresholds are the series' recommended defaults ([post 12](posts/12-compress
 
 ## Cost and caching
 
-Figures from Anthropic's "Pricing" and "Prompt caching" pages, as of early 2026; they go stale ([post 05](posts/05-economics-of-context/index.md)).
+Figures from Anthropic's "Pricing" and "Prompt caching" pages: rates as of early 2026, cache multipliers as consulted on 12 October 2026; they go stale ([post 05](posts/05-economics-of-context/index.md)).
 
 - **Input against output:** output tokens cost about five times input tokens at every tier. Keep generations tight.
-- **Cache read:** about a tenth of the base input price. **Cache write:** 1.25 times the input price for the five-minute tier, 2 times for the one-hour tier.
+- **Cache read:** 0.1 times the base input price for most models, including the series' three running models; some newer models list 0.05 or 0.025 times (Anthropic, "Pricing", consulted 12 October 2026). **Cache write:** 1.25 times the base input price for the five-minute lifetime, 2 times for the one-hour lifetime; one read repays the first, two the second.
 - **Freeze the prefix:** layers 01 and 02 first and byte-identical; every volatile byte last.
 - **Watch the cache-hit rate:** a drop means the prefix is churning; find what moved.
 

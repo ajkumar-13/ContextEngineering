@@ -26,11 +26,15 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Bookend packing.** Placing the highest-ranked retrieved chunk first and the second-highest last, with weaker chunks in the middle, so the strongest evidence avoids the lost-in-the-middle dip (posts 06 and 09).
 
+**Byte-pair encoding (BPE).** A tokeniser built by repeatedly merging the most frequent adjacent pair of symbols, so common words become single tokens and rare strings split into fragments (Sennrich et al., 2016; post 03).
+
 **Cache breakpoint.** A marker in a request that tells the provider where a cacheable prefix ends, so the computed state up to that point is stored and reused by later calls (post 05).
 
 **Cache hit, cache miss.** Whether a request's prefix matches a stored prompt-cache entry. A hit is billed at a fraction of the base input price; a miss bills the prefix at the full price plus, where the prefix is written to the cache, a write premium (post 05).
 
 **Candidate generation.** The second stage of the select pipeline: dense, sparse, or hybrid retrieval that produces a high-recall set of top-N candidates (for example top-50) for the reranker to refine (post 09).
+
+**Causal mask.** The rule in decoder-only models that a token may attend only to itself and the tokens before it; the reason a cached prefix stays valid when later tokens change (post 03).
 
 **Chain of thought (CoT).** A prompting pattern in which the model writes out intermediate reasoning before its answer (Wei et al., 2022).
 
@@ -48,7 +52,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Compress.** The third of the four operations (WSCI): shrinking what is already in the window, by windowing, summarisation, tool-result clearing, priority pruning, or token-level compression (post 12).
 
-**Confusion.** The failure mode in which the right information is present but the model applies the wrong rule or makes the wrong choice, usually because the rules are vague or unmotivated (post 06).
+**Confusion.** The failure mode in which the right information is present but the model applies the wrong rule or makes the wrong choice, because the rules about it are implicit, ambiguous or buried. The first fix is explicit, motivated, exemplified rules (post 06).
 
 **Conflict.** The failure mode in which the window holds contradictory information (an old memory and a new document, two retrieved chunks) and the model picks the wrong one. The first fix is a provenance and recency stamp with an explicit precedence rule (post 06).
 
@@ -60,7 +64,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Context recall.** A Ragas metric: how much of the information the reference answer needs is present in the retrieved context.
 
-**Context rot.** The gradual degradation of model behaviour as the window fills with stale, redundant, or low-signal tokens (Hong et al., 2025).
+**Context rot.** The degradation of model performance as input length grows, even on simple tasks and well inside the stated window (Hong, Troynikov and Huber, Chroma, 2025; post 06).
 
 **Context window.** The maximum number of tokens a model can take in one call, prompt and output together. A hard ceiling set by the model (post 04).
 
@@ -73,6 +77,8 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 **Data residency.** A requirement that data be stored and processed only within a given geographic or legal jurisdiction (post 24).
 
 **Decay.** A periodic job that lowers the confidence of memory cells that have not been confirmed recently, so stale facts stop dominating recall (post 16).
+
+**Decode.** The phase of a call that generates output one token per forward pass, each depending on the previous one (post 05).
 
 **Distraction.** The failure mode in which irrelevant tokens crowd out relevant ones and the model attends to the wrong material. The first fix is a tighter select step (post 06).
 
@@ -120,6 +126,8 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Isolate.** The fourth of the four operations (WSCI): splitting work across separate context windows (sub-agents, sandboxes) so that one task's noise, errors, and tool output do not enter another's window (post 13).
 
+**Key-value (KV) cache.** The keys and values already computed for earlier tokens, kept so that each new token attends over them instead of recomputing them; reused across calls for an identical prefix by a prompt cache (post 03).
+
 **Layer.** One of the six parts of the context window, numbered 01 to 06 in the order they are sent: 01 system prompt, 02 tools and MCP descriptions, 03 memory and state, 04 retrieved chunks, 05 conversation history, 06 user instruction. Each has its own lifetime, cost shape, and failure mode (post 02).
 
 **Layout-aware parsing.** Document parsing that keeps visual structure (tables, columns, headings, reading order) instead of flattening a page to a stream of text (post 10).
@@ -154,6 +162,8 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Precision@k.** The fraction of the top-k packed items that are relevant. The series' measure of the rerank and pack stages (post 09).
 
+**Prefill.** The phase of a call in which the model processes all input tokens in parallel before producing the first output token (post 05).
+
 **Prefix caching.** Another name for prompt caching.
 
 **Priority pruning.** A compress technique that drops items by priority band (keep, keep if room, summarise, drop) rather than by age (post 12).
@@ -162,7 +172,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Prompt cache.** A provider-side cache that stores the computed state of a stable prompt prefix and reuses it on later calls with the same prefix; the reason the stable prefix (layers 01 and 02) comes first (post 05).
 
-**Prompt engineering.** The narrower practice of choosing the wording, structure, and examples of a single message. A subset of context engineering (post 01).
+**Prompt engineering.** The narrower practice of choosing the wording, structure, and examples of a single message, which context engineering extends to the whole window (post 01).
 
 **Prompt injection.** An attack in which adversarial text in the input makes the model ignore its instructions or take unintended actions. Direct injection comes from the user; indirect injection comes from content the model reads (post 23).
 
@@ -220,6 +230,8 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Thinking tokens.** The intermediate reasoning tokens a reasoning model generates before its answer. They are billed as output and are usually hidden or summarised in the response (post 18).
 
+**Time to first token (TTFT).** The wait before the first output token appears; it is set mainly by prefill, which streaming cannot hide (post 05).
+
 **Token.** The unit a model reads and bills by. In English prose one token is roughly three quarters of a word (OpenAI, "Tokenizer"; post 04).
 
 **Tool.** A callable function exposed to the model through a name, a description, and a JSON Schema for its arguments.
@@ -228,7 +240,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Tool selection.** Choosing at run time which subset of the tool catalogue to expose to the model on a given call. A select operation over tool descriptions (posts 09 and 15).
 
-**Tool-storm.** The failure mode in which the model makes repeated, redundant, or useless tool calls, usually because the catalogue is too large or the descriptions do not say when not to call a tool (post 06).
+**Tool-storm.** The failure mode in which the model makes repeated, redundant, or useless tool calls, from a catalogue that is too large, descriptions that do not say when to call a tool, or no stop condition. The first fix is a trimmed catalogue with a stop budget (post 06).
 
 **Top-k.** The number of items kept after reranking and packed into the window (post 09).
 
