@@ -1,49 +1,23 @@
 id: ctx-002
 slug: 02-six-layers-of-context
-title: "02 · The Six Layers of Context"
-
-description: >
-  Learn the six layers of a modern LLM context window—system prompts,
-  tools, memory, RAG, conversation history, and user instructions—and
-  understand how each layer affects accuracy, cost, latency, and debugging.
-
-author: "Ajay"
-
+title: "02 - The six layers of context"
+summary: "A model receives one flat sequence of tokens on every call. Reading it as six layers with different lifetimes shows where each part sits in a raw request, why the stable layers go first, and which layer to inspect for a symptom."
 date: 2026-05-13
-last_modified: 2026-05-13
-
-tags:
-  - context-engineering
-  - foundations
-  - context-window
-  - llm
-  - rag
-  - ai-agents
-
-category: Foundations
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part I - Foundations"
-chapter: "Part I — Foundations"
-
-hero: diagrams/00-hero-six-layers.svg
-hero_alt: "The six layers of a context window, bracketed by lifetime: stable prefix, per-turn injection, growing tail, and trigger"
-
-reading_time: 14
-
-toc: true
-draft: false
-
-keywords:
-  - Context Window
-  - Context Engineering
-  - System Prompt
-  - RAG
-  - Memory
-  - MCP
-  - AI Agents
-  - Large Language Models
-
-canonical_url: ""
-
-prev: ../01-why-context-engineering/
-next: ../03-how-llms-read-context/
+level: beginner
+reading_time: 18
+tags: [context-engineering, context-window, system-prompt, tool-schemas, memory, retrieval, prompt-caching]
+hero: diagrams/01-six-layer-stack.svg
+prerequisites: [ctx-001]
+code: optional
+outcomes:
+  - id: o1
+    text: "Name the six layers of a context window in their fixed order and state the job and the lifetime of each."
+  - id: o2
+    text: "Identify every layer in a raw Anthropic, OpenAI, or Gemini request body."
+  - id: o3
+    text: "Explain why the stable layers are sent first and the user instruction last, in terms of prompt caching and position."
+  - id: o4
+    text: "Predict which layer is most likely at fault for a reported symptom, and say what to inspect in it."

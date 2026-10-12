@@ -1,0 +1,791 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-002",
+  "next_ordinal": 17,
+  "questions": [
+    {
+      "id": "ctx-002-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "lifetime",
+        "history"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "The series sorts the six layers into four lifetime classes. Which layer is the growing tail, the one that gains content on every call and runs out of room first?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "04 Retrieved chunks",
+          "correct": false,
+          "feedback": "Retrieved chunks change every turn, but each call fetches a fresh set; they are replaced, not accumulated. Layer 04 belongs to the per-turn injection."
+        },
+        {
+          "key": "b",
+          "text": "05 Conversation history",
+          "correct": true,
+          "feedback": "Right. Every call adds the previous turn to the history, so layer 05 keeps growing while the others stay roughly the same size."
+        },
+        {
+          "key": "c",
+          "text": "02 Tools and MCP descriptions",
+          "correct": false,
+          "feedback": "The tool list can be large, but it is the same on every call. That makes layer 02 part of the stable prefix, not a tail that grows."
+        },
+        {
+          "key": "d",
+          "text": "06 User instruction",
+          "correct": false,
+          "feedback": "The user instruction is new on every call, but it replaces the previous one and stays small. It is the trigger, not the growing tail."
+        }
+      ],
+      "explanation": "Section 3 groups the layers by lifetime: 01 and 02 are the stable prefix, 03 and 04 the per-turn injection, 05 the growing tail and 06 the trigger. Only the history accumulates across calls.",
+      "hints": [
+        "Ask which layer is resent on every call with one more turn appended."
+      ]
+    },
+    {
+      "id": "ctx-002-q02",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "layer-order"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the six layers of a context window in the order this series sends them, from the first token the model reads to the last.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Retrieved chunks"
+        },
+        {
+          "key": "b",
+          "text": "User instruction"
+        },
+        {
+          "key": "c",
+          "text": "System prompt"
+        },
+        {
+          "key": "d",
+          "text": "Conversation history"
+        },
+        {
+          "key": "e",
+          "text": "Memory and state"
+        },
+        {
+          "key": "f",
+          "text": "Tools and MCP descriptions"
+        }
+      ],
+      "answer": [
+        "c",
+        "f",
+        "e",
+        "a",
+        "d",
+        "b"
+      ],
+      "partial_credit": true,
+      "explanation": "Sections 3 and 11: the stable prefix (system prompt, then tools and MCP descriptions) comes first, then the per-turn injection (memory and state, then retrieved chunks), then the growing conversation history, and the user instruction last.",
+      "hints": [
+        "The layers that are the same on every call come first; the one that is new on every call comes last."
+      ]
+    },
+    {
+      "id": "ctx-002-q03",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "lifetime"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each layer to its lifetime class. A class may take more than one layer, and one class on the right matches no layer.",
+      "left": [
+        {
+          "key": "a",
+          "text": "01 System prompt"
+        },
+        {
+          "key": "b",
+          "text": "02 Tools and MCP descriptions"
+        },
+        {
+          "key": "c",
+          "text": "03 Memory and state"
+        },
+        {
+          "key": "d",
+          "text": "04 Retrieved chunks"
+        },
+        {
+          "key": "e",
+          "text": "05 Conversation history"
+        },
+        {
+          "key": "f",
+          "text": "06 User instruction"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Stable prefix: the same on every call"
+        },
+        {
+          "key": "b",
+          "text": "Per-turn injection: assembled for this call"
+        },
+        {
+          "key": "c",
+          "text": "Growing tail: gains a turn on every call"
+        },
+        {
+          "key": "d",
+          "text": "Trigger: small, new on every call, sent last"
+        },
+        {
+          "key": "e",
+          "text": "Session constant: fixed at login, sent after the history"
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "a",
+        "c": "b",
+        "d": "b",
+        "e": "c",
+        "f": "d"
+      },
+      "explanation": "Section 3 names four lifetime classes: 01 and 02 are the stable prefix, 03 and 04 the per-turn injection, 05 the growing tail and 06 the trigger. Memory is stored between sessions, but what reaches the request is chosen for each call, which is why it sits in the per-turn injection. No layer is sent after the history except the user instruction.",
+      "hints": [
+        "Two classes take two layers each, and two take one."
+      ]
+    },
+    {
+      "id": "ctx-002-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "10",
+      "est_minutes": 2,
+      "tags": [
+        "providers",
+        "system-prompt"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A request to OpenAI's Responses API needs a system prompt. Which field carries it as a dedicated top-level parameter?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "`system`",
+          "correct": false,
+          "feedback": "`system` is the top-level field of the Anthropic Messages API. The Responses API names its own field differently."
+        },
+        {
+          "key": "b",
+          "text": "`systemInstruction`",
+          "correct": false,
+          "feedback": "`systemInstruction` is Gemini's `generateContent` field. The Responses API does not use it."
+        },
+        {
+          "key": "c",
+          "text": "`instructions`",
+          "correct": true,
+          "feedback": "Right. The Responses API takes the system prompt as `instructions`, or as a `developer` item at the start of `input`."
+        },
+        {
+          "key": "d",
+          "text": "The last item of `input`",
+          "correct": false,
+          "feedback": "The last item of `input` is where layer 06, the user instruction, goes. The system prompt is sent first, not last."
+        }
+      ],
+      "explanation": "Section 10's table: Anthropic uses `system`, OpenAI Chat Completions a first `system` or `developer` message, the Responses API `instructions` (or a `developer` item in `input`), and Gemini `systemInstruction`.",
+      "hints": [
+        "Each provider names the layer 01 field differently; the table in the post lists all four APIs."
+      ]
+    },
+    {
+      "id": "ctx-002-q05",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "10",
+      "est_minutes": 4,
+      "tags": [
+        "request-body",
+        "history"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "The request body below was assembled the way this post's snippet assembles one. Select every entry of `messages` (counted from 0) that belongs to layer 05, the conversation history.",
+      "stimulus": {
+        "kind": "code",
+        "language": "json",
+        "content": "{\n  \"system\": \"You are a support assistant for Acme.\",\n  \"tools\": [{\"name\": \"lookup_order\", \"description\": \"Find an order by id.\", \"input_schema\": {\"type\": \"object\"}}],\n  \"messages\": [\n    {\"role\": \"user\", \"content\": \"<memory>Customer is on the Pro plan.</memory>\"},\n    {\"role\": \"assistant\", \"content\": \"Acknowledged.\"},\n    {\"role\": \"user\", \"content\": \"<chunk>Refunds take 5 business days.</chunk>\"},\n    {\"role\": \"user\", \"content\": \"Where is order 1182?\"},\n    {\"role\": \"assistant\", \"content\": \"It shipped on Monday.\"},\n    {\"role\": \"user\", \"content\": \"And when will my refund arrive?\"}\n  ]\n}"
+      },
+      "select": "multiple",
+      "options": [
+        {
+          "key": "a",
+          "text": "Entry 1, the assistant message \"Acknowledged.\"",
+          "correct": false,
+          "feedback": "It has the assistant role, but no earlier turn produced it: the application wrote it as the second half of the memory exchange, so it is layer 03."
+        },
+        {
+          "key": "b",
+          "text": "Entry 2, the message holding the chunk",
+          "correct": false,
+          "feedback": "It has the user role, but it carries evidence fetched for this turn. That is layer 04, retrieved chunks."
+        },
+        {
+          "key": "c",
+          "text": "Entry 3, \"Where is order 1182?\"",
+          "correct": true,
+          "feedback": "Right. This is a question the user asked on an earlier turn of the session, resent as history."
+        },
+        {
+          "key": "d",
+          "text": "Entry 4, \"It shipped on Monday.\"",
+          "correct": true,
+          "feedback": "Right. This is the model's answer on that earlier turn, part of the history the application resends."
+        },
+        {
+          "key": "e",
+          "text": "Entry 5, \"And when will my refund arrive?\"",
+          "correct": false,
+          "feedback": "The last user message is the current turn, layer 06. It becomes history only on the next call."
+        }
+      ],
+      "explanation": "Section 10: in the Messages shape, layers 03 to 06 share the `messages` list in the layer order. Entries 0 and 1 are the synthetic memory exchange (03), entry 2 the evidence block (04), entries 3 and 4 the earlier turn (05) and entry 5 the user instruction (06). A role alone does not tell the layer.",
+      "hints": [
+        "Walk the list in the layer order 03, 04, 05, 06 rather than by role.",
+        "Ask which entries a real earlier turn of the session produced."
+      ]
+    },
+    {
+      "id": "ctx-002-q06",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "memory",
+        "request-body"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In the request body this post's snippet prints, the second entry of `messages` is `{\"role\": \"assistant\", \"content\": \"Acknowledged.\"}`. Which layer does it belong to, and why is it there?",
+      "answer": {
+        "model": "Layer 03, memory and state. The application wrote it as the second half of a synthetic exchange that replays the stored memories; the model never said it on a real earlier turn.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(not|isn'?t|never|rather than|instead of) (in |part of )?(the )?(layer )?(0?3|memor(y|ies))\\b)(?![\\s\\S]*(?<!not )(?<!n't )(?<!than )(?<!of )\\b(is|belongs to|part of|in|it'?s) (layer )?0?5\\b)(?![\\s\\S]*(?<!not )(?<!n't )(?<!than )(?<!of )\\b(is|belongs to|part of|it'?s) (the )?(conversation )?history\\b)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess)\\b)(?=[\\s\\S]*(\\b0?3\\b|\\bmemor(y|ies)\\b))(?=[\\s\\S]*(synthetic|fake|fabricat|made[- ]up|invent|inserted|insert|written by|wrote|writes|generated by the app|\\badd(s|ed)?\\b|appended|\\bput\\b|\\bplaced\\b|after the memor|with the memor|replay|acknowledg|exchange|pair|half|completes|follow|never (said|happened|replied|answered)|not (a )?real|isn'?t (a )?real|not an? (actual|genuine)|no (real|actual|earlier) turn|didn'?t (say|happen)|did not (say|happen)))(?=[\\s\\S]*\\b(is|it|it'?s|was|are|belongs?|goes|sits|wrote|writes|written|add(s|ed)?|put|placed|inserted|completes|follows|replays|because|since)\\b)[\\s\\S]*\\S[\\s\\S]*\\s\\S"
+        ]
+      },
+      "explanation": "Section 6 describes the pattern the snippet uses: memories are replayed as a user message holding the stored facts followed by a short assistant acknowledgement. Both entries are layer 03, even though the second has the assistant role that history turns also have.",
+      "hints": [
+        "It sits right after the message that holds the memory notes.",
+        "Ask whether any earlier turn of the session produced it."
+      ]
+    },
+    {
+      "id": "ctx-002-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "5",
+      "est_minutes": 4,
+      "tags": [
+        "tool-schemas",
+        "tokens",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent exposes 12 tools whose names, descriptions and parameter documentation take 350 tokens each (illustrative numbers). The tool list is sent on every call. How many tokens does layer 02 add to each call, and what does layer 02 alone cost in input over 1,000 calls at an illustrative rate of \\$3 per million input tokens, with no caching?",
+      "answer": {
+        "parts": [
+          {
+            "label": "layer 02 tokens per call",
+            "value": 4200,
+            "tolerance": 0,
+            "unit": "tokens"
+          },
+          {
+            "label": "layer 02 input cost over 1,000 calls",
+            "value": 12.6,
+            "tolerance": 0.01,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "12 × 350 = 4,200 tokens per call; 4,200 × 1,000 = 4,200,000 tokens; 4,200,000 × 3 / 1,000,000 = 12.60 dollars. Counting the list once instead of on every call gives 0.0126 dollars, the nearest wrong method.",
+      "explanation": "Section 5: every tool schema rides in the prompt on every call, so layer 02 costs 12 × 350 = 4,200 tokens per call before the user types anything. Over 1,000 calls that is 4.2 million tokens, or \\$12.60 at \\$3 per million.",
+      "hints": [
+        "The whole tool list is resent on each call.",
+        "Multiply tokens per call by the number of calls, then by the rate per token."
+      ]
+    },
+    {
+      "id": "ctx-002-q08",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "11",
+      "est_minutes": 5,
+      "tags": [
+        "prompt-caching",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A call sends a stable prefix of 5,000 tokens (layers 01 and 02) followed by 3,000 tokens of layers 03 to 06. The base input rate is an illustrative \\$3 per million tokens, and a cache read is billed at 0.1 times that rate, the factor the post cites for most Anthropic models. Ignoring output and the one-time write premium, give the input cost of this call when the prefix is read from the cache, and when nothing is cached.",
+      "answer": {
+        "parts": [
+          {
+            "label": "input cost with the prefix read from the cache",
+            "value": 0.0105,
+            "tolerance": 0.0006,
+            "unit": "USD"
+          },
+          {
+            "label": "input cost with nothing cached",
+            "value": 0.024,
+            "tolerance": 0.0001,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "Hit: 5,000 × 0.30 / 1,000,000 + 3,000 × 3 / 1,000,000 = 0.0015 + 0.009 = 0.0105 dollars. Miss: 8,000 × 3 / 1,000,000 = 0.024 dollars. Applying the 0.1 factor to the whole call gives 0.0024, and applying it to the 3,000 per-turn tokens instead of the prefix gives 0.0159, the two nearest wrong methods.",
+      "explanation": "Section 11: only the identical prefix can be read from the cache, so only the 5,000 tokens of layers 01 and 02 take the cache-read price of \\$0.30 per million; the 3,000 tokens after them pay the full \\$3 per million. That gives \\$0.0105 against \\$0.024 for a call with nothing cached.",
+      "hints": [
+        "Split the call into the part that can come from the cache and the part that cannot.",
+        "Price the 5,000 prefix tokens at 0.1 × \\$3 per million and the rest at \\$3 per million."
+      ]
+    },
+    {
+      "id": "ctx-002-q09",
+      "type": "numeric",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "11",
+      "est_minutes": 6,
+      "tags": [
+        "prompt-caching",
+        "cost",
+        "layout"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Take a call with a 5,000-token stable prefix (layers 01 and 02, matched by the cache in that order) and 3,000 tokens after it, an illustrative \\$3 per million input tokens and cache reads at 0.1 times that rate, ignoring output and the write premium. Over 100 consecutive calls, layout A keeps the prefix identical, so call 1 is a miss and calls 2 to 100 read the prefix from the cache. Layout B formats the time of the call into the system prompt. Give the total input cost of the 100 calls under each layout.",
+      "answer": {
+        "parts": [
+          {
+            "label": "layout A, total over 100 calls",
+            "value": 1.0635,
+            "tolerance": 0.005,
+            "unit": "USD"
+          },
+          {
+            "label": "layout B, total over 100 calls",
+            "value": 2.4,
+            "tolerance": 0.002,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "A: 0.024 + 99 × (5,000 × 0.30 + 3,000 × 3) / 1,000,000 = 0.024 + 99 × 0.0105 = 1.0635 dollars. B: the time changes the first layer on every call, so every call is a miss: 100 × 0.024 = 2.40 dollars. Treating call 1 of layout A as a hit gives 1.05, the nearest wrong method.",
+      "explanation": "Section 11 and its figure: a cache reuses the prefix only up to the first entry that differs. Under layout A that is all of layers 01 and 02 from call 2 on; under layout B the system prompt differs on every call, so nothing is ever reused and the cost is more than twice that of layout A.",
+      "hints": [
+        "Decide, for each layout, how much of each call's prefix is identical to the previous call's.",
+        "Layout A pays one full-price call and 99 cache-hit calls; layout B pays 100 full-price calls."
+      ]
+    },
+    {
+      "id": "ctx-002-q10",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "11",
+      "est_minutes": 3,
+      "tags": [
+        "prompt-caching",
+        "anthropic"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "On the Anthropic Messages API, a team rewrites its system prompt on every deploy but has kept the same tool list, byte for byte, for months. Between two deploys, which part of a request can still be read from the prompt cache once it has been written?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Nothing: the system prompt is layer 01, so any change to it ends the reusable prefix before the tools.",
+          "correct": false,
+          "feedback": "That holds in the series' layer order, but Anthropic builds its cache prefix in the order tools, system, messages, so the tools come before the system prompt there."
+        },
+        {
+          "key": "b",
+          "text": "The tool definitions, which come first in Anthropic's cache prefix, given a cache breakpoint after them.",
+          "correct": true,
+          "feedback": "Right. The cache prefix runs tools, system, messages, so an unchanged tool list stays reusable even when the system prompt changes, as long as a breakpoint marks the end of the tools."
+        },
+        {
+          "key": "c",
+          "text": "The conversation history, because earlier turns do not change.",
+          "correct": false,
+          "feedback": "The history comes after the system prompt in the cache prefix. Once the system prompt differs, nothing after it can match, however stable it is."
+        },
+        {
+          "key": "d",
+          "text": "Everything except the system prompt, because the cache skips over a changed block and resumes matching right after it, at the messages.",
+          "correct": false,
+          "feedback": "A prompt cache does not skip a block. A hit needs an identical prefix, so matching stops at the first difference."
+        }
+      ],
+      "explanation": "Section 11: a hit needs an identical prefix, and Anthropic builds that prefix in the order `tools`, `system`, `messages`. A changed system prompt therefore ends the reusable prefix after the tools, not before them.",
+      "hints": [
+        "The cache matches from the start of the prefix and stops at the first difference.",
+        "Check the order in which Anthropic assembles its cache prefix."
+      ]
+    },
+    {
+      "id": "ctx-002-q11",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "9",
+      "est_minutes": 3,
+      "tags": [
+        "layer-order",
+        "user-instruction"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Give one reason the user instruction is placed last in the window rather than first.",
+      "answer": {
+        "model": "It is the one part that is new on every call, so placing it last keeps everything before it an identical, cacheable prefix. Also, models use information at the end of a long input more reliably than in the middle.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess)\\b)(?![\\s\\S]*\\b(model|it|llms?) (reads?|attends?|sees?|uses?|remembers?) (the )?(start|beginning|first part)s? (best|most|first|better)\\b(?![\\s\\S]*\\bend\\b))(?![\\s\\S]*\\b(largest|biggest|longest|most tokens)\\b)(?![\\s\\S]*\\b(cache|caches|cached) (the )?(user )?(instruction|question|request)\\b)(?![\\s\\S]*\\b(it|instruction|question|request|message) (never|rarely|doesn'?t|does not|won'?t|will not) (change|vary|differ)s?\\b)(?![\\s\\S]*\\b(end|last part|final part)s? (of the (input|window|prompt) )?(is|are|gets?) (ignored|forgotten|skipped|lost|read least|used least|attended least)\\b)(?![\\s\\S]*\\b(ignores?|forgets?|skips?|loses?) the end\\b)(?![\\s\\S]*\\b(reads?|uses?|attends? to|sees?|recalls?|remembers?) (the )?middle( of [\\w ]+?)? (best|most|better|more)\\b)(?=[\\s\\S]*\\b(is|are|it|so|because|since|keeps?|goes|go|placed?|placing|put|changes?|varies|differs?|would|break|breaks|use|uses|read|reads|attend|attends|recall|recalls)\\b)(?=[\\s\\S]*(cach|prefix))(?=[\\s\\S]*(chang|new|differ|vari|fresh|volatile|not stable|unstable|isn'?t stable|every (call|turn|request)|each (call|turn|request)|per[- ](call|turn)))[\\s\\S]*\\s\\S",
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess)\\b)(?![\\s\\S]*\\b(model|it|llms?) (reads?|attends?|sees?|uses?|remembers?) (the )?(start|beginning|first part)s? (best|most|first|better)\\b(?![\\s\\S]*\\bend\\b))(?![\\s\\S]*\\b(largest|biggest|longest|most tokens)\\b)(?![\\s\\S]*\\b(cache|caches|cached) (the )?(user )?(instruction|question|request)\\b)(?![\\s\\S]*\\b(it|instruction|question|request|message) (never|rarely|doesn'?t|does not|won'?t|will not) (change|vary|differ)s?\\b)(?![\\s\\S]*\\b(end|last part|final part)s? (of the (input|window|prompt) )?(is|are|gets?) (ignored|forgotten|skipped|lost|read least|used least|attended least)\\b)(?![\\s\\S]*\\b(ignores?|forgets?|skips?|loses?) the end\\b)(?![\\s\\S]*\\b(reads?|uses?|attends? to|sees?|recalls?|remembers?) (the )?middle( of [\\w ]+?)? (best|most|better|more)\\b)(?=[\\s\\S]*\\b(is|are|it|so|because|since|keeps?|goes|go|placed?|placing|put|changes?|varies|differs?|would|break|breaks|use|uses|read|reads|attend|attends|recall|recalls)\\b)(?=[\\s\\S]*\\b(models?|llms?|attention|attends?|accuracy|recall|information|lost in the middle)\\b)(?=[\\s\\S]*\\b(end|middle)\\b)[\\s\\S]*\\s\\S"
+        ]
+      },
+      "explanation": "Sections 9 and 11 give two reasons: the user instruction changes on every call, and anything that changes ends the reusable prefix, so it goes after the stable layers; and Liu et al. found that models use information at the start and the end of a long input best, so the question belongs at the end.",
+      "hints": [
+        "Think about what a prompt cache needs, or about where in a long input models use information best."
+      ]
+    },
+    {
+      "id": "ctx-002-q12",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "12",
+      "est_minutes": 4,
+      "tags": [
+        "diagnosis",
+        "symptoms"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each bug report to the layer to inspect first.",
+      "left": [
+        {
+          "key": "a",
+          "text": "\"It quotes our old refund policy, even though the policy page was updated last month.\""
+        },
+        {
+          "key": "b",
+          "text": "\"It keeps asking which language I code in; I told it last week.\""
+        },
+        {
+          "key": "c",
+          "text": "\"After the new release it stopped answering in bullet points.\""
+        },
+        {
+          "key": "d",
+          "text": "\"It called delete_ticket when I asked it to close the ticket.\""
+        },
+        {
+          "key": "e",
+          "text": "\"Forty messages in, it no longer knows which customer we are discussing.\""
+        },
+        {
+          "key": "f",
+          "text": "\"It summarised the attached documents instead of answering my question about them.\""
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "01 System prompt"
+        },
+        {
+          "key": "b",
+          "text": "02 Tools and MCP descriptions"
+        },
+        {
+          "key": "c",
+          "text": "03 Memory and state"
+        },
+        {
+          "key": "d",
+          "text": "04 Retrieved chunks"
+        },
+        {
+          "key": "e",
+          "text": "05 Conversation history"
+        },
+        {
+          "key": "f",
+          "text": "06 User instruction"
+        }
+      ],
+      "answer": {
+        "a": "d",
+        "b": "c",
+        "c": "a",
+        "d": "b",
+        "e": "e",
+        "f": "f"
+      },
+      "explanation": "Section 12's table: stale facts from documents point at the retrieved chunks (the old version is still indexed), a forgotten preference at memory, a lost format rule after a release at the system prompt, a wrong tool at the tool descriptions, a lost thread in a long chat at the history, and an answer to the wrong question at the placement of the user instruction.",
+      "hints": [
+        "Ask, for each report, which layer should have carried the missing or wrong information."
+      ]
+    },
+    {
+      "id": "ctx-002-q13",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o4",
+        "o3"
+      ],
+      "section": "13",
+      "est_minutes": 4,
+      "tags": [
+        "diagnosis",
+        "prompt-caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An assistant's answers are fine, but its input bill has not dropped since prompt caching was switched on, and the usage block of every response reports `cache_read_input_tokens: 0`. The system prompt opens with \"Today is {weekday}, {date} {time}.\" Which change fixes it?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Move the date and time out of the system prompt into a later layer, such as the user turn.",
+          "correct": true,
+          "feedback": "Right. The time makes layer 01 differ on every call, so no prefix ever matches. Moved after the stable layers, it no longer breaks the prefix."
+        },
+        {
+          "key": "b",
+          "text": "Trim the conversation history, which has grown too long for the prompt cache to store alongside the system prompt.",
+          "correct": false,
+          "feedback": "History length does not stop the prefix before it from matching. A cache read of zero on every call means the very first layer already differs."
+        },
+        {
+          "key": "c",
+          "text": "Shorten the user instruction so that it fits in the cache.",
+          "correct": false,
+          "feedback": "The user instruction is meant to be outside the cache; it is new on every call. Its length has no effect on whether the prefix matches."
+        },
+        {
+          "key": "d",
+          "text": "Send fewer retrieved chunks per call.",
+          "correct": false,
+          "feedback": "Retrieved chunks come after the stable prefix, so their number cannot explain a prefix that never matches."
+        }
+      ],
+      "explanation": "Sections 11 and 13: a cache hit needs an identical prefix. A value that changes on every call, written into layer 01, makes every call differ from its first tokens, so the cache-read count stays at zero; moving it into layer 03, 04 or 06 restores the stable prefix.",
+      "hints": [
+        "A cache-read count of zero means the match fails at the very start.",
+        "Find the one value in the stable prefix that differs from call to call."
+      ]
+    },
+    {
+      "id": "ctx-002-q14",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "12",
+      "est_minutes": 10,
+      "tags": [
+        "diagnosis",
+        "checklist"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "explain",
+      "prompt": "A user reports: \"Since Tuesday it ignores our rule to answer in British English, but only in long chats.\" Walk the layers from 01 to 06: name the two layers most likely at fault, say what to inspect in each and what finding would confirm it, and explain why the words \"since Tuesday\" and \"only in long chats\" point where they do.",
+      "answer_length": "two short paragraphs",
+      "solution": "1. **Layer 01, the system prompt.** The rule lives there, and \"since Tuesday\" points at a change: diff the system prompt between the last good deploy and Tuesday's. A rule that was edited, truncated, moved to the middle of a longer prompt or contradicted by a new rule confirms it.\n2. **Layer 05, the conversation history.** \"Only in long chats\" points at the layer that grows: in a long chat the history dominates the window, and if a compaction or summary step (or a sliding window) was introduced or changed on Tuesday, older turns that restated the rule may have been dropped, or the summary may carry American spelling forward. Inspect the assembled request of a long chat: check whether the rule is still present and how much history now sits between it and the user instruction.\n3. **Why the walk stops there.** Layers 02 to 04 do not carry a spelling rule, and layer 06 is the user's own sentence. The two clues are complementary: a change on a date suggests a deploy, which edits 01 or the history policy; a dependence on length points at 05. Printing one assembled long-chat request answers both at once.",
+      "rubric": [
+        {
+          "criterion": "Names layer 01 and says to diff or read the rule as deployed since Tuesday",
+          "points": 2
+        },
+        {
+          "criterion": "Names layer 05 and ties it to chat length (growth, compaction or truncation)",
+          "points": 2
+        },
+        {
+          "criterion": "Gives a concrete finding that would confirm each layer",
+          "points": 2
+        },
+        {
+          "criterion": "Explains why the other layers are less likely, or suggests printing the assembled request",
+          "points": 1
+        }
+      ],
+      "explanation": "Section 12 maps an ignored instruction to the system prompt and a lost thread in long chats to the history; the checklist walks the layers from 01 to 06 and asks of each whether it carries what it should. Here the date clue points at a deploy and the length clue at the growing tail.",
+      "hints": [
+        "Which layer holds the rule, and which layer changes with the length of the chat?",
+        "A clue about a date suggests a deploy; a clue about length suggests the growing tail."
+      ]
+    },
+    {
+      "id": "ctx-002-q15",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o3"
+      ],
+      "section": "11",
+      "est_minutes": 15,
+      "tags": [
+        "layout",
+        "design",
+        "prompt-caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "design",
+      "prompt": "Design the request layout for a customer-support assistant that has: a 2,500-token policy and style guide, 15 tool schemas, the customer's stored profile and preferences, up to six help-centre chunks retrieved per question, the session's earlier turns, the current date, and the customer's new message. Assign each piece to a layer, give the order in which they are sent, say where the date goes and why, and say what happens to the cost and the context window as a chat gets long. Name the later posts that treat the cost arithmetic and the history policy.",
+      "answer_length": "half a page",
+      "solution": "1. **Layers.** Policy and style guide: 01 System prompt. The 15 tool schemas: 02 Tools and MCP descriptions. Profile and preferences: 03 Memory and state, selected per call. Help-centre chunks: 04 Retrieved chunks. Earlier turns: 05 Conversation history. The new message: 06 User instruction.\n2. **Order.** 01, 02, 03, 04, 05, 06: the stable prefix first, then the per-turn injection, then the growing history, and the new message last, at the end, one of the two places where models use information most reliably, and where it does not break the prefix.\n3. **The date.** It changes daily (and a time would change every call), so it must not go into layer 01: there it would make every call a cache miss. It belongs with the per-turn material, for example in layer 03 as session state or at the start of the user turn.\n4. **Cost and window as the chat grows.** The prefix (policy and tools) is read from the cache after the first call; everything after it is billed at the full rate, and layer 05 grows by one turn per call, so the per-call input and the bill climb until a history policy (sliding window, rolling summary, selective recall) holds it in budget, before the window itself overflows.\n5. **Posts.** Post 05 works the caching and pricing arithmetic; post 12 treats the history policy as compression.",
+      "rubric": [
+        {
+          "criterion": "Assigns all six pieces to the right layers",
+          "points": 2
+        },
+        {
+          "criterion": "Gives the order 01 to 06 and justifies it by caching and position",
+          "points": 2
+        },
+        {
+          "criterion": "Keeps the date out of the stable prefix, with the cache reason",
+          "points": 2
+        },
+        {
+          "criterion": "Explains that layer 05 grows and needs a history policy before the window overflows",
+          "points": 1
+        },
+        {
+          "criterion": "Names post 05 for the cost arithmetic and post 12 for the history policy",
+          "points": 1
+        }
+      ],
+      "explanation": "Sections 3 and 11 fix the layer order and the reason for it; section 13 shows what a per-turn value in the stable prefix does to the cache; section 8 lists the history strategies. Post 05 prices the layout with and without caching, and post 12 treats the history policy as compression.",
+      "hints": [
+        "Sort the pieces by lifetime first; the order follows from the lifetimes.",
+        "For the date, ask how often it changes and what that does to the prefix."
+      ],
+      "connects": [
+        "ctx-005",
+        "ctx-012"
+      ]
+    },
+    {
+      "id": "ctx-002-q16",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o2",
+        "o1"
+      ],
+      "section": "10",
+      "est_minutes": 12,
+      "tags": [
+        "request-body",
+        "layer-order"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "fix",
+      "language": "python",
+      "prompt": "`assemble` should build an Anthropic Messages body with the layers in the series' order: the system prompt and the tools as top-level fields, then in `messages` the memory exchange, the retrieved chunks, the history and, last, the user instruction. The starter returns a body with every layer present, but one layer is in the wrong place. Fix it.",
+      "starter": "def assemble(system_prompt, tools, memory, chunks, history, instruction):\n    \"\"\"Return an Anthropic Messages body with the six layers in the series' order.\n\n    memory and chunks are lists of strings; history is a list of {\"role\", \"content\"} turns.\n    \"\"\"\n    messages = []\n    if memory:\n        messages.append({\"role\": \"user\", \"content\": \"<memory>\" + \"\\n\".join(memory) + \"</memory>\"})\n        messages.append({\"role\": \"assistant\", \"content\": \"Acknowledged.\"})\n    if chunks:\n        messages.append({\"role\": \"user\", \"content\": \"\\n\".join(f\"<chunk>{c}</chunk>\" for c in chunks)})\n    messages.append({\"role\": \"user\", \"content\": instruction})\n    messages.extend(history)\n    return {\"system\": system_prompt, \"tools\": tools, \"messages\": messages}\n",
+      "solution": "def assemble(system_prompt, tools, memory, chunks, history, instruction):\n    \"\"\"Return an Anthropic Messages body with the six layers in the series' order.\n\n    memory and chunks are lists of strings; history is a list of {\"role\", \"content\"} turns.\n    \"\"\"\n    messages = []\n    if memory:\n        messages.append({\"role\": \"user\", \"content\": \"<memory>\" + \"\\n\".join(memory) + \"</memory>\"})\n        messages.append({\"role\": \"assistant\", \"content\": \"Acknowledged.\"})\n    if chunks:\n        messages.append({\"role\": \"user\", \"content\": \"\\n\".join(f\"<chunk>{c}</chunk>\" for c in chunks)})\n    messages.extend(history)\n    messages.append({\"role\": \"user\", \"content\": instruction})\n    return {\"system\": system_prompt, \"tools\": tools, \"messages\": messages}\n",
+      "tests": "hist = [{\"role\": \"user\", \"content\": \"How do webhooks work?\"},\n        {\"role\": \"assistant\", \"content\": \"A webhook is an HTTP callback.\"}]\nbody = assemble(\"You are a helpful assistant.\", [{\"name\": \"search_docs\"}], [\"User prefers Python.\"],\n                [\"Webhooks are HTTP callbacks.\"], hist, \"Now rotate the signing secret.\")\nm = body[\"messages\"]\n\n# 1. Layers 01 and 02 are top-level fields, not messages.\nassert body[\"system\"] == \"You are a helpful assistant.\", \"the system prompt belongs in the system field\"\nassert body[\"tools\"] == [{\"name\": \"search_docs\"}], \"the tool list belongs in the tools field\"\nassert all(x[\"role\"] in (\"user\", \"assistant\") for x in m), \"no system message inside messages\"\n\n# 2. The user instruction is the last entry.\nassert m[-1] == {\"role\": \"user\", \"content\": \"Now rotate the signing secret.\"}, m[-1]\n\n# 3. The history comes right before it, unchanged and in order.\nassert m[-3:-1] == hist, \"the history must sit just before the user instruction\"\n\n# 4. Memory (with its acknowledgement), then chunks, come first.\nassert m[0][\"content\"].startswith(\"<memory>\") and m[1] == {\"role\": \"assistant\", \"content\": \"Acknowledged.\"}\nassert m[2][\"content\"].startswith(\"<chunk>\") and len(m) == 6, len(m)\n\n# 5. Empty layers add nothing, and the instruction is still last.\nbare = assemble(\"s\", [], [], [], [], \"q\")\nassert bare[\"messages\"] == [{\"role\": \"user\", \"content\": \"q\"}], bare[\"messages\"]\n\n# 6. A longer history is kept whole and in order, not cut to its last turn.\nlonger = hist + [{\"role\": \"user\", \"content\": \"And retries?\"}, {\"role\": \"assistant\", \"content\": \"They back off.\"}]\nm6 = assemble(\"s\", [], [], [], longer, \"q\")[\"messages\"]\nassert m6 == longer + [{\"role\": \"user\", \"content\": \"q\"}], m6\nprint(\"all tests passed\")\n",
+      "entry": "python solution_and_tests.py",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 10's snippet appends the history and then the user instruction, so the instruction is always the last entry of `messages`. The starter appends the instruction before the history, which turns the current question into a stale-looking early turn and leaves an old assistant reply as the last thing the model reads.",
+      "hints": [
+        "Compare the order of the appends with the order 03, 04, 05, 06.",
+        "The last thing in `messages` should be the one entry that is new on every call."
+      ]
+    }
+  ]
+}
