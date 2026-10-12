@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-_SENTENCE = re.compile(r"[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$")
+_SENTENCE = re.compile(r"\S.*?(?:[.!?]+(?=\s|$)|$)", re.S)
 
 
 @dataclass(frozen=True)

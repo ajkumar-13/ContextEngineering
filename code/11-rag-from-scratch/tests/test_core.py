@@ -64,3 +64,10 @@ def test_bookend_pack_positions_the_two_strongest():
     assert packed[0] == "best"
     assert packed[-1] == "second"
     assert packed[1:-1] == ["c", "d"]
+
+def test_split_sentences_keeps_text_around_inner_full_stops():
+    from ragkit import split_sentences
+
+    text = "Standard delivery costs 4.95 dollars. See example.com for more. Done"
+    assert split_sentences(text) == ["Standard delivery costs 4.95 dollars.", "See example.com for more.", "Done"]
+    assert " ".join(split_sentences(text)).split() == text.split()
