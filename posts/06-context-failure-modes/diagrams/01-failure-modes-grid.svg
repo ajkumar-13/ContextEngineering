@@ -1,15 +1,232 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 380" role="img" aria-labelledby="t d">
-  <title id="t">Five context failure modes mapped to layers</title>
-  <desc id="d">A hand-drawn table of five rows, one per context failure mode, with columns for the symptom users report, the layer the mode originates in, and the cheapest first fix. Distraction produces a fluent but off-topic answer from retrieval or the system prompt, and is fixed by tightening Select and adding a reranker. Confusion is the right information with the wrong choice, from the system prompt or tools, fixed by explicit exemplified rules. Conflict is an internally contradictory answer from memory or retrieval, fixed with a provenance and precedence rule. Lost in the middle is a long context whose middle is ignored, from retrieval or history, fixed by bookend packing. Tool-storm is tool calls without progress, from the tools layer, fixed by trimming the catalogue and capping the loop. A caption notes the small remainder are model or systems bugs, not context bugs.</desc>
-
-  <style><![CDATA[
-    :root{--ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;--ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;--ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;--ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-neutral-1:#EAEAE4;--ctx-neutral-2:#CFCFC8;--ctx-neutral-3:#8E8E88;--ctx-on-fill:#FFFDF9;--ctx-on-accent:#1A1A1A;}
-    @media (prefers-color-scheme:dark){:root{--ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;--ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;--ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;--ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-neutral-1:#1F2229;--ctx-neutral-2:#2C3038;--ctx-neutral-3:#6E6E68;--ctx-on-fill:#14161A;--ctx-on-accent:#1A1A1A;}}
-    .bg{fill:var(--ctx-bg);}
-    text{dominant-baseline:auto;}
-  ]]></style>
-
-  <rect class="bg" width="820" height="380"/>
-<text xml:space="preserve" x="32" y="38.24" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="22" fill="var(--ctx-ink)">Five failure modes, layer source, first-fix</text><text xml:space="preserve" x="32" y="61.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink-muted)">Each mode has one symptom, one layer it originates in, and one cheap thing to try first.</text><text xml:space="preserve" x="32" y="92.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-subtle)">Mode</text><text xml:space="preserve" x="180" y="92.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-subtle)">Symptom</text><text xml:space="preserve" x="396" y="92.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-subtle)">Originates in</text><text xml:space="preserve" x="536" y="92.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-subtle)">First-fix</text><path d="M33.17 107.34C31.65 115.85 31.17 123.17 31.44 136.4M31.91 108.06C31.62 117.54 31.47 127.17 31.84 135.79" fill="none" stroke="var(--ctx-accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="46" y="124.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink)">Distraction</text><text xml:space="preserve" x="180" y="124.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">fluent answer, off topic</text><text xml:space="preserve" x="396" y="124.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">RAG / system</text><text xml:space="preserve" x="536" y="124.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink)">tighten Select; add a reranker</text><path d="M31.92 144.23C207.25 144.19 382.15 144.51 787.84 144.14M32.11 143.99C318.97 144.31 605.65 144.25 788.1 144.05" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M33.18 152.56C31.27 159.58 32.63 166.09 32.13 178.86M31.5 152.14C31.94 159.19 32.21 166.76 31.9 180.57" fill="none" stroke="var(--ctx-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="46" y="168.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink)">Confusion</text><text xml:space="preserve" x="180" y="168.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">right info present, wrong choice</text><text xml:space="preserve" x="396" y="168.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">system / tools</text><text xml:space="preserve" x="536" y="168.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink)">explicit, exemplified rules</text><path d="M31.92 187.99C217.44 187.52 402.99 187.13 787.98 187.83M32.03 188C253.81 187.54 475.4 187.55 788.11 187.96" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M33.19 195.37C32.91 203.31 31.32 211.42 32.82 223.72M32.28 196.22C31.89 206.45 31.38 217.55 31.96 224.15" fill="none" stroke="var(--ctx-accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="46" y="212.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink)">Conflict</text><text xml:space="preserve" x="180" y="212.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">internally contradictory answer</text><text xml:space="preserve" x="396" y="212.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">memory / RAG</text><text xml:space="preserve" x="536" y="212.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink)">provenance + precedence rule</text><path d="M31.92 232.24C227.63 232.37 423.35 232.22 788.12 232.01M31.95 232.02C188.41 231.02 345.15 231.09 787.88 232.12" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M33.2 240.58C32.53 247.05 32.77 256.75 31.1 268.57M31.86 240.3C32.21 248.1 32.11 255.93 32.02 267.72" fill="none" stroke="var(--ctx-warn)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="46" y="256.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink)">Lost in the middle</text><text xml:space="preserve" x="180" y="256.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">long context, middle ignored</text><text xml:space="preserve" x="396" y="256.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">RAG / history</text><text xml:space="preserve" x="536" y="256.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink)">bookend packing</text><path d="M31.92 276C237.82 275.23 444.19 275.32 787.77 276.18M32.1 276.03C274.46 276.48 517.06 276.63 787.89 276.03" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M30.81 283.39C32.14 293.18 31.83 302.07 31.79 311.03M31.44 284.39C32.16 289.76 32.48 295.52 32.07 312.5" fill="none" stroke="var(--ctx-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="46" y="300.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink)">Tool-storm</text><text xml:space="preserve" x="180" y="300.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">tool calls without progress</text><text xml:space="preserve" x="396" y="300.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">tools (layer 02)</text><text xml:space="preserve" x="536" y="300.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink)">trim catalogue; cap the loop</text><text xml:space="preserve" x="32" y="343.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">Walk these five in order on every bug report. The first yes is almost always the right one.</text><text xml:space="preserve" x="32" y="363.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink-muted)">The small remainder are model bugs or systems bugs; neither is a context bug.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="ctx-01-failure-modes-grid-title" aria-describedby="ctx-01-failure-modes-grid-desc">
+<title id="ctx-01-failure-modes-grid-title">Each failure mode starts in a few layers</title>
+<desc id="ctx-01-failure-modes-grid-desc">A grid with one row per failure mode, one column per layer from 01 System prompt to 06 User instruction, and a last column for the first fix. Distraction: also in 01, starts in 04, also in 05; first fix: lower top-k, add a reranker. Confusion: starts in 01, starts in 02; first fix: explicit, motivated, exemplified rules. Conflict: a side in 01, a side in 03, a side in 04, a side in 05; first fix: provenance stamp, precedence rule. Lost-in-the-middle: starts in 04, starts in 05, also in 06; first fix: bookend packing; summarise old history. Tool-storm: also in 01, starts in 02; first fix: trim the catalogue, cap the loop. Key: starts, the layer the mode begins in; also, a layer that shares it; a side, one of two parts that disagree.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-blue-ink { fill: var(--ctx-blue-ink); }
+  .f-blue-soft { fill: var(--ctx-blue-soft); }
+  .f-green-ink { fill: var(--ctx-green-ink); }
+  .f-green-soft { fill: var(--ctx-green-soft); }
+  .f-ink { fill: var(--ctx-ink); }
+  .f-orange-ink { fill: var(--ctx-orange-ink); }
+  .f-orange-soft { fill: var(--ctx-orange-soft); }
+  .f-purple-ink { fill: var(--ctx-purple-ink); }
+  .f-purple-soft { fill: var(--ctx-purple-soft); }
+  .s-blue-line { stroke: var(--ctx-blue-line); }
+  .s-green-line { stroke: var(--ctx-green-line); }
+  .s-orange-line { stroke: var(--ctx-orange-line); }
+  .s-purple-line { stroke: var(--ctx-purple-line); }
+</style>
+<defs>
+<marker id="ctx-01-failure-modes-grid-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="720"/>
+<text x="40" y="48" class="t-title" data-w="480">Each failure mode starts in a few layers</text>
+<text x="40" y="76" class="t-subtitle" data-w="569">The five modes of this post, the layers each one starts in, and the first fix to try.</text>
+<text x="40" y="136" class="t-head" data-w="47">Mode</text>
+<text x="752" y="136" class="t-head" data-w="63">First fix</text>
+<text x="252" y="136" text-anchor="middle" class="t-head f-blue-ink" data-w="20">01</text>
+<text x="252" y="160" text-anchor="middle" class="t-tick f-ink" data-w="47">System</text>
+<text x="252" y="180" text-anchor="middle" class="t-tick f-ink" data-w="46">prompt</text>
+<text x="340" y="136" text-anchor="middle" class="t-head f-blue-ink" data-w="20">02</text>
+<text x="340" y="160" text-anchor="middle" class="t-tick f-ink" data-w="62">Tools and</text>
+<text x="340" y="180" text-anchor="middle" class="t-tick f-ink" data-w="32">MCP</text>
+<text x="340" y="200" text-anchor="middle" class="t-tick f-ink" data-w="76">descriptions</text>
+<text x="428" y="136" text-anchor="middle" class="t-head f-orange-ink" data-w="20">03</text>
+<text x="428" y="160" text-anchor="middle" class="t-tick f-ink" data-w="79">Memory and</text>
+<text x="428" y="180" text-anchor="middle" class="t-tick f-ink" data-w="32">state</text>
+<text x="516" y="136" text-anchor="middle" class="t-head f-orange-ink" data-w="20">04</text>
+<text x="516" y="160" text-anchor="middle" class="t-tick f-ink" data-w="61">Retrieved</text>
+<text x="516" y="180" text-anchor="middle" class="t-tick f-ink" data-w="44">chunks</text>
+<text x="604" y="136" text-anchor="middle" class="t-head f-green-ink" data-w="20">05</text>
+<text x="604" y="160" text-anchor="middle" class="t-tick f-ink" data-w="83">Conversation</text>
+<text x="604" y="180" text-anchor="middle" class="t-tick f-ink" data-w="43">history</text>
+<text x="692" y="136" text-anchor="middle" class="t-head f-purple-ink" data-w="20">06</text>
+<text x="692" y="160" text-anchor="middle" class="t-tick f-ink" data-w="30">User</text>
+<text x="692" y="180" text-anchor="middle" class="t-tick f-ink" data-w="66">instruction</text>
+<text x="40" y="260" class="t-head" data-w="91">Distraction</text>
+<rect x="212" y="224" width="80" height="64" rx="6" class="f-blue-soft" data-fit="skip"/>
+<rect x="212" y="224" width="80" height="64" rx="6" class="w1 nofill s-blue-line" data-fit="skip"/>
+<text x="252" y="260" text-anchor="middle" class="t-label" data-w="28">also</text>
+<rect x="476" y="224" width="80" height="64" rx="6" class="f-orange-soft" data-fit="skip"/>
+<rect x="476" y="224" width="80" height="64" rx="6" class="w1 nofill s-orange-line" data-fit="skip"/>
+<text x="516" y="260" text-anchor="middle" class="t-label" data-w="38">starts</text>
+<rect x="564" y="224" width="80" height="64" rx="6" class="f-green-soft" data-fit="skip"/>
+<rect x="564" y="224" width="80" height="64" rx="6" class="w1 nofill s-green-line" data-fit="skip"/>
+<text x="604" y="260" text-anchor="middle" class="t-label" data-w="28">also</text>
+<text x="752" y="248" class="t-label" data-w="80">lower top-k,</text>
+<text x="752" y="272" class="t-label" data-w="98">add a reranker</text>
+<text x="40" y="340" class="t-head" data-w="84">Confusion</text>
+<rect x="212" y="304" width="80" height="64" rx="6" class="f-blue-soft" data-fit="skip"/>
+<rect x="212" y="304" width="80" height="64" rx="6" class="w1 nofill s-blue-line" data-fit="skip"/>
+<text x="252" y="340" text-anchor="middle" class="t-label" data-w="38">starts</text>
+<rect x="300" y="304" width="80" height="64" rx="6" class="f-blue-soft" data-fit="skip"/>
+<rect x="300" y="304" width="80" height="64" rx="6" class="w1 nofill s-blue-line" data-fit="skip"/>
+<text x="340" y="340" text-anchor="middle" class="t-label" data-w="38">starts</text>
+<text x="752" y="328" class="t-label" data-w="127">explicit, motivated,</text>
+<text x="752" y="352" class="t-label" data-w="114">exemplified rules</text>
+<text x="40" y="420" class="t-head" data-w="65">Conflict</text>
+<rect x="212" y="384" width="80" height="64" rx="6" class="f-blue-soft" data-fit="skip"/>
+<rect x="212" y="384" width="80" height="64" rx="6" class="w1 nofill s-blue-line" data-fit="skip"/>
+<text x="252" y="420" text-anchor="middle" class="t-label" data-w="40">a side</text>
+<rect x="388" y="384" width="80" height="64" rx="6" class="f-orange-soft" data-fit="skip"/>
+<rect x="388" y="384" width="80" height="64" rx="6" class="w1 nofill s-orange-line" data-fit="skip"/>
+<text x="428" y="420" text-anchor="middle" class="t-label" data-w="40">a side</text>
+<rect x="476" y="384" width="80" height="64" rx="6" class="f-orange-soft" data-fit="skip"/>
+<rect x="476" y="384" width="80" height="64" rx="6" class="w1 nofill s-orange-line" data-fit="skip"/>
+<text x="516" y="420" text-anchor="middle" class="t-label" data-w="40">a side</text>
+<rect x="564" y="384" width="80" height="64" rx="6" class="f-green-soft" data-fit="skip"/>
+<rect x="564" y="384" width="80" height="64" rx="6" class="w1 nofill s-green-line" data-fit="skip"/>
+<text x="604" y="420" text-anchor="middle" class="t-label" data-w="40">a side</text>
+<text x="752" y="408" class="t-label" data-w="129">provenance stamp,</text>
+<text x="752" y="432" class="t-label" data-w="108">precedence rule</text>
+<text x="40" y="500" class="t-head" data-w="154">Lost-in-the-middle</text>
+<rect x="476" y="464" width="80" height="64" rx="6" class="f-orange-soft" data-fit="skip"/>
+<rect x="476" y="464" width="80" height="64" rx="6" class="w1 nofill s-orange-line" data-fit="skip"/>
+<text x="516" y="500" text-anchor="middle" class="t-label" data-w="38">starts</text>
+<rect x="564" y="464" width="80" height="64" rx="6" class="f-green-soft" data-fit="skip"/>
+<rect x="564" y="464" width="80" height="64" rx="6" class="w1 nofill s-green-line" data-fit="skip"/>
+<text x="604" y="500" text-anchor="middle" class="t-label" data-w="38">starts</text>
+<rect x="652" y="464" width="80" height="64" rx="6" class="f-purple-soft" data-fit="skip"/>
+<rect x="652" y="464" width="80" height="64" rx="6" class="w1 nofill s-purple-line" data-fit="skip"/>
+<text x="692" y="500" text-anchor="middle" class="t-label" data-w="28">also</text>
+<text x="752" y="488" class="t-label" data-w="119">bookend packing;</text>
+<text x="752" y="512" class="t-label" data-w="148">summarise old history</text>
+<text x="40" y="580" class="t-head" data-w="91">Tool-storm</text>
+<rect x="212" y="544" width="80" height="64" rx="6" class="f-blue-soft" data-fit="skip"/>
+<rect x="212" y="544" width="80" height="64" rx="6" class="w1 nofill s-blue-line" data-fit="skip"/>
+<text x="252" y="580" text-anchor="middle" class="t-label" data-w="28">also</text>
+<rect x="300" y="544" width="80" height="64" rx="6" class="f-blue-soft" data-fit="skip"/>
+<rect x="300" y="544" width="80" height="64" rx="6" class="w1 nofill s-blue-line" data-fit="skip"/>
+<text x="340" y="580" text-anchor="middle" class="t-label" data-w="38">starts</text>
+<text x="752" y="568" class="t-label" data-w="127">trim the catalogue,</text>
+<text x="752" y="592" class="t-label" data-w="84">cap the loop</text>
+<text x="40" y="648" class="t-label b" data-w="42">starts</text>
+<text x="96" y="648" class="t-note" data-w="191">the layer the mode begins in</text>
+<text x="320" y="648" class="t-label b" data-w="30">also</text>
+<text x="360" y="648" class="t-note" data-w="137">a layer that shares it</text>
+<text x="536" y="648" class="t-label b" data-w="42">a side</text>
+<text x="592" y="648" class="t-note" data-w="202">one of two parts that disagree</text>
+<text x="40" y="684" class="t-note" data-w="487">Conflict is the one mode that needs two parts of the window to disagree.</text>
 </svg>

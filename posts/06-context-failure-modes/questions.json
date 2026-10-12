@@ -1,0 +1,803 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-006",
+  "next_ordinal": 19,
+  "questions": [
+    {
+      "id": "ctx-006-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "distraction",
+        "symptoms"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A user asks a support bot about the cancellation policy. The answer is fluent and confident, and it is about shipping times. Which failure mode does this symptom point to first?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Distraction",
+          "correct": true,
+          "feedback": "Right: a fluent, confident answer that is off topic is the symptom of distraction, usually a retrieved chunk that shares words with the question but not its intent."
+        },
+        {
+          "key": "b",
+          "text": "Confusion",
+          "correct": false,
+          "feedback": "Confusion is the right information in the window and a wrong choice about it, such as a rule broken or a tool misused; this answer is about the wrong topic altogether."
+        },
+        {
+          "key": "c",
+          "text": "Conflict",
+          "correct": false,
+          "feedback": "Conflict shows as an answer that wavers or contradicts itself or an earlier turn; a single confident answer on the wrong topic does not."
+        },
+        {
+          "key": "d",
+          "text": "Tool-storm",
+          "correct": false,
+          "feedback": "Tool-storm shows in the trace as repeated or useless tool calls, not as a fluent answer on the wrong subject."
+        }
+      ],
+      "explanation": "Section 2 gives the symptom of distraction as an answer that is fluent, confident and off topic, with this very example: a question about the cancellation policy answered with shipping.",
+      "hints": [
+        "Ask which mode is defined by the answer being about the wrong thing."
+      ]
+    },
+    {
+      "id": "ctx-006-q02",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "7",
+      "est_minutes": 4,
+      "tags": [
+        "symptoms",
+        "checklist"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each reported symptom to the failure mode it points to. One entry on the right is not one of the five modes.",
+      "left": [
+        {
+          "key": "a",
+          "text": "The agent calls the same search tool twelve times with slightly different queries and never answers."
+        },
+        {
+          "key": "b",
+          "text": "The second paragraph of an answer says the opposite of the first."
+        },
+        {
+          "key": "c",
+          "text": "The refund rule is in the system prompt, the answer summarises it correctly, and then the bot breaks it."
+        },
+        {
+          "key": "d",
+          "text": "Answers are fine until the session passes a few hundred turns, although the needed detail is still in the history."
+        },
+        {
+          "key": "e",
+          "text": "A coding agent asked to fix one null check rewrites a different function."
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Lost-in-the-middle"
+        },
+        {
+          "key": "b",
+          "text": "Memory poisoning"
+        },
+        {
+          "key": "c",
+          "text": "Tool-storm"
+        },
+        {
+          "key": "d",
+          "text": "Distraction"
+        },
+        {
+          "key": "e",
+          "text": "Conflict"
+        },
+        {
+          "key": "f",
+          "text": "Confusion"
+        }
+      ],
+      "answer": {
+        "a": "c",
+        "b": "e",
+        "c": "f",
+        "d": "a",
+        "e": "d"
+      },
+      "explanation": "Repeated calls without progress are tool-storm (section 6); an answer that contradicts itself is conflict (section 4); a clearly stated rule broken is confusion (section 3); quality that drops only with length while the content is present is lost-in-the-middle (section 5); editing the wrong thing is distraction (section 2). Memory poisoning is a security term, not one of the five (section 8).",
+      "hints": [
+        "Place the one that only the trace of tool calls would show first.",
+        "Two of the five need the window to hold the right content: one fails by length, one by rules."
+      ]
+    },
+    {
+      "id": "ctx-006-q03",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 1,
+      "tags": [
+        "breunig",
+        "vocabulary"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Drew Breunig's essay names a failure \"context clash\": new information or tools disagree with what the context already holds. What name does this series give that failure mode?",
+      "answer": {
+        "model": "Conflict.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|possibly|probably|i think|i guess|not sure|might be|could be)\\b)(?![\\s\\S]*\\b(not|never|isn't|isnt|no longer)\\s+(called\\s+|named\\s+|renamed\\s+(to\\s+)?)?[\\\"'“]?conflicts?\\b)(?![\\s\\S]*\\bconflicts?\\s+or\\b)(?![\\s\\S]*\\bor\\s+[\\\"'“]?conflicts?\\b)(?:\\W*[\\\"'“]?conflicts?\\b|[\\s\\S]*\\b(?:to|as|is|it|called|named|becomes|renamed)\\s+[\\\"'“]?conflicts?\\b)"
+        ]
+      },
+      "explanation": "Section 1: clash becomes conflict, with the same meaning, two parts of the window that disagree. It is the only one of Breunig's four names that the series renames without changing the definition.",
+      "hints": [
+        "It is the cross-layer mode of section 4."
+      ]
+    },
+    {
+      "id": "ctx-006-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "conflict",
+        "layers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Which statement describes the mechanism of conflict as this post gives it?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Two parts of the window disagree and nothing tells the model which one wins.",
+          "correct": true,
+          "feedback": "Right: conflict is the cross-layer mode; it needs two layers, or two items in one layer, that disagree with no precedence rule."
+        },
+        {
+          "key": "b",
+          "text": "A rule in layer 01 or a description in layer 02 is vague, so the model guesses.",
+          "correct": false,
+          "feedback": "That is confusion: the information is present but the rules about it are unclear. Conflict needs two sources that disagree."
+        },
+        {
+          "key": "c",
+          "text": "The relevant chunk sits deep in the middle of a long input and is used poorly.",
+          "correct": false,
+          "feedback": "That is lost-in-the-middle, a failure of position and length, not of disagreement."
+        },
+        {
+          "key": "d",
+          "text": "Chunks share words with the question but not its intent, and pull the answer away.",
+          "correct": false,
+          "feedback": "That is distraction: irrelevant material pulling the answer off course."
+        }
+      ],
+      "explanation": "Section 4 calls conflict the cross-layer failure mode: two parts of the window disagree (a memory in layer 03 and a chunk in layer 04, for example), and nothing tells the model which one wins.",
+      "hints": [
+        "Look for the option that needs two sources rather than one."
+      ]
+    },
+    {
+      "id": "ctx-006-q05",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "1",
+      "est_minutes": 3,
+      "tags": [
+        "breunig",
+        "vocabulary",
+        "distraction"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A colleague quotes Breunig's essay, which defines context confusion as \"when superfluous content in the context is used by the model to generate a low-quality response\", and files a bug about a pile of irrelevant retrieved chunks under confusion. In this series' vocabulary, which mode is the bug, and why?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Distraction, the series' name for irrelevant material that pulls the answer off course.",
+          "correct": true,
+          "feedback": "Right: the series keeps Breunig's words but redraws them by layer; superfluous content is distraction here, and confusion is unclear rules over the right content."
+        },
+        {
+          "key": "b",
+          "text": "Confusion, since the series keeps each of Breunig's names with his own definition.",
+          "correct": false,
+          "feedback": "Only clash keeps its meaning (as conflict). Distraction and confusion keep their names but not their definitions, which is exactly the trap."
+        },
+        {
+          "key": "c",
+          "text": "Conflict, because irrelevant chunks always disagree with the relevant ones.",
+          "correct": false,
+          "feedback": "Irrelevant chunks need not disagree with anything; conflict needs two sources that contradict each other."
+        },
+        {
+          "key": "d",
+          "text": "Lost-in-the-middle, because with that many chunks the relevant one ends up in the middle.",
+          "correct": false,
+          "feedback": "Position may make it worse, but the symptom described is irrelevant content driving the answer, which is distraction; lost-in-the-middle is about where relevant content sits."
+        }
+      ],
+      "explanation": "Section 1 says distraction and confusion keep Breunig's names but are redrawn by layer: here distraction is irrelevant material pulling the answer off course (closest to Breunig's confusion), and confusion is the right information handled under unclear rules.",
+      "hints": [
+        "Check which of Breunig's four names keep their definitions in this series.",
+        "Ask what this series calls irrelevant material that drives the answer."
+      ]
+    },
+    {
+      "id": "ctx-006-q06",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "tool-storm",
+        "tool-results"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In an agent loop, the right tool is called every time, but each call returns a very large result. In one or two sentences, explain why this alone can produce a tool-storm.",
+      "answer": {
+        "model": "Every tool result is appended to the window, so a few large results crowd out the task, push the question and earlier evidence towards the middle, and make every later call of the loop more expensive.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|possibly|probably|i think|i guess|not sure|might be|could be)\\b)(?=[\\s\\S]*\\b(the|a|so|because|which|each|every|is|are|and)\\b)(?![\\s\\S]*\\b(not|never|isn't|aren't|are not|is not)\\s+(\\w+\\s+)?(appended|added|kept|stored|put|sent|included|resent)\\b)(?![\\s\\S]*(?<!not )(?<!not the )\\b(decode|decoding|output|generation)\\s+(budget|tokens?|limit|window)\\b)(?![\\s\\S]*\\bruns?\\s+out\\s+of\\s+output\\b)(?=[\\s\\S]*\\b(window|context|input|prompt|history|message list)\\b)(?=[\\s\\S]*(\\b(results?|payloads?|outputs?|responses?|they|data)\\b[^.;\\n]{0,60}?\\b(append\\w*|added|adds?|kept|keeps?|stay\\w*|remain\\w*|accumulat\\w*|pil\\w*\\s+up|fill\\w*|tak\\w*\\s+up|occup\\w*|resen[dt]\\w*|re-sent|bloat\\w*|grow\\w*|crowd\\w*|bur(y|ies|ied)|push\\w*)\\b|\\b(resen[dt]\\w*|re-sent|carr\\w*|includ\\w*)\\b[^.;\\n]{0,40}?\\b(results?|payloads?|outputs?)\\b|\\b(grow\\w*|fill\\w*|bloat\\w*|swell\\w*)\\b[^.;\\n]{0,30}?\\b(with|by)\\b[^.;\\n]{0,20}?\\b(results?|payloads?|outputs?)\\b))(?=[\\s\\S]*\\b(crowd\\w*|push\\w*|middle|bur(y|ies|ied)|los[et]\\w*|drown\\w*|dilut\\w*|expensive|cost\\w*|fill\\w*|grow\\w*|bloat\\w*|focus|track|larger|longer|swamp\\w*|overflow\\w*|exceed\\w*|full|less room|room)\\b)"
+        ]
+      },
+      "explanation": "Section 6 names the fourth cause: each result is appended to the window, so large payloads crowd out the task, push the question towards the middle, and raise the cost of every later call. The cost is in the input the model reads, not in its output.",
+      "hints": [
+        "Ask where a tool's result goes before the next call.",
+        "Think about what that does to the window's size and to where the question now sits."
+      ]
+    },
+    {
+      "id": "ctx-006-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 2,
+      "tags": [
+        "ruler",
+        "effective-length"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "RULER's main table lists Yi (34B) with a claimed window of 200K tokens and an effective length of 32K. By what factor does the claimed window exceed the effective length?",
+      "answer": {
+        "value": 6.25,
+        "tolerance": 0.01,
+        "unit": ""
+      },
+      "precision_note": "Claimed divided by effective, both in the paper's thousands: 200 / 32 = 6.25 (RULER, Table 3). The inverse ratio, 32 / 200 = 0.16, is the nearest wrong method and is rejected.",
+      "explanation": "The factor is the claimed window over the effective length: $200 / 32 = 6.25$. Section 5 and its figure show the gap running from a factor of two (GPT-4) to more than sixty.",
+      "hints": [
+        "Divide the larger length by the smaller one; the units cancel."
+      ]
+    },
+    {
+      "id": "ctx-006-q08",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 5,
+      "tags": [
+        "tool-storm",
+        "cost",
+        "tool-results"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent's first call sends 6,200 input tokens (system prompt, tool definitions and the question; illustrative sizes). It then makes five tool calls in a row; each result, 8,000 tokens, is appended to the window before the next call, and a sixth call writes the answer. Ignoring output tokens and caching, how many input tokens do the six calls send in total, and what does that cost at 3 US dollars per million input tokens (the Claude Sonnet 4.5 rate post 01 quotes, as of early 2026)?",
+      "answer": {
+        "parts": [
+          {
+            "label": "input tokens",
+            "value": 157200,
+            "tolerance": 0,
+            "unit": "tokens"
+          },
+          {
+            "label": "cost",
+            "value": 0.4716,
+            "tolerance": 0.005,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "Call i sends 6,200 + 8,000 (i - 1) tokens for i = 1 to 6: 6 x 6,200 + 8,000 x (0 + 1 + 2 + 3 + 4 + 5) = 37,200 + 120,000 = 157,200; cost = 157,200 x 3 / 1,000,000 = 0.4716 dollars (0.47 to the cent is accepted). Counting each result once (77,200 tokens, 0.23 dollars) is the nearest wrong method and is rejected.",
+      "explanation": "Each result stays in the window, so every later call resends all earlier results: the six calls send $6 \\times 6{,}200 + 8{,}000 \\times 15 = 157{,}200$ tokens, which cost $157{,}200 \\times 3 / 1{,}000{,}000 = 0.4716$ dollars. This is why section 6 caps result size in the wrapper.",
+      "hints": [
+        "Write down the input of the first, second and sixth calls separately.",
+        "The sixth call carries five results; the first carries none.",
+        "Sum the six inputs, then multiply by 3 and divide by one million."
+      ]
+    },
+    {
+      "id": "ctx-006-q09",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "detection",
+        "precision-at-k",
+        "distraction"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A retrieval step packs 5 chunks per query (top-k = 5). Over last month's labelled sample, 4 of the 5 packed chunks were relevant on average; this week the same sample gives 2 of 5. Give precision@k for last month and for this week, as fractions between 0 and 1.",
+      "answer": {
+        "parts": [
+          {
+            "label": "last month",
+            "value": 0.8,
+            "tolerance": 0.005,
+            "unit": ""
+          },
+          {
+            "label": "this week",
+            "value": 0.4,
+            "tolerance": 0.005,
+            "unit": ""
+          }
+        ]
+      },
+      "precision_note": "precision@k is relevant packed chunks over k: 4 / 5 = 0.8 and 2 / 5 = 0.4. The prompt asks for fractions; percentages (80, 40) are outside the tolerance.",
+      "explanation": "Section 7 defines the distraction signal as precision@k, the share of the k packed chunks that were relevant: $4/5 = 0.8$ last month and $2/5 = 0.4$ this week. A fall like this is the counter that warns of distraction before users complain.",
+      "hints": [
+        "The denominator is the number of chunks packed, not the number retrieved or relevant."
+      ]
+    },
+    {
+      "id": "ctx-006-q10",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "checklist"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the steps of the diagnostic walk for a new bug report in the order this post asks them.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Is the trace full of tool calls that make no progress?"
+        },
+        {
+          "key": "b",
+          "text": "Do the logs show a rate-limit error, a truncated response or a malformed tool return?"
+        },
+        {
+          "key": "c",
+          "text": "Do two parts of the window disagree, or does the answer contradict itself?"
+        },
+        {
+          "key": "d",
+          "text": "Is the answer fluent but off topic?"
+        },
+        {
+          "key": "e",
+          "text": "Does quality drop only when the input is long?"
+        },
+        {
+          "key": "f",
+          "text": "Does the answer break a rule, or misuse a tool, that the window states clearly?"
+        }
+      ],
+      "answer": [
+        "b",
+        "d",
+        "f",
+        "c",
+        "e",
+        "a"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 7 rules out systems faults in the logs first, then asks distraction, confusion, conflict, lost-in-the-middle and tool-storm in that order: from what the answer and the window show, to what needs two input lengths, to what needs the trace.",
+      "hints": [
+        "The step that is not about the context at all comes first.",
+        "The question that needs the trace of tool calls comes last."
+      ]
+    },
+    {
+      "id": "ctx-006-q11",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 4,
+      "tags": [
+        "checklist",
+        "two-modes"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A support agent's sessions often run past 80 turns. Late in long sessions it states a refund limit that contradicts the one it gave earlier; the window holds an episodic memory and a retrieved policy chunk that give different limits, with no dates. Short sessions are fine, and the trace shows one tool call per turn. Which modes does the checklist find? Select all that apply.",
+      "select": "multiple",
+      "options": [
+        {
+          "key": "a",
+          "text": "Conflict",
+          "correct": true,
+          "feedback": "Yes: two parts of the window disagree with no precedence rule, and the answer contradicts an earlier turn."
+        },
+        {
+          "key": "b",
+          "text": "Lost-in-the-middle",
+          "correct": true,
+          "feedback": "Yes: the failure appears only in long sessions, with the needed content still present, which earns the fourth question a yes."
+        },
+        {
+          "key": "c",
+          "text": "Tool-storm",
+          "correct": false,
+          "feedback": "One tool call per turn is not a storm; the fifth question earns no yes."
+        },
+        {
+          "key": "d",
+          "text": "Distraction",
+          "correct": false,
+          "feedback": "The answer is on topic (a refund limit for a refund question); it is wrong, not off topic."
+        }
+      ],
+      "explanation": "Section 7 says a report can earn two yeses and then gets both first fixes: here the disagreeing memory and chunk earn the conflict question, and the dependence on session length earns the lost-in-the-middle question. The fixes are a provenance stamp with a precedence rule, and bookend packing or compressing the old history.",
+      "hints": [
+        "Walk all five questions instead of stopping at the first yes.",
+        "Separate what the window holds from when the failure appears."
+      ]
+    },
+    {
+      "id": "ctx-006-q12",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "checklist",
+        "systems-fault"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Long answers from an assistant end in the middle of a sentence. Users say \"it loses the thread on long answers\". The logs show that each of these responses stopped because it hit its output token limit. What is the right diagnosis?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A systems fault, ruled out before the walk begins",
+          "correct": true,
+          "feedback": "Right: a response cut off at its token limit shows in the logs directly; section 7 rules out such faults before asking the five questions."
+        },
+        {
+          "key": "b",
+          "text": "Lost-in-the-middle, since the failure appears on long answers",
+          "correct": false,
+          "feedback": "Lost-in-the-middle is about long inputs and content in the middle of them; a response that stops at a limit is not a context fault."
+        },
+        {
+          "key": "c",
+          "text": "A model problem, since none of the five fits",
+          "correct": false,
+          "feedback": "A model problem is what remains after the walk; a fault the logs show directly is removed before the walk and is not a model weakness."
+        },
+        {
+          "key": "d",
+          "text": "Distraction, since the answer drifts before it stops",
+          "correct": false,
+          "feedback": "Nothing here says the answer is off topic; it is on topic and cut short."
+        }
+      ],
+      "explanation": "Section 7 starts by ruling out the faults the logs show directly, including a response cut off at its token limit; these are systems faults, not context faults. The user's wording points at length, which is the trap.",
+      "hints": [
+        "Read the log line before the user's words.",
+        "Ask what the walk does with a fault the logs show directly, before any of the five questions."
+      ]
+    },
+    {
+      "id": "ctx-006-q13",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "tool-storm",
+        "first-fix"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent with 120 tools loops through similar search tools on hard questions. Which change is the first fix this post gives for that failure?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Expose only the tools this query needs and say when not to call each",
+          "correct": true,
+          "feedback": "Right: trim the catalogue per query, rewrite descriptions to say when not to call a tool, add a budget rule and cap result size in the wrapper."
+        },
+        {
+          "key": "b",
+          "text": "Move to a larger model that can choose reliably among all 120 of the tools",
+          "correct": false,
+          "feedback": "The first fixes of every mode avoid a model upgrade; a larger model with the same catalogue keeps the same ambiguity."
+        },
+        {
+          "key": "c",
+          "text": "Add a line to the system prompt telling the agent to be efficient",
+          "correct": false,
+          "feedback": "A vague instruction is not a stop condition; the post asks for an explicit budget, enforced in code as well."
+        },
+        {
+          "key": "d",
+          "text": "Add more search tools so that every phrasing has an exact match",
+          "correct": false,
+          "feedback": "A larger catalogue is the first cause of tool-storm, not its cure."
+        }
+      ],
+      "explanation": "Section 6's first fix trims the catalogue to the tools the conversation needs, rewrites each description to say when not to call it, adds a budget rule and caps result size in the wrapper; the last resort is a deterministic router.",
+      "hints": [
+        "Ask which option shrinks the choice the model faces."
+      ]
+    },
+    {
+      "id": "ctx-006-q14",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4",
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 12,
+      "tags": [
+        "diagnosis",
+        "first-fix",
+        "last-resort"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Diagnose the feature below with this post's checklist. Name every mode it shows, the evidence for each, the first fix you would apply, and the last resort if the first fix is not enough.",
+      "stimulus": {
+        "kind": "data",
+        "content": "A research assistant exposes 60 tools, several of them search tools with near-identical descriptions. For every question it retrieves 40 chunks and packs them all, in score order. Users report answers about a related but different topic, and the traces show runs of 10 to 15 search calls before an answer. Failures are as common on the first turn of a session as late in a long one, and no answer contradicts itself.",
+        "caption": "An illustrative feature description."
+      },
+      "kind": "design",
+      "solution": "1. **Systems faults:** none is described, so the walk applies.\n2. **Distraction (question 1, yes).** Answers on a related but different topic, with 40 chunks packed on every question: irrelevant chunks that share vocabulary pull the answer off course. First fix: tighten select, lower top-k well below 40, add a reranker, check the embedding model. Last resort: a router that classifies the question and selects from a topic-scoped index, plus a cheap on-topic check.\n3. **Confusion and conflict:** no rule is said to be broken and nothing contradicts itself, so questions 2 and 3 earn no yes (the near-identical descriptions are a confusion risk worth fixing anyway).\n4. **Lost-in-the-middle:** failures are as common on the first turn as late in a long session, so a growing input is not the trigger; no yes.\n5. **Tool-storm (question 5, yes).** Runs of 10 to 15 search calls without progress, with a 60-tool catalogue and look-alike descriptions. First fix: trim the catalogue per query, rewrite descriptions to say when not to call each tool, add a budget rule and enforce it in the loop, cap result size in the wrapper. Last resort: a deterministic router that shows the model only two or three tools.",
+      "answer_length": "half a page",
+      "rubric": [
+        {
+          "criterion": "Identifies distraction with the off-topic answers and the 40 packed chunks as evidence",
+          "points": 2
+        },
+        {
+          "criterion": "Identifies tool-storm with the runs of search calls and the large, look-alike catalogue as evidence",
+          "points": 2
+        },
+        {
+          "criterion": "Rules out lost-in-the-middle because failures do not depend on length, and conflict because nothing contradicts",
+          "points": 2
+        },
+        {
+          "criterion": "Gives the post's first fix for each mode found",
+          "points": 2
+        },
+        {
+          "criterion": "Gives the post's last resort for each mode found",
+          "points": 1
+        }
+      ],
+      "explanation": "Sections 2 and 6 give the first fixes and last resorts of distraction and tool-storm; section 7's walk is what rules the other three out. The length-independence of the failures is the evidence that separates distraction from lost-in-the-middle.",
+      "hints": [
+        "Walk all five questions and write a yes or a no with its evidence for each.",
+        "For each yes, take the first fix and the last resort from that mode's section."
+      ]
+    },
+    {
+      "id": "ctx-006-q15",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o4",
+        "o2"
+      ],
+      "section": "6",
+      "est_minutes": 12,
+      "tags": [
+        "tool-storm",
+        "prompt-caching",
+        "layers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Trimming the tool catalogue per query is tool-storm's first fix. Using post 02's account of the stable prefix and the prompt cache, explain what this fix can cost on every call, and propose a design that keeps the benefit of a small catalogue without losing that saving.",
+      "kind": "connect",
+      "connects": [
+        "ctx-002",
+        "ctx-005"
+      ],
+      "solution": "1. **Where the tools sit.** Layer 02, tools and MCP descriptions, belongs with layer 01 to the stable prefix: identical on every call, so a prompt cache can reuse it (post 02, section 11). On Anthropic's API the cache prefix is built in the order tools, system, messages, so the tool list is the very first thing cached.\n2. **The cost.** A catalogue chosen per query makes layer 02 differ from call to call. The reusable prefix then ends at the first changed tool, and everything after it, the system prompt included, is billed at the full input rate instead of the cache-read rate.\n3. **A design that keeps both.** Keep a small, fixed, sorted core set of tools that every call carries, so the prefix stays identical and cacheable; route each question to one of a few fixed tool groups, each of which caches as its own prefix; or keep the catalogue stable and narrow the model's choice with the router of the last resort or with the system prompt's guidance. Whatever is chosen per query goes after the cached part, not inside it.\n4. **Check.** Watch the cache-read tokens in each response's usage block (post 05) before and after the change; a drop to near zero shows the prefix was broken.",
+      "answer_length": "half a page",
+      "rubric": [
+        {
+          "criterion": "Places the tool definitions in the stable prefix that the cache reuses",
+          "points": 1
+        },
+        {
+          "criterion": "Explains that a per-query catalogue changes the prefix, so the cache stops matching from that point on",
+          "points": 2
+        },
+        {
+          "criterion": "Notes that on Anthropic tools are cached first, so the system prompt after them is lost too",
+          "points": 1
+        },
+        {
+          "criterion": "Proposes a design that keeps a stable cacheable set (fixed core, fixed groups, or a router outside the prefix)",
+          "points": 2
+        },
+        {
+          "criterion": "Says how to verify the cache still hits",
+          "points": 1
+        }
+      ],
+      "explanation": "Post 02 (`ctx-002`) puts layer 02 in the stable prefix and states the identical-prefix rule and Anthropic's cache order; post 05 (`ctx-005`) prices the difference. Section 6 of this post trims the catalogue; done naively, the trim breaks the cache that the stable prefix exists to earn.",
+      "hints": [
+        "Recall which lifetime class layer 02 belongs to and why it is sent early.",
+        "Ask what a prompt cache needs to be identical, and what a per-query catalogue changes."
+      ]
+    },
+    {
+      "id": "ctx-006-q16",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 8,
+      "tags": [
+        "checklist",
+        "diagnosis"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Implement `diagnose(report)`, which walks this post's diagnostic checklist over a bug report given as booleans and returns the diagnosis as a list, as the docstring specifies. A report can earn more than one yes.",
+      "kind": "implement",
+      "language": "python",
+      "starter": "MODES = [\"distraction\", \"confusion\", \"conflict\", \"lost-in-the-middle\", \"tool-storm\"]\nQUESTIONS = [\"off_topic\", \"breaks_clear_rule\", \"parts_disagree\", \"drops_only_when_long\",\n             \"tool_calls_without_progress\"]\n\n\ndef diagnose(report):\n    \"\"\"Walk the post's diagnostic checklist over a bug report.\n\n    report: a dict of booleans with the keys \"systems_fault\" and the five QUESTIONS.\n    Return [\"systems fault\"] when the logs show one; otherwise every mode whose question\n    earns a yes, in the checklist's order; [\"model problem\"] when none does.\n    \"\"\"\n    raise NotImplementedError\n",
+      "solution": "MODES = [\"distraction\", \"confusion\", \"conflict\", \"lost-in-the-middle\", \"tool-storm\"]\nQUESTIONS = [\"off_topic\", \"breaks_clear_rule\", \"parts_disagree\", \"drops_only_when_long\",\n             \"tool_calls_without_progress\"]\n\n\ndef diagnose(report):\n    \"\"\"Walk the post's diagnostic checklist over a bug report.\n\n    report: a dict of booleans with the keys \"systems_fault\" and the five QUESTIONS.\n    Return [\"systems fault\"] when the logs show one; otherwise every mode whose question\n    earns a yes, in the checklist's order; [\"model problem\"] when none does.\n    \"\"\"\n    if report.get(\"systems_fault\"):\n        return [\"systems fault\"]\n    found = [mode for mode, key in zip(MODES, QUESTIONS) if report.get(key)]\n    return found or [\"model problem\"]\n",
+      "tests": "def r(**yes):\n    base = {\"systems_fault\": False, \"off_topic\": False, \"breaks_clear_rule\": False,\n            \"parts_disagree\": False, \"drops_only_when_long\": False,\n            \"tool_calls_without_progress\": False}\n    base.update(yes)\n    return base\n\nassert diagnose(r(off_topic=True)) == [\"distraction\"]\nassert diagnose(r(tool_calls_without_progress=True)) == [\"tool-storm\"]\n# two yeses: both modes, in the checklist's order (confusion is asked before conflict)\nassert diagnose(r(parts_disagree=True, breaks_clear_rule=True)) == [\"confusion\", \"conflict\"], \\\n    diagnose(r(parts_disagree=True, breaks_clear_rule=True))\nassert diagnose(r(parts_disagree=True, drops_only_when_long=True)) == [\"conflict\", \"lost-in-the-middle\"]\n# no yes at all: a model problem, never an empty diagnosis\nassert diagnose(r()) == [\"model problem\"], diagnose(r())\n# a systems fault is ruled out before the walk, whatever else is true\nassert diagnose(r(systems_fault=True, drops_only_when_long=True)) == [\"systems fault\"]\nassert diagnose(r(systems_fault=True)) == [\"systems fault\"]\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 7 rules out systems faults first, asks the five questions in the order distraction, confusion, conflict, lost-in-the-middle, tool-storm, keeps every yes (a report can show two modes), and calls a report with no yes a model problem.",
+      "hints": [
+        "Handle the systems fault before looking at any of the five questions.",
+        "Collect every yes rather than returning at the first one, and keep the checklist's order."
+      ]
+    },
+    {
+      "id": "ctx-006-q17",
+      "type": "code",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 6,
+      "tags": [
+        "bookend-packing",
+        "lost-in-the-middle"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "The starter packs retrieved chunks in score order. Complete `bookend(ranked)` so that it returns this post's first fix for lost-in-the-middle, as the docstring specifies, for any number of chunks.",
+      "kind": "complete",
+      "language": "python",
+      "starter": "def bookend(ranked):\n    \"\"\"Return the packing order for chunks given best first.\n\n    The best chunk goes first, the second-best last, and the others between them\n    in rank order. Every chunk is kept exactly once.\n    \"\"\"\n    return list(ranked)\n",
+      "solution": "def bookend(ranked):\n    \"\"\"Return the packing order for chunks given best first.\n\n    The best chunk goes first, the second-best last, and the others between them\n    in rank order. Every chunk is kept exactly once.\n    \"\"\"\n    ranked = list(ranked)\n    if len(ranked) < 3:\n        return ranked\n    return [ranked[0]] + ranked[2:] + [ranked[1]]\n",
+      "tests": "assert bookend([\"c1\", \"c2\", \"c3\", \"c4\", \"c5\"]) == [\"c1\", \"c3\", \"c4\", \"c5\", \"c2\"], \\\n    bookend([\"c1\", \"c2\", \"c3\", \"c4\", \"c5\"])\nassert bookend([\"a\", \"b\", \"c\"]) == [\"a\", \"c\", \"b\"]\nassert bookend([\"a\", \"b\"]) == [\"a\", \"b\"]\nassert bookend([\"a\"]) == [\"a\"]\nassert bookend([]) == []\nranked = [f\"c{i}\" for i in range(1, 11)]\nout = bookend(ranked)\nassert sorted(out) == sorted(ranked) and len(out) == len(ranked), \"every chunk exactly once\"\nassert out[0] == \"c1\" and out[-1] == \"c2\" and out[1:-1] == ranked[2:]\nassert bookend(tuple(ranked)) == out, \"works on any sequence\"\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 5's bookend packing puts the highest-ranked chunk first and the second-highest last, with the weaker chunks in the middle; nothing is dropped. With fewer than three chunks, score order already puts the two best at the ends.",
+      "hints": [
+        "Slice the list into the best chunk, the second-best, and the rest.",
+        "Check what your code does with one chunk and with none."
+      ]
+    },
+    {
+      "id": "ctx-006-q18",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "ruler",
+        "effective-length"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An illustrative model claims a 128K window. Its RULER average scores at 4K, 8K, 16K, 32K, 64K and 128K are 95.0, 92.1, 88.4, 86.0, 84.9 and 70.3. Using RULER's threshold from this post, what is its effective length, in thousands of tokens?",
+      "answer": {
+        "value": 32,
+        "tolerance": 0,
+        "unit": "thousand tokens"
+      },
+      "precision_note": "RULER's rule: the longest tested length whose average stays above 85.6% (the score of Llama 2 7B at 4K). 86.0 at 32K passes; 84.9 at 64K does not. A 90% threshold would give 8; reading the last length above 70 would give 128.",
+      "explanation": "Section 5 defines the effective length as the longest tested length at which the average score stays above 85.6%. The scores pass at 4K to 32K (86.0) and fail at 64K (84.9), so the effective length is 32K, a quarter of the claimed 128K.",
+      "hints": [
+        "Recall the exact threshold section 5 gives and what it is the score of.",
+        "Walk the lengths upwards and stop at the first score at or below the threshold."
+      ]
+    }
+  ]
+}

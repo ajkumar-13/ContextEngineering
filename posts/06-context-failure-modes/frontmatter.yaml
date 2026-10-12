@@ -1,58 +1,24 @@
 id: ctx-006
 slug: 06-context-failure-modes
-title: "06 · Five Context Failure Modes"
-
-description: >
-  Learn the five most common context failure modes in modern LLM systems:
-  distraction, confusion, conflict, lost-in-the-middle, and tool-storm.
-  Understand their symptoms, root causes, and practical fixes for building
-  reliable AI agents.
-
-author: "Ajay"
-
+title: "06 - Five context failure modes"
+summary: "Five recurring ways a context window fails (distraction, confusion, conflict, lost-in-the-middle and tool-storm), each traced to the layers it starts in, with its first fix and a checklist that maps a bug report to a mode."
 date: 2026-05-13
-last_modified: 2026-05-13
-
-tags:
-  - context-engineering
-  - failure-modes
-  - debugging
-  - llm
-  - ai-agents
-  - retrieval
-  - tools
-  - evaluation
-
-category: Foundations
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part I - Foundations"
-chapter: "Part I — Foundations"
-
+level: intermediate
+reading_time: 16
+tags: [context-engineering, failure-modes, debugging, retrieval, tool-calling, long-context, evaluation]
 hero: diagrams/01-failure-modes-grid.svg
-hero_alt: "Grid illustrating the five context failure modes and the context layers where they originate"
-
-reading_time: 14
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - LLM Failure Modes
-  - Distraction
-  - Confusion
-  - Conflict
-  - Lost in the Middle
-  - Tool Storm
-  - Retrieval Errors
-  - AI Agent Debugging
-  - Long Context
-  - Context Window
-  - WSCI
-  - RAG
-  - Tool Calling
-
-canonical_url: ""
-
-prev: ../05-economics-of-context/
-next: ../07-write-select-compress-isolate/
+prerequisites: [ctx-002]
+code: none
+outcomes:
+  - id: o1
+    text: "Name the five context failure modes and the symptom each produces."
+  - id: o2
+    text: "Trace each failure mode to the layers of the context window it starts in, and explain its mechanism."
+  - id: o3
+    text: "Map a bug report to one or two of the five modes with the diagnostic checklist, or rule all five out."
+  - id: o4
+    text: "Choose the first fix for each mode, and the last resort behind it, without a model upgrade or a framework switch."
+recommended: [ctx-005]
