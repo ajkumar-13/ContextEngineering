@@ -1,197 +1,248 @@
-# 11 · RAG in depth
+# 11 - RAG in depth
 
-> **TL;DR.** Retrieval-augmented generation is the document-corpus instance of the Select operation ([Post 09](../09-select-strategies/index.md)). The four-stage pipeline — query, candidates, re-rank, pack — is the same; what is specific to RAG is the *offline preparation* of the corpus, the *evaluation* of end-to-end answer quality, and a small bag of techniques (contextual retrieval, reciprocal rank fusion, cross-encoder reranking) that account for most of the difference between a demo RAG and a production one.
+> **TL;DR.** Retrieval-augmented generation (RAG) is the select operation of [post 09](../09-select-strategies/index.md) run over documents, and it fills layer 04, retrieved chunks. The gap between a demo and a production system is mostly a handful of choices: chunks that keep each fact whole, contextual retrieval, hybrid search fused by reciprocal rank fusion, a cross-encoder reranker, a prompt that demands citations, and an evaluation harness that says whether a change helped. The offline half sets the ceiling on quality; the online half decides how close each answer gets.
 >
-> **After reading this you will be able to:**
-> - Walk through every stage of a production RAG pipeline and name what fails when.
-> - Apply the three techniques that consistently lift quality (contextual retrieval, hybrid + RRF, cross-encoder reranking).
-> - Wire up the minimum eval harness that tells you whether a change actually helped.
+> **Prerequisites:** [Post 09](../09-select-strategies/index.md), [Post 10](../10-data-ingestion-pipelines/index.md).
+> **Safe to skip?** Skip it if a RAG pipeline can already be built and debugged stage by stage, with contextual chunk headers, fused hybrid retrieval, reranking, cited answers and a regression gate.
+>
+> **After reading, you will be able to:**
+>
+> - Walk through every stage of a production RAG pipeline, offline and online, and name what fails at each.
+> - Choose a splitter family, a chunk size and an overlap, and check that chunking keeps every fact whole.
+> - Apply contextual retrieval, hybrid search with reciprocal rank fusion, and cross-encoder reranking, and say what each fixes.
+> - Wire a minimum evaluation harness (golden set, recall@N, citation accuracy, answer correctness, regression gate) and read whether a change helped.
+> - Decide when RAG is the wrong tool: a corpus that fits the window, a task that needs all of it, or data in tables.
 
-![The RAG pipeline](diagrams/04-rag-pipeline.svg)
+![Two lanes. Offline: documents, chunk, add context, embed and index, into an index of chunks and a manifest. Online: query, candidates (top-50), re-rank (top-5), pack into 04 Retrieved chunks, then the model, with three stages' metrics under them.](diagrams/00-hero-rag-pipeline.svg)
 
-*The RAG pipeline: an offline half (chunk, enrich, embed, index) that sets the quality ceiling, and an online half (query, retrieve, re-rank, pack, generate) that decides how close you get to it.*
-
----
-
-## 1. The two halves
-
-Every RAG system has an **offline** half (collection, cleaning, chunking, enrichment, embedding, indexing) and an **online** half (query construction, candidate generation, re-ranking, packing, generation). The offline half decides the ceiling on quality; the online half decides how close you get to it.
-
-This post focuses on the engineering choices in each half that actually move the metric, in roughly the order their impact compounds.
+*The offline lane decides what any query can find; the online lane decides what this query does find. The metric under each stage says where to look when an answer is wrong.*
 
 ---
 
-## 2. Offline: chunking is more than half the battle
+## 1. The question: what separates a demo RAG from a production one?
 
-A chunk is the unit retrieval returns. It is the granularity at which the system says "this is what was relevant". Get it wrong and no amount of fancy retrieval will recover.
+Retrieval-augmented generation was named by Lewis et al. (2020): retrieve passages relevant to a question at query time and give them to the model with it. In this series' terms RAG is the select operation of [post 09](../09-select-strategies/index.md) over a corpus of documents, and its output is layer 04, retrieved chunks. A first version, which embeds the documents and fetches the nearest few, takes an afternoon. This post asks which offline and online choices account for most of the gap between that demo and a system that holds up on real traffic.
 
-![Three splitter families in order of preference, chunk size as three zones, and overlap drawn as two genuinely overlapping bars](diagrams/01-chunking-choices.svg)
+Every RAG system has two halves, drawn in the figure above. The **offline** half runs once per document: chunk, add context, embed, index. It decides what any query can find, so it sets the ceiling. The **online** half runs on every user turn: construct the query, generate candidates, re-rank, pack, generate. It decides how close an answer gets to the ceiling.
 
-*Splitter first, then size, then overlap. The vector database is nowhere on this figure because it barely moves the outcome.*
+---
 
-**Chunk size.** The empirical sweet spot for prose is 400–600 tokens with 10–20 % overlap. Smaller chunks (100–200) win on precision but lose self-containment: the model gets a fragment without enough surrounding context to use it. Larger chunks (1 000+) waste budget: the prompt fills up with paragraphs that touch the answer rather than carrying it.
+## 2. Offline: chunking and contextual retrieval
 
-**Splitter choice.** Three families, in order of preference:
+A chunk is the unit retrieval returns. If a fact is cut in half, or buried in a chunk about something else, no later stage can recover it.
 
-1. **Structure-aware**: split on Markdown headings, HTML sections, source-code symbols, PDF page boundaries. Best when the source has structure.
-2. **Sentence-aware**: split on sentence boundaries with a token budget per chunk. The default for free-form prose; libraries like `langchain.RecursiveCharacterTextSplitter` and `llama-index`'s sentence splitter do this well.
-3. **Fixed-length**: split every *N* characters or tokens. Last resort. Will cut sentences in half.
+**Splitter family.** Three families, in order of preference:
 
-For code, split by symbol (function, class, module). A 1 200-token function is one chunk; a 50-token helper is one chunk. Splitting code in the middle of a function is almost always a mistake.
+1. **Structure-aware**: split on Markdown headings, HTML (HyperText Markup Language) sections, code symbols or PDF (Portable Document Format) pages. Best whenever the source has structure. For code, one function is one chunk, whatever its length.
+2. **Sentence-aware**: group whole sentences under a token budget. The default for prose; LlamaIndex's `SentenceSplitter` is one implementation, the companion's `chunk` another.
+3. **Fixed-length**: cut every *N* characters or tokens. The last resort, because it cuts sentences, and the facts in them, in half.
 
-**Overlap.** Adjacent chunks share 10–20 % of their tokens so a fact that lives at a chunk boundary survives in at least one chunk in full. Overlap is cheap (it grows the index linearly) and prevents a category of "the answer is right there but split across two chunks" misses.
+**Chunk size.** The series' starting default for prose is 400 to 600 tokens with 10 to 20 percent overlap ([post 09](../09-select-strategies/index.md)): illustrative values to tune with the harness of section 6, not measurements. Small chunks (100 to 200 tokens, illustrative) are precise but often not self-contained. Large ones (over 1,000 tokens, illustrative) fill layer 04 with paragraphs that touch the answer rather than carry it, the distraction failure mode of [post 06](../06-context-failure-modes/index.md).
 
-**Parent-child and late chunking.** Two refinements that decouple the unit that is *retrieved* from the unit that is *embedded*. Parent-child (small-to-big) retrieval embeds and searches small child chunks for precision, then hands the model the larger parent chunk they belong to for context. Late chunking (Günther et al., 2024) runs the whole document through a long-context embedding model first and only splits the token embeddings into chunks afterwards, so each chunk vector already reflects its neighbours. Both trade a little index complexity for better recall on boundary-spanning facts; reach for them once fixed chunking has plateaued.
+**Overlap.** Adjacent chunks share their boundary sentences, so a fact on a boundary survives whole in at least one chunk, at the cost of a proportionally larger index.
 
-![A chunk carrying a document and summary prefix, beside three bars showing 35, 49 and 67 per cent reductions in retrieval failures](diagrams/02-contextual-retrieval.svg)
+The figure below runs both kinds of splitter over one 38-word section of the toy corpus that ships with this post. A fixed 30-word split cuts "8:00 to 18:00" in two; the companion's `chunk`, with a 30-word target and 8 words of overlap, keeps every sentence whole and repeats the second sentence in both chunks.
 
-*One cheap call per chunk at index time, and the three published numbers it buys.*
+![A section of four sentences of 11, 10, 11 and 6 words, to scale. A fixed 30-word split cuts sentence 3 between 8:00 and to 18:00, marked in red. The sentence-aware chunker makes chunk 1 from sentences 1 and 2 (21 words) and chunk 2 from sentences 2 to 4 (27 words); sentence 2 is the overlap.](diagrams/01-chunking.svg)
 
-**Contextual retrieval.** Anthropic's name for a single offline trick: prepend each chunk with a one-or-two-sentence summary of *the document it came from*. The chunk now carries enough context to make sense in isolation. The cost is one cheap LLM call per chunk at index time (one-off; cacheable). The reported lift is about 35% fewer retrieval failures with contextual embeddings alone, about 49% when combined with a contextual BM25 keyword index (BM25 is the classic sparse lexical ranker), and about 67% once a reranker is added (Anthropic, 2024). The contextual-embeddings step alone is the largest single offline improvement most teams will ever ship.
+*Same text, same budget: the fixed-length split breaks a fact; the sentence-aware split keeps every sentence whole and shares one across the boundary.*
 
-The header looks like this:
+**Parent-child and late chunking.** Parent-child retrieval searches small child chunks and hands the model the larger parent they belong to. Late chunking (Günther et al., 2024) embeds the whole document with a long-context model and only then pools the token embeddings into chunk vectors, so each vector reflects its neighbours. Both add complexity; they pay once plain chunking stops improving the golden set.
 
+**Contextual retrieval.** Anthropic's "Introducing Contextual Retrieval" (September 2024) prepends "chunk-specific explanatory context to each chunk before embedding", and builds the keyword index over the same contextualised chunks. A model reads the whole document and one chunk and writes a sentence or two that situate the chunk, usually 50 to 100 tokens; the page puts the one-time cost at $1.02 per million document tokens with prompt caching, under its stated assumptions (800-token chunks, 8,000-token documents).
+
+BM25 (Best Matching 25; Robertson and Zaragoza, 2009) is the classic lexical ranking function: it scores a chunk by the query words it contains, weighted by their rarity. The page measures the effect as the top-20 retrieval failure rate (1 minus recall@20, averaged over its four knowledge domains with its best embedding configuration): contextual embeddings cut it by 35% (5.7% to 3.7%), adding contextual BM25 by 49% (to 2.9%), and adding a reranker by 67% (to 1.9%). The figure below draws the page's example chunk and its numbers.
+
+![Top, Anthropic's example chunk before and after a sentence naming the company and quarter is prepended. Bottom, cited from the page, the top-20 retrieval failure rate falling from 5.7% to 3.7% with contextual embeddings (minus 35%), to 2.9% with contextual BM25 (minus 49%), and to 1.9% with reranking (minus 67%).](diagrams/02-contextual-retrieval.svg)
+
+*Every number is the page's own; each reduction is measured from the same 5.7% baseline, and the steps stack.*
+
+Part of a header costs nothing: the document title and section path are known at ingest ([post 10](../10-data-ingestion-pipelines/index.md) records them as provenance). The toy snippet prepends that free part to each chunk and keeps a bare copy for comparison:
+
+```python
+chunks, headed = [], []
+for doc, sections in CORPUS.items():
+    for section, text in sections.items():
+        for c in chunk(text, target_tokens=30, overlap_tokens=8):
+            chunks.append(c.text)
+            headed.append(f"[{doc} > {section}] {c.text}")
 ```
-[Document: refunds-policy.md, Section 4]
-[Summary: Defines escalation thresholds for the customer-support agent.
- Refunds over $1 000 require manager approval.]
 
-When a customer requests a refund of more than $1 000, the agent must…
-```
-
-Adding the document title and section path is free; adding the summary costs one LLM call per chunk; both belong in the index for any production RAG.
+The model-written sentences need a model call per chunk, so the offline snippet leaves them out. Either way, the header is also what the prompt of section 5 shows the model, so one string serves retrieval and citation.
 
 ---
 
 ## 3. Offline: embedding model and index
 
-**Embedding model.** Three reasonable defaults as of early 2026: `text-embedding-3-small` (OpenAI), `voyage-3-lite` (Voyage), `bge-large-en-v1.5` (open-weight). Specific models turn over fast, so treat these as examples and check a current ranking such as the MTEB leaderboard (Muennighoff et al., 2022) before committing. The differences between top general-purpose models are smaller than they used to be. The decision rule: for a corpus in a language or domain (legal, medical, code) where one of these has a specialised variant, use it; otherwise the choice is mostly cost and operational preference.
+**Embedding model.** Choose a kind before a name, because names turn over fast: a hosted general model (OpenAI's `text-embedding-3-small`), a hosted family with domain variants (Voyage AI's documentation, consulted October 2026, lists models for law, finance and code), or an open-weight model (BAAI's `bge-large-en-v1.5`). Shortlist from a current ranking such as the MTEB leaderboard (Massive Text Embedding Benchmark; Muennighoff et al., 2022), then decide on the golden set of section 6, because a leaderboard averages over tasks that are not this corpus. Where a specialised variant exists for the domain or language, try it first.
 
-**Vector database.** For prototypes: `Chroma` or `FAISS` in-process. For single-server production: `pgvector` on an existing Postgres instance. For scale (many millions of vectors, multi-tenant, hosted; roughly north of ten million as a rule of thumb): `Pinecone`, `Weaviate`, `Qdrant`, `Milvus`. The decision rule: pick the lowest-operational-burden option that meets the scale; retrieval quality is dominated by chunking and re-ranking, not by the database.
+**Vector database.** In-process (Chroma, FAISS) for a prototype; `pgvector` on an existing Postgres for one production server; a dedicated store (Pinecone, Weaviate, Qdrant, Milvus) for many millions of vectors or many tenants (roughly ten million vectors and up, an illustrative threshold). Pick the lowest-burden option that meets the scale.
 
-**Sparse index alongside.** An Elasticsearch / OpenSearch / tantivy index over the same corpus, populated at the same time. Hybrid retrieval ([Post 09](../09-select-strategies/index.md), §3) needs both. The cost of running both is small compared to the recall lift from fusing them.
+**Sparse index alongside.** A BM25 index over the same chunks (Elasticsearch, OpenSearch, or the companion's `BM25` class), because hybrid retrieval needs both rankings.
 
-**Manifest table.** A row per source document: its hash, its chunks' ids, the embedding-model version, the timestamp. Without this there is no way to answer "what changed in the index since last week", which is the question every production debugging session opens with.
+**Manifest table.** One row per source document: its hash, its chunk ids, the embedding-model version, the ingest time. Without it, "what changed in the index since last week?" has no answer. [Post 10](../10-data-ingestion-pipelines/index.md) shows how the hash drives incremental re-indexing.
 
 ---
 
-## 4. Online: the four levers (recap)
+## 4. Online: the four levers, recapped
 
-The online pipeline is described in detail in [Post 09](../09-select-strategies/index.md). The summary in pipeline order:
+[Post 09](../09-select-strategies/index.md) describes the online pipeline in full. In order, with the series' starting defaults (illustrative values to tune):
 
-1. **Query**: rewrite the user turn into a self-contained search query, optionally generate a hypothetical answer (HyDE, hypothetical-document embeddings: embed a drafted answer rather than the raw question) or 3–5 paraphrases (multi-query).
-2. **Candidates**: hybrid retrieval (dense top-30 + BM25 top-30 + metadata filter; top-*k* means keeping the *k* best-scoring results) merged by **reciprocal rank fusion** (RRF) into a top-50 candidate set.
-3. **Re-rank**: a cross-encoder (for example Cohere `rerank`, Voyage `rerank-2`, or the open-weight `bge-reranker-v2`; see Further reading) scores each candidate against the query; keep the top-5.
-4. **Pack**: bookend layout (best chunk first, second-best last), deduplicate near-identical chunks, optionally trim within a chunk, attach a citation header per chunk, respect the per-layer budget.
+1. **Query.** Rewrite the user turn into a self-contained query; optionally embed a drafted answer instead (HyDE, hypothetical document embeddings; Gao et al., 2022) or issue a few paraphrases.
+2. **Candidates.** Dense top-30 plus BM25 top-30 plus any metadata filter, merged by reciprocal rank fusion (RRF) into a top-50 candidate set.
+3. **Re-rank.** A cross-encoder reads the query and each candidate together and scores the pair; keep the top-5. Cohere Rerank and Voyage AI's rerankers are hosted; BAAI's `bge-reranker-v2-m3` is open-weight.
+4. **Pack.** Bookend layout (best first, second-best last; [post 06](../06-context-failure-modes/index.md)), drop near-duplicates, give each chunk a citation header, and keep to the budget of layer 04.
 
-Three sub-points worth surfacing because they are RAG-specific:
+Top-5 is a starting point: Anthropic's tests passed the top 20 chunks and found 20 more effective than 10 or 5. The golden set decides. Three points are specific to RAG.
 
-- **Query construction must include conversation context.** A naïve embedding of "and the second one?" against your knowledge base returns garbage. Either rewrite using the last 2–3 turns or concatenate them into the query string.
-- **Candidate fusion order doesn't matter to RRF.** RRF scores each candidate by summing `1 / (k + rank)` across the result lists (a small constant `k`, often 60, damps the top ranks); because it sums over lists, it is symmetric in its inputs, which is half the reason it works without tuning. Post 09 (§3) defines it in full.
-- **Re-ranking is the single highest-ROI online fix.** If a team has built every other piece and skipped this one, fix this first. (The same lever is called out in §7 and in Common pitfalls.)
+**The query must carry the conversation.** Embedded alone, "and the second one?" retrieves nothing useful; rewrite it from the last few turns.
+
+**RRF takes ranks, not scores.** A candidate $d$ scores $\mathrm{RRF}(d) = \sum_i 1/(k + r_i(d))$ over the lists $i$ it appears in, where $r_i(d)$ is its rank in list $i$ and $k$ is a damping constant, 60 in Cormack et al. (2009) and unrelated to top-k. A cosine similarity and a BM25 score never have to share a scale, and the order in which lists are passed changes no score (the companion's `rrf` breaks exact ties by first appearance). The figure below fuses two rankings from the toy snippet, which uses a character-trigram ranker as an offline stand-in for the dense half.
+
+![For a toy question, BM25 ranks chunk 2 first and chunk 0, which holds the answer, second; the trigram ranker ranks chunk 0 first. Summed RRF scores put chunk 0 first.](diagrams/03-rrf-fusion.svg)
+
+*BM25's first chunk is not the answer; the answer's ranks of 2 and 1 beat ranks of 1 and 3, and no score is rescaled.*
+
+**Re-ranking is this post's first online fix.** In Anthropic's numbers, a reranker on top of contextual embeddings and contextual BM25 took the failure rate from 2.9% to 1.9%, a further third, without touching the index.
 
 ---
 
 ## 5. Generation: what the prompt should look like
 
-The model sees the packed chunks, a system prompt that instructs it how to use them, and the user's question. The system prompt does more work than people expect. A skeleton that consistently behaves well:
+The model sees the packed chunks in layer 04, rules for using them in layer 01, the system prompt, and the question last, as layer 06, the user instruction. A skeleton, each part labelled with its layer:
 
-```
-You are answering a question using the provided sources.
-
-Rules:
-1. Use only the sources below. If the answer is not in them, say
+```text
+[layer 01, the system prompt]
+Answer using only the sources given with the question.
+1. If the answer is not in them, say
    "I could not find that in the provided sources."
-2. Cite the source in [brackets] after every claim, e.g. [refunds.md §4].
-3. If sources disagree, surface the disagreement and cite both.
+2. After every claim, cite its source in brackets,
+   e.g. [refunds-policy.md > Approval limits].
+3. If two sources disagree, say so and cite both.
 
-Sources:
-[refunds.md §4] When a customer requests a refund over $1 000…
-[refunds.md §5] The manager queue is staffed 24/5…
-[escalations.md §2] All escalations require a written summary…
+[layer 04, retrieved chunks]
+[refunds-policy.md > Approval limits] Support agents can approve up to 1,000 dollars ...
+[refunds-policy.md > Payment method] Card payments take five to ten business days ...
 
-Question: {user_question}
+[layer 06, the user instruction]
+Who signs off on a refund of 2,000 dollars?
 ```
 
-Three details to notice:
-
-- **The "if you don't know, say so" instruction.** Without it the model fills gaps from parametric memory and the citations become decorative.
-- **Citations are mandatory and machine-parseable.** This makes it possible to verify, after the fact, that the cited chunk really contained the asserted fact.
-- **The disagreement clause.** Cheaper than building a pre-retrieval consistency checker; lets the human reader catch the conflict.
+The **"say so" rule** stops the model filling gaps from training. **Machine-parseable citations** let the application check that the cited chunk contains the claim, and show the source. The **disagreement rule** is a cheap defence against the conflict failure mode of [post 06](../06-context-failure-modes/index.md): it lets the reader see the clash.
 
 ---
 
 ## 6. Evaluation: the harness without which nothing improves
 
-A RAG system that is not measured will degrade. The minimum eval harness has three pieces.
+Every component change moves quality in some direction, and without measurement no one sees which. The minimum harness has three parts.
 
-**A gold-question set.** 50–200 question/answer pairs curated by domain experts. Each pair carries the *ground-truth source chunk* (which document and which section the answer comes from). As a rough rule of thumb, on the order of a hundred questions is enough to notice a few-percent regression without drowning in per-run labelling cost; treat the exact number as illustrative and grow the set until results stop moving between runs.
+**A golden set.** Questions and answers written by people who know the domain, each with the passage the answer comes from; 50 to 200 pairs is a common start (illustrative). Size it with arithmetic: a score measured on $n$ questions estimates the score on all traffic with a standard error of $\sqrt{p(1-p)/n}$, which for $n = 100$ and $p = 0.8$ is 0.04, four percentage points. A 2-point drop on 100 questions cannot be told from noise; reading which questions flipped between two configurations is more sensitive than comparing their totals.
 
-**Three metrics, computed on every change:**
+**Three metrics on every change.**
 
-- **Recall@N (retrieval-only).** Out of the gold questions, what fraction had the gold chunk in the top-N candidates? Cheapest to compute; predicts the ceiling on end-to-end quality.
-- **Citation accuracy (retrieval + packing).** Did the chunk the model cited contain the fact it asserted? An LLM-as-judge can evaluate this when paying for human labels every run is not worth it.
-- **End-to-end answer correctness.** Did the model's final answer match the gold answer (semantically)? An LLM-as-judge with a rubric works; full human review on a sample for ground truth.
+- **Recall@N** (retrieval): the share of questions whose gold passage is in the top-N candidates. Cheapest, and the ceiling on everything downstream; Anthropic's failure rate is 1 minus recall@20.
+- **Citation accuracy** (retrieval to generation): does each cited chunk contain its claim? An LLM (large language model) judge can grade it when human labels on every run cost too much; ARES (Saad-Falcon et al., 2023) builds such judges.
+- **Answer correctness** (end to end): does the answer agree with the gold answer? An LLM judge with a rubric, checked against human review on a sample.
 
-**A regression gate in CI.** Any change to chunker, embedding model, retrieval, re-ranker, prompt template runs the eval. A drop greater than the noise floor blocks the merge. This is the discipline that distinguishes RAG systems that improve over time from RAG systems that decay.
+**A regression gate in CI** (continuous integration): every change runs the harness, and a drop larger than the noise blocks the merge. [Post 20](../20-evaluation/index.md) builds the full harness.
+
+The toy snippet is the harness in miniature: ten questions phrased as a user would type them, each with a phrase only its answer-bearing chunks contain, scored at recall@1 and recall@3 for five retrievers over 17 chunks. It prints:
+
+```text
+4 documents, 10 sections, 17 chunks
+retriever                 recall@1  recall@3  missed at 3
+BM25, bare chunks              0.6       0.9  6
+BM25, headed chunks            0.6       0.9  6
+trigram, bare chunks           0.6       0.7  4, 6, 7
+trigram, headed chunks         0.7       0.9  7
+RRF of the two, headed         0.7       0.9  6
+```
+
+The headers lift the trigram ranker from 0.7 to 0.9 at recall@3, because "Lost parcels" and "refunds-policy.md > Approval limits" give the answer chunks more of the query's trigrams. They do nothing for BM25, whose exact-word match does not connect "refund" with "refunds"; a stemmer would. Fusion ties for the best recall@1 but misses question 6 ("Can a big refund be approved on a Saturday?") at 3: its answer chunk says "Weekend requests wait" and shares no word with "Saturday", so only the header reaches it, and the fused list puts it fourth. Linking Saturday to weekend is what an embedding model is for. The toy's numbers say nothing about effect sizes on a real corpus; the habit of reading which questions each change won and lost is the point.
 
 ---
 
-## 7. Where production RAGs go wrong
+## 7. Where production RAG goes wrong
 
-A short tour of the failure *symptoms* seen in the field, in roughly descending frequency. (Common pitfalls, below, lists the upstream *decisions* that cause them; the two lists are meant to be read together, not as duplicates.)
+Common symptoms, each with the failure mode of [post 06](../06-context-failure-modes/index.md) it produces and its first fix:
 
-- **No re-ranker.** Most demo-grade RAGs ship without one; adding one is the highest-ROI online fix (the same lever named in §4).
-- **Chunks too big.** The retrieved chunk is 1 500 tokens; the answer-bearing sentence is 30. Half the budget is paid to wrap a fact.
-- **No structural metadata.** All chunks live in one undifferentiated pool. Queries that should be filtered to one document are searched against the entire corpus.
-- **Embedding stale chunks.** A document changed two months ago. The vector still points to the old chunks. The agent confidently cites an outdated policy.
-- **Citations drop on the floor.** The model cites; the application does not surface the citation; the user has no way to verify; trust collapses on the first wrong answer.
-- **Retrieval but no generation guard.** No "if you don't know, say so" instruction. The model hallucinates with confident citations.
-- **No eval set.** Every change feels good; quality drifts; nobody can tell.
-- **Reaching for the latest embedding model before fixing chunking.** The most common form of premature optimisation in this space.
+| Symptom | Cause | Failure mode | First fix |
+|---|---|---|---|
+| Fluent, confident, off-topic answers | No reranker; near-miss chunks packed | Distraction | Add a cross-encoder; lower top-k |
+| A 30-word answer inside a 1,500-token chunk (illustrative) | Chunks too big | Distraction | Smaller chunks, or parent-child |
+| A question about one document answered from another | No metadata filter | Distraction | Filter by document, product or date |
+| An outdated policy, cited with confidence | Stale chunks left in the index | Conflict | Stamp provenance and recency, then replace chunks when a hash changes |
+| Confident answers with decorative citations | No "say so" rule in layer 01 | Confusion | Add the rule; check the citations |
+| Quality drifts and no one can say when | No golden set | none: not a context fault | Build the harness of section 6 |
 
 ---
 
-## 8. When *not* to use RAG
+## 8. When not to use RAG
 
-RAG is a tool, not a religion. Three situations where it is the wrong tool:
+Three cases where retrieval is the wrong tool:
 
-- **The corpus fits in the context window.** A 50-page handbook fits in 100 k tokens. Just include it. Cache it. Skip the pipeline.
-- **The query needs *all* of the corpus.** Summarisation of a single 30-page document does not benefit from retrieval; it needs the whole document.
-- **The information is structured.** A query like "list all customers in California with churn risk > 0.7" should hit a database, not a vector index. RAG is for unstructured text; SQL is for tables.
+- **The corpus fits.** Anthropic's contextual-retrieval page draws the line at a knowledge base "smaller than 200,000 tokens (about 500 pages of material)": below it, put the whole corpus in the prompt and cache it ([post 05](../05-economics-of-context/index.md) prices the cache).
+- **The task needs all of it.** Summarising one 30-page document gains nothing from retrieval.
+- **The data lives in tables.** "All customers in California with a churn risk above 0.7" is a query for a database in SQL (Structured Query Language), not a vector index.
 
-Hybrid systems, which *route* to RAG, SQL, or full-document depending on the query type, outperform pure-RAG systems on every realistic benchmark.
+A production system can route between RAG, a database query and whole-document loading by query type; [post 17](../17-advanced-retrieval/index.md) covers the router and [post 25](../25-long-context-vs-rag/index.md) the long-context decision.
+
+---
+
+## 9. Make it run
+
+The companion [`code/11-rag-from-scratch`](../../code/11-rag-from-scratch/) holds `ragkit`, a dependency-free offline core (`read_corpus`, `chunk`, `BM25`, `rrf`, `bookend_pack`) plus an online `generate` adapter that needs an API (application programming interface) key and is not run here. Its seven tests run offline from the series root:
+
+```text
+uv run --with pytest python -m pytest -q code/11-rag-from-scratch/tests
+```
+
+They end with `7 passed` in under a second. The toy snippet imports the same package from `code/11-rag-from-scratch/src`, with no install, and prints the table of section 6 in under a second:
+
+```text
+uv run python posts/11-rag-in-depth/snippets/toy_rag.py
+```
+
+Its last lines bookend-pack the fused top-5 for the first question. Rewording a question in `GOLDEN` or changing `target_tokens` shows which questions each change wins and loses; a real dense ranking joins `rrf` as one more list.
+
+---
+
+## 10. What can go wrong?
+
+- **Gold labels tied to chunk ids.** The golden set records "chunk 412". After a chunker change chunk 412 is another passage, recall collapses, and a good change is reverted. Label the answer by a phrase or source span, as the toy does.
+- **A splitter that loses text.** A splitter that treats every full stop as a sentence end breaks "4.95 dollars" or "example.com", and a careless one drops the fragment: the answer is in the document and in no chunk. Check that each document's chunks, joined, contain every word of the source.
+- **Context written without the document.** To save tokens, the context call sees only the chunk, and the model invents a plausible context. The call needs the whole document (cached) and the chunk.
+- **Fusing scores instead of ranks.** Cosine similarities near 0.8 are added to BM25 scores near 12, and BM25 decides every ranking.
+- **A recall gain read as an answer gain.** Recall@50 rises, the change ships, and answer correctness falls because weaker chunks now reach the top-5. Each metric guards only its own stage.
 
 ---
 
 ## Common pitfalls
 
-- **Skipping contextual retrieval.** The single largest one-off offline win.
-- **Skipping re-ranking.** The single largest online win.
-- **Embedding the user message verbatim.** Query construction is not optional.
-- **Treating "more chunks" as the fix for any quality problem.** Usually it is the cause.
-- **Using RAG when the data is structured or already fits.** SQL, full-document, and RAG each have a niche.
-- **Shipping without an eval set.** You will not be able to tell if your next change helped.
+1. **Embedding the user message verbatim.** Past the first turn, query construction is not optional.
+2. **Treating "more chunks" as the fix for every quality problem.** A bigger top-k often causes the distraction it was meant to cure.
+3. **Reaching for a newer embedding model before fixing chunking.** A better vector of a broken chunk is still a broken chunk.
+4. **Using RAG where the data is structured or already fits.** A database query, whole-document loading and RAG each have their place.
+5. **Shipping without a golden set.** Then no change can be shown to help.
 
 ---
 
 ## Further reading
 
-- Anthropic, *"Introducing Contextual Retrieval"* (Sept 2024): the chunk-enrichment trick and the ~35%/49%/67% figures.
-- Cormack, G. V. *et al.*, *"Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods"* (2009): the RRF formula used in §4.
-- Lewis, P. *et al.*, *"Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"* (2020): the original RAG (retrieval-augmented generation) paper.
-- Muennighoff, N. *et al.*, *"MTEB: Massive Text Embedding Benchmark"* (2022): the leaderboard for choosing an embedding model (§3). See [huggingface.co/spaces/mteb/leaderboard](https://huggingface.co/spaces/mteb/leaderboard) for the current ranking.
-- Cohere, Voyage AI, and BAAI reranker documentation: the cross-encoder models named in §4.
-- Günther, M. *et al.*, *"Late Chunking: Contextual Chunk Embeddings Using Long-Context Embedding Models"* (2024): the late-chunking method in §2.
-- Khattab, O. & Zaharia, M., *"ColBERT"* (2020): late-interaction retrieval, covered in [Post 17](../17-advanced-retrieval/index.md).
-- Saad-Falcon, J. *et al.*, *"ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems"* (NAACL 2024; arXiv 2311.09476, 2023).
+- Lewis, P. *et al.*, "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks" (NeurIPS 2020).
+- Anthropic, "Introducing Contextual Retrieval" (September 2024).
+- Cormack, G. V. *et al.*, "Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods" (SIGIR 2009).
+- Günther, M. *et al.*, "Late Chunking: Contextual Chunk Embeddings Using Long-Context Embedding Models" (2024).
+- Muennighoff, N. *et al.*, "MTEB: Massive Text Embedding Benchmark" (2022).
+- Cohere, Voyage AI and BAAI reranker documentation.
+- Saad-Falcon, J. *et al.*, "ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems" (NAACL 2024).
+- Khattab, O. and Zaharia, M., "ColBERT" (SIGIR 2020): late interaction, in [post 17](../17-advanced-retrieval/index.md).
 
-Full citations in [REFERENCES.md](../../REFERENCES.md).
+Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
 ---
 
 ## What to read next
 
-- **[Post 12 — Compress strategies](../12-compress-strategies/index.md)**: keeping retrieved context within budget.
-- **[Post 17 — Advanced retrieval](../17-advanced-retrieval/index.md)**: graph RAG, late interaction, structured retrieval.
-- **[Post 20 — Evaluation](../20-evaluation/index.md)**: the eval harness in detail.
+- **[Post 12 - Compress strategies](../12-compress-strategies/index.md):** what to do when retrieved chunks and history outgrow the budget.
+- **[Post 20 - Evaluation](../20-evaluation/index.md):** the full harness that section 6 sketches, with its judges and CI gate.

@@ -1,0 +1,797 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-011",
+  "next_ordinal": 18,
+  "questions": [
+    {
+      "id": "ctx-011-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 2,
+      "tags": [
+        "pipeline",
+        "offline",
+        "online"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A RAG system answers a question wrongly because the passage that holds the answer was never put into the index. Which half of the pipeline sets this limit, and why?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The online half, because the reranker decides which chunks reach the window.",
+          "correct": false,
+          "feedback": "The reranker can only reorder candidates that the index holds. A passage that was never indexed is not among them."
+        },
+        {
+          "key": "b",
+          "text": "The offline half, because what is not indexed cannot be retrieved by any query.",
+          "correct": true,
+          "feedback": "Right. The offline half sets the ceiling: no online stage can recover a passage the index does not hold."
+        },
+        {
+          "key": "c",
+          "text": "The generation step, because the model can answer from what it learned in training.",
+          "correct": false,
+          "feedback": "Answering from training is what the \"say so\" rule is meant to stop; it does not make a missing passage retrievable."
+        },
+        {
+          "key": "d",
+          "text": "Neither: a larger top-N on the candidates stage recovers any passage.",
+          "correct": false,
+          "feedback": "A larger top-N widens the search over the index, not beyond it. The passage still has to be in the index."
+        }
+      ],
+      "explanation": "Section 1: the offline half (chunk, add context, embed, index) decides what any query can find, so it sets the ceiling; the online half (query, candidates, re-rank, pack, generate) decides how close one answer gets to it. A passage missing from the index caps every answer, whatever the online stages do.",
+      "hints": [
+        "Ask which half decides what exists to be found."
+      ]
+    },
+    {
+      "id": "ctx-011-q02",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 3,
+      "tags": [
+        "pipeline",
+        "stages"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the stages in the order a document and then a user's question pass through a production RAG pipeline, from the raw parsed document to the answer.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Re-rank the candidates with a cross-encoder and keep the top-5"
+        },
+        {
+          "key": "b",
+          "text": "Split the parsed document into chunks"
+        },
+        {
+          "key": "c",
+          "text": "Rewrite the user turn into a self-contained query"
+        },
+        {
+          "key": "d",
+          "text": "Embed and index the headed chunks, dense and BM25"
+        },
+        {
+          "key": "e",
+          "text": "Pack the kept chunks with bookends and citations"
+        },
+        {
+          "key": "f",
+          "text": "Prepend a contextual header to each chunk"
+        },
+        {
+          "key": "g",
+          "text": "Retrieve dense and BM25 candidates and fuse them into a top-50"
+        },
+        {
+          "key": "h",
+          "text": "Generate the answer"
+        }
+      ],
+      "answer": [
+        "b",
+        "f",
+        "d",
+        "c",
+        "g",
+        "a",
+        "e",
+        "h"
+      ],
+      "partial_credit": true,
+      "explanation": "Sections 1 and 4: offline, a parsed document is chunked, each chunk gets its contextual header, and the headed chunks are embedded and indexed. Online, the user turn is rewritten into a query, hybrid retrieval with fusion produces the top-50 candidates, a cross-encoder keeps the top-5, the pack step bookends them with citations into layer 04, and the model generates.",
+      "hints": [
+        "The context header is written for a chunk, so the chunk has to exist first.",
+        "Online, nothing can be re-ranked before candidates exist, and nothing is packed before it is re-ranked."
+      ]
+    },
+    {
+      "id": "ctx-011-q03",
+      "type": "match",
+      "track": "connect",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "7",
+      "est_minutes": 4,
+      "tags": [
+        "failure-modes",
+        "diagnosis"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each production symptom to its most likely cause in the RAG pipeline. One cause on the right matches no symptom.",
+      "connects": [
+        "ctx-006"
+      ],
+      "left": [
+        {
+          "key": "a",
+          "text": "Fluent, confident answers that miss the topic of the question"
+        },
+        {
+          "key": "b",
+          "text": "An outdated policy, cited with confidence"
+        },
+        {
+          "key": "c",
+          "text": "A question about one product answered from another product's manual"
+        },
+        {
+          "key": "d",
+          "text": "Answers that cite sources which do not contain the claim"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Near-miss chunks packed because no reranker scored them against the query"
+        },
+        {
+          "key": "b",
+          "text": "Chunks of a changed document never replaced in the index"
+        },
+        {
+          "key": "c",
+          "text": "No metadata filter on the candidates stage"
+        },
+        {
+          "key": "d",
+          "text": "No rule telling the model to say when the sources lack the answer"
+        },
+        {
+          "key": "e",
+          "text": "An embedding model with too few dimensions"
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "c",
+        "d": "d"
+      },
+      "explanation": "Section 7 ties each symptom to a cause and to the failure mode of post 06: off-topic answers come from near-miss chunks with no reranker (distraction); an outdated policy from stale chunks left in the index (conflict); a question about one document answered from another from a missing metadata filter; decorative citations from a missing \"say so\" rule (confusion). A larger embedding model is not the cause of any of them.",
+      "hints": [
+        "For each symptom, ask which stage would have had to work differently to prevent it."
+      ]
+    },
+    {
+      "id": "ctx-011-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "chunking",
+        "overlap"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A 38-word section has four sentences of 11, 10, 11 and 6 words. It is split two ways with a budget of 30 words: fixed-length, every 30 words, and sentence-aware with 8 words of overlap, which fills a chunk with whole sentences up to the budget and starts the next chunk on the previous chunk's last sentence. Which statement is true?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The fixed split cuts sentence 3; the sentence-aware chunks hold 21 and 27 words and share sentence 2.",
+          "correct": true,
+          "feedback": "Right. Word 30 lies inside sentence 3, while the sentence-aware chunks hold sentences 1 to 2 and 2 to 4."
+        },
+        {
+          "key": "b",
+          "text": "Both splits keep every sentence whole, because 30 words is close to the section's length.",
+          "correct": false,
+          "feedback": "The fixed split ignores sentence boundaries: words 22 to 32 are sentence 3, and the cut after word 30 lands inside it."
+        },
+        {
+          "key": "c",
+          "text": "The sentence-aware split makes one 30-word chunk and drops the last 8 words.",
+          "correct": false,
+          "feedback": "A sentence-aware chunker never ends mid-sentence and never drops text: chunk 1 stops at 21 words because sentence 3 would take it to 32."
+        },
+        {
+          "key": "d",
+          "text": "The fixed split cuts sentence 4, the shortest, because it comes last.",
+          "correct": false,
+          "feedback": "Sentence 4 is words 33 to 38. The cut after word 30 is inside sentence 3."
+        }
+      ],
+      "explanation": "Section 2 and its figure: the fixed split ends at word 30, which falls inside sentence 3 (words 22 to 32), so that sentence and any fact in it are cut in two. The sentence-aware chunker makes chunk 1 from sentences 1 and 2 (21 words, since adding sentence 3 would make 32) and chunk 2 from sentences 2 to 4 (27 words); sentence 2 is the overlap.",
+      "hints": [
+        "Add up the sentence lengths to see where word 30 falls.",
+        "For the sentence-aware split, add sentences while the total stays at or under 30."
+      ]
+    },
+    {
+      "id": "ctx-011-q05",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 5,
+      "tags": [
+        "chunking",
+        "overlap",
+        "index-size"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A section has five sentences of 10, 12, 9, 8 and 11 words (50 words). A sentence-aware chunker with a 30-word target and 8 words of overlap fills each chunk with whole sentences while the total stays at or under 30, then starts the next chunk by stepping back over the previous chunk's trailing sentences until at least 8 words are repeated. How many chunks does it make, and how many words do the chunks hold in total?",
+      "answer": {
+        "parts": [
+          {
+            "label": "chunks",
+            "value": 3,
+            "tolerance": 0,
+            "unit": "chunks"
+          },
+          {
+            "label": "words held by all chunks",
+            "value": 70,
+            "tolerance": 0,
+            "unit": "words"
+          }
+        ]
+      },
+      "precision_note": "Chunks of 22 (sentences 1 to 2), 29 (2 to 4) and 19 (4 to 5) words, as the companion's chunk(target_tokens=30, overlap_tokens=8) returns them; 22 + 29 + 19 = 70. Ignoring the overlap gives 50.",
+      "explanation": "Chunk 1 is sentences 1 and 2 (22 words; adding sentence 3 makes 31). Sentence 2 alone repeats 12 words, at least 8, so chunk 2 starts there: sentences 2, 3 and 4 (29 words; sentence 5 would make 40). Sentence 4 repeats 8 words, so chunk 3 is sentences 4 and 5 (19 words). The index stores 70 words for a 50-word section, 40% more: overlap costs index size in proportion to how much is repeated.",
+      "hints": [
+        "Fill chunk 1 sentence by sentence and stop before the total passes 30.",
+        "Step back one sentence at a time from the end of the chunk until the repeated words reach 8, then fill again."
+      ]
+    },
+    {
+      "id": "ctx-011-q06",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "rrf",
+        "hybrid-search"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A hybrid retriever fuses a dense ranking and a BM25 ranking with reciprocal rank fusion, $\\mathrm{RRF}(d) = \\sum_i 1/(k + r_i(d))$ with $k = 60$. Which statement about it is true?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Passing the BM25 list first instead of the dense list changes no item's fused score.",
+          "correct": true,
+          "feedback": "Right. The score is a sum over the lists, and a sum does not depend on the order of its terms."
+        },
+        {
+          "key": "b",
+          "text": "The dense similarities and BM25 scores must be normalised to one scale before fusing.",
+          "correct": false,
+          "feedback": "RRF reads only each item's rank in each list, which is why no normalisation is needed."
+        },
+        {
+          "key": "c",
+          "text": "With k = 60, the fused list keeps the top 60 candidates.",
+          "correct": false,
+          "feedback": "Here k is a damping constant in the denominator. The candidate count is top-N, a separate setting."
+        },
+        {
+          "key": "d",
+          "text": "An item that appears in only one of the two lists scores zero and is dropped.",
+          "correct": false,
+          "feedback": "It still gets the term from the list that ranks it, 1/(60 + rank); it simply cannot collect a second one."
+        }
+      ],
+      "explanation": "Section 4: RRF adds one term per list that ranks the item, so passing the lists in the other order changes no score (only how exact ties are broken can depend on it); it uses ranks, so cosine and BM25 scores never need a common scale; $k$ is a damping constant, unrelated to top-k; and an item in one list still gets that list's term.",
+      "hints": [
+        "Write out the score of one item with the two lists swapped.",
+        "Ask what the formula reads from each list: a score or a position?"
+      ]
+    },
+    {
+      "id": "ctx-011-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "rrf",
+        "arithmetic"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "With reciprocal rank fusion at $k = 60$, chunk A is ranked 1st by the dense list and 10th by the BM25 list; chunk B is ranked 4th by both. Compute each chunk's fused score to four decimal places.",
+      "answer": {
+        "parts": [
+          {
+            "label": "fused score of A",
+            "value": 0.0307,
+            "tolerance": 6e-05,
+            "unit": ""
+          },
+          {
+            "label": "fused score of B",
+            "value": 0.03125,
+            "tolerance": 6e-05,
+            "unit": ""
+          }
+        ]
+      },
+      "precision_note": "A = 1/61 + 1/70 = 0.030679; B = 2/64 = 0.03125 (0.0312 or 0.0313 by rounding). Dropping k gives 1.1 and 0.5; one term per chunk gives 0.0164 and 0.0156.",
+      "explanation": "A scores 1/61 + 1/70 = 0.01639 + 0.01429 = 0.0307, and B scores 1/64 + 1/64 = 0.0313 (0.03125). B wins: the damping constant flattens the reward for a single first place, so steady agreement beats one top rank and one weak one. With k = 0 the order flips (A 1.1, B 0.5), which is why the constant matters.",
+      "hints": [
+        "Each list contributes 1/(60 + rank) for the chunk.",
+        "Add the two terms for each chunk; keep at least five decimal places before rounding."
+      ]
+    },
+    {
+      "id": "ctx-011-q08",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "2",
+      "est_minutes": 4,
+      "tags": [
+        "contextual-retrieval",
+        "reranking",
+        "percentages"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Anthropic's \"Introducing Contextual Retrieval\" (September 2024) reports a top-20 retrieval failure rate of 5.7% for its baseline, 2.9% with contextual embeddings and contextual BM25, and 1.9% with a reranker added on top. By what percentage does the combination of contextual embeddings and contextual BM25 cut the baseline failure rate, and by what percentage does the reranker then cut the 2.9% rate? Give one decimal place.",
+      "answer": {
+        "parts": [
+          {
+            "label": "cut by contextual embeddings and BM25",
+            "value": 49.1,
+            "tolerance": 0.15,
+            "unit": "%"
+          },
+          {
+            "label": "further cut by the reranker",
+            "value": 34.5,
+            "tolerance": 0.15,
+            "unit": "%"
+          }
+        ]
+      },
+      "precision_note": "(5.7 - 2.9)/5.7 = 49.12%; (2.9 - 1.9)/2.9 = 34.48%. Point differences (2.8 and 1.0) and the reranker's cut measured from 5.7% (17.5%) are the wrong methods.",
+      "explanation": "Relative reductions: (5.7 - 2.9) / 5.7 = 49.1%, the page's 49%; then (2.9 - 1.9) / 2.9 = 34.5%, about a third of the remaining failures, which section 4 calls a further third. The page's 67% for all three steps is measured from the 5.7% baseline: (5.7 - 1.9) / 5.7 = 66.7%.",
+      "hints": [
+        "A reduction in percent is the drop divided by the rate it starts from.",
+        "The second reduction starts from 2.9%, not from 5.7%."
+      ]
+    },
+    {
+      "id": "ctx-011-q09",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 5,
+      "tags": [
+        "evaluation",
+        "golden-set",
+        "standard-error"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A golden set of $n$ questions gives a recall score near $p = 0.8$. Using the standard error $\\sqrt{p(1-p)/n}$, what is the standard error in percentage points for $n = 100$, and how many questions are needed to bring it down to 2 percentage points?",
+      "answer": {
+        "parts": [
+          {
+            "label": "standard error at n = 100",
+            "value": 4.0,
+            "tolerance": 0.05,
+            "unit": "points"
+          },
+          {
+            "label": "questions for a 2-point standard error",
+            "value": 400,
+            "tolerance": 1,
+            "unit": "questions"
+          }
+        ]
+      },
+      "precision_note": "sqrt(0.16/100) = 0.04 = 4 points; n = 0.16/0.02^2 = 400. Forgetting the square root gives 0.16 points; scaling n linearly gives 200.",
+      "explanation": "Section 6: $\\sqrt{0.8 \\times 0.2 / 100} = 0.04$, four points, so a 2-point drop on 100 questions cannot be told from noise. Solving $\\sqrt{0.16/n} = 0.02$ gives $n = 0.16 / 0.0004 = 400$: halving the error takes four times the questions.",
+      "hints": [
+        "Compute p(1 - p) first, then divide by n and take the square root.",
+        "For the second part, square both sides before solving for n."
+      ]
+    },
+    {
+      "id": "ctx-011-q10",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "evaluation",
+        "recall"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A team changes its embedding model and wants a number that moves only if retrieval itself got better or worse, whatever the reranker and the prompt do. Which metric fits?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Recall@N: the share of questions whose gold passage is in the top-N candidates.",
+          "correct": true,
+          "feedback": "Right. It is computed on the candidate set, before re-ranking, packing or generation."
+        },
+        {
+          "key": "b",
+          "text": "Answer correctness, graded by an LLM judge against the gold answer.",
+          "correct": false,
+          "feedback": "Answer correctness is end to end: a change in the reranker or the prompt moves it too."
+        },
+        {
+          "key": "c",
+          "text": "Citation accuracy: whether each cited chunk contains the claim it supports.",
+          "correct": false,
+          "feedback": "Citation accuracy depends on packing and generation as well as retrieval."
+        },
+        {
+          "key": "d",
+          "text": "Precision@k: the share of the packed top-k chunks that are relevant.",
+          "correct": false,
+          "feedback": "The packed top-k comes after the reranker, so a reranker change moves it."
+        }
+      ],
+      "explanation": "Section 6: recall@N reads only the candidate set, so it isolates retrieval and is the cheapest of the three. Citation accuracy and answer correctness depend on packing, the prompt and the model as well, and precision@k measures the packed set after re-ranking.",
+      "hints": [
+        "Find the metric computed before any later stage runs."
+      ]
+    },
+    {
+      "id": "ctx-011-q11",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "10",
+      "est_minutes": 3,
+      "tags": [
+        "golden-set",
+        "labels",
+        "chunking"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In one sentence, why should a golden set record each answer as a phrase or a span of the source document rather than as the id of the chunk that held it?",
+      "answer": {
+        "model": "Because changing the chunker changes the chunk boundaries and ids, so an id would point at a different passage afterwards, while a phrase or source span still identifies the answer.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\b(ids?|chunk numbers?|boundar(y|ies)|chunks?) (are|is|stay|stays|remain|remains) (stable|fixed|the same|unchanged|constant|permanent)\\b)(?![\\s\\S]*\\b(ids?|boundar\\w*|chunk(er|ing|s)?|splitter)\\b[^.;,]{0,12}\\b(never|don'?t|do not|doesn'?t|does not|won'?t|will not|can'?t|cannot|aren'?t|are not|isn'?t|is not) (chang\\w*|mov\\w*|shift\\w*|renumber\\w*|affect\\w*|alter\\w*)\\b)(?=[\\s\\S]*\\b(re-?chunk\\w*|re-?split\\w*|(different|new|other) (chunk )?boundar\\w*|chunk(er|ing)?\\b[\\s\\S]{0,60}\\b(chang\\w*|edit\\w*|tun\\w*|differ\\w*|redo\\w*|redone|rerun|re-?run|alter\\w*|replac\\w*|swap\\w*|updat\\w*|size|overlap|boundar\\w*)|(chang\\w*|edit\\w*|tun\\w*|alter\\w*|replac\\w*|swap\\w*|updat\\w*|redo\\w*|rerun\\w*|new)\\b[\\s\\S]{0,40}\\b(chunk\\w*|splitter|split\\w*|boundar\\w*)|boundar\\w*[\\s\\S]{0,40}\\b(chang\\w*|move\\w*|shift\\w*|differ\\w*)|ids?\\b[\\s\\S]{0,40}\\b(chang\\w*|shift\\w*|renumber\\w*|reassign\\w*|differ\\w*|mean something else|point (at|to) (a )?(different|other|another|wrong))|renumber\\w*))[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 10: chunk ids and boundaries are products of the chunker. Change the chunker and chunk 412 is another passage, so recall computed against old ids collapses for a change that may have helped; a phrase or source span still identifies the answer after any re-chunking.",
+      "hints": [
+        "Think about what happens to chunk ids when the chunker's size or overlap changes."
+      ]
+    },
+    {
+      "id": "ctx-011-q12",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "rrf",
+        "scores",
+        "ranks"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In one sentence, why does reciprocal rank fusion combine the rankers' ranks rather than adding their raw scores?",
+      "answer": {
+        "model": "Because the rankers' scores are on different scales (cosine near 0.8, BM25 near 12), so adding them lets one ranker dominate, while ranks are comparable without any normalisation.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\bscores? (are|is) (already )?(comparable|on (the same|one|a common) scale)\\b)(?![\\s\\S]*\\b(are|is|live|lie|sit)( already)? on (the same|one|a common) scale\\b)(?![\\s\\S]*\\b(not|n't) (on )?(different|differing|incompatible) (scales?|ranges?)\\b)(?=[\\s\\S]*(\\b(different|differing|incompatible|incomparable|not comparable|uncomparable|unrelated|mismatched|varying|vary|unbounded) (scales?|ranges?|units?|magnitudes?|distributions?)\\b|\\b(scales?|ranges?|units?|magnitudes?|distributions?)\\b[\\s\\S]{0,30}\\b(differ\\w*|incompatible|not comparable|don'?t match|do not match|vary|varies|mismatch\\w*)|\\bnot (on )?(the same|a common|one|comparable) (scale|range|units?)\\b|\\b(don'?t|do not|doesn'?t|does not|never) share (a|one|the same|any|a common) (common )?(scale|range|units?)\\b|(\\bnot|n't) comparable\\b|\\bincomparable\\b|\\b(normali[sz]\\w*|rescal\\w*|calibrat\\w*)\\b|\\bdominat\\w*|\\bswamp\\w*|\\boverwhelm\\w*|\\bapples\\b))[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 4: a cosine similarity near 0.8 and a BM25 score near 12 live on different scales, so adding them lets the larger-scaled ranker decide every ranking; ranks are comparable across rankers with no rescaling, and the damping constant keeps one first place from dominating.",
+      "hints": [
+        "Compare a typical cosine similarity with a typical BM25 score."
+      ]
+    },
+    {
+      "id": "ctx-011-q13",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "10",
+      "est_minutes": 10,
+      "tags": [
+        "chunking",
+        "sentence-splitter",
+        "regex"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "`split_sentences` should split prose into sentences wherever a full stop, exclamation mark or question mark is followed by whitespace, and must never lose text. The starter silently drops the words before a full stop that is not followed by whitespace, as in \"4.95\" or \"example.com\". Fix it.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "import re\n\n_SENTENCE = re.compile(r\"[^.!?]+[.!?]+(?:\\s+|$)|[^.!?]+$\")\n\n\ndef split_sentences(text):\n    \"\"\"Split prose into sentences at ., ! or ? followed by whitespace, without losing any text.\"\"\"\n    return [m.group(0).strip() for m in _SENTENCE.finditer(text) if m.group(0).strip()]\n",
+      "solution": "import re\n\n\ndef split_sentences(text):\n    \"\"\"Split prose into sentences at ., ! or ? followed by whitespace, without losing any text.\"\"\"\n    return [s for s in re.split(r\"(?<=[.!?])\\s+\", text.strip()) if s]\n",
+      "tests": "assert split_sentences(\"One sentence. Two! Three? Trailing\") == [\"One sentence.\", \"Two!\", \"Three?\", \"Trailing\"]\n\n# A full stop inside a number or a name is not a sentence end, and nothing before it is lost.\nassert split_sentences(\"Standard delivery costs 4.95 dollars. Express costs 12 dollars.\") == [\n    \"Standard delivery costs 4.95 dollars.\", \"Express costs 12 dollars.\"]\nassert split_sentences(\"See example.com for details. Version 1.5 ships today.\") == [\n    \"See example.com for details.\", \"Version 1.5 ships today.\"]\n\n# Repeated end marks stay with their sentence.\nassert split_sentences(\"Really?! Yes.\") == [\"Really?!\", \"Yes.\"]\n\n# No word of the source is ever lost.\nfor t in [\"Refunds over 1,000.50 dollars need approval. Ask the U.K. team.\",\n          \"  Leading and trailing space.  Two spaces between.  \", \"No end mark at all\"]:\n    assert \" \".join(split_sentences(t)).split() == t.split(), t\n\n# Any whitespace after an end mark is a boundary, and no sentence keeps leading space.\nassert split_sentences(\"First line.\\nSecond line.  Third.\") == [\"First line.\", \"Second line.\", \"Third.\"]\n\n# Generated text, so a solution cannot list the expected answers.\nparts = [\"Item %d costs %d.%02d dollars.\" % (i, i, 7 * i % 100) for i in range(1, 6)]\nassert split_sentences(\" \".join(parts)) == parts\n\nassert split_sentences(\"\") == []\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 10: a splitter that treats every full stop as a boundary breaks numbers and names, and this one also drops the fragment, so a fact can be in the document and in no chunk. Splitting only on whitespace that follows an end mark keeps every character, and the join check in the tests is the guard section 10 recommends.",
+      "hints": [
+        "Run the starter on \"costs 4.95 dollars.\" and see which words come back.",
+        "Split on the whitespace after an end mark (a lookbehind), not on the end mark itself."
+      ]
+    },
+    {
+      "id": "ctx-011-q14",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o1",
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 15,
+      "tags": [
+        "pipeline",
+        "diagnosis",
+        "hybrid-search",
+        "reranking"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A support assistant retrieves the dense top-5 chunks for the raw user message and packs them in score order. Its chunks are 1,500-token fixed-length windows with no headers, and there is no golden set. Users report off-topic answers, answers that miss facts the documentation clearly states, and failures on follow-up questions such as \"and for the second plan?\". Propose the changes in the order to make them, say which symptom each addresses and at which stage, and name the metric that shows each one helped.",
+      "kind": "design",
+      "answer_length": "half a page",
+      "solution": "1. **A golden set and the harness first** (section 6): questions with gold passages, recall@N, citation accuracy and answer correctness, so each change below is measured.\n2. **Missed facts: chunking, offline.** Replace the 1,500-token fixed windows with sentence-aware chunks near the series' starting default (400 to 600 tokens, overlap), and prepend a contextual header (title, section path, and optionally model-written context). Watch recall@N.\n3. **Follow-ups: query construction, online.** Rewrite the user turn with the last few turns into a self-contained query. Watch recall@N on the follow-up questions of the golden set.\n4. **Missed facts: hybrid candidates.** Add BM25 beside the dense ranking and fuse with RRF into a top-50 candidate set, so exact terms (plan names, codes) are found. Watch recall@50.\n5. **Off-topic answers: a reranker.** A cross-encoder scores the 50 candidates against the query and keeps the top-5. Watch precision@5 and answer correctness.\n6. **Pack with bookends and citation headers**, and add the \"say so\" rule to the system prompt. Watch citation accuracy.",
+      "rubric": [
+        {
+          "criterion": "Builds the golden set and harness before changing anything else, and says why",
+          "points": 2
+        },
+        {
+          "criterion": "Fixes chunking offline (sentence-aware, smaller, headers) for the missed facts",
+          "points": 2
+        },
+        {
+          "criterion": "Adds query rewriting from the conversation for the follow-up failures",
+          "points": 2
+        },
+        {
+          "criterion": "Adds hybrid retrieval with RRF and a cross-encoder reranker, each tied to the symptom it addresses",
+          "points": 2
+        },
+        {
+          "criterion": "Names a stage-appropriate metric for each change (recall@N for retrieval, precision@k or answer correctness for re-ranking, citation accuracy for packing)",
+          "points": 2
+        }
+      ],
+      "explanation": "Section 6 says to build the harness first, so every later change is measured. Sections 2 and 4 then supply the offline fixes (sentence-aware chunks, headers) and the online ones (query rewriting, hybrid retrieval with RRF, a reranker, bookend packing), each tied to its own stage's metric so a gain in one stage is not mistaken for a gain in another.",
+      "hints": [
+        "Start with whatever lets every later change be measured.",
+        "Match each symptom to the stage that would have prevented it: offline chunking, the query, the candidates, the reranker or the pack step."
+      ]
+    },
+    {
+      "id": "ctx-011-q15",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 12,
+      "tags": [
+        "when-not-rag",
+        "long-context",
+        "sql"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Decide, for each workload, whether to use RAG, to put the whole corpus in the prompt with prompt caching, or to query a database, and justify each choice: (1) a 120-page product handbook of about 60,000 tokens (an illustrative size) that changes once a quarter, asked many small questions a day; (2) 40,000 support articles, edited daily, with a requirement to cite the article behind every answer; (3) \"which enterprise customers in Germany renewed late last year?\" over the billing system.",
+      "connects": [
+        "ctx-025",
+        "ctx-005"
+      ],
+      "kind": "compare",
+      "answer_length": "half a page",
+      "solution": "1. **Whole handbook in the prompt, cached.** About 60,000 tokens is well under the 200,000-token line in Anthropic's contextual-retrieval page, below which the page says the whole knowledge base can go into the prompt. It changes once a quarter, so the prefix stays the same for months, and each question that arrives within the cache lifetime reads it at the cache-read price (post 05), with no retrieval stage to fail.\n2. **RAG.** 40,000 articles do not fit any window, and daily edits plus a citation requirement call for an index that is re-indexed by hash (post 10) and chunks that carry their source as a header for citation (sections 2 and 5).\n3. **A database query in SQL.** The answer is a filter over rows (customer type, country, renewal date); a vector index over text cannot guarantee completeness or exactness. Route the question to the billing database, as post 17's router does.",
+      "rubric": [
+        {
+          "criterion": "Puts the handbook in the prompt with caching and justifies it by size against the cited line and by its stability",
+          "points": 3
+        },
+        {
+          "criterion": "Chooses RAG for the article base and justifies it by size, freshness and citation",
+          "points": 3
+        },
+        {
+          "criterion": "Routes the customer question to a database query and explains why retrieval over text is the wrong tool",
+          "points": 2
+        },
+        {
+          "criterion": "Mentions routing between the three as the production pattern",
+          "points": 1
+        }
+      ],
+      "explanation": "Section 8 gives the three cases where RAG is the wrong tool and points to post 25 for the long-context decision and post 05 for the price of a cached prefix. The handbook falls below the line Anthropic's page draws, the article base does not and needs freshness and provenance, and the customer question is a table query.",
+      "hints": [
+        "Check each corpus against the size line section 8 quotes from Anthropic's page.",
+        "Ask whether the third question needs text at all, or rows and columns."
+      ]
+    },
+    {
+      "id": "ctx-011-q16",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 3,
+      "tags": [
+        "when-not-rag",
+        "caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An internal policy manual of about 150,000 tokens changes twice a year and is asked many unrelated small questions a day. A colleague argues for RAG \"because each question needs only a paragraph\". What is the better first design?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Put the whole manual in the prompt and cache it, since it is under the 200,000-token line and rarely changes.",
+          "correct": true,
+          "feedback": "Right. It fits under the line Anthropic's page draws, and a manual that rarely changes makes a prefix that stays cacheable."
+        },
+        {
+          "key": "b",
+          "text": "RAG with top-5 chunks, because a question that needs one paragraph should never be sent 150,000 tokens.",
+          "correct": false,
+          "feedback": "Question size is not the test. Under the size line, with a stable prefix cached, the whole manual is simpler and has no retrieval stage to fail."
+        },
+        {
+          "key": "c",
+          "text": "A SQL database, because the manual has a fixed structure.",
+          "correct": false,
+          "feedback": "A policy manual is prose, not rows and columns. A database query suits data that lives in tables."
+        },
+        {
+          "key": "d",
+          "text": "Fine-tune a model on the manual so no context is needed.",
+          "correct": false,
+          "feedback": "This series engineers the input to a fixed model; fine-tuning is out of its scope and is not one of section 8's options."
+        }
+      ],
+      "explanation": "Section 8 quotes Anthropic's line: a knowledge base smaller than 200,000 tokens (about 500 pages) can go into the prompt whole. A stable manual is also an ideal cached prefix: each question that arrives within the cache lifetime pays the cache-read price for it (post 05). RAG becomes the choice when the corpus outgrows the window, changes too often to cache, or needs per-passage citation.",
+      "hints": [
+        "Compare the manual's size with the line section 8 quotes.",
+        "Then ask how often the prompt prefix would change."
+      ]
+    },
+    {
+      "id": "ctx-011-q17",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2",
+        "o3"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "contextual-retrieval",
+        "chunking"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A chunk of a refunds policy reads \"Anything above that needs a manager's sign-off before money moves.\" A user asks \"Which refunds need approval?\" and BM25 ranks the chunk low. Which offline change most directly lets the query's words reach this chunk?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Prepend a contextual header such as \"[refunds-policy.md > Approval limits]\" to the chunk before indexing it.",
+          "correct": true,
+          "feedback": "Right. The header puts the topic words the chunk lacks into its indexed text."
+        },
+        {
+          "key": "b",
+          "text": "Double the overlap so that each chunk repeats more of the sentences around it.",
+          "correct": false,
+          "feedback": "Overlap repeats neighbouring sentences, which may not contain the topic words either; it does not target the missing context."
+        },
+        {
+          "key": "c",
+          "text": "Switch to a larger embedding model with more dimensions.",
+          "correct": false,
+          "feedback": "BM25 is lexical: an embedding model, of any size, does not change the words BM25 scores."
+        },
+        {
+          "key": "d",
+          "text": "Raise the candidate count from top-50 to top-200 so that the chunk makes the cut.",
+          "correct": false,
+          "feedback": "A larger top-N moves the cut-off, not the chunk's low BM25 score, and it sends more near-misses to the reranker."
+        }
+      ],
+      "explanation": "Section 2: the chunk lacks the words \"refunds\" and \"approval\" because its document title and section supply them. A contextual header (the document title and section path for free, or a model-written sentence) puts those words into the indexed text, which is what contextual retrieval does. More overlap repeats neighbouring sentences, which may or may not help; a bigger embedding model does not change what BM25 sees; and a larger top-N only moves the cut-off.",
+      "hints": [
+        "List the query words that the chunk's text lacks.",
+        "Where in the document do those words appear?"
+      ]
+    }
+  ]
+}

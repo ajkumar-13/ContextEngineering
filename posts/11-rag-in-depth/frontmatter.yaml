@@ -1,69 +1,25 @@
 id: ctx-011
 slug: 11-rag-in-depth
-title: "11 · RAG in Depth"
-
-description: >
-  Master production Retrieval-Augmented Generation (RAG) systems by
-  understanding offline indexing, online retrieval, hybrid search,
-  contextual retrieval, re-ranking, prompt packing, evaluation, and the
-  engineering practices that separate demo RAG systems from production-ready
-  applications.
-
-author: "Ajay"
-
+title: "11 - RAG in depth"
+summary: "Which offline and online choices separate a demo RAG system from a production one: chunking, contextual retrieval, hybrid search with reciprocal rank fusion, reranking, cited prompts and an evaluation harness."
 date: 2026-05-19
-last_modified: 2026-05-19
-
-tags:
-  - context-engineering
-  - rag
-  - retrieval
-  - hybrid-search
-  - reranking
-  - contextual-retrieval
-  - embeddings
-  - evaluation
-
-category: The Four Primitives
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part II - The WSCI operating system"
-chapter: "Part II — The Four Primitives (WSCI)"
-
-hero: diagrams/04-rag-pipeline.svg
-hero_alt: "Production Retrieval-Augmented Generation pipeline showing offline indexing and online retrieval"
-
-reading_time: 18
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - Retrieval-Augmented Generation
-  - RAG
-  - Production RAG
-  - Contextual Retrieval
-  - Hybrid Search
-  - BM25
-  - Dense Retrieval
-  - Reciprocal Rank Fusion
-  - RRF
-  - Cross Encoder
-  - Re-ranking
-  - Query Rewriting
-  - HyDE
-  - Chunking
-  - Embeddings
-  - Vector Database
-  - Prompt Packing
-  - Citation Grounding
-  - RAG Evaluation
-  - Recall@K
-  - LLM-as-a-Judge
-  - Offline Indexing
-  - Online Retrieval
-
-canonical_url: ""
-
-prev: ../10-data-ingestion-document-pipelines/
-next: ../12-compress-strategies/
+level: intermediate
+reading_time: 14
+tags: [context-engineering, rag, retrieval, chunking, contextual-retrieval, hybrid-search, reranking, evaluation]
+hero: diagrams/00-hero-rag-pipeline.svg
+prerequisites: [ctx-009, ctx-010]
+code: included
+outcomes:
+  - id: o1
+    text: "Walk through every stage of a production RAG pipeline, offline and online, and name what fails at each."
+  - id: o2
+    text: "Choose a splitter family, a chunk size and an overlap, and check that chunking keeps every fact whole."
+  - id: o3
+    text: "Apply contextual retrieval, hybrid search with reciprocal rank fusion, and cross-encoder reranking, and say what each fixes."
+  - id: o4
+    text: "Wire a minimum evaluation harness (golden set, recall@N, citation accuracy, answer correctness, regression gate) and read whether a change helped."
+  - id: o5
+    text: "Decide when RAG is the wrong tool: a corpus that fits the window, a task that needs all of it, or data in tables."
