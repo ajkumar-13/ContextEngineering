@@ -1,15 +1,189 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 460" role="img" aria-labelledby="t d">
-  <title id="t">The five failure modes, each with a first-line WSCI operation and a fallback</title>
-  <desc id="d">A hand-drawn table mapping the five context failure modes onto the four operations. Distraction is answered first by Select, lowering k and reranking so the noise never enters, and second by Compress. Confusion is answered by Select and one canonical rule, then by Isolate, one sub-agent per tool family. Conflict is answered by Compress, de-duplicating and stamping provenance, then by Select resolving the winner first. Lost in the middle is answered by Compress, shrinking so the answer sits near an end, then by Isolate. Tool-storm is answered by Select, trimming the catalogue, then by Isolate with a deterministic router. A caption observes that Compress is usually the first thing to reach for, because it also makes Select cheaper and Isolate possible.</desc>
-
-  <style><![CDATA[
-    :root{--ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;--ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;--ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;--ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-neutral-1:#EAEAE4;--ctx-neutral-2:#CFCFC8;--ctx-neutral-3:#8E8E88;--ctx-on-fill:#FFFDF9;--ctx-on-accent:#1A1A1A;}
-    @media (prefers-color-scheme:dark){:root{--ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;--ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;--ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;--ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-neutral-1:#1F2229;--ctx-neutral-2:#2C3038;--ctx-neutral-3:#6E6E68;--ctx-on-fill:#14161A;--ctx-on-accent:#1A1A1A;}}
-    .bg{fill:var(--ctx-bg);}
-    text{dominant-baseline:auto;}
-  ]]></style>
-
-  <rect class="bg" width="960" height="460"/>
-<text xml:space="preserve" x="40" y="38.24" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="22" fill="var(--ctx-ink)">Every first-fix is one of the four operations</text><text xml:space="preserve" x="40" y="61.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink-muted)">The five failure modes of Post 06, each with a first-line operation and a fallback.</text><text xml:space="preserve" x="40" y="94.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-subtle)">Failure mode (Post 06)</text><text xml:space="preserve" x="266" y="94.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-subtle)">First line</text><text xml:space="preserve" x="620" y="94.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-subtle)">Second line</text><text xml:space="preserve" x="40" y="129.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink)">Distraction</text><text xml:space="preserve" x="266" y="117.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-accent)">Select</text><text xml:space="preserve" x="266" y="136.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">lower k, rerank so noise never enters</text><text xml:space="preserve" x="620" y="117.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-warn)">Compress</text><text xml:space="preserve" x="620" y="136.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">shrink a distracting history</text><path d="M40.08 153.87C388.43 154.39 737.15 154.28 920.14 154.03M40.09 153.94C298.55 153.98 557.15 154.06 919.98 153.98" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="40" y="183.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink)">Confusion</text><text xml:space="preserve" x="266" y="171.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-accent)">Select</text><text xml:space="preserve" x="266" y="190.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">fewer, more distinct tools; one rule</text><text xml:space="preserve" x="620" y="171.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-success)">Isolate</text><text xml:space="preserve" x="620" y="190.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">one sub-agent per tool family</text><path d="M40.08 208.11C224.3 207.08 408.88 207.21 919.8 208.21M40 207.96C222.7 207.36 405.52 207.28 919.99 207.9" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="40" y="237.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink)">Conflict</text><text xml:space="preserve" x="266" y="225.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-warn)">Compress</text><text xml:space="preserve" x="266" y="244.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">de-duplicate; a rule with provenance</text><text xml:space="preserve" x="620" y="225.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-accent)">Select</text><text xml:space="preserve" x="620" y="244.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">resolve the winner first</text><path d="M40.08 261.88C236.66 262.09 433.1 261.98 919.93 261.9M39.92 261.98C322.85 263.07 605.65 263.05 920 262.05" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="40" y="291.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink)">Lost in the middle</text><text xml:space="preserve" x="266" y="279.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-warn)">Compress</text><text xml:space="preserve" x="266" y="298.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">shrink so the answer sits near an end</text><text xml:space="preserve" x="620" y="279.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-success)">Isolate</text><text xml:space="preserve" x="620" y="298.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">split so no window runs long</text><path d="M40.08 316.12C248.54 314.78 456.83 314.91 920.07 316.07M40.08 315.99C247 316.45 454.02 316.27 920.01 315.97" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="40" y="345.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink)">Tool-storm</text><text xml:space="preserve" x="266" y="333.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-accent)">Select</text><text xml:space="preserve" x="266" y="352.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">trim the tool catalogue to this turn</text><text xml:space="preserve" x="620" y="333.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-success)">Isolate</text><text xml:space="preserve" x="620" y="352.12" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="11" fill="var(--ctx-ink-muted)">a router pre-selects tools</text><text xml:space="preserve" x="40" y="407.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink-muted)">Read it the other way and a pattern falls out: in most over-stuffed production prompts the first thing to reach for is Compress.</text><text xml:space="preserve" x="40" y="427.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">Compress also makes Select cheaper and Isolate possible, which is the order Part II covers them in.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="ctx-03-wsci-vs-failures-title" aria-describedby="ctx-03-wsci-vs-failures-desc">
+<title id="ctx-03-wsci-vs-failures-title">Every fix is a select, a compress or an isolate</title>
+<desc id="ctx-03-wsci-vs-failures-desc">A grid with one row per failure mode of post 06 and one column per operation: write, select, compress, isolate. Each filled cell names the fix that performs that operation. Distraction: select, lower top-k, add a reranker. Confusion: select, explicit, motivated, exemplified rules. Conflict: select, provenance stamp, precedence rule; compress, deduplicate the candidates. Lost-in-the-middle: compress, summarise old history; isolate, split across sub-agents; select, dashed, bookend packing (the pack step). Tool-storm: select, trim the catalogue; isolate, cap the result size. The write column is empty: what is written acts later, when it is selected. A dashed cell touches select through bookend packing, the pack step of select.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-neutral-soft { fill: var(--ctx-neutral-soft); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+  .s-rule { stroke: var(--ctx-rule); }
+</style>
+<defs>
+<marker id="ctx-03-wsci-vs-failures-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="720"/>
+<text x="40" y="48" class="t-title" data-w="549">Every fix is a select, a compress or an isolate</text>
+<text x="40" y="76" class="t-subtitle" data-w="573">Post 06's five modes, with one of post 06's fixes under each operation it names.</text>
+<text x="40" y="132" class="t-head" data-w="106">Failure mode</text>
+<text x="320" y="132" text-anchor="middle" class="t-head" data-w="45">Write</text>
+<text x="488" y="132" text-anchor="middle" class="t-head" data-w="51">Select</text>
+<text x="664" y="132" text-anchor="middle" class="t-head" data-w="83">Compress</text>
+<text x="832" y="132" text-anchor="middle" class="t-head" data-w="55">Isolate</text>
+<text x="40" y="200" class="t-head" data-w="91">Distraction</text>
+<rect x="408" y="160" width="164" height="72" rx="6" class="f-neutral-soft" data-fit="skip"/>
+<rect x="408" y="160" width="164" height="72" rx="6" class="w1 nofill s-ink-muted" data-fit="skip"/>
+<text x="488" y="192" text-anchor="middle" class="t-label" data-w="80">lower top-k,</text>
+<text x="488" y="212" text-anchor="middle" class="t-label" data-w="98">add a reranker</text>
+<text x="40" y="288" class="t-head" data-w="84">Confusion</text>
+<rect x="408" y="248" width="164" height="72" rx="6" class="f-neutral-soft" data-fit="skip"/>
+<rect x="408" y="248" width="164" height="72" rx="6" class="w1 nofill s-ink-muted" data-fit="skip"/>
+<text x="488" y="280" text-anchor="middle" class="t-label" data-w="127">explicit, motivated,</text>
+<text x="488" y="300" text-anchor="middle" class="t-label" data-w="114">exemplified rules</text>
+<text x="40" y="376" class="t-head" data-w="65">Conflict</text>
+<rect x="408" y="336" width="164" height="72" rx="6" class="f-neutral-soft" data-fit="skip"/>
+<rect x="408" y="336" width="164" height="72" rx="6" class="w1 nofill s-ink-muted" data-fit="skip"/>
+<text x="488" y="368" text-anchor="middle" class="t-label" data-w="129">provenance stamp,</text>
+<text x="488" y="388" text-anchor="middle" class="t-label" data-w="108">precedence rule</text>
+<rect x="580" y="336" width="164" height="72" rx="6" class="f-neutral-soft" data-fit="skip"/>
+<rect x="580" y="336" width="164" height="72" rx="6" class="w1 nofill s-ink-muted" data-fit="skip"/>
+<text x="664" y="368" text-anchor="middle" class="t-label" data-w="104">deduplicate the</text>
+<text x="664" y="388" text-anchor="middle" class="t-label" data-w="74">candidates</text>
+<text x="40" y="464" class="t-head" data-w="154">Lost-in-the-middle</text>
+<rect x="580" y="424" width="164" height="72" rx="6" class="f-neutral-soft" data-fit="skip"/>
+<rect x="580" y="424" width="164" height="72" rx="6" class="w1 nofill s-ink-muted" data-fit="skip"/>
+<text x="664" y="456" text-anchor="middle" class="t-label" data-w="74">summarise</text>
+<text x="664" y="476" text-anchor="middle" class="t-label" data-w="71">old history</text>
+<rect x="752" y="424" width="164" height="72" rx="6" class="f-neutral-soft" data-fit="skip"/>
+<rect x="752" y="424" width="164" height="72" rx="6" class="w1 nofill s-ink-muted" data-fit="skip"/>
+<text x="832" y="456" text-anchor="middle" class="t-label" data-w="77">split across</text>
+<text x="832" y="476" text-anchor="middle" class="t-label" data-w="76">sub-agents</text>
+<rect x="408" y="424" width="164" height="72" rx="6" class="f-neutral-soft" data-fit="skip"/>
+<rect x="408" y="424" width="164" height="72" rx="6" class="w1 nofill s-rule d-lead" data-fit="skip"/>
+<text x="488" y="456" text-anchor="middle" class="t-label" data-w="115">bookend packing</text>
+<text x="488" y="476" text-anchor="middle" class="t-label" data-w="101">(the pack step)</text>
+<text x="40" y="552" class="t-head" data-w="91">Tool-storm</text>
+<rect x="408" y="512" width="164" height="72" rx="6" class="f-neutral-soft" data-fit="skip"/>
+<rect x="408" y="512" width="164" height="72" rx="6" class="w1 nofill s-ink-muted" data-fit="skip"/>
+<text x="488" y="544" text-anchor="middle" class="t-label" data-w="52">trim the</text>
+<text x="488" y="564" text-anchor="middle" class="t-label" data-w="67">catalogue</text>
+<rect x="752" y="512" width="164" height="72" rx="6" class="f-neutral-soft" data-fit="skip"/>
+<rect x="752" y="512" width="164" height="72" rx="6" class="w1 nofill s-ink-muted" data-fit="skip"/>
+<text x="832" y="544" text-anchor="middle" class="t-label" data-w="50">cap the</text>
+<text x="832" y="564" text-anchor="middle" class="t-label" data-w="69">result size</text>
+<text x="320" y="368" text-anchor="middle" class="t-note" data-w="66">in no row:</text>
+<text x="320" y="388" text-anchor="middle" class="t-note" data-w="133">acts later, via select</text>
+<rect x="40" y="616" width="48" height="24" rx="6" class="f-neutral-soft" data-fit="skip"/>
+<rect x="40" y="616" width="48" height="24" rx="6" class="w1 nofill s-rule d-lead" data-fit="skip"/>
+<text x="104" y="632" class="t-note" data-w="490">dashed: bookend packing, the first fix, is the pack step of select (post 06)</text>
+<text x="40" y="684" class="t-note" data-w="613">Select is in every row, four as post 06 states them: a tighter select is the first lever to check.</text>
 </svg>

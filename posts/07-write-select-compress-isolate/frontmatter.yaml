@@ -1,58 +1,25 @@
 id: ctx-007
 slug: 07-write-select-compress-isolate
-title: "07 · Write, Select, Compress, Isolate"
-
-description: >
-  Discover the WSCI framework—the four fundamental operations of context
-  engineering: Write, Select, Compress, and Isolate. Learn how every
-  production LLM technique maps to these primitives and how they solve
-  common context failure modes.
-
-author: "Ajay"
-
+title: "07 - Write, select, compress, isolate"
+summary: "Four operations act on a context window: write, select, compress and isolate. Two axes place them, and they map onto the six layers, the five failure modes and every event of an agent session."
 date: 2026-05-15
-last_modified: 2026-05-15
-
-tags:
-  - context-engineering
-  - wsci
-  - write
-  - select
-  - compress
-  - isolate
-  - ai-agents
-  - llm
-
-category: The Four Primitives
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part II - The WSCI operating system"
-chapter: "Part II — The Four Primitives (WSCI)"
-
+level: beginner
+reading_time: 15
+tags: [context-engineering, wsci, write, select, compress, isolate, agents]
 hero: diagrams/01-wsci-quadrants.svg
-hero_alt: "The WSCI framework showing the four primitive operations: Write, Select, Compress, and Isolate"
-
-reading_time: 10
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - WSCI
-  - Write
-  - Select
-  - Compress
-  - Isolate
-  - AI Agents
-  - Retrieval
-  - RAG
-  - Memory Systems
-  - Prompt Compression
-  - Multi-Agent Systems
-  - Context Window
-  - Agent Architecture
-
-canonical_url: ""
-
-prev: ../06-context-failure-modes/
-next: ../08-write-strategies/
+prerequisites: [ctx-002, ctx-006]
+code: none
+outcomes:
+  - id: o1
+    text: "Name the four operations of WSCI, place each on the two axes, and state the question each one answers."
+  - id: o2
+    text: "Classify a context-engineering technique as exactly one of write, select, compress or isolate."
+  - id: o3
+    text: "Map each of the six layers to the operations that act on it."
+  - id: o4
+    text: "Name the operation behind the first fix of each of the five failure modes."
+  - id: o5
+    text: "Annotate each event of an agent session as W, S, C or I."

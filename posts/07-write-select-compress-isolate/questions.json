@@ -1,0 +1,889 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-007",
+  "next_ordinal": 19,
+  "questions": [
+    {
+      "id": "ctx-007-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 1,
+      "tags": [
+        "axes",
+        "write"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "On the two axes of WSCI, one operation moves information out of the window and spans several windows. Which one?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Compress",
+          "correct": false,
+          "feedback": "Compress also takes information out, but it acts inside the one window the model reads next; it does not reach other windows."
+        },
+        {
+          "key": "b",
+          "text": "Write",
+          "correct": true,
+          "feedback": "Write parks information in a store outside the window, where a later call or session can read it: out of the window, across windows."
+        },
+        {
+          "key": "c",
+          "text": "Isolate",
+          "correct": false,
+          "feedback": "Isolate spans several windows, but its direction is into a window: it fills a fresh window with what a sub-task needs."
+        },
+        {
+          "key": "d",
+          "text": "Select",
+          "correct": false,
+          "feedback": "Select brings information into the one window of this call; it is the opposite cell on both axes."
+        }
+      ],
+      "explanation": "Section 1 places write at out of the window and several windows: the information leaves this window for a store that later windows read. Compress shares the direction, isolate shares the scope, select shares neither.",
+      "hints": [
+        "Ask where the information goes after it leaves the window."
+      ]
+    },
+    {
+      "id": "ctx-007-q02",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 3,
+      "tags": [
+        "questions",
+        "wsci"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each operation to the question it answers. One question on the right belongs to none of the four.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Write"
+        },
+        {
+          "key": "b",
+          "text": "Select"
+        },
+        {
+          "key": "c",
+          "text": "Compress"
+        },
+        {
+          "key": "d",
+          "text": "Isolate"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Of everything that could be included, what does the model need for this call?"
+        },
+        {
+          "key": "b",
+          "text": "Which layer of the window is most likely at fault for this symptom?"
+        },
+        {
+          "key": "c",
+          "text": "Can the task be done in pieces, each with its own clean window?"
+        },
+        {
+          "key": "d",
+          "text": "What should be kept, even though it cannot be paid for on every call?"
+        },
+        {
+          "key": "e",
+          "text": "What is the smallest form of what is already inside that still works?"
+        }
+      ],
+      "answer": {
+        "a": "d",
+        "b": "a",
+        "c": "e",
+        "d": "c"
+      },
+      "explanation": "Sections 2 to 5 open each operation with its question: write keeps what cannot ride on every call, select picks what this call needs, compress finds the smallest working form of what is inside, isolate splits the task into clean windows. The layer question is post 02's diagnostic, not an operation.",
+      "hints": [
+        "Two of the questions are about this one call; one of those is about content already in the window.",
+        "The question about a symptom and a layer comes from post 02."
+      ]
+    },
+    {
+      "id": "ctx-007-q03",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "5",
+      "est_minutes": 1,
+      "tags": [
+        "isolate",
+        "axes"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Which of the four operations puts information into a window but spans several windows, giving each sub-task a fresh window that holds only what it needs?",
+      "answer": {
+        "model": "Isolate.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|possibly|probably|i think|i guess|not sure|might be|could be|either)\\b)(?![\\s\\S]*\\b(not|never|isn't|isnt|no|nor)\\s+(a\\s+|an\\s+|the\\s+|just\\s+)?(isolat\\w*)\\b)(?![\\s\\S]*\\b(isolat\\w*)\\b\\s+(is\\s+)?(wrong|incorrect)\\b)\\W*((it is|it's|that's|that is|this is|the answer is|answer:|the operation is)\\s+)?(an?\\s+)?(isolat\\w*)\\b(?!\\s*(,|/|\\band\\b|\\bor\\b|\\+|&)?\\s*(a\\s+|an\\s+)?(writ\\w*|wrote|select\\w*|compress\\w*)\\b(?!\\s+(is|was)\\s+(just|only|merely|not)\\b))",
+          "^(?![\\s\\S]*\\b(maybe|perhaps|possibly|probably|i think|i guess|not sure|might be|could be|either)\\b)(?![\\s\\S]*\\b(not|never|isn't|isnt|no|nor)\\s+(a\\s+|an\\s+|the\\s+|just\\s+)?(isolat\\w*)\\b)(?![\\s\\S]*\\b(isolat\\w*)\\b\\s+(is\\s+)?(wrong|incorrect)\\b)(?![\\s\\S]*(?<!not )(?<!not a )(?<!not an )(?<!unlike )(?<!than )(?<!instead of )(?<!nor )\\b(writ\\w*|wrote|select\\w*|compress\\w*)\\b(?!\\s+(is|was)\\s+(just|only|merely|not)\\b))[\\s\\S]*([,:;.]|\\b(so|therefore|hence|thus|it is|it's|this is|that is|that's|the operation is|the answer is|making it|which makes it))\\s+(an?\\s+)?(isolat\\w*)(\\s+(event|operation))?\\W*$"
+        ]
+      },
+      "explanation": "Isolate is the cell at into a window and several windows (section 1): each sub-agent's window receives only what its sub-task needs, and only the result returns to the parent (section 5).",
+      "hints": [
+        "The operation behind sub-agents and sandboxes."
+      ]
+    },
+    {
+      "id": "ctx-007-q04",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "placement",
+        "compress",
+        "sub-agents"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A sub-agent reads turns 1 to 40 of a long conversation and returns a short brief that replaces those turns in the parent's history. Classified by its effect on the window the model reads next, which single operation is this event?",
+      "answer": {
+        "model": "Compress: the parent's history shrinks; the sub-agent is only the means of making the summary.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|possibly|probably|i think|i guess|not sure|might be|could be|either)\\b)(?![\\s\\S]*\\b(not|never|isn't|isnt|no|nor)\\s+(a\\s+|an\\s+|the\\s+|just\\s+)?(compress\\w*)\\b)(?![\\s\\S]*\\b(compress\\w*)\\b\\s+(is\\s+)?(wrong|incorrect)\\b)\\W*((it is|it's|that's|that is|this is|the answer is|answer:|the operation is)\\s+)?(an?\\s+)?(compress\\w*)\\b(?!\\s*(,|/|\\band\\b|\\bor\\b|\\+|&)?\\s*(a\\s+|an\\s+)?(writ\\w*|wrote|select\\w*|isolat\\w*)\\b(?!\\s+(is|was)\\s+(just|only|merely|not)\\b))",
+          "^(?![\\s\\S]*\\b(maybe|perhaps|possibly|probably|i think|i guess|not sure|might be|could be|either)\\b)(?![\\s\\S]*\\b(not|never|isn't|isnt|no|nor)\\s+(a\\s+|an\\s+|the\\s+|just\\s+)?(compress\\w*)\\b)(?![\\s\\S]*\\b(compress\\w*)\\b\\s+(is\\s+)?(wrong|incorrect)\\b)(?![\\s\\S]*(?<!not )(?<!not a )(?<!not an )(?<!unlike )(?<!than )(?<!instead of )(?<!nor )\\b(writ\\w*|wrote|select\\w*|isolat\\w*)\\b(?!\\s+(is|was)\\s+(just|only|merely|not)\\b))[\\s\\S]*([,:;.]|\\b(so|therefore|hence|thus|it is|it's|this is|that is|that's|the operation is|the answer is|making it|which makes it))\\s+(an?\\s+)?(compress\\w*)(\\s+(event|operation))?\\W*$"
+        ]
+      },
+      "explanation": "Section 6 classifies an event by what it does to the window the model reads next. The parent's layer 05 ends up smaller and holds a summary of what was there: that is compress. The sub-agent is how the summary is produced, not what happens to the window.",
+      "hints": [
+        "Ignore who does the work; look at the parent's window before and after.",
+        "Is information added, removed or shrunk, and in which window?"
+      ]
+    },
+    {
+      "id": "ctx-007-q05",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "placement",
+        "select",
+        "rules-file"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A team versions its rules in `AGENTS.md`. At the start of each session the host reads the file into the system prompt. Which operation is the loading step?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Write, because the rules live in a file",
+          "correct": false,
+          "feedback": "Authoring the file was the write. Loading it moves information into the window, which write never does."
+        },
+        {
+          "key": "b",
+          "text": "Select, because it pulls stored information into the window",
+          "correct": true,
+          "feedback": "Loading a stored rules file into this window is a select; Martin's essay lists it there too."
+        },
+        {
+          "key": "c",
+          "text": "Compress, because the file is shorter than the full documentation",
+          "correct": false,
+          "feedback": "Compress shrinks what is already in the window. The file was not in the window before it was loaded."
+        },
+        {
+          "key": "d",
+          "text": "None, because layer 01 is managed by no operation",
+          "correct": false,
+          "feedback": "Layer 01's main operation is write, and select and compress also act on it; it is layer 06 that no operation manages."
+        }
+      ],
+      "explanation": "Section 3 lists loading a rules file as a select, and section 6 splits the technique into two events: writing the file is write, loading it into the system prompt is select.",
+      "hints": [
+        "Writing and loading are two separate events; this question asks about one of them."
+      ]
+    },
+    {
+      "id": "ctx-007-q06",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "placement",
+        "compress"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Which of these events are compress? Select every one that is.",
+      "select": "multiple",
+      "options": [
+        {
+          "key": "a",
+          "text": "After the agent copies the two fields it needs, the body of a long tool result is dropped from the history.",
+          "correct": true,
+          "feedback": "Tool-result clearing removes tokens already in the window: compress."
+        },
+        {
+          "key": "b",
+          "text": "A test suite runs in a sandbox, and only the names of the failing tests ever reach the window.",
+          "correct": false,
+          "feedback": "Nothing was shrunk: the raw output was kept in another environment and only a summary returned, which is isolate."
+        },
+        {
+          "key": "c",
+          "text": "Only the last eight turns of the history are kept on each call.",
+          "correct": true,
+          "feedback": "Windowing drops older turns that were in the window: compress."
+        },
+        {
+          "key": "d",
+          "text": "The best chunk is packed first and the second best last.",
+          "correct": false,
+          "feedback": "Bookend packing is the packing step of select: it decides where chosen items enter, not how small they are."
+        },
+        {
+          "key": "e",
+          "text": "Top-k is lowered from 10 to 4 chunks.",
+          "correct": false,
+          "feedback": "Lowering top-k changes what enters the window: a tighter select. Nothing already inside is shrunk."
+        }
+      ],
+      "explanation": "Section 6 asks what an event does to the window the model reads next. Clearing a used tool result and windowing the history shrink what is already there (compress); a sandbox keeps output out (isolate); bookend packing and a lower top-k change what enters and where (select).",
+      "hints": [
+        "For each event ask whether the tokens were in the window before the event.",
+        "Two events never let the tokens in at all; they belong to other operations."
+      ]
+    },
+    {
+      "id": "ctx-007-q07",
+      "type": "match",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "layers",
+        "mapping"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each layer to its main operation in this post's mapping. An operation may be used more than once, and one may be used by none of these layers.",
+      "left": [
+        {
+          "key": "a",
+          "text": "01 System prompt"
+        },
+        {
+          "key": "b",
+          "text": "02 Tools and MCP descriptions"
+        },
+        {
+          "key": "c",
+          "text": "04 Retrieved chunks"
+        },
+        {
+          "key": "d",
+          "text": "05 Conversation history"
+        },
+        {
+          "key": "e",
+          "text": "06 User instruction"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Write"
+        },
+        {
+          "key": "b",
+          "text": "Select"
+        },
+        {
+          "key": "c",
+          "text": "Compress"
+        },
+        {
+          "key": "d",
+          "text": "Isolate"
+        },
+        {
+          "key": "e",
+          "text": "None: the trigger"
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "b",
+        "d": "c",
+        "e": "e"
+      },
+      "explanation": "Section 7: the system prompt is written once to a versioned file; tools and retrieved chunks are selected per turn; the growing history is compressed; the user instruction is the trigger, placed last and never compressed. Isolate is a secondary operation (layers 02 and 05), never a main one.",
+      "hints": [
+        "Think of each layer's lifetime class from post 02.",
+        "The growing tail is the layer that runs out of room first."
+      ]
+    },
+    {
+      "id": "ctx-007-q08",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 2,
+      "tags": [
+        "prompt-caching",
+        "tool-selection"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An application starts choosing a fresh tool list for every call. Answers improve, but the cost per call rises. What is the most likely reason?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Layer 02 is part of the stable prefix; a list that changes per call ends the cached prefix at the first change.",
+          "correct": true,
+          "feedback": "The tool list sits in the stable prefix, so changing it breaks the identical-prefix match the cache needs."
+        },
+        {
+          "key": "b",
+          "text": "Each selected tool costs an extra model call to choose it.",
+          "correct": false,
+          "feedback": "Choosing tools by retrieval need not call the model at all; the rise comes from the input that is no longer read from the cache."
+        },
+        {
+          "key": "c",
+          "text": "Fewer tools means the model writes longer answers.",
+          "correct": false,
+          "feedback": "Nothing about a smaller catalogue lengthens the output; the cost that changed is the input side."
+        },
+        {
+          "key": "d",
+          "text": "Selected tools move from layer 02 into layer 05.",
+          "correct": false,
+          "feedback": "Tool schemas stay in layer 02 whatever selects them; the history does not hold them."
+        }
+      ],
+      "explanation": "Section 7 notes the collision between an operation and a lifetime class: layer 02 belongs to the stable prefix (post 02), and a per-call selection changes it, so the cached part of the request ends at the first change. Selecting from a few fixed groups keeps the prefix stable.",
+      "hints": [
+        "Recall which lifetime class layer 02 belongs to, and what a prompt cache needs to match."
+      ]
+    },
+    {
+      "id": "ctx-007-q09",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 5,
+      "tags": [
+        "prompt-caching",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "The stable prefix of a request (layers 01 and 02) is 12,000 tokens (an illustrative size). Before a change it was read from the cache on every call; after the team starts selecting tools per call, it is billed at the full input rate on every call. Take a base input price of 3 US dollars per million tokens (the Claude Sonnet 4.5 rate post 01 quotes, as of early 2026) and a cache read at 0.1 times the base price, and ignore cache writes. How much more does the prefix cost per call, and per 1,000 calls?",
+      "answer": {
+        "parts": [
+          {
+            "label": "extra cost per call",
+            "value": 0.0324,
+            "tolerance": 0.0025,
+            "unit": "USD"
+          },
+          {
+            "label": "extra cost per 1,000 calls",
+            "value": 32.4,
+            "tolerance": 0.05,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "Full rate: 12,000 x 3 / 1,000,000 = 0.036 dollars; cache read: 0.1 x 0.036 = 0.0036 dollars; difference 0.0324 dollars per call (0.032, or 0.03 to the cent, is accepted), 32.40 dollars per 1,000 calls. The full price without subtracting the cache read (0.036 and 36) is rejected.",
+      "explanation": "The prefix used to cost $12{,}000 \\times 0.3 / 1{,}000{,}000 = 0.0036$ dollars per call at the cache-read price and now costs $0.036$ at the full price: $0.0324$ dollars more per call, $32.40$ per 1,000 calls. Section 7 traces the loss to selecting inside the stable prefix.",
+      "hints": [
+        "Price the prefix twice: at the full rate and at the cache-read rate.",
+        "The extra cost is the difference; then multiply by 1,000.",
+        "0.1 times 3 dollars is 0.30 dollars per million cached tokens."
+      ]
+    },
+    {
+      "id": "ctx-007-q10",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "8",
+      "est_minutes": 3,
+      "tags": [
+        "distraction",
+        "top-k",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Distraction's first fix lowers top-k. An application goes from 20 packed chunks to 5, each about 500 tokens (illustrative sizes). How many tokens leave layer 04 on every call, and how much does that save per 1,000 calls at 3 US dollars per million input tokens (the Claude Sonnet 4.5 rate post 01 quotes, as of early 2026)?",
+      "answer": {
+        "parts": [
+          {
+            "label": "tokens removed per call",
+            "value": 7500,
+            "tolerance": 0,
+            "unit": "tokens"
+          },
+          {
+            "label": "saving per 1,000 calls",
+            "value": 22.5,
+            "tolerance": 0.05,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "(20 - 5) x 500 = 7,500 tokens per call; 7,500 x 1,000 x 3 / 1,000,000 = 22.50 dollars. Pricing the 5 kept chunks instead of the 15 removed (2,500 tokens, 7.50 dollars) is the nearest wrong method and is rejected.",
+      "explanation": "Fifteen chunks of 500 tokens leave the window: $15 \\times 500 = 7{,}500$ tokens per call, or $7{,}500 \\times 1{,}000 \\times 3 / 1{,}000{,}000 = 22.50$ dollars per 1,000 calls. Section 8 files this fix under select: fewer, better chunks enter the window.",
+      "hints": [
+        "Count the chunks that no longer enter, not the ones that stay.",
+        "Multiply tokens per call by the number of calls, then by the price per token."
+      ]
+    },
+    {
+      "id": "ctx-007-q11",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 2,
+      "tags": [
+        "retrieval",
+        "layer-04",
+        "chain"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the steps that fill layer 04, retrieved chunks, in the order they happen, from the offline write to the per-turn select.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Rerank the candidates"
+        },
+        {
+          "key": "b",
+          "text": "Chunk the documents"
+        },
+        {
+          "key": "c",
+          "text": "Pack the top-k into the window"
+        },
+        {
+          "key": "d",
+          "text": "Index the vectors"
+        },
+        {
+          "key": "e",
+          "text": "Retrieve the top-N candidates for the question"
+        },
+        {
+          "key": "f",
+          "text": "Embed each chunk"
+        }
+      ],
+      "answer": [
+        "b",
+        "f",
+        "d",
+        "e",
+        "a",
+        "c"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 7: the offline write (chunk, embed, index) runs before any question arrives, and feeds the per-turn select (retrieve, rerank, pack). Layer 04 needs both, in that sequence.",
+      "hints": [
+        "Three steps happen before any question exists.",
+        "Packing is the last thing before the model reads the window."
+      ]
+    },
+    {
+      "id": "ctx-007-q12",
+      "type": "match",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "9",
+      "est_minutes": 5,
+      "tags": [
+        "annotation",
+        "agent-session"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A coding agent works on a bug. Annotate each event with its operation, classified by its effect on the window the model reads next. An operation may be used more than once.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Before starting, the agent saves its plan for the task to `plan.md`."
+        },
+        {
+          "key": "b",
+          "text": "It searches the repository and reads the three files that mention the failing function into its window."
+        },
+        {
+          "key": "c",
+          "text": "The test suite runs in a sandbox; only the names of the two failing tests come back."
+        },
+        {
+          "key": "d",
+          "text": "After 30 turns, the oldest 25 turns are replaced by a short summary."
+        },
+        {
+          "key": "e",
+          "text": "Once the needed line is copied, the body of a long log result is dropped from the history."
+        },
+        {
+          "key": "f",
+          "text": "At the end, the lesson \"run the linter before the tests\" is added to `AGENTS.md`."
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "W (write)"
+        },
+        {
+          "key": "b",
+          "text": "S (select)"
+        },
+        {
+          "key": "c",
+          "text": "C (compress)"
+        },
+        {
+          "key": "d",
+          "text": "I (isolate)"
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "d",
+        "d": "c",
+        "e": "c",
+        "f": "a"
+      },
+      "explanation": "As in the walk-through of section 9: saving a plan and adding a rule to a file are writes; reading files into the window is a select; a sandbox that returns only test names keeps the raw output in another environment, an isolate; replacing old turns with a summary and clearing a used tool result shrink what is already inside, so both are compress.",
+      "hints": [
+        "Two events shrink tokens that were already in the window.",
+        "The sandbox event never let the full output in at all."
+      ]
+    },
+    {
+      "id": "ctx-007-q13",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o1",
+        "o5"
+      ],
+      "section": "9",
+      "est_minutes": 8,
+      "tags": [
+        "annotation",
+        "axes"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Implement `annotate(events)`, which labels each event of a session W, S, C or I from the two axes of WSCI, as the docstring specifies. An event that does not land in one of the four cells must be refused.",
+      "kind": "implement",
+      "language": "python",
+      "starter": "def annotate(events):\n    \"\"\"Return the WSCI letter of each event, in order.\n\n    Each event is a dict with two keys:\n      \"direction\": \"into\" (information goes into a window) or \"out\" (it leaves the window)\n      \"scope\":     \"one\" (inside one window) or \"several\" (it spans several windows)\n    Return a list of letters \"W\", \"S\", \"C\" or \"I\". Raise ValueError on any other value.\n    \"\"\"\n    raise NotImplementedError\n",
+      "solution": "CELLS = {\n    (\"into\", \"one\"): \"S\",\n    (\"out\", \"one\"): \"C\",\n    (\"into\", \"several\"): \"I\",\n    (\"out\", \"several\"): \"W\",\n}\n\n\ndef annotate(events):\n    \"\"\"Return the WSCI letter of each event, in order.\n\n    Each event is a dict with two keys:\n      \"direction\": \"into\" (information goes into a window) or \"out\" (it leaves the window)\n      \"scope\":     \"one\" (inside one window) or \"several\" (it spans several windows)\n    Return a list of letters \"W\", \"S\", \"C\" or \"I\". Raise ValueError on any other value.\n    \"\"\"\n    letters = []\n    for event in events:\n        key = (event[\"direction\"], event[\"scope\"])\n        if key not in CELLS:\n            raise ValueError(f\"not a WSCI cell: {key}\")\n        letters.append(CELLS[key])\n    return letters\n",
+      "tests": "def ev(direction, scope):\n    return {\"direction\": direction, \"scope\": scope}\n\n# the four cells of section 1\nassert annotate([ev(\"into\", \"one\")]) == [\"S\"]\nassert annotate([ev(\"out\", \"one\")]) == [\"C\"]\nassert annotate([ev(\"into\", \"several\")]) == [\"I\"], annotate([ev(\"into\", \"several\")])\nassert annotate([ev(\"out\", \"several\")]) == [\"W\"], annotate([ev(\"out\", \"several\")])\n# the walk-through of section 9: three writes at setup, four selects, two compresses, a write, an isolate, a write\nsession = ([ev(\"out\", \"several\")] * 3 + [ev(\"into\", \"one\")] * 4 + [ev(\"out\", \"one\")] * 2\n           + [ev(\"out\", \"several\"), ev(\"into\", \"several\"), ev(\"out\", \"several\")])\nletters = annotate(session)\nassert \"\".join(letters) == \"WWWSSSSCCWIW\", letters\nassert {k: letters.count(k) for k in \"WSCI\"} == {\"W\": 5, \"S\": 4, \"C\": 2, \"I\": 1}\nassert annotate([]) == []\n# every event lands in exactly one cell: anything else is refused\nfor bad in (ev(\"sideways\", \"one\"), ev(\"into\", \"many\"), ev(\"Out\", \"one\")):\n    try:\n        annotate([bad])\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(f\"accepted {bad}\")\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 1 places the four operations on two axes: select is into one window, compress out of one window, isolate into several windows, write out to several. Section 9 annotates every event of a session with one letter; an event that fits no cell is an error, not a fifth operation.",
+      "hints": [
+        "Two answers to two yes-or-no questions name one cell; a lookup table keyed on both is enough.",
+        "Isolate and write share the scope several; direction separates them."
+      ]
+    },
+    {
+      "id": "ctx-007-q14",
+      "type": "code",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "8",
+      "est_minutes": 6,
+      "tags": [
+        "failure-modes",
+        "wsci"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Complete `mode_operations(mode)` so that it returns, for each of the five failure modes, the operations post 06's table names for it, as the docstring specifies.",
+      "kind": "complete",
+      "language": "python",
+      "starter": "def mode_operations(mode):\n    \"\"\"Return the WSCI operations post 06 names for a failure mode, in WSCI order.\n\n    mode: a failure mode name, in any letter case (\"Tool-storm\", \"tool-storm\").\n    Return a list drawn from \"write\", \"select\", \"compress\", \"isolate\".\n    Raise ValueError for a name that is not one of the five modes.\n    \"\"\"\n    raise NotImplementedError\n",
+      "solution": "ORDER = [\"write\", \"select\", \"compress\", \"isolate\"]\nOPERATIONS = {\n    \"distraction\": {\"select\"},\n    \"confusion\": {\"select\"},\n    \"conflict\": {\"select\", \"compress\"},\n    \"lost-in-the-middle\": {\"compress\", \"isolate\"},\n    \"tool-storm\": {\"select\", \"isolate\"},\n}\n\n\ndef mode_operations(mode):\n    \"\"\"Return the WSCI operations post 06 names for a failure mode, in WSCI order.\n\n    mode: a failure mode name, in any letter case (\"Tool-storm\", \"tool-storm\").\n    Return a list drawn from \"write\", \"select\", \"compress\", \"isolate\".\n    Raise ValueError for a name that is not one of the five modes.\n    \"\"\"\n    key = mode.strip().lower()\n    if key not in OPERATIONS:\n        raise ValueError(f\"not one of the five failure modes: {mode}\")\n    return [op for op in ORDER if op in OPERATIONS[key]]\n",
+      "tests": "assert mode_operations(\"Distraction\") == [\"select\"]\nassert mode_operations(\"confusion\") == [\"select\"]\nassert mode_operations(\"Conflict\") == [\"select\", \"compress\"], mode_operations(\"Conflict\")\nassert mode_operations(\"LOST-IN-THE-MIDDLE\") == [\"compress\", \"isolate\"], mode_operations(\"LOST-IN-THE-MIDDLE\")\nassert mode_operations(\"Tool-storm\") == [\"select\", \"isolate\"], mode_operations(\"Tool-storm\")\n# write is in no row of post 06's table\nassert all(\"write\" not in mode_operations(m) for m in\n           [\"distraction\", \"confusion\", \"conflict\", \"lost-in-the-middle\", \"tool-storm\"])\n# poisoning is a security term, not a sixth mode; neither is a misspelling\nfor bad in (\"poisoning\", \"memory poisoning\", \"lost in the middle\", \"toolstorm\"):\n    try:\n        mode_operations(bad)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(f\"accepted {bad}\")\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 8 reproduces post 06's pairs: distraction select; confusion select (of rules); conflict select and compress; lost-in-the-middle compress and isolate; tool-storm select and isolate. Write is in no row, and poisoning is a security term, not a sixth mode.",
+      "hints": [
+        "A dictionary from the lower-case mode name to a set of operations does most of the work.",
+        "Return the operations in WSCI order, and refuse any name that is not one of the five."
+      ]
+    },
+    {
+      "id": "ctx-007-q15",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2",
+        "o5"
+      ],
+      "section": "6",
+      "est_minutes": 10,
+      "tags": [
+        "placement",
+        "critique",
+        "retrieval"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A design document labels one step of a RAG pipeline \"select + compress\": the retriever fetches 20 chunks, and a small model summarises them into one 500-token passage, which is packed into the window. Critique the label under this post's placement rule, and annotate the step correctly.",
+      "kind": "critique",
+      "solution": "1. **The rule.** Every technique sits in exactly one cell, and an event is classified by what it does to the window the model reads next (section 6). A label with two operations means the step is really two events.\n2. **Split the step.** Event one: the retriever chooses which 20 chunks are candidates for this call, a select (layer 04). Event two: the small model replaces those chunks by a 500-token passage, so the window holds a shorter form of the same content, a compress. In WSCI order the annotation is S, then C.\n3. **Why it matters.** Each event gets its own checks. The select is measured by recall@N and precision@k; the compress by how many key facts survive (post 12's information retention ratio). Under one label, a fall in answer quality cannot be traced to the step that caused it.\n4. **Optional nuance.** If the summary is made by a sub-agent, it is still a compress: the sub-agent is the means, not the effect on the window.",
+      "answer_length": "one paragraph",
+      "rubric": [
+        {
+          "criterion": "States the rule: one event, one operation, classified by its effect on the window",
+          "points": 2
+        },
+        {
+          "criterion": "Splits the step into a select (choosing the chunks) and a compress (shrinking them)",
+          "points": 2
+        },
+        {
+          "criterion": "Annotates the two events in order, S then C",
+          "points": 1
+        },
+        {
+          "criterion": "Explains what the split buys: separate checks for retrieval and for retention",
+          "points": 1
+        }
+      ],
+      "explanation": "Section 6 gives the placement rule and its consequence: a technique that seems to need two operations is two events. Here selecting chunks and shrinking them are separate events with separate measures.",
+      "hints": [
+        "Ask how many different things happen to the window in this step.",
+        "Name the measure each event would be checked with."
+      ]
+    },
+    {
+      "id": "ctx-007-q16",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o4",
+        "o3"
+      ],
+      "section": "8",
+      "est_minutes": 12,
+      "tags": [
+        "conflict",
+        "write",
+        "provenance"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In post 06's table, conflict is fixed by select and compress, and write appears in no row. Using the six layers of post 02, explain where write nevertheless decides whether conflict's first fix can work, and design the write step it needs.",
+      "kind": "connect",
+      "connects": [
+        "ctx-006",
+        "ctx-002"
+      ],
+      "solution": "1. **The fix and its operations.** Conflict's first fix is a provenance and recency stamp on every memory and retrieved chunk, with a precedence rule in the system prompt and deduplication of the candidates (post 06). The precedence rule picks the winner when the candidates are selected; deduplication shrinks the candidate set; hence select and compress.\n2. **Where write decides it.** The stamp has to exist before any select can use it, and it can only be added when the item is written: when a fact is stored in layer 03, memory and state, and when a document is chunked and indexed for layer 04, retrieved chunks. A store written without source and date gives the select step nothing to rank by.\n3. **The write step.** Every memory row and every chunk carries its source, the date it was written or last confirmed, and a confidence or authority field; an update supersedes rather than duplicates. Layer 01, the system prompt, states the precedence rule that reads those fields.\n4. **So.** Write prevents the failure and select fixes it at read time: the table lists the operations that act when the failure is visible, while the stamp is laid down earlier.",
+      "answer_length": "half a page",
+      "rubric": [
+        {
+          "criterion": "Names conflict's first fix and why it is select and compress",
+          "points": 1
+        },
+        {
+          "criterion": "Places the stamp at write time in layers 03 and 04",
+          "points": 2
+        },
+        {
+          "criterion": "Specifies the fields the write must carry (source, date, authority) and how updates are handled",
+          "points": 2
+        },
+        {
+          "criterion": "Connects the precedence rule in layer 01 to the stamped fields",
+          "points": 1
+        },
+        {
+          "criterion": "States the distinction: write prevents, select fixes when the failure shows",
+          "points": 1
+        }
+      ],
+      "explanation": "Post 06 (`ctx-006`) gives conflict's first fix; post 02 (`ctx-002`) places memory in layer 03, retrieved chunks in layer 04 and rules in layer 01. Section 8 of this post notes that write appears in no row because what is written acts only later, when it is selected.",
+      "hints": [
+        "Ask when the source and date of a memory can first be recorded.",
+        "List the layers the stamped items live in, and the layer that holds the rule."
+      ]
+    },
+    {
+      "id": "ctx-007-q17",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "8",
+      "est_minutes": 3,
+      "tags": [
+        "lost-in-the-middle",
+        "diagnosis"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In a 90-turn session, a fact stated in turn 3 is still in the history, but answers ignore it. Retrieved chunks are already bookended. By post 06's table, which operations come next?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Write: store more of the conversation in a memory store",
+          "correct": false,
+          "feedback": "Write appears in no row of post 06's table; storing the fact does not move it out of the middle of this window."
+        },
+        {
+          "key": "b",
+          "text": "Select: raise top-k so the fact is retrieved again",
+          "correct": false,
+          "feedback": "More retrieval lengthens the window and pushes the old turn further into the middle; packing has already been tried."
+        },
+        {
+          "key": "c",
+          "text": "Compress and isolate: summarise old history, or split the work across sub-agents",
+          "correct": true,
+          "feedback": "These are lost-in-the-middle's operations once bookend packing no longer rescues the middle."
+        },
+        {
+          "key": "d",
+          "text": "None: move to a model with a larger window",
+          "correct": false,
+          "feedback": "A larger window holds more middle; post 06's fixes work on the window without a model change."
+        }
+      ],
+      "explanation": "Section 8: lost-in-the-middle's operations are compress and isolate, and it touches select only through bookend packing, which is already in place here. Summarising old history brings the fact into a short brief; splitting the work keeps each window short.",
+      "hints": [
+        "Which fix of this mode has already been applied, and which operation was it?",
+        "What remains when packing no longer rescues the middle?"
+      ]
+    },
+    {
+      "id": "ctx-007-q18",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "5",
+      "est_minutes": 2,
+      "tags": [
+        "isolate",
+        "contracts"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Which of these sub-tasks is the best candidate for isolate?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Help the main agent think through the design",
+          "correct": false,
+          "feedback": "There is no output the orchestrator can integrate, so the sub-task has no clean output contract."
+        },
+        {
+          "key": "b",
+          "text": "Find the three most relevant papers on a topic and return their titles and links",
+          "correct": true,
+          "feedback": "It needs only a topic and returns a short, structured list: a clean input and a clean output contract."
+        },
+        {
+          "key": "c",
+          "text": "Continue the user's conversation in a fresh window",
+          "correct": false,
+          "feedback": "The conversation history is exactly the input the sub-task would need; isolating it throws the context away."
+        },
+        {
+          "key": "d",
+          "text": "Answer the user's question, since the main window is getting long",
+          "correct": false,
+          "feedback": "A long window is compress's cue; handing the whole task to another window just moves the problem."
+        }
+      ],
+      "explanation": "Section 5's rule: isolate when the sub-task has a clean input contract and a clean output contract. A search that takes a topic and returns three titles and links has both; open-ended help, the conversation itself and the whole task do not.",
+      "hints": [
+        "For each option, ask what the sub-agent needs to start and what it hands back.",
+        "The orchestrator must be able to fold the returned output into its own window without the transcript."
+      ]
+    }
+  ]
+}
