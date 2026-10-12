@@ -1,0 +1,807 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-012",
+  "next_ordinal": 18,
+  "questions": [
+    {
+      "id": "ctx-012-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "windowing",
+        "retention"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An assistant keeps only the last eight turns of its conversation history and drops the rest. Which statement describes what it retains?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Everything inside the eight turns and nothing older, however important the older turn was.",
+          "correct": true,
+          "feedback": "Right. Windowing's retention is bimodal: complete inside the window, zero outside it, which is why pinned turns are added."
+        },
+        {
+          "key": "b",
+          "text": "The most important facts from older turns, because the model remembers them from earlier calls.",
+          "correct": false,
+          "feedback": "The model keeps no memory between calls; what is dropped from the window is gone unless something else writes it down."
+        },
+        {
+          "key": "c",
+          "text": "A short summary of the older turns, written when they leave the window.",
+          "correct": false,
+          "feedback": "That is summarisation. Windowing writes nothing; it only drops the older turns."
+        },
+        {
+          "key": "d",
+          "text": "The older turns in shortened form, with low-information words removed.",
+          "correct": false,
+          "feedback": "That describes token-level compression such as LLMLingua, a different technique that keeps every turn in shorter form."
+        }
+      ],
+      "explanation": "Windowing drops everything older than the last N turns or M tokens. What is inside the window survives verbatim and what is outside is lost, so a fact stated twelve turns ago disappears from an eight-turn window.",
+      "hints": [
+        "Ask what happens to a turn on the day it slides out of the window."
+      ]
+    },
+    {
+      "id": "ctx-012-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "8",
+      "est_minutes": 2,
+      "tags": [
+        "claude-code",
+        "compact",
+        "clear"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Midway through a long refactor in Claude Code, the conversation has grown large, but the work on the same refactor must go on with its decisions intact. Which command fits?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "`/clear`, because it frees the most space at once.",
+          "correct": false,
+          "feedback": "It does free everything, by starting a new conversation with empty context; the refactor's decisions in the conversation would be lost with it."
+        },
+        {
+          "key": "b",
+          "text": "`/compact`, with focus instructions if some part of the work matters most.",
+          "correct": true,
+          "feedback": "Right. `/compact` summarises the conversation so far and keeps going; optional instructions steer what the summary keeps."
+        },
+        {
+          "key": "c",
+          "text": "`/context`, because it removes the tool outputs the conversation no longer needs.",
+          "correct": false,
+          "feedback": "`/context` shows what is using the window and suggests optimisations; it does not remove anything."
+        },
+        {
+          "key": "d",
+          "text": "None: Claude Code never compacts on its own, so the session has to be restarted.",
+          "correct": false,
+          "feedback": "Claude Code compacts automatically as the window approaches its limit, clearing older tool outputs and then summarising."
+        }
+      ],
+      "explanation": "Anthropic's Claude Code documentation (consulted 12 October 2026) describes `/compact [instructions]` as summarising the conversation so far to free context, and `/clear` as starting a new conversation with empty context. Keeping the thread but shrinking it is `/compact`.",
+      "hints": [
+        "One command keeps the thread, the other ends it.",
+        "Decide whether the decisions of the conversation so far must survive."
+      ]
+    },
+    {
+      "id": "ctx-012-q03",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "tool-result-clearing",
+        "safety"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent's history holds four tool results that it has already read. Which one should not be cleared to a one-line note, but summarised so the record survives?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A web search that returned twenty snippets, two of which were fetched.",
+          "correct": false,
+          "feedback": "A search is cheap and can be issued again; once the two URLs were chosen, the snippets are safe to clear."
+        },
+        {
+          "key": "b",
+          "text": "A read of a configuration file that has not changed since.",
+          "correct": false,
+          "feedback": "Reading an unchanged file is deterministic and cheap to repeat, which is the case clearing is made for."
+        },
+        {
+          "key": "c",
+          "text": "The confirmation returned by a call that charged the customer's card.",
+          "correct": true,
+          "feedback": "Right. A payment is stateful and must not be repeated; if its result is cleared, the agent may not know whether the charge happened and call again."
+        },
+        {
+          "key": "d",
+          "text": "A lookup of an order's shipping status that was used in the last answer.",
+          "correct": false,
+          "feedback": "A status lookup can be repeated at little cost; if a later turn needs it, the call is issued again."
+        }
+      ],
+      "explanation": "Clearing is safe for results that are deterministic and cheap to fetch again. A call with side effects, such as a payment or a write, is summarised instead, so the agent keeps the record of what happened.",
+      "hints": [
+        "Ask which of the four calls could be issued a second time without harm.",
+        "Look for the call with a side effect."
+      ]
+    },
+    {
+      "id": "ctx-012-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "10",
+      "est_minutes": 3,
+      "tags": [
+        "irr",
+        "measurement"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "On the same replay set, two windowing policies each remove about 56 percent of the history's tokens. One keeps 12 of 22 key facts and the other 20 of 22. What does this show?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Token reduction alone cannot rank compression policies; the retained facts have to be measured too.",
+          "correct": true,
+          "feedback": "Right. The same reduction hid an IRR of 55 percent against 91 percent; the difference is which entries were kept, not how many tokens."
+        },
+        {
+          "key": "b",
+          "text": "The difference must be noise, because policies with the same reduction keep the same facts.",
+          "correct": false,
+          "feedback": "Equal reductions say nothing about which entries survive; pinning the first turn and the decisions kept eight more facts at the same size."
+        },
+        {
+          "key": "c",
+          "text": "The policy with fewer facts kept is better, because it is more aggressive.",
+          "correct": false,
+          "feedback": "Both remove the same share of tokens, so neither is more aggressive; one simply loses more of what the next turns need."
+        },
+        {
+          "key": "d",
+          "text": "The replay set is too small to say anything, so token reduction should be used instead.",
+          "correct": false,
+          "feedback": "A small replay set is still the measurement that catches lost facts; token reduction cannot see them at any size."
+        }
+      ],
+      "explanation": "Section 10's toy replay set shows plain windowing and pinned windowing at 56.6 and 56.0 percent reduction with IRRs of 55 and 91 percent. The reduction column cannot rank them; the IRR column can.",
+      "hints": [
+        "Compare what the two numbers measure."
+      ]
+    },
+    {
+      "id": "ctx-012-q05",
+      "type": "mcq",
+      "track": "connect",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "11",
+      "est_minutes": 4,
+      "tags": [
+        "failure-modes",
+        "lost-in-the-middle"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "connects": [
+        "ctx-006"
+      ],
+      "prompt": "Users of a long-running assistant report that it ignores an instruction they gave forty turns ago, although the instruction is still in the window. The history is 60,000 tokens and the turn sits near its middle. Which failure mode and which compress technique fit first?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Lost-in-the-middle; summarise the older turns into a brief near the start and keep the recent turns verbatim.",
+          "correct": true,
+          "feedback": "Right. The content is present but sits deep in a long input; post 06 pairs this mode with compress and isolate, and the summary moves the instruction out of the middle."
+        },
+        {
+          "key": "b",
+          "text": "Distraction; lower top-k on the retrieved chunks.",
+          "correct": false,
+          "feedback": "Lowering top-k tightens layer 04, retrieved chunks; the instruction here sits in layer 05, conversation history, and nothing in the report points to off-topic retrieval."
+        },
+        {
+          "key": "c",
+          "text": "Tool-storm; clear the tool results.",
+          "correct": false,
+          "feedback": "Tool-storm is runaway tool calls; nothing in the report describes repeated calls, and clearing tool results does not move the instruction."
+        },
+        {
+          "key": "d",
+          "text": "Conflict; delete the older copy of the instruction.",
+          "correct": false,
+          "feedback": "Conflict needs two parts of the window that disagree; here one instruction is present and simply used poorly."
+        }
+      ],
+      "explanation": "Post 06 defines lost-in-the-middle as content that is in the window but sits where the model uses it poorly, with summarising old history among its first fixes. Section 11 maps a long history with the key turns in the middle to summarisation.",
+      "hints": [
+        "The instruction is still present; ask why it is used poorly.",
+        "Look up which failure mode post 06 ties to position in a long input."
+      ]
+    },
+    {
+      "id": "ctx-012-q06",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "token-compression",
+        "prompt-caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "connects": [
+        "ctx-005"
+      ],
+      "prompt": "A team runs an LLMLingua-style compressor over its 6,000-token system prompt on every call. The prompt sent is now shorter, yet the input bill rose. What is the most likely cause?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The compressed prefix differs slightly from call to call, so it never matches the cached prefix and the cache-read discount is lost.",
+          "correct": true,
+          "feedback": "Right. A cache hit needs an identical prefix; rewriting it on every call turns every read into a full-price send, often a write as well."
+        },
+        {
+          "key": "b",
+          "text": "Compressed prompts are billed per character rather than per token.",
+          "correct": false,
+          "feedback": "Providers bill tokens whatever the text looks like; the change in the bill comes from caching, not from the billing unit."
+        },
+        {
+          "key": "c",
+          "text": "LLMLingua adds tokens, because it rewrites the prompt into longer, more explicit sentences.",
+          "correct": false,
+          "feedback": "LLMLingua deletes low-information tokens; the prompt really did get shorter."
+        },
+        {
+          "key": "d",
+          "text": "The system prompt is layer 06, which is never cached.",
+          "correct": false,
+          "feedback": "The system prompt is layer 01, part of the stable prefix that caches; layer 06 is the user instruction."
+        }
+      ],
+      "explanation": "Section 7: token-level compression interacts badly with prompt caching. A prefix rewritten on every call never matches the cached one (post 05, section 4), so the stable part is compressed once, reviewed, and then cached as it is.",
+      "hints": [
+        "Ask what a cache hit requires of the prefix.",
+        "Compare the prefix of two consecutive calls."
+      ]
+    },
+    {
+      "id": "ctx-012-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "10",
+      "est_minutes": 4,
+      "tags": [
+        "irr",
+        "arithmetic"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A new summary prompt is run over a replay set of conversations that list 40 key facts in total; 31 of them are still in the compressed histories. The histories shrink from 24,000 tokens to 3,600 tokens. Give the information retention ratio and the token reduction, both in percent.",
+      "answer": {
+        "parts": [
+          {
+            "label": "information retention ratio",
+            "value": 77.5,
+            "tolerance": 0.5,
+            "unit": "%"
+          },
+          {
+            "label": "token reduction",
+            "value": 85.0,
+            "tolerance": 0.1,
+            "unit": "%"
+          }
+        ]
+      },
+      "precision_note": "IRR = 31 / 40 = 0.775, 77.5 percent; reduction = 1 - 3,600 / 24,000 = 0.85, 85 percent. The nearest wrong methods give 22.5 (the share of facts lost) and 15 (the share of tokens kept).",
+      "explanation": "Section 10: the IRR is the fraction of listed key facts that survive the pass, reported beside the token reduction, which is one minus the ratio of tokens after to tokens before.",
+      "hints": [
+        "The IRR counts facts kept over facts listed.",
+        "The reduction is the share of tokens removed, not the share kept."
+      ]
+    },
+    {
+      "id": "ctx-012-q08",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "9",
+      "est_minutes": 5,
+      "tags": [
+        "triggers",
+        "budget",
+        "arithmetic"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent runs on a 200,000-token window and reserves 20,000 tokens for the answer through `max_tokens`. Its policy uses the 80 percent soft trigger and the 60 percent soft target, measured against the input budget. The input has just reached 150,000 tokens. At how many input tokens does the soft trigger fire, and how many tokens must the soft pass remove to reach its target?",
+      "answer": {
+        "parts": [
+          {
+            "label": "soft trigger",
+            "value": 144000,
+            "tolerance": 0,
+            "unit": "tokens"
+          },
+          {
+            "label": "tokens to remove",
+            "value": 42000,
+            "tolerance": 0,
+            "unit": "tokens"
+          }
+        ]
+      },
+      "precision_note": "Budget = 200,000 - 20,000 = 180,000; trigger = 0.80 x 180,000 = 144,000; target = 0.60 x 180,000 = 108,000; to remove = 150,000 - 108,000 = 42,000. Measuring against the whole window instead gives 160,000 and 30,000, the nearest wrong method.",
+      "explanation": "Section 9: the triggers are measured against the input budget, the window minus the output reserve. The soft pass clears stale tool results until the input is under the target.",
+      "hints": [
+        "First find the input budget.",
+        "The trigger and the target are both shares of that budget."
+      ]
+    },
+    {
+      "id": "ctx-012-q09",
+      "type": "numeric",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "9",
+      "est_minutes": 8,
+      "tags": [
+        "simulation",
+        "triggers",
+        "python"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In `posts/12-compress-strategies/snippets/compaction_policy.py`, change `MESSAGES = 1_400` to `MESSAGES = 2_000` (a chattier session) and run it again from the series root. How many summaries does the summarise-only policy make in the 110 turns, and at which turn does the two-trigger policy make its first summary?",
+      "stimulus": {
+        "kind": "code",
+        "language": "text",
+        "content": "uv run python posts/12-compress-strategies/snippets/compaction_policy.py"
+      },
+      "answer": {
+        "parts": [
+          {
+            "label": "summaries, summarise-only",
+            "value": 4,
+            "tolerance": 0,
+            "unit": ""
+          },
+          {
+            "label": "first summary, two-trigger (turn)",
+            "value": 71,
+            "tolerance": 0,
+            "unit": ""
+          }
+        ]
+      },
+      "precision_note": "Printed by the snippet with MESSAGES = 2_000: summarise-only summarises at turns [27, 51, 75, 98]; two-trigger summarises at turn [71]. With the shipped value, 1_400, the answers are 4 and 98, the nearest wrong reading.",
+      "explanation": "Section 9: messages are what clearing cannot remove, so a chattier session reaches the hard trigger sooner under the two-trigger policy (turn 71 instead of 98), while the summarise-only policy still summarises four times in 110 turns, at turns 27, 51, 75 and 98.",
+      "hints": [
+        "Edit only the one constant and rerun the script.",
+        "Read the summaries column of the two policy lines."
+      ]
+    },
+    {
+      "id": "ctx-012-q10",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "claude-code",
+        "tool-result-clearing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "According to Anthropic's Claude Code documentation, when the context window fills up, what does Claude Code do first, before it summarises the conversation?",
+      "answer": {
+        "model": "It clears older tool outputs first, and only then summarises the conversation if that is still needed.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(keep|keeps|keeping|kept|preserv\\w*|retain\\w*)\\b[\\s\\S]{0,15}\\btool)(?![\\s\\S]*\\btool\\w*[\\s-]*(call\\s+)?(outputs?|results?)\\s+(are\\s+|get\\s+|stay\\s+)?(kept|preserved|retained|untouched)\\b)(?![\\s\\S]*\\b(clear|drop|remov|delet|discard|prun|trim)\\w*\\s+(the\\s+|all\\s+)?(old\\w*\\s+|earl\\w*\\s+|stale\\s+)?(user|messages?|conversation|history|system|turns?|chat)\\b)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might|could be)\\b)(?![\\s\\S]*\\b(not|never|doesn'?t|does not|won'?t|without|no longer)\\b[\\s\\S]{0,30}\\b(clear|drop|remov|delet|discard|prun|trim)\\w*)(?![\\s\\S]*\\bsummar\\w*[\\s\\S]*\\b(then|before|first)\\b[\\s\\S]*\\b(clear|drop|remov|delet|discard|prun|trim)\\w*)(?![\\s\\S]*\\bafter\\s+(it\\s+|the\\s+|having\\s+)?summar)(?=[\\s\\S]*(\\b(clear|drop|remov|delet|discard|prun|trim|evict|strip)\\w*\\b[\\s\\S]{0,40}\\btool\\w*[\\s-]*(call\\s+)?(outputs?|results?|responses?|bodies|body|payloads?)|\\btool\\w*[\\s-]*(call\\s+)?(outputs?|results?|responses?|bodies|body|payloads?)\\b[\\s\\S]{0,30}\\b(cleared|dropped|removed|deleted|discarded|pruned|trimmed|evicted|stripped)|\\btool[\\s-]*results?[\\s-]*clearing|\\btool\\w*[\\s-]*(call\\s+)?(outputs?|results?)\\b[\\s\\S]{0,60}\\b(clears?|drops?|removes?|deletes?|discards?|prunes?|trims?)\\s+(the\\s+)?(old|older|stale|earlier)\\s+ones\\b))[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 4 quotes \"How Claude Code works\" (consulted 12 October 2026): Claude Code clears older tool outputs first, then summarises the conversation if needed. That is tool-result clearing before summarisation, the order of the two-trigger policy.",
+      "hints": [
+        "The documentation's first step needs no model call and leaves the user's requests in place."
+      ]
+    },
+    {
+      "id": "ctx-012-q11",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "10",
+      "est_minutes": 3,
+      "tags": [
+        "irr",
+        "gate"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A new summary prompt cuts the conversation history by 90 percent on average. Before it ships, what must be measured alongside that reduction, and on what?",
+      "answer": {
+        "model": "The information retention ratio, the share of listed key facts that still survive the compression, measured on a replay set of real conversations.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|no need|nothing else|not needed)\\b)(?=[\\s\\S]*(\\birr\\b|\\bretention\\b|\\bretain\\w*|\\b(key\\s+)?facts?\\b[\\s\\S]{0,40}\\b(survive\\w*|kept|keep|retained|remain\\w*|preserved|still (there|present|answerable))|\\bhow many (of the )?(key )?facts|\\bfacts? (that )?(were |are )?(lost|dropped)))(?=[\\s\\S]*(\\breplay\\w*|\\b(recorded|real|past|logged|production|held[- ]out|saved)\\s+(conversations?|sessions?|transcripts?|traffic)|\\b(eval\\w*|test|golden|regression|fixed)\\s+(set|suite)|\\bset of (real |recorded |past )?(conversations?|sessions?|transcripts?)))(?=[\\s\\S]*\\b(on|over|across|against|with|using|in|of|from|by|measured|measure|run|compute\\w*)\\b)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 10: a replay set of conversations with their key facts listed shows what a compression pass loses; the IRR goes beside the token reduction, and a drop beyond the measurement's noise blocks the merge.",
+      "hints": [
+        "The reduction counts tokens; something else must count facts.",
+        "Name the set of conversations the check runs over."
+      ]
+    },
+    {
+      "id": "ctx-012-q12",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "9",
+      "est_minutes": 3,
+      "tags": [
+        "triggers",
+        "policy"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the events of the two-trigger policy in the order they happen as a long session's input grows.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Older turns are summarised; the most recent turns stay verbatim."
+        },
+        {
+          "key": "b",
+          "text": "The input crosses 80 percent of the budget."
+        },
+        {
+          "key": "c",
+          "text": "The input crosses 95 percent of the budget."
+        },
+        {
+          "key": "d",
+          "text": "Stale tool results are cleared to notes, oldest first."
+        },
+        {
+          "key": "e",
+          "text": "Clearing stops once the input is under 60 percent."
+        }
+      ],
+      "answer": [
+        "b",
+        "d",
+        "e",
+        "c",
+        "a"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 9: the soft trigger at 80 percent runs the cheap pass, clearing tool results oldest first until the input is under 60 percent; only when the input later crosses 95 percent does the hard trigger summarise the older turns.",
+      "hints": [
+        "The cheap pass comes first and has its own stopping point."
+      ]
+    },
+    {
+      "id": "ctx-012-q13",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "10",
+      "est_minutes": 4,
+      "tags": [
+        "techniques"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each compress technique to what it removes from the window.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Windowing"
+        },
+        {
+          "key": "b",
+          "text": "Tool-result clearing"
+        },
+        {
+          "key": "c",
+          "text": "Priority pruning"
+        },
+        {
+          "key": "d",
+          "text": "Summarisation"
+        },
+        {
+          "key": "e",
+          "text": "Token-level compression (LLMLingua)"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Every turn older than the last N"
+        },
+        {
+          "key": "b",
+          "text": "The verbatim body of a result already used, leaving a short note"
+        },
+        {
+          "key": "c",
+          "text": "Entries of the lowest class first, until the budget fits"
+        },
+        {
+          "key": "d",
+          "text": "A span of older turns, replaced by a model-written digest"
+        },
+        {
+          "key": "e",
+          "text": "Individual low-information tokens inside every entry"
+        },
+        {
+          "key": "f",
+          "text": "The system prompt, which it rewrites into a shorter version on every call"
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "c",
+        "d": "d",
+        "e": "e"
+      },
+      "explanation": "Sections 2 to 7: windowing drops by age, clearing drops tool bodies, pruning drops by class, summarisation replaces a span, and token-level compression thins every entry. None of them should rewrite the system prompt on every call: that breaks the cache and risks the rules.",
+      "hints": [
+        "Ask, for each technique, whether it works on whole turns, on tool results, on classes or on tokens."
+      ]
+    },
+    {
+      "id": "ctx-012-q14",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o2"
+      ],
+      "section": "9",
+      "est_minutes": 15,
+      "tags": [
+        "policy",
+        "design"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "design",
+      "prompt": "A customer-support agent runs long sessions on a 200,000-token window with a 20,000-token output reserve. Each turn adds the customer's message, the agent's reply, and one or two tool results (order lookups that can be repeated, and refund calls that cannot). Its retrieved help-centre chunks are re-selected every turn. Design its compression policy: which techniques run at which trigger, what is pinned or never compressed, how the refund calls are handled, and how a change to the policy is checked before it ships.",
+      "answer_length": "half a page",
+      "solution": "1. **Budget and triggers.** The input budget is 200,000 - 20,000 = 180,000 tokens. A soft trigger at 80 percent (144,000) and a hard trigger at 95 percent (171,000), both illustrative starting values to tune.\n2. **Soft pass, no model call.** Clear the order-lookup results that the agent has already used, oldest first, leaving one-line notes, and prune the lowest priority class (stale results, expired memory entries) until the input is under 60 percent (108,000).\n3. **Refund calls.** They are stateful and cannot be repeated, so they are never cleared to a bare note; they are summarised (amount, order, outcome, approval) so the record survives.\n4. **Hard pass.** Summarise the older turns with a prompt that lists what to keep (decisions, open questions, stated facts and preferences, tool conclusions), keep the last few turns verbatim, and log the originals.\n5. **Never compressed.** Layer 01, the system prompt, and the pinned first turn stay out of every span a summariser sees; layer 06, the user instruction, is never compressed. Retrieved chunks in layer 04 are re-selected each turn, so they are trimmed by top-k rather than summarised.\n6. **Check.** A replay set of real support sessions with listed key facts; report the IRR beside the token reduction, and block a change whose IRR falls by more than the measurement noise.",
+      "rubric": [
+        {
+          "criterion": "Computes the input budget and places the soft and hard triggers on it, calling the percentages starting values",
+          "points": 2
+        },
+        {
+          "criterion": "Runs clearing and pruning (no model call) at the soft trigger and summarisation at the hard trigger",
+          "points": 2
+        },
+        {
+          "criterion": "Treats the refund calls as not clearable and summarises them instead, with the reason",
+          "points": 2
+        },
+        {
+          "criterion": "Keeps the system prompt, pinned turns and the user instruction out of compression",
+          "points": 1
+        },
+        {
+          "criterion": "Gates policy changes on IRR and token reduction over a replay set",
+          "points": 2
+        }
+      ],
+      "explanation": "Sections 4, 5, 9 and 10: cheap passes run first and often, summaries run late with a prompt that names what to keep, stateful tool results are summarised rather than cleared, and a replay set measures what a change loses.",
+      "hints": [
+        "Start from the input budget and place both triggers on it.",
+        "Sort the content into what can be cleared, what must be summarised and what is never touched."
+      ]
+    },
+    {
+      "id": "ctx-012-q15",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "12",
+      "est_minutes": 12,
+      "tags": [
+        "isolate",
+        "decision"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "connect",
+      "connects": [
+        "ctx-013",
+        "ctx-006"
+      ],
+      "prompt": "A contract-review agent works through a 300-page agreement and, in the same session, answers the client's billing questions and drafts a cover email. Its compression policy keeps losing exact clause wording, and its IRR on a replay set stays low however the summary prompt is tuned. Argue whether the fix is more compression or isolation, and sketch what the isolated design would look like.",
+      "answer_length": "one or two paragraphs",
+      "solution": "The fix is isolation, not harder compression. Two of section 12's signals are present. First, the material is exact and irreplaceable: clause wording must be quoted verbatim, and every lossy pass (summarisation, token-level compression) corrupts it, so no summary prompt can raise the IRR on those facts. Second, the session is really three unrelated jobs (clause review, billing, the email), and each thread's turns distract the others (post 06's distraction, here coming from the session's own history); compressing the combined history treats that without curing it. A policy whose IRR stays low however the prompt is tuned is itself the signal to isolate.\n\nThe isolated design (post 13) gives the clause review to a sub-agent whose own window holds the relevant sections of the agreement in full; it returns a structured result (clause references, quoted wording, findings) and none of its intermediate reading. Billing and the email run in separate contexts or in the parent, which now holds only the conclusions. Compression stays inside each window to keep it under budget; isolation keeps any one window from having to hold everything, and the hand-off is explicit and inspectable.",
+      "rubric": [
+        {
+          "criterion": "Chooses isolation and ties it to exact, irreplaceable material that lossy compression corrupts",
+          "points": 2
+        },
+        {
+          "criterion": "Recognises the several unrelated jobs and names the distraction they cause, in post 06's terms",
+          "points": 2
+        },
+        {
+          "criterion": "Reads a persistently low IRR as the signal to isolate rather than compress harder",
+          "points": 1
+        },
+        {
+          "criterion": "Sketches a sub-agent with the full text in its own window returning a structured result only",
+          "points": 2
+        },
+        {
+          "criterion": "Notes that compression and isolation are complementary (compress within, isolate across)",
+          "points": 1
+        }
+      ],
+      "explanation": "Section 12 lists when to isolate rather than compress: exact material, several unrelated jobs, and a need for auditability. Post 13 gives the sub-agent pattern and its contracts; post 06 names the distraction one thread causes another.",
+      "hints": [
+        "Check the material against what a lossy pass can preserve.",
+        "Count the jobs the session is doing, and ask what each one's turns do to the others."
+      ]
+    },
+    {
+      "id": "ctx-012-q16",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "10",
+      "est_minutes": 10,
+      "tags": [
+        "irr",
+        "python",
+        "measurement"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "fix",
+      "language": "python",
+      "prompt": "`measure` should return the token reduction (the share of tokens removed) and the information retention ratio of one compression pass, with tokens approximated by whitespace-separated words and a key fact surviving only when every one of its words appears in the compressed history, ignoring case. The starter returns wrong numbers. Fix it.",
+      "starter": "def measure(before, after, facts):\n    \"\"\"Token reduction and information retention ratio of one compression pass.\n\n    before, after: the history as one string, before and after the pass\n    facts: a list of key facts, each a list of words; a fact survives when every one of\n    its words appears in `after`, ignoring case\n    Returns (reduction, irr) as fractions; tokens are whitespace-separated words.\n    \"\"\"\n    n_before, n_after = len(before.split()), len(after.split())\n    reduction = n_after / n_before\n    text = after.lower()\n    kept = sum(any(w.lower() in text for w in fact) for fact in facts)\n    return reduction, kept / len(facts)\n",
+      "solution": "def measure(before, after, facts):\n    \"\"\"Token reduction and information retention ratio of one compression pass.\n\n    before, after: the history as one string, before and after the pass\n    facts: a list of key facts, each a list of words; a fact survives when every one of\n    its words appears in `after`, ignoring case\n    Returns (reduction, irr) as fractions; tokens are whitespace-separated words.\n    \"\"\"\n    n_before, n_after = len(before.split()), len(after.split())\n    reduction = 1 - n_after / n_before\n    text = after.lower()\n    kept = sum(all(w.lower() in text for w in fact) for fact in facts)\n    return reduction, kept / len(facts)\n",
+      "tests": "from math import isclose\n\nbefore = \"user: the project lead is Alice Moreno and we run Postgres 16 on the export host\"\nfacts = [[\"Alice\", \"Moreno\"], [\"Postgres\", \"16\"], [\"acme-exports\"]]\n\n# 1. Reduction is the share removed: 16 words become 4.\nred, irr = measure(before, \"lead Alice; Postgres 16\", facts)\nassert isclose(red, 0.75), f\"reduction should be 0.75, got {red}\"\n\n# 2. A fact survives only when all of its words survive: Moreno is gone, so only one fact of three.\nassert isclose(irr, 1 / 3), f\"IRR should be 1/3, got {irr}\"\n\n# 3. Case is ignored.\nred, irr = measure(before, \"ALICE MORENO, POSTGRES 16, ACME-EXPORTS\", facts)\nassert isclose(irr, 1.0), f\"IRR should be 1.0 when every word survives in upper case, got {irr}\"\nassert isclose(red, 1 - 5 / 16), f\"reduction should be 11/16, got {red}\"\n\n# 4. An empty history after the pass removes everything and keeps nothing.\nred, irr = measure(before, \"\", facts)\nassert isclose(red, 1.0) and isclose(irr, 0.0), f\"empty: expected (1.0, 0.0), got {(red, irr)}\"\n\n# 5. Words, not characters: a few long words count as few tokens.\nred, irr = measure(\"a b c d e f g h i j\", \"internationalisation\", [[\"g\"]])\nassert isclose(red, 0.9), f\"reduction counts words: expected 0.9, got {red}\"\nassert isclose(irr, 0.0), f\"the fact g is gone: expected 0.0, got {irr}\"\n\n# 6. Another split, so a hard-coded answer cannot pass.\nred, irr = measure(\"one two three four five six seven eight\", \"two four six\", [[\"two\"], [\"six\", \"four\"], [\"eight\"], [\"one\"]])\nassert isclose(red, 5 / 8) and isclose(irr, 0.5), f\"expected (0.625, 0.5), got {(red, irr)}\"\n# 7. A generated history, so an answer keyed to the inputs above cannot pass.\nimport random\nrng = random.Random(12)\nwords = [f\"w{i:03d}\" for i in range(rng.randint(40, 80))]\nkept_words = rng.sample(words, rng.randint(8, 30))\nfacts7 = [rng.sample(words, rng.randint(1, 3)) for _ in range(11)]\nwant_irr = sum(all(w in kept_words for w in f) for f in facts7) / len(facts7)\nred, irr = measure(\" \".join(words), \" \".join(kept_words), facts7)\nassert isclose(red, 1 - len(kept_words) / len(words)) and isclose(irr, want_irr), f\"generated case: got {(red, irr)}\"\n\nprint(\"all tests passed\")\n",
+      "explanation": "Section 10: the reduction is the share of tokens removed, one minus after over before, and the IRR counts a fact as kept only when all of its words are still present. The starter returned the share kept and counted a fact when any one word survived.",
+      "hints": [
+        "Check what the reduction should be when nothing is removed.",
+        "Ask whether a fact with one of its two words left can still answer the next turn."
+      ]
+    },
+    {
+      "id": "ctx-012-q17",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "12",
+      "est_minutes": 3,
+      "tags": [
+        "isolate",
+        "decision"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "connects": [
+        "ctx-013"
+      ],
+      "prompt": "In which situation is isolating the work in a sub-agent a better answer than compressing the main agent's history?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A support chat has grown long, but only its gist matters for the next answer.",
+          "correct": false,
+          "feedback": "When the gist is enough, summarisation is the right tool; nothing exact has to survive."
+        },
+        {
+          "key": "b",
+          "text": "A coding agent must quote and patch 40 exact lines from a 3,000-line log, alongside an unrelated documentation task in the same session.",
+          "correct": true,
+          "feedback": "Right. Exact material plus unrelated jobs: a lossy pass would corrupt the lines, and a sub-agent can hold the full log and return only the patch."
+        },
+        {
+          "key": "c",
+          "text": "Old web-search results are filling the history after their URLs were fetched.",
+          "correct": false,
+          "feedback": "That is tool-result clearing: the results can be fetched again, so dropping their bodies loses nothing."
+        },
+        {
+          "key": "d",
+          "text": "The input crosses 80 percent of the budget for the first time in a session.",
+          "correct": false,
+          "feedback": "That is the soft trigger, which runs the cheap passes; nothing about it calls for a second window."
+        }
+      ],
+      "explanation": "Section 12: isolate rather than compress when the material is exact and irreplaceable, when the context is really several unrelated jobs, or when the hand-off must be auditable. The log case meets the first two.",
+      "hints": [
+        "Look for material that no lossy pass may touch.",
+        "Count how many unrelated jobs each situation puts into one window."
+      ]
+    }
+  ]
+}

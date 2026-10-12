@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="ctx-01-usage-and-triggers-title" aria-describedby="ctx-01-usage-and-triggers-desc">
+<title id="ctx-01-usage-and-triggers-title">Clearing tool results first postpones the lossy summary</title>
+<desc id="ctx-01-usage-and-triggers-desc">A line chart of input-budget usage, in percent of 180,000 tokens, over 110 turns of one simulated agent session, with dotted lines at the 95 percent hard trigger, the 80 percent soft trigger and the 60 percent soft target. Without compression usage climbs steadily and passes the budget at turn 31. Summarising alone drops it at turns 30, 56, 83 and 108, four summaries. The two-trigger policy clears stale tool results at 80 percent, back under 60 percent at turns 25, 32, 38, 46, 53 and 61; later passes fall short, and its only summary comes at turn 98, from 95.1 to 17.8 percent.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-ink { fill: var(--ctx-ink); }
+  .f-ink-muted { fill: var(--ctx-ink-muted); }
+  .f-red-ink { fill: var(--ctx-red-ink); }
+  .f-red-soft { fill: var(--ctx-red-soft); }
+  .s-ink { stroke: var(--ctx-ink); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+  .s-red { stroke: var(--ctx-red); }
+</style>
+<defs>
+<marker id="ctx-01-usage-and-triggers-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+<clipPath id="ctx-01-usage-and-triggers-clip-1"><rect x="90" y="122" width="684" height="312"/></clipPath>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="540"/>
+<text x="40" y="48" class="t-title" data-w="681">Clearing tool results first postpones the lossy summary</text>
+<text x="40" y="76" class="t-subtitle" data-w="641">One simulated session, illustrative sizes: 110 turns against a 180,000-token input budget.</text>
+<g data-grid="skip">
+<rect x="96" y="128" width="672" height="50" class="f-red-soft" data-fit="skip"/>
+<path d="M96,428H768M96,378H768M96,328H768M96,278H768M96,228H768M96,178H768M96,128H768" class="gridline"/>
+<text x="88" y="432" text-anchor="end" class="t-tick" data-w="20">0%</text>
+<text x="88" y="382" text-anchor="end" class="t-tick" data-w="28">20%</text>
+<text x="88" y="332" text-anchor="end" class="t-tick" data-w="28">40%</text>
+<text x="88" y="282" text-anchor="end" class="t-tick" data-w="28">60%</text>
+<text x="88" y="232" text-anchor="end" class="t-tick" data-w="28">80%</text>
+<text x="88" y="182" text-anchor="end" class="t-tick" data-w="35">100%</text>
+<text x="88" y="132" text-anchor="end" class="t-tick" data-w="35">120%</text>
+<text x="96" y="448" text-anchor="middle" class="t-tick" data-w="8">0</text>
+<text x="218.18" y="448" text-anchor="middle" class="t-tick" data-w="16">20</text>
+<text x="340.36" y="448" text-anchor="middle" class="t-tick" data-w="16">40</text>
+<text x="462.55" y="448" text-anchor="middle" class="t-tick" data-w="16">60</text>
+<text x="584.73" y="448" text-anchor="middle" class="t-tick" data-w="16">80</text>
+<text x="706.91" y="448" text-anchor="middle" class="t-tick" data-w="23">100</text>
+<path d="M96,128V428H768" class="axis"/>
+<path d="M96,190.5H768" class="s-ink-muted w1 nofill d-ref"/>
+<path d="M96,228H768" class="s-ink-muted w1 nofill d-ref"/>
+<path d="M96,278H768" class="s-ink-muted w1 nofill d-ref"/>
+<g clip-path="url(#ctx-01-usage-and-triggers-clip-1)">
+<path d="M102.11,406.19 L108.22,402.17 L114.33,387.72 L120.44,384.67 L126.55,377.86 L132.65,367.58 L138.76,363.56 L144.87,349.11 L150.98,346.06 L157.09,339.25 L163.2,328.97 L169.31,324.94 L175.42,310.5 L181.53,307.44 L187.64,300.64 L193.75,290.36 L199.85,286.33 L205.96,271.89 L212.07,268.83 L218.18,262.03 L224.29,251.75 L230.4,247.72 L236.51,233.28 L242.62,230.22 L248.73,223.42 L254.84,213.14 L260.95,209.11 L267.05,194.67 L273.16,191.61 L279.27,184.81 L279.27,388 L285.38,377.72 L291.49,373.69 L297.6,359.25 L303.71,356.19 L309.82,349.39 L315.93,339.11 L322.04,335.08 L328.15,320.64 L334.25,317.58 L340.36,310.78 L346.47,300.5 L352.58,296.47 L358.69,282.03 L364.8,278.97 L370.91,272.17 L377.02,261.89 L383.13,257.86 L389.24,243.42 L395.35,240.36 L401.45,233.56 L407.56,223.28 L413.67,219.25 L419.78,204.81 L425.89,201.75 L432,194.94 L438.11,184.67 L438.11,392.17 L444.22,388.14 L450.33,373.69 L456.44,370.64 L462.55,363.83 L468.65,353.56 L474.76,349.53 L480.87,335.08 L486.98,332.03 L493.09,325.22 L499.2,314.94 L505.31,310.92 L511.42,296.47 L517.53,293.42 L523.64,286.61 L529.75,276.33 L535.85,272.31 L541.96,257.86 L548.07,254.81 L554.18,248 L560.29,237.72 L566.4,233.69 L572.51,219.25 L578.62,216.19 L584.73,209.39 L590.84,199.11 L596.95,195.08 L603.05,180.64 L603.05,383.56 L609.16,380.5 L615.27,373.69 L621.38,363.42 L627.49,359.39 L633.6,344.94 L639.71,341.89 L645.82,335.08 L651.93,324.81 L658.04,320.78 L664.15,306.33 L670.25,303.28 L676.36,296.47 L682.47,286.19 L688.58,282.17 L694.69,267.72 L700.8,264.67 L706.91,257.86 L713.02,247.58 L719.13,243.56 L725.24,229.11 L731.35,226.06 L737.45,219.25 L743.56,208.97 L749.67,204.94 L755.78,190.5 L755.78,383.56 L761.89,380.5 L768,373.69" class="s-ink-muted w15 nofill d-proj"/>
+<path d="M102.11,406.19 L108.22,402.17 L114.33,387.72 L120.44,384.67 L126.55,377.86 L132.65,367.58 L138.76,363.56 L144.87,349.11 L150.98,346.06 L157.09,339.25 L163.2,328.97 L169.31,324.94 L175.42,310.5 L181.53,307.44 L187.64,300.64 L193.75,290.36 L199.85,286.33 L205.96,271.89 L212.07,268.83 L218.18,262.03 L224.29,251.75 L230.4,247.72 L236.51,233.28 L242.62,230.22 L248.73,223.42 L248.73,280.36 L254.84,270.08 L260.95,266.06 L267.05,251.61 L273.16,248.56 L279.27,241.75 L285.38,231.47 L291.49,227.44 L291.49,278.58 L297.6,264.14 L303.71,261.08 L309.82,254.28 L315.93,244 L322.04,239.97 L328.15,225.53 L328.15,282.47 L334.25,279.42 L340.36,272.61 L346.47,262.33 L352.58,258.31 L358.69,243.86 L364.8,240.81 L370.91,234 L377.02,223.72 L377.02,280.67 L383.13,276.64 L389.24,262.19 L395.35,259.14 L401.45,252.33 L407.56,242.06 L413.67,238.03 L419.78,223.58 L419.78,280.53 L425.89,277.47 L432,270.67 L438.11,260.39 L444.22,256.36 L450.33,241.92 L456.44,238.86 L462.55,232.06 L468.65,221.78 L468.65,278.72 L474.76,274.69 L480.87,260.25 L486.98,257.19 L493.09,250.39 L499.2,240.11 L505.31,236.08 L511.42,221.64 L511.42,255.92 L517.53,252.86 L523.64,246.06 L529.75,235.78 L535.85,231.75 L541.96,217.31 L541.96,245.78 L548.07,242.72 L554.18,235.92 L560.29,225.64 L560.29,248.31 L566.4,244.28 L572.51,229.83 L578.62,226.78 L578.62,240.83 L584.73,234.03 L590.84,223.75 L590.84,238.17 L596.95,234.14 L603.05,219.69 L603.05,225.5 L609.16,222.44 L609.16,230.69 L615.27,223.89 L615.27,225.89 L621.38,215.61 L621.38,228.03 L627.49,224 L627.49,225.03 L633.6,210.58 L633.6,215.36 L639.71,212.31 L639.71,220.56 L645.82,213.75 L645.82,215.75 L651.93,205.47 L651.93,217.89 L658.04,213.86 L658.04,214.89 L664.15,200.44 L664.15,205.22 L670.25,202.17 L670.25,210.42 L676.36,203.61 L676.36,205.61 L682.47,195.33 L682.47,207.75 L688.58,203.72 L688.58,204.75 L694.69,190.31 L694.69,383.56 L700.8,380.5 L706.91,373.69 L713.02,363.42 L719.13,359.39 L725.24,344.94 L731.35,341.89 L737.45,335.08 L743.56,324.81 L749.67,320.78 L755.78,306.33 L761.89,303.28 L768,296.47" class="s-ink w15 nofill"/>
+<path d="M242.62,230.22 L248.73,223.42 L254.84,213.14 L260.95,209.11 L267.05,194.67 L273.16,191.61 L279.27,184.81 L285.38,174.53 L291.49,170.5 L297.6,156.06 L303.71,153 L309.82,146.19 L315.93,135.92 L322.04,131.89 L323.68,128" class="s-red w15 nofill"/>
+</g>
+<text x="780" y="378.69" class="t-note f-ink-muted" data-w="106">summarise only</text>
+<text x="780" y="301.47" class="t-note f-ink" data-w="80">two triggers</text>
+<text x="780" y="195.5" class="t-note f-ink-muted" data-w="113">hard trigger 95%</text>
+<text x="780" y="233" class="t-note f-ink-muted" data-w="108">soft trigger 80%</text>
+<text x="104" y="272" class="t-note f-ink-muted" data-w="104">soft target 60%</text>
+</g>
+<text x="96" y="116" class="t-note" data-w="237">input tokens, percent of the budget</text>
+<text x="432" y="472" text-anchor="middle" class="t-note" data-w="27">turn</text>
+<g data-grid="skip">
+<text x="108.22" y="158" class="t-label f-red-ink" data-w="145">over the input budget</text>
+</g>
+<g data-grid="skip">
+<text x="328.15" y="158" class="t-label f-red-ink" data-w="244">no compression: over it from turn 31</text>
+</g>
+<text x="40" y="504" class="t-note" data-w="592">The soft pass needs no model call; the summary is kept for when nothing cheaper is left.</text>
+</svg>

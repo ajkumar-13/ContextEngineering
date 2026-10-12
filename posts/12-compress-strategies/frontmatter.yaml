@@ -1,68 +1,24 @@
 id: ctx-012
 slug: 12-compress-strategies
-title: "12 · Compress Strategies"
-
-description: >
-  Learn how to shrink LLM context without sacrificing answer quality.
-  Explore windowing, summarization, tool-result clearing, priority pruning,
-  semantic chunking, prompt compression, and practical policies for managing
-  long-running AI agent conversations.
-
-author: "Ajay"
-
+title: "12 - Compress strategies"
+summary: "Six ways to shrink what is already in the context window, what each removes and what it costs in key facts, the two triggers that decide when to run them, and a replay set that shows when a summary change lost something."
 date: 2026-05-20
-last_modified: 2026-05-20
-
-tags:
-  - context-engineering
-  - wsci
-  - compress
-  - summarization
-  - context-management
-  - prompt-compression
-  - long-context
-  - ai-agents
-
-category: The Four Primitives
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part II - The WSCI operating system"
-chapter: "Part II — The Four Primitives (WSCI)"
-
-hero: diagrams/00-hero-compress-strategies.svg
-hero_alt: "Timeline illustrating context-window growth, automatic compaction, and token reduction through compression strategies"
-
-reading_time: 18
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - WSCI
-  - Compress
-  - Context Compression
-  - Prompt Compression
-  - LLMLingua
-  - LLMLingua-2
-  - RECOMP
-  - Summarization
-  - Rolling Summary
-  - Hierarchical Summarization
-  - Semantic Chunking
-  - Priority Pruning
-  - Windowing
-  - Tool Result Clearing
-  - Context Management
-  - Long Context
-  - Information Retention Ratio
-  - IRR
-  - Auto Compaction
-  - Claude Code
-  - Context Window
-  - Token Budget
-  - AI Agents
-
-canonical_url: ""
-
-prev: ../11-rag-in-depth/
-next: ../13-isolate-strategies/
+level: intermediate
+reading_time: 20
+tags: [context-engineering, wsci, compress, summarisation, compaction, prompt-compression, ai-agents]
+hero: diagrams/01-usage-and-triggers.svg
+prerequisites: [ctx-007]
+code: optional
+outcomes:
+  - id: o1
+    text: "Pick the compression technique that fits a given layer and failure mode, from the six this post compares."
+  - id: o2
+    text: "Set a soft and a hard compaction trigger with the action each one runs, and tell `/compact` apart from `/clear` and from tool-result clearing."
+  - id: o3
+    text: "Measure a compression policy's information retention ratio and token reduction on a replay set of key facts, and gate a summary change on it."
+  - id: o4
+    text: "Decide when compression is the wrong answer and a task should be isolated across sub-agents instead."
+recommended: [ctx-004]

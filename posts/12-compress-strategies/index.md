@@ -1,24 +1,32 @@
-# 12 · Compress strategies
+# 12 - Compress strategies
 
-> **TL;DR.** *Compress* is the operation that shrinks what is already in the context window. Six techniques cover almost every production system: **windowing**, **summarisation**, **tool-result clearing**, **priority pruning**, **semantic chunking**, and **prompt-level token compression** (LLMLingua-style). Each has a sweet spot, a token-reduction range, and what this post calls an **information retention ratio (IRR)** (a teaching construct, not a standard metric): the fraction of key facts that survive. A good compression policy mixes two or three of them under a clear trigger and is measured every release.
+> **TL;DR.** Compress is the operation that shrinks what is already in the context window. This post covers six techniques (windowing, summarisation, tool-result clearing, priority pruning, semantic chunking and token-level prompt compression), what each removes and what it costs in the facts the next turn needs, measured with the series' information retention ratio. A compression policy pairs the cheap techniques with the lossy ones under two triggers, and a replay set with listed key facts shows whether a change to it lost something.
 >
-> **After reading this you will be able to:**
-> - Pick the right compression technique for a given layer and failure mode.
-> - Set sensible auto-compaction triggers and tell `/compact` apart from `/clear`.
-> - Measure information retention so the next "summary" change does not silently regress quality.
+> **Prerequisites:** [Post 07](../07-write-select-compress-isolate/index.md).
+> **Safe to skip?** Skip it if a long-running agent's history can already be kept under budget with a stated policy, and the facts that policy drops can be counted on a replay set.
+>
+> **After reading, you will be able to:**
+>
+> - Pick the compression technique that fits a given layer and failure mode, from the six this post compares.
+> - Set a soft and a hard compaction trigger with the action each one runs, and tell `/compact` apart from `/clear` and from tool-result clearing.
+> - Measure a compression policy's information retention ratio and token reduction on a replay set of key facts, and gate a summary change on it.
+> - Decide when compression is the wrong answer and a task should be isolated across sub-agents instead.
 
-![Timeline of context-window usage climbing to the compaction trigger, where /compact swaps the older history for a much smaller summary, dropping usage and freeing window space, with an information retention ratio of about 85 per cent annotated.](diagrams/00-hero-compress-strategies.svg)
-*Compaction buys back window space at the price of fidelity; the goal is to lose only what will not be needed.*
+![Input-budget usage over 110 turns of one simulated session. Without compression it passes the budget at turn 31; summarising alone needs four summaries, at turns 30, 56, 83 and 108; clearing tool results at the 80 percent trigger first postpones the only summary to turn 98.](diagrams/01-usage-and-triggers.svg)
+
+*Clearing the stale tool results at the soft trigger costs no model call and keeps the lossy summary for when nothing cheaper is left.*
 
 ---
 
-## 1. Why compression is the day-to-day discipline
+## 1. The question: what does compression buy, and what does it lose?
 
-Most long-running agents reach a moment, around 80 % of the context window, where the next decision is *cheap and lossy* (truncate something) or *expensive and lossless* (issue a smaller, denser representation of what is already there). The first option is what frameworks default to; the second is what well-engineered systems do.
+Every long-running agent reaches a point where the next call no longer fits the budget. Layer 05, conversation history, is the growing tail of the window (post 02): every turn adds to it, and nothing leaves on its own. There are two kinds of move: drop something, which is cheap and lossy, or replace it with a smaller, denser representation, which costs a model call and loses less. This post asks which technique to use on which content, what each costs in the facts the next turn needs, and when to run it.
 
-The framing this post uses comes directly from production agent debuggers (Anthropic's auto-compaction in Claude Code, Cursor's history compression, the LangGraph compress nodes). All of them implement a variant of the six techniques below.
+Compression is needed before the window is full. Post 04 treats the window as a ceiling rather than a target, and Liu et al. ("Lost in the Middle", arXiv 2023, TACL 2024) found that models used information in the middle of a long input less reliably than at its start or end; a long history can put the turns that matter in that middle.
 
-A useful rule of thumb (illustrative, not a measured constant): a well-tuned compression pass typically reaches **70–90 % token reduction** while keeping most of the facts that matter. Beyond that, retention drops sharply, the familiar compression-versus-quality knee documented for prompt compressors such as LLMLingua (Jiang et al., 2023): the last slice of compression tends to cost a disproportionate share of the facts. The per-technique reduction and IRR figures throughout this post are illustrative planning ranges from production practice, not benchmark results; measure your own with the replay set in §8.
+Compress is one of the four operations of post 07: it moves information out of the window, within one window. Lance Martin's essay "Context Engineering for Agents" (June 2025) names two compress techniques, summarisation and trimming. This post splits them into six, the series' own breakdown: windowing, priority pruning and tool-result clearing are forms of trimming, summarisation and semantic chunking are forms of summarising, and token-level prompt compression works below the level of whole turns.
+
+To compare them, the post uses a teaching construct of its own, the **information retention ratio** (IRR): the fraction of a list of key facts that a later turn could still read after a compression pass. It is not a standard metric; it puts the loss next to the token reduction.
 
 ---
 
@@ -26,36 +34,34 @@ A useful rule of thumb (illustrative, not a measured constant): a well-tuned com
 
 **Operation.** Drop everything older than the last *N* turns or *M* tokens.
 
-**When it works.** When the task is genuinely local: short tool-use loops, recent-context-only assistants, latency-sensitive UIs.
+**When it works.** When the task is genuinely local: short tool-use loops, assistants that only need the recent context, latency-sensitive interfaces.
 
-**When it breaks.** Anything with cross-turn dependencies. The classic failure: the user said "remember Alice is the project lead" twelve turns ago; window of 8 turns drops it; the agent now refers to the project lead as "the user" because that is the most recent salient noun.
+**When it breaks.** Anything with dependencies across turns. The user said "Alice is the project lead" twelve turns ago; a window of eight turns drops it; the agent can no longer say who the lead is, or guesses from the most recent name it saw.
 
-**Token reduction.** 50–90 %, depending on window size.
-**IRR.** 100 % within the window, 0 % outside it. Bimodal, which is why pure windowing fails alone.
+**Token reduction (illustrative).** 50 to 90 percent, depending on the window size. **Retention.** Bimodal: everything inside the window, nothing outside it, which is why pure windowing fails on its own.
 
-**Tuning.** Two refinements that lift IRR without ballooning cost:
+**Tuning.** Two refinements lift retention without much extra cost:
 
-- **Pin the system prompt and the first turn.** They almost always carry rules and goals that need to outlive the window.
-- **Pin "important" turns** explicitly: turns the user marked, turns the agent flagged as containing decisions, turns where a tool wrote to long-term memory.
+- **Pin the first turn.** It often carries the goal, the user's name and the constraints. Layer 01, the system prompt, is never part of the sliding window: it is sent whole on every call.
+- **Pin important turns** explicitly: turns the user marked, turns the agent flagged as decisions, turns where a tool wrote to long-term memory.
 
-Windowing is the cheapest technique on this list and the most often used as a default. It is rarely the right *only* technique.
+On the toy replay set of section 10, windowing to the last six entries kept 12 of 22 key facts; pinning the first turn and the decisions kept 20 of 22 for about the same size. Windowing costs no model call, and is rarely the right *only* technique.
 
 ---
 
 ## 3. Technique 2: summarisation
 
-**Operation.** Replace a span of older context with an LLM-generated (large-language-model-generated) summary of that span.
+**Operation.** Replace a span of older context with a summary of that span written by a large language model (LLM).
 
-**When it works.** Long conversations where the *gist* of the past matters but the *exact phrasing* does not. Project meetings, multi-turn research, customer-support sessions.
+**When it works.** Long conversations where the gist of the past matters but the exact phrasing does not: project meetings, multi-turn research, customer-support sessions.
 
-**When it breaks.** Anywhere the exact wording matters: code, legal text, tool outputs that will be re-cited. A summary of a stack trace is useless; the agent needed the line numbers.
+**When it breaks.** Anywhere the exact wording matters: code, legal text, tool outputs that will be quoted again. A summary of a stack trace is useless if the agent needed the line numbers.
 
-**Token reduction.** 80–95 %.
-**IRR.** 70–95 % with a careful prompt; 40–60 % with a careless one.
+**Token reduction (illustrative).** 80 to 95 percent. **Retention.** Depends on the summary prompt more than on anything else: a prompt that names what to keep keeps it, and a prompt that says only "summarise" keeps whatever the model finds salient.
 
-**The summarisation prompt matters as much as the model.** A skeleton that consistently outperforms "summarise this conversation":
+**The summarisation prompt matters as much as the model.** A skeleton that names what to keep, in priority order, and bans filler:
 
-```
+```text
 Summarise the conversation below for the agent that will continue it.
 Preserve, in this order:
 1. Decisions made, with the reasoning given.
@@ -63,220 +69,264 @@ Preserve, in this order:
 3. User-stated facts and preferences.
 4. Tool calls and their key results (only the conclusion, not the verbatim output).
 Do NOT include politeness, recap, or filler.
-Output as bullet points, ≤ {target_tokens}.
+Output as bullet points, <= {target_tokens} tokens.
 ```
 
-The prompt explicitly enumerates what to keep, in priority order, and explicitly bans filler. The output is half the size of an unstructured summary, with higher retention.
+The four categories give the summariser a checklist, and the cap keeps the summary from growing back into the history it replaced. What the summariser fails to file under one of them is lost first: a preference mentioned in passing (section 10 shows one).
 
-Three variants are worth naming. **Rolling summarisation** keeps a single running summary and folds each new batch of turns into it. **Hierarchical summarisation** builds a tree: summarise turns 1–20, then later compress that summary together with turns 21–40; it stays coherent across thousands of turns but multiplies cost, so reserve it for genuinely long sessions. **Structured summarisation** produces one digest per topic rather than one chronological digest (that is semantic chunking, §6).
+**Rolling summarisation** keeps one running summary and folds each new batch of turns into it. **Hierarchical summarisation** summarises turns 1 to 20, then compresses that summary together with turns 21 to 40, and so on; it stays coherent over very long sessions but multiplies the model calls. **Structured summarisation**, one digest per topic, is semantic chunking (section 6).
 
-The rolling variant is the one most systems ship first. A minimal, runnable implementation with the direct Anthropic SDK:
+`snippets/rolling_summary.py` holds the rolling variant's fold step, with the model call passed in as a function, so the step runs offline and any provider can be plugged in:
 
 ```python
-from anthropic import Anthropic
-
-client = Anthropic()
-MODEL = "claude-sonnet-4-5"  # names/prices current as of early 2026; check the provider's page
-
-def fold(summary: str, new_turns: list[str], target_tokens: int = 300) -> str:
-    """Fold new turns into a running summary, preserving decisions and facts."""
+def fold_prompt(summary: str, new_turns: list[str], target_tokens: int = 300) -> str:
+    """The prompt that folds new turns into a running summary, preserving decisions and facts."""
     prior = f"Existing summary:\n{summary}\n\n" if summary else ""
     convo = "\n".join(new_turns)
-    prompt = (
+    return (
         f"{prior}New turns to fold in:\n{convo}\n\n"
         "Rewrite the summary for the agent that will continue this conversation. "
         "Preserve, in order: decisions and their reasoning; open questions; "
         "user-stated facts and preferences; tool conclusions (not verbatim output). "
         f"No politeness or filler. Bullet points, <= {target_tokens} tokens."
     )
-    msg = client.messages.create(
-        model=MODEL, max_tokens=target_tokens + 100,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return msg.content[0].text
 
-# Usage: fold each batch of turns into the running summary as the budget fills.
-running = ""
-for batch in batches_of_turns:          # your turn buffer, chunked
-    running = fold(running, batch)
+
+def fold(summary, new_turns, complete, target_tokens=300):
+    """complete(prompt, max_tokens) -> text is any model call; the summary it returns replaces the old one."""
+    return complete(fold_prompt(summary, new_turns, target_tokens), target_tokens + 100)
 ```
+
+Run as `uv run python posts/12-compress-strategies/snippets/rolling_summary.py` from the series root, it prints the prompt the first fold of a four-turn batch would send and makes no model call. The same file holds `anthropic_complete`, which sends the prompt through the Anthropic Messages API (application programming interface) to Claude Sonnet 4.5, a running model of the series as of early 2026; it needs the Anthropic software development kit (SDK) and an API key.
+
 ---
 
 ## 4. Technique 3: tool-result clearing
 
-**Operation.** After a tool call, extract the bits the agent needed and drop the verbatim body.
+**Operation.** After a tool call, keep the part of the result the agent used and drop the verbatim body.
 
-**When it works.** Almost always. This is the most under-used technique in the field.
+**When it works.** Whenever a tool result has been read and acted on.
 
-A web-search tool returns 8 KB of result snippets. The agent reads them, decides which two URLs to fetch, and proceeds. The 8 KB stays in context for the rest of the session, paid for on every subsequent call, contributing only distraction. Replacing the body with `[search results: 2 URLs selected, see fetch outputs]` reclaims the 8 KB at zero quality cost, and if the agent ever needs the original results, it can re-issue the call (deterministic and cheap).
+A web-search tool returns, say, 8 KB of result snippets (an illustrative size). The agent reads them, picks two URLs to fetch, and moves on, but the 8 KB stays in layer 05 for the rest of the session, paid for on every later call. Replacing the body with a note such as `[search results: 2 URLs selected, see fetch outputs]` costs the answer nothing, and if the original results are needed again, the call can be repeated.
 
-**Token reduction.** 70–95 % of tool-result tokens, often the largest single line item in a long agent run.
-**IRR.** Effectively 100 %, because the result is *re-callable* on demand.
+**Token reduction (illustrative).** 70 to 95 percent of the tool-result tokens, which can be the largest share of a long agent run's history. **Retention.** Close to complete when the note records what the agent took from the result and the call can be repeated.
 
-**The principle.** Tool calls with deterministic, cheap-to-re-issue results are *safe to clear*. Tool calls with expensive, non-deterministic, or stateful results (a payment, a write, an API call that costs $1) are not; those should be summarised, not cleared.
+**The principle.** Deterministic results that are cheap to fetch again are safe to clear. Expensive, non-deterministic or stateful results (a payment, a write, a call billed per request) are summarised instead, so the record of what happened survives.
 
-In practice this technique alone can push the auto-compaction trigger a long way further into the session (a large fraction, though the exact figure is workload-specific and worth measuring, not a fixed constant). Implement it before reaching for windowing or summarisation.
+Claude Code works this way when its window fills: its documentation ("How Claude Code works", consulted 12 October 2026) says that it "clears older tool outputs first, then summarizes the conversation if needed". The simulation of section 9 shows why that order pays.
 
 ---
 
 ## 5. Technique 4: priority pruning
 
-**Operation.** Assign every layer (or every chunk within a layer) a priority class. When over budget, trim from the lowest class first.
+**Operation.** Give every entry in the window (or every chunk within a layer) a priority class. When over budget, trim from the lowest class first.
 
-**When it works.** Multi-layer prompts (most production systems) where the layers have clearly different importance. The system prompt is more important than tool results; the latest user turn is more important than the third-most-recent retrieved chunk.
+**When it works.** Requests whose parts differ clearly in importance: the system prompt matters more than a stale tool result.
 
-**Token reduction.** 20–60 %, depending on how aggressive the trimming is.
-**IRR.** 90–100 % on the high-priority classes; 0 % on the trimmed ones (which is the point).
+**Token reduction (illustrative).** 20 to 60 percent, depending on how far down the classes the trimming goes. **Retention.** Everything in the classes kept, nothing in the classes trimmed.
 
-**A practical four-class scheme** that works as a default for most agents:
+**A practical four-class scheme**, a starting default rather than a standard:
 
 | Class | Contents | Trim policy |
 |---|---|---|
 | **P0** | System prompt, identity, hard rules | Never trim |
-| **P1** | Last 3 user turns, current goal | Never trim until budget is impossible to meet |
-| **P2** | Older history, retrieved RAG chunks (retrieval-augmented generation) beyond the top-3 (the *k* highest-scoring retrieved chunks) | Trim first |
+| **P1** | Last three user turns, the current goal | Never trim until the budget cannot be met otherwise |
+| **P2** | Older history; retrieved chunks beyond the top three | Trim first |
 | **P3** | Stale tool results, expired memory entries | Trim eagerly; clear by default |
 
-Implementation is mechanical: tag every entry with its class as it lands in the budget; sort by class then by recency; pop from the bottom until the budget fits.
+"Top three" means the three highest-scoring chunks in layer 04, retrieved chunks, which retrieval-augmented generation (RAG) fills (posts 09 to 11). Tag every entry with its class as it lands in the budget, sort by class and then by age, and drop from the bottom until the budget fits.
 
-Priority pruning composes well with the other techniques. Most production systems use it as the *default* trim mechanism and reach for summarisation only when even P2 trimming cannot rescue the budget.
+Pruning is blind inside a class. On the toy replay set of section 10, pruning to 15 percent of the original size dropped older P2 messages oldest first, decisions included, and kept 16 of 22 key facts; promoting decisions to P1 keeps them. Pruning composes well with the other techniques, as a default trim mechanism with summarisation kept for when even P2 trimming cannot meet the budget.
 
 ---
 
 ## 6. Technique 5: semantic chunking
 
-**Operation.** Group context by topic, summarise each topic independently, recombine.
+**Operation.** Group the history by topic, summarise each topic on its own, and put the topic summaries in place of the turns.
 
-**When it works.** Sessions that have moved across multiple distinct sub-topics. A coding session that touched authentication, then billing, then a UI bug benefits from three small topic-summaries more than one long chronological summary.
+**When it works.** Sessions that have moved across distinct sub-topics. A coding session that touched authentication, then billing, then an interface bug is better served by three topic summaries than by one chronological one.
 
-**When it breaks.** Sessions that are tightly intertwined; sessions that are short enough that simpler techniques suffice.
+**When it breaks.** Sessions whose topics are tightly intertwined, and sessions short enough for simpler techniques.
 
-**Token reduction.** 80–95 %.
-**IRR.** 85–95 %, typically the highest of the lossy techniques, because the topical structure preserves more relationship information.
+**Token reduction (illustrative).** 80 to 95 percent. **Retention.** Facts stay next to the other facts about the same subject, which a chronological summary can split.
 
-**Cost.** Highest on this list. Topic detection adds a clustering pass; per-topic summarisation multiplies LLM cost by the number of topics. Reserve for long-lived sessions where the cost amortises over many future turns.
+**Cost.** The highest on this list: a clustering pass, then one summary call per topic. It is reserved for long-lived sessions where the cost is spread over many later turns.
 
-A simple-but-effective implementation: every *N* turns, embed each turn, run a small clustering algorithm (density- and hierarchy-based methods such as HDBSCAN or agglomerative clustering, or even k-means with a sensible number of clusters *k*), summarise each cluster with the prompt template from §3, replace the original turns with the summaries. This is the *structured* variant of summarisation: instead of one chronological digest, you produce one digest per detected topic.
-
----
-
-## 7. Technique 6: prompt-level token compression (LLMLingua, RECOMP)
-
-The five techniques above all operate at the granularity of turns, tool results, or topics. A different family compresses at the granularity of *tokens*: it deletes or rewrites individual words a downstream model can afford to lose, leaving the prompt readable enough for the model but shorter on the wire.
-
-**LLMLingua** (Jiang et al., 2023) uses a small language model to score each token's *perplexity* (roughly, how surprising or informative it is) and drops the low-information tokens: articles, redundant phrasing, boilerplate. The authors report up to ~20x prompt compression with little task-performance loss on their benchmarks. **LLMLingua-2** (Pan et al., 2024) reframes the same idea as a supervised token-classification task (keep or drop) trained on a distillation dataset, which makes it faster and more faithful than the original perplexity heuristic. Because the compressed prompt is no longer fluent English, this is a machine-to-machine technique: fine for a retrieval context or a long reasoning trace, wrong for anything a human will read back.
-
-**RECOMP** (Xu et al., 2023) is the RAG-specific cousin. Instead of pruning tokens uniformly, it trains two compressors that run *before* the answer model sees the retrieved documents: an *extractive* one that selects the most useful sentences, and an *abstractive* one that summarises multiple documents into a short synthesis. The point is the same as tool-result clearing (§4): shrink the retrieved payload before it costs tokens on every subsequent turn, without throwing away the facts the answer depends on.
-
-**When it works.** Fixed, verbose context you feed a model many times: long RAG contexts, few-shot exemplar blocks, static instruction preambles. The compressor pays for itself when the same block is re-sent across many calls.
-
-**When it breaks.** Anything a human reads, anything re-cited verbatim, and short prompts where the extra compressor call costs more than it saves. Token-level pruning also interacts badly with prompt caching: if you rewrite the prefix on every call you lose the cache-read discount ([Post 03](../03-how-llms-read-context/index.md), §6), so compress the *stable* part once and cache it, rather than re-compressing each turn.
-
-**Token reduction.** Reported figures reach several-fold to ~20x on the source benchmarks (Jiang et al., 2023); treat those as an upper bound and measure on your own traffic. This is the only technique here that needs a separate model in the loop, so budget for its latency and cost.
+A simple implementation: every *N* turns, embed each turn, cluster the embeddings (HDBSCAN, agglomerative clustering, or k-means with a sensible number of clusters *k*), summarise each cluster with the prompt of section 3, and replace the turns with the summaries. The name is shared with an ingestion technique that splits documents at topic boundaries before indexing (post 10); here it is applied to the history.
 
 ---
 
-## 8. Two Claude Code commands: `/compact` vs `/clear`
+## 7. Technique 6: token-level prompt compression (LLMLingua, RECOMP)
 
-If you use Claude Code, two of its slash commands map directly onto the techniques above, and conflating them is a common mistake.
+The five techniques above work on whole turns, tool results or topics. Token-level compression deletes the individual words a downstream model can do without, leaving a prompt that is shorter and still usable by a model, though no longer fluent for a human.
 
-- **`/compact`** is *summarisation* (§3) applied to the whole conversation: it replaces the running history with an LLM-generated summary and keeps going. You reach for it, or let auto-compaction reach for it, when the gist of the session must survive but the token bill has grown too large. Auto-compaction is the same operation fired automatically as the budget fills (Anthropic, 2024–25).
-- **`/clear`** is a *full reset*: it drops the conversation entirely and starts fresh. It is the degenerate case of *windowing* (§2) with a window of zero. Use it at a genuine task boundary, when nothing from the previous exchange needs to carry forward.
+**LLMLingua** (Jiang et al., EMNLP 2023) uses a small language model to score tokens by perplexity, roughly how surprising each one is, and drops the predictable ones. Its abstract reports "up to 20x compression with little performance loss" on the authors' benchmarks. **LLMLingua-2** (Pan et al., Findings of ACL 2024) recasts the task as token classification, keep or drop, with a small encoder trained on data distilled from a larger LLM; the authors report it runs 3 to 6 times faster than earlier prompt compressors and cuts end-to-end latency by 1.6 to 2.9 times at compression ratios of 2 to 5 times.
 
-Note that Claude Code's `/clear` (reset the whole conversation) is not the same as this post's **tool-result clearing** (§4), which surgically drops one verbose tool body while leaving the rest of the conversation intact. Same verb, very different blast radius. The rule of thumb: `/compact` when you want to keep the thread but shrink it; `/clear` when the thread is done; tool-result clearing continuously, in the background, regardless of either.
+**RECOMP** (Xu, Shi and Choi, arXiv 2023) is the retrieval-specific relative: an *extractive* compressor selects the most useful sentences of the retrieved documents and an *abstractive* one writes a short synthesis of them, before the answering model sees them. The authors report compression to as little as 6 percent of the original length with minimal loss on their tasks. Its aim is that of tool-result clearing, applied to layer 04: fewer tokens for the same evidence.
+
+**When it works.** Fixed, verbose context sent many times: long retrieved contexts, blocks of few-shot examples, long static instructions.
+
+**When it breaks.** Anything a human reads or quotes verbatim, and short prompts where the compressor's own call costs more than it saves. It also interacts badly with prompt caching: a prefix rewritten on every call never matches the cached one and loses the cache-read discount (post 05, section 4), so the stable part is compressed once, reviewed, and then cached as it is.
+
+**Token reduction.** The figures above are the papers' own, on their benchmarks; other traffic is measured before the technique is trusted, with the compressor's latency and cost added to the budget.
 
 ---
 
-## 9. The two triggers: 80 % and 95 %
+## 8. Two Claude Code commands: `/compact` and `/clear`
 
-![The four priority classes stacked from never-trim to trim-eagerly, beside a budget gauge marked with the 95, 80 and 60 per cent lines](diagrams/02-priority-and-triggers.svg)
+Claude Code, Anthropic's coding agent, exposes two of these techniques as slash commands, described in its "Commands" reference and "How Claude Code works" page (both consulted 12 October 2026).
 
-*A policy is these two things together: a stack of classes that never changes, and two thresholds that decide when to walk it.*
+- **`/compact [instructions]`** is summarisation (section 3) of the conversation so far: the reference describes it as freeing context "by summarizing the conversation so far", with optional focus instructions (`/compact focus on the API changes` is the documentation's example). Claude Code also compacts automatically as the window approaches its limit, clearing older tool outputs before it summarises, and a "Compact Instructions" section in the project's `CLAUDE.md` steers what the summary keeps. The documentation gives the automatic trigger as a window size in tokens, adjustable with `/autocompact`, and states no default percentage, so the thresholds of section 9 are this series' policy values, not Claude Code's.
+- **`/clear`** starts "a new conversation with empty context" (aliases `/reset` and `/new`); the commands page notes that it keeps project memory. It is windowing (section 2) with a window of zero, for a genuine task boundary.
 
-A compression *policy* is two thresholds and a reaction at each. The two numbers below are illustrative defaults (a useful starting point, not a measured law); tune them to your own token-usage variance.
+Neither is this post's tool-result clearing (section 4), which drops one verbose tool body and leaves the rest of the conversation in place. The rule of thumb: `/compact` to keep the thread but shrink it, `/clear` when the thread is done, tool-result clearing continuously.
 
-- **At 80 % of the budget (*soft trigger*).** Run the cheap operations: tool-result clearing, P3 priority pruning. If this brings the prompt under 60 %, stop. This is the routine maintenance pass; it should happen frequently enough that the user never notices.
-- **At 95 % of the budget (*hard trigger*).** Run summarisation or semantic chunking on the older portion of the conversation. The agent surfaces a brief notice ("Compressing earlier conversation to free space"). The compressed turns are kept verbatim in a separate log for debugging.
+---
 
-The thresholds are not magic. 80 % is far enough below the limit to give the next few turns headroom; 95 % is close enough that waiting risks overflow. Move both downward when token-usage variance is high (long tool outputs, deep RAG); upward when it is low.
+## 9. The two triggers: 80 and 95 percent
 
-**Anti-pattern: compress on every turn.** The token cost of running summarisation eight times an hour usually exceeds the savings. Compress on triggers, not on schedule.
+A compression policy is two thresholds and an action at each, measured against the input budget: the context window minus the output reserve that `max_tokens` holds back (post 04). The two numbers are illustrative defaults, a starting point and not a measured law.
+
+- **At 80 percent of the budget, the soft trigger.** Run the cheap operations, tool-result clearing and P3 pruning, oldest first, until the input is under 60 percent. No model is called.
+- **At 95 percent, the hard trigger.** Summarise, or semantically chunk, the older part of the conversation, keeping the most recent turns verbatim. The agent tells the user it is compressing earlier conversation, and the original turns go to a separate log for debugging.
+
+Both move down when token usage varies a lot from turn to turn (long tool outputs, deep retrieval) and up when it varies little.
+
+`snippets/compaction_policy.py` replays one illustrative session against this policy. The window is Claude Sonnet 4.5's 200,000 tokens (Anthropic, "Context windows", consulted October 2026, as post 04 cites it), less post 04's illustrative output reserve of 20,000, an input budget of 180,000 tokens. Layers 01 to 04 take 8,300 tokens on every call (post 04's support agent), and every turn appends 1,400 tokens of messages and one tool result of 800 to 9,000 tokens to layer 05, all illustrative sizes. It prints:
+
+```text
+window 200000, output reserve 20000, input budget 180000
+triggers: soft 80%, hard 95%, soft target 60%; 110 turns
+
+none            first over budget:  31   soft passes:  0   summaries: 0 at turns []
+summarise-only  first over budget:   -   soft passes:  0   summaries: 4 at turns [30, 56, 83, 108]
+two-trigger     first over budget:   -   soft passes: 26   summaries: 1 at turns [98]
+
+two-trigger policy, usage of the input budget before -> after
+  soft passes that reached 60%: turns [25, 32, 38, 46, 53, 61]
+  first soft pass that did not: turn 68 (82.5% -> 68.8%)
+  summary: turn 98 (95.1% -> 17.8%)
+```
+
+The hero figure draws the three runs. Without compression the input passes the budget at turn 31. Summarising alone holds it, at the price of four lossy summaries in 110 turns. With the soft trigger in front, the first six clearing passes each bring the input back under 60 percent; from turn 68 the clearable tool results run out, the passes stop reaching the target, and the one summary comes at turn 98. A soft pass that misses its target is the signal that the hard trigger is near. The figure below shows what each pass removes.
+
+![Four stacked bars of the input, split into layers 01 and 02, layers 03 and 04, the messages, notes and summary of layer 05, and its verbatim tool results. At turn 25 the soft pass cuts the input from 81.8 to 59.1 percent. At turn 98 the summary cuts it from 95.1 to 17.8 percent.](diagrams/02-what-each-pass-removes.svg)
+
+*The soft pass removes tool bodies and nothing else; the summary is the only pass that rewrites what was said.*
+
+**Anti-pattern: summarising on every turn.** Each summary is a model call that reads the whole span it replaces, and each rewrites the history, so a prompt cache over the earlier conversation stops matching. Compress on triggers, not on a schedule.
 
 ---
 
 ## 10. Measuring information retention
 
-A summary that drops the fact the next turn needed is not a summary; it is a regression. The way to detect this before it ships:
+A summary that drops the fact the next turn needed is a regression. The way to catch it before it ships:
 
-- **A small replay set.** 20–50 conversations from production, with the next-turn ground-truth answer recorded.
-- **The metric.** Run the conversation through the new compression policy; ask the model to answer the next turn; score whether the answer matches the ground truth. The IRR-equivalent is the fraction that match.
-- **The gate.** A new compression prompt that drops IRR by more than the noise floor blocks merge.
+- **A small replay set.** Real conversations, each with the key facts a later turn needs listed beside it, or with the next turn's correct answer recorded.
+- **The metric.** Run each conversation through the policy, then check which key facts the compressed history still holds, or ask the next turn's question and score the answer. The IRR is the fraction that survive, reported beside the token reduction.
+- **The gate.** A new summary prompt or policy whose IRR falls by more than the run-to-run noise of the measurement blocks the merge.
 
-If you want a public benchmark to calibrate against rather than only your own replay set, long-context task suites such as LongBench (Bai et al., 2024) measure how much task quality a given compression pass costs across many tasks; use them to sanity-check a technique before trusting it on your own traffic.
+`snippets/retention.py` runs the first two steps on a toy replay set of three conversations with 22 key facts, counting tokens with tiktoken's `o200k_base` encoding. A fact survives when every word of it is still in the compressed history. The summariser is a rule-based stand-in for a model: it keeps what the section 3 prompt asks for (decisions, open questions, stated facts, tool conclusions), so its row measures the prompt's checklist, not a model. It prints:
 
-This is the same gate as the RAG eval ([Post 11](../11-rag-in-depth/index.md), §6) and the same overall pattern as system-level eval ([Post 20](../20-evaluation/index.md)). A team that ships compression without this gate is shipping silent regressions.
+```text
+replay set: 3 conversations, 22 key facts, encoding o200k_base
+technique               tokens  after reduction facts kept   IRR
+windowing                19931   8650     56.6%    12 of 22   55%
+windowing, pinned        19931   8768     56.0%    20 of 22   91%
+tool-result clearing     19931   2598     87.0%    22 of 22  100%
+priority pruning         19931   2248     88.7%    16 of 22   73%
+summarisation            19931   2449     87.7%    21 of 22   95%
+
+windowing              lost: Alice Moreno, Postgres 16, disk quota, acme-exports, 48213, damaged, 3,000, Lisbon, 12 people, Casa Azul
+windowing, pinned      lost: disk quota, damaged
+tool-result clearing   lost: nothing
+priority pruning       lost: disk quota, acme-exports, 90 days, damaged, 3,000, WhatsApp
+summarisation          lost: WhatsApp
+```
+
+Two lessons hold beyond the toy. The token reduction says nothing about the loss: windowing and pinned windowing remove about the same 56 percent and keep 12 and 20 of the 22 facts. And the losses are specific: the summary lost a customer's preference for WhatsApp, mentioned "by the way" and never picked out as a stated preference; the fix is a line in the prompt, and the replay set is what shows it is needed. The figure below lines up the six techniques by what each removes, with these numbers beside the five the snippet runs.
+
+![Eight strips of the same ten-entry history, oldest left: the original, then what windowing, pinned windowing, tool-result clearing, priority pruning, summarisation, semantic chunking and token-level compression keep, removed parts dashed in red. Beside the first five, reduction and IRR: 56.6 and 55, 56.0 and 91, 87.0 and 100, 88.7 and 73, 87.7 and 95 percent.](diagrams/03-six-techniques.svg)
+
+*Each technique removes a different part of the history. The reduction column cannot rank them; the IRR column can.*
+
+For a public check, long-context benchmarks such as LongBench (Bai et al., arXiv 2023, ACL 2024), with question answering, summarisation and code tasks in English and Chinese, are where prompt compressors such as LLMLingua-2 report results. This is the same kind of gate as the evaluation of a retrieval pipeline ([post 11](../11-rag-in-depth/index.md)) and of a whole system ([post 20](../20-evaluation/index.md)).
 
 ---
 
 ## 11. Picking among the six
 
-![Six compression techniques compared by token-reduction range on one shared scale, with what survives each](diagrams/01-six-techniques.svg)
+- **Default: priority pruning and tool-result clearing.** Cheap, predictable and composable; both can be on from the first release.
+- **Add summarisation** when the length of the conversation is the bottleneck and the gist is enough.
+- **Add semantic chunking** when several long-running threads would lose their structure in one chronological summary.
+- **Add token-level compression** only for large, fixed context sent many times, and only where it can coexist with caching.
+- **Use windowing alone** only when the task is genuinely local; otherwise with pinned turns.
 
-*The ranges share one scale, so the comparison is a length rather than an arithmetic exercise. What survives is the column that decides.*
+The order matters: clearing and pruning give the headroom that lets the expensive techniques run rarely, as section 9 shows. The technique also follows from the layer that is over budget and the failure mode it feeds, in post 06's names:
 
-A short decision sketch.
+| What is too large | Layer | Failure mode it feeds | Technique to try first |
+|---|---|---|---|
+| Tool results already read | 05 Conversation history | tool-storm (oversized results) | tool-result clearing |
+| A long history, key turns in the middle | 05 Conversation history | lost-in-the-middle | summarise older turns into a brief near the start |
+| Old turns on a topic the session has left | 05 Conversation history | distraction | semantic chunking, or windowing with pins |
+| Two versions of one fact | 05, or 03 Memory and state | conflict | a summary that keeps only the latest decision |
+| A long retrieved payload on every turn | 04 Retrieved chunks | lost-in-the-middle | RECOMP-style extraction, or pruning past the top three |
+| Few-shot examples, static instructions | 01 System prompt | none; a cost problem | token-level compression, once, then cached |
 
-- **Default: priority pruning + tool-result clearing.** Cheap, predictable, composable. Most systems should ship with these two on from day one.
-- **Add summarisation** when the conversation length itself is the bottleneck and the gist suffices.
-- **Add semantic chunking** when the conversation has multiple long-running threads and a single chronological summary loses the structure.
-- **Add prompt-level compression (§7)** only for large, fixed context you re-send many times, and only when it can coexist with caching.
-- **Use windowing only** when the task is genuinely local; otherwise use it *with* pinned-turn refinements (§2).
-
-The ordering matters: clearing and pruning give you headroom that lets the more expensive techniques stay infrequent.
+Layer 06, the user instruction, is never compressed: it is the trigger of the call, small and last. Post 06's first fix for distraction remains a tighter select step; compression is the fix only when the distracting material is the session's own history.
 
 ---
 
 ## 12. When compression is the wrong answer
 
-Compression is lossy by construction, so the honest limit of this whole post is: sometimes the right move is not to shrink the context but to *not put it there in the first place*. That is the **Isolate** operation ([Post 13](../13-isolate-strategies/index.md)), and it is the correct answer whenever compression would force you to throw away something you cannot afford to lose.
+Compression is lossy by construction, so sometimes the right move is to keep the material out of the window in the first place. That is the isolate operation ([post 13](../13-isolate-strategies/index.md)), the better answer whenever compression would throw away something the task cannot lose.
 
-Reach for Isolate instead of Compress when:
+Isolate rather than compress when:
 
-- **The material is exact and irreplaceable.** Code, legal text, financial figures, verbatim tool outputs that will be re-cited. Any lossy pass corrupts them; hand the work to a sub-agent whose isolated context holds the full text, and return only the conclusion.
-- **The context is really several unrelated jobs.** If a session keeps three loosely-related threads alive at once, compressing the combined history fights the confusion failure mode (Post 06) instead of curing it. Splitting the threads into separate isolated contexts removes the tokens entirely rather than summarising them.
-- **You need auditability.** A summariser that silently drops a fact leaves no trace; a sub-agent boundary makes the hand-off explicit and inspectable.
+- **The material is exact and irreplaceable.** Code, legal text, financial figures, tool outputs that will be quoted verbatim. Any lossy pass corrupts them; a sub-agent whose own window holds the full text does the work and returns only the conclusion.
+- **The context is really several unrelated jobs.** Compressing the combined history of three loosely related threads treats the distraction each causes the others (post 06) without curing it; separate windows remove those tokens from each other's context entirely.
+- **Auditability is required.** A summariser that drops a fact leaves no trace; a sub-agent boundary makes the hand-off explicit and inspectable.
 
-Compression and isolation are complementary, not rivals: compress *within* a context to keep it under budget, isolate *across* contexts so no single window has to hold everything. When a compression policy starts fighting its own IRR, that is the signal to isolate rather than compress harder.
+The two are complementary: compress within a window, isolate across windows. A policy that keeps losing facts on the replay set however its prompt is tuned is the signal to isolate rather than compress harder.
+
+---
+
+## 13. What can go wrong?
+
+- **The summary drops the one fact the next turn needs.** A preference stated in passing slips past the summary prompt's checklist, and three turns later the agent contradicts it. The trace shows a summary event just before the regression; a replay set listing that preference fails the change before it ships.
+- **A summariser rewrites the rules.** The compaction span includes the system prompt or the first turn, and "refunds above 3,000 rupees need approval" becomes "large refunds are reviewed". The rule is broken only after the first compaction.
+- **A non-repeatable tool result is cleared.** A payment confirmation is cleared like a search result; later the agent cannot tell whether the payment went through, and calls the tool again.
+- **The soft pass stops reaching its target unnoticed.** Usage then creeps towards the hard trigger, as in section 9 from turn 68 to turn 98, and every call pays for a fuller window. Logging whether each soft pass reached its target turns this into an alert.
+- **Token-level compression on a cached prefix.** A compressor rewrites the system prompt on every call; the cache-read tokens in the usage block fall to zero, and the input bill rises although the prompt got shorter.
 
 ---
 
 ## Common pitfalls
 
-- **Skipping tool-result clearing.** The largest single line item in long agent runs.
-- **Summarising when clearing would do.** Never compress a deterministic re-callable result; clear it.
-- **No replay set.** Without it the next "improvement" silently regresses.
-- **Compressing on every turn.** The cost is a hidden second LLM bill.
-- **Treating windowing as a complete strategy.** It loses anything outside the window, no matter how important.
-- **Compressing P0 / P1.** A "smarter" summariser will eventually try to summarise the system prompt. Pin it.
+1. **Skipping tool-result clearing.** Tool results can be the largest share of a long run's history, and clearing them costs no model call.
+2. **Summarising what could be cleared.** A deterministic result that can be fetched again is cleared, not summarised.
+3. **No replay set.** Without one, the next "improvement" to the summary prompt regresses silently.
+4. **Compressing on every turn.** Every summary is a second model bill and a broken cache; compression runs on triggers.
+5. **Treating windowing as a complete strategy.** It loses everything outside the window, however important; pins are the minimum.
+6. **Letting a summariser see P0.** The system prompt and the pinned turns stay out of every compaction span.
 
 ---
 
 ## Further reading
 
-- Anthropic, *"Claude Code"* documentation (auto-compact and the conversation budget) (2024–25): production reference implementation for `/compact` and auto-compaction.
-- Martin, L., *"Context Engineering for Agents"* (LangChain blog, 2025): the windowing / summarisation / pruning taxonomy this post follows.
-- Jiang, H. *et al.*, *"LLMLingua: Compressing Prompts for Accelerated Inference of Large Language Models"* (2023): perplexity-based prompt-token compression, with the compression-versus-quality curves referenced in §1 and §7.
-- Pan, Z. *et al.*, *"LLMLingua-2: Data Distillation for Efficient and Faithful Task-Agnostic Prompt Compression"* (2024): the supervised token-classification successor.
-- Xu, F. *et al.*, *"RECOMP: Improving Retrieval-Augmented LMs with Compression and Selective Augmentation"* (2023): extractive and abstractive compression of retrieved documents.
-- Bai, Y. *et al.*, *"LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding"* (2024): a benchmark for measuring how much task quality a compression pass costs (§10).
-- Liu, N. *et al.*, *"Lost in the Middle: How Language Models Use Long Contexts"* (TACL 2024; arXiv 2023): the empirical motivation for compression even when the window allows.
+- Anthropic, "How Claude Code works" and "Commands" (Claude Code documentation, consulted 12 October 2026): automatic compaction, `/compact` and `/clear`.
+- Martin, L., "Context Engineering for Agents" (June 2025): summarisation and trimming, the compress techniques this post splits into six.
+- Jiang, H. *et al.*, "LLMLingua: Compressing Prompts for Accelerated Inference of Large Language Models" (EMNLP 2023).
+- Pan, Z. *et al.*, "LLMLingua-2: Data Distillation for Efficient and Faithful Task-Agnostic Prompt Compression" (Findings of ACL 2024).
+- Xu, F., Shi, W. and Choi, E., "RECOMP: Improving Retrieval-Augmented LMs with Compression and Selective Augmentation" (arXiv 2023).
+- Bai, Y. *et al.*, "LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding" (arXiv 2023, ACL 2024).
+- Liu, N. F. *et al.*, "Lost in the Middle: How Language Models Use Long Contexts" (arXiv 2023, TACL 2024).
 
-Full citations in [REFERENCES.md](../../REFERENCES.md).
+Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
 ---
 
 ## What to read next
 
-- **[Post 13 — Isolate strategies](../13-isolate-strategies/index.md)**: the structural alternative to compression.
-- **[Post 04 — Tokens, windows, budgets](../04-tokens-windows-budgets/index.md)**: the budget the compression policy serves.
-- **[Post 20 — Evaluation](../20-evaluation/index.md)**: the harness that catches IRR regressions.
+- **[Post 13 - Isolate strategies](../13-isolate-strategies/index.md):** the operation to reach for when compression would lose what the task needs.
+- **[Post 30 - Capstone: email reply agent](../30-capstone-email-reply-agent/index.md):** the two-trigger policy and the structured summary prompt applied to long email threads.
