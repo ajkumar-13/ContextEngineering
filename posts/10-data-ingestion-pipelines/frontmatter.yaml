@@ -1,65 +1,25 @@
 id: ctx-010
-slug: 10-data-ingestion-document-pipelines
-title: "10 · Data Ingestion and Document Pipelines"
-
-description: >
-  Learn how production RAG systems ingest documents from PDFs, HTML,
-  spreadsheets, and scanned images. Explore parsing strategies, OCR,
-  layout-aware extraction, metadata enrichment, provenance, incremental
-  re-indexing, and the upstream decisions that determine retrieval quality.
-
-author: "Ajay"
-
+slug: 10-data-ingestion-pipelines
+title: "10 - Data ingestion and document pipelines"
+summary: "Retrieval can only find text that ingestion produced. This post chooses a parser per source type, keeps tables and reading order, strips boilerplate, attaches provenance and re-indexes only the pages that changed."
 date: 2026-05-18
-last_modified: 2026-05-18
-
-tags:
-  - context-engineering
-  - data-ingestion
-  - document-parsing
-  - rag
-  - ocr
-  - pdf
-  - html
-  - retrieval
-
-category: The Four Primitives
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part II - The WSCI operating system"
-chapter: "Part II — The Four Primitives (WSCI)"
-
-hero: diagrams/00-hero-data-ingestion-pipelines.svg
-hero_alt: "Document ingestion pipeline showing parsing, cleaning, enrichment, chunking, and indexing for production RAG systems"
-
-reading_time: 15
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - Data Ingestion
-  - Document Pipelines
-  - RAG
-  - PDF Parsing
-  - OCR
-  - Layout Analysis
-  - Table Extraction
-  - HTML Parsing
-  - Document Parsing
-  - Metadata
-  - Provenance
-  - Chunking
-  - Vector Database
-  - Incremental Indexing
-  - Re-indexing
-  - Docling
-  - Unstructured
-  - LlamaParse
-  - Tesseract OCR
-  - Retrieval Pipeline
-
-canonical_url: ""
-
-prev: ../09-select-strategies/
-next: ../11-rag-in-depth/
+level: intermediate
+reading_time: 18
+tags: [context-engineering, data-ingestion, document-parsing, ocr, table-extraction, provenance, incremental-indexing, rag]
+hero: diagrams/01-ingestion-pipeline.svg
+prerequisites: [ctx-009]
+code: optional
+outcomes:
+  - id: o1
+    text: "Choose a parsing strategy for a source file (born-digital extraction, OCR or a layout-aware parser) and name what escalates from one to the next."
+  - id: o2
+    text: "Preserve tables and reading order through parsing, and check a parsed table cell against the source."
+  - id: o3
+    text: "Strip boilerplate before chunking: main-content extraction for web pages, and repeated headers, footers and navigation."
+  - id: o4
+    text: "Attach provenance at ingest (source, page, section, timestamp, document type) and name what citations, conflict resolution and filtering need from it."
+  - id: o5
+    text: "Re-index incrementally with content hashes, so that a changed page is re-embedded and its old chunk replaced while unchanged pages are skipped."

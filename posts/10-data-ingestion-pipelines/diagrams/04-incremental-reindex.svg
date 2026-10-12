@@ -1,0 +1,194 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="ctx-04-incremental-reindex-title" aria-describedby="ctx-04-incremental-reindex-desc">
+<title id="ctx-04-incremental-reindex-title">A one-page edit re-embeds one page</title>
+<desc id="ctx-04-incremental-reindex-desc">A table of the second ingest run of snippets/reindex.py, one row per page or document, with the hash check and the action: refunds.pdf p1, page hash unchanged, skip; refunds.pdf p2, page hash changed, delete old chunk, embed new; refunds.pdf p3, page hash unchanged, skip; shipping.html, document hash unchanged, skip; shipping_copy.html, same hash as shipping.html, not indexed; warranty.md p1, not in the manifest, embed; faq.md p1, source retired, delete its chunk; faq.md p2, source retired, delete its chunk. The two deleted faq.md rows are shaded red; the replace and embed actions are bold. Of the five pages in the corpus after the run, two were embedded.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-red-soft { fill: var(--ctx-red-soft); }
+</style>
+<defs>
+<marker id="ctx-04-incremental-reindex-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="540"/>
+<text x="40" y="48" class="t-title" data-w="449">A one-page edit re-embeds one page</text>
+<text x="40" y="76" class="t-subtitle" data-w="662">Run 2 of snippets/reindex.py: one page edited, one document retired, one document added.</text>
+<rect x="40" y="392" width="880" height="40" class="f-red-soft" data-fit="skip"/>
+<rect x="40" y="432" width="880" height="40" class="f-red-soft" data-fit="skip"/>
+<rect x="40" y="112" width="208" height="40" class="nofill"/>
+<rect x="248" y="112" width="304" height="40" class="nofill"/>
+<rect x="552" y="112" width="368" height="40" class="nofill"/>
+<rect x="40" y="152" width="208" height="40" class="nofill"/>
+<rect x="248" y="152" width="304" height="40" class="nofill"/>
+<rect x="552" y="152" width="368" height="40" class="nofill"/>
+<rect x="40" y="192" width="208" height="40" class="nofill"/>
+<rect x="248" y="192" width="304" height="40" class="nofill"/>
+<rect x="552" y="192" width="368" height="40" class="nofill"/>
+<rect x="40" y="232" width="208" height="40" class="nofill"/>
+<rect x="248" y="232" width="304" height="40" class="nofill"/>
+<rect x="552" y="232" width="368" height="40" class="nofill"/>
+<rect x="40" y="272" width="208" height="40" class="nofill"/>
+<rect x="248" y="272" width="304" height="40" class="nofill"/>
+<rect x="552" y="272" width="368" height="40" class="nofill"/>
+<rect x="40" y="312" width="208" height="40" class="nofill"/>
+<rect x="248" y="312" width="304" height="40" class="nofill"/>
+<rect x="552" y="312" width="368" height="40" class="nofill"/>
+<rect x="40" y="352" width="208" height="40" class="nofill"/>
+<rect x="248" y="352" width="304" height="40" class="nofill"/>
+<rect x="552" y="352" width="368" height="40" class="nofill"/>
+<rect x="40" y="392" width="208" height="40" class="nofill"/>
+<rect x="248" y="392" width="304" height="40" class="nofill"/>
+<rect x="552" y="392" width="368" height="40" class="nofill"/>
+<rect x="40" y="432" width="208" height="40" class="nofill"/>
+<rect x="248" y="432" width="304" height="40" class="nofill"/>
+<rect x="552" y="432" width="368" height="40" class="nofill"/>
+<path d="M40,112H920M40,472H920" class="axis"/>
+<path d="M40,152H920" class="rule1"/>
+<text x="48" y="136" class="t-head" data-w="149">Page or document</text>
+<text x="256" y="136" class="t-head" data-w="214">Hash against the manifest</text>
+<text x="560" y="136" class="t-head" data-w="54">Action</text>
+<text x="48" y="176" class="t-label" data-w="98">refunds.pdf p1</text>
+<text x="256" y="176" class="t-label" data-w="149">page hash unchanged</text>
+<text x="560" y="176" class="t-label" data-w="27">skip</text>
+<text x="48" y="216" class="t-label" data-w="98">refunds.pdf p2</text>
+<text x="256" y="216" class="t-label" data-w="132">page hash changed</text>
+<text x="560" y="216" class="t-label" data-w="197"><tspan class="b">delete old chunk, embed new</tspan></text>
+<text x="48" y="256" class="t-label" data-w="98">refunds.pdf p3</text>
+<text x="256" y="256" class="t-label" data-w="149">page hash unchanged</text>
+<text x="560" y="256" class="t-label" data-w="27">skip</text>
+<text x="48" y="296" class="t-label" data-w="91">shipping.html</text>
+<text x="256" y="296" class="t-label" data-w="182">document hash unchanged</text>
+<text x="560" y="296" class="t-label" data-w="27">skip</text>
+<text x="48" y="336" class="t-label" data-w="131">shipping_copy.html</text>
+<text x="256" y="336" class="t-label" data-w="187">same hash as shipping.html</text>
+<text x="560" y="336" class="t-label" data-w="79">not indexed</text>
+<text x="48" y="376" class="t-label" data-w="105">warranty.md p1</text>
+<text x="256" y="376" class="t-label" data-w="126">not in the manifest</text>
+<text x="560" y="376" class="t-label" data-w="47"><tspan class="b">embed</tspan></text>
+<text x="48" y="416" class="t-label" data-w="68">faq.md p1</text>
+<text x="256" y="416" class="t-label" data-w="93">source retired</text>
+<text x="560" y="416" class="t-label" data-w="106">delete its chunk</text>
+<text x="48" y="456" class="t-label" data-w="68">faq.md p2</text>
+<text x="256" y="456" class="t-label" data-w="93">source retired</text>
+<text x="560" y="456" class="t-label" data-w="106">delete its chunk</text>
+<text x="40" y="504" class="t-note" data-w="507">Of the 5 pages now in the corpus, 2 were embedded; the rest were skipped.</text>
+</svg>

@@ -1,178 +1,286 @@
-# 10 · Data ingestion and document pipelines
+# 10 - Data ingestion and document pipelines
 
-> **TL;DR.** Retrieval quality is decided upstream, in parsing, long before any embedding model runs. The Select posts and the RAG build assume clean plain text, but real corpora arrive as PDFs, scanned images, HTML, slides, and spreadsheets, and how you extract layout, tables, and text determines which tokens ever reach the context in the first place. This post is the missing upstream half of the Select primitive: the ingestion pipeline that turns messy source files into the clean, chunk-ready, provenance-tagged text that [Post 11](../11-rag-in-depth/index.md) then indexes.
+> **TL;DR.** Retrieval can only find text that ingestion produced: a table cell the parser dropped, or two columns it scrambled, cannot be put back by any embedding model or reranker downstream. Of the six ingestion stages (source, parse, clean, enrich, chunk, index), the first four decide which text exists at all. This post covers them: choosing among born-digital extraction, optical character recognition (OCR) and a layout-aware parser, keeping tables, stripping boilerplate, attaching provenance, and re-indexing only what changed.
 >
-> **After reading this you will be able to:**
-> - Choose the right parsing strategy (born-digital extraction, layout-aware parsing, or OCR) for a given source type.
-> - Preserve tables, structure, and provenance through the pipeline instead of flattening them into unusable text.
-> - Stand up incremental re-indexing so a corpus that changes daily does not silently rot.
+> **Prerequisites:** [Post 09](../09-select-strategies/index.md).
+> **Safe to skip?** Skip it if every document type in the corpus already has a tested parser, tables survive parsing with their cells bound to their headers, every chunk carries its source, page and date, and a one-page edit re-indexes only that page.
+>
+> **After reading, you will be able to:**
+>
+> - Choose a parsing strategy for a source file (born-digital extraction, OCR or a layout-aware parser) and name what escalates from one to the next.
+> - Preserve tables and reading order through parsing, and check a parsed table cell against the source.
+> - Strip boilerplate before chunking: main-content extraction for web pages, and repeated headers, footers and navigation.
+> - Attach provenance at ingest (source, page, section, timestamp, document type) and name what citations, conflict resolution and filtering need from it.
+> - Re-index incrementally with content hashes, so that a changed page is re-embedded and its old chunk replaced while unchanged pages are skipped.
 
-![Ingestion pipeline: raw PDF, HTML, scan and spreadsheet sources feed a parse and OCR stage, then clean, enrich, chunk and index (dense plus lexical), with the parse, clean and enrich stages marked as where retrieval quality is set upstream.](diagrams/00-hero-data-ingestion-pipelines.svg)
-*Retrieval quality is decided upstream: what the parser keeps or drops is what the model can ever retrieve.*
+![Six stages joined left to right: source, parse, clean, enrich, chunk, index. Braces mark the first four as deciding which text exists and the last two as post 11's subject. A select arrow runs from the index to 04 Retrieved chunks; red notes mark a cell dropped at parse and provenance not written at enrich.](diagrams/01-ingestion-pipeline.svg)
 
----
-
-## 1. The motivation: garbage in
-
-A RAG system is only ever as good as the text it retrieves, and that text is only ever as good as the parser that produced it. The whole of [Post 09](../09-select-strategies/index.md) and [Post 11](../11-rag-in-depth/index.md) assumes clean plain text: paragraphs that read in order, tables that survived as tables, no navigation menus or page furniture bleeding into the content. Real corpora look nothing like that. They are PDFs exported from a design tool, decades-old scans, HTML dumps thick with cookie banners, PowerPoint decks, and spreadsheets where the meaning lives in the cell grid.
-
-The trouble is that ingestion is invisible until retrieval quality is bad. A demo built on three tidy Markdown files retrieves beautifully, ships, and then meets a real document store, where the "chunk" that got embedded is half a table caption glued to a page-footer copyright line, with the actual answer three columns away in a cell the parser dropped. Nothing in the retrieval stack is broken: the embedding model, the reranker, and the vector database are all fine. The tokens carrying the answer never entered the index, and recall@N cannot recover a fact that was destroyed at parse time.
-
-This inverts where teams spend their attention. Debugging effort flows to the parts that are easy to instrument (retrieval scores, prompt templates) and away from the pile of one-off parsing scripts nobody wants to own. Yet a large share of production RAG failures trace back to ingestion rather than retrieval (illustrative: the exact split depends on your corpus and is not a measured constant). The rule of thumb worth internalising: **before you tune retrieval, read the extracted text your parser actually produced.** Often the bug is visible in the first paragraph.
+*Every stage after parse works on what parse kept; the select step of each turn can only bring back what the index holds.*
 
 ---
 
-## 2. The shape of an ingestion pipeline
+## 1. The question: what decides which tokens can ever be retrieved?
 
-Every ingestion pipeline, whatever the source, has the same six stages:
+Retrieval-augmented generation (RAG) puts the chunks a retrieval pipeline selects into layer 04, retrieved chunks, of the window ([post 02](../02-six-layers-of-context/index.md)). [Post 09](../09-select-strategies/index.md) tunes that select step and [post 11](../11-rag-in-depth/index.md) builds it, and both assume the corpus is already clean text: paragraphs in reading order, tables that are still tables, no navigation menus or page numbers mixed into the content. Real corpora arrive as Portable Document Format (PDF) files exported from design tools, scans of paper, HyperText Markup Language (HTML) pages thick with cookie banners, slide decks, and spreadsheets whose meaning lives in the grid.
 
-```
-source  →  parse  →  clean  →  enrich  →  chunk  →  index
-  |          |         |         |          |         |
- raw     structured  strip    metadata,  split into  embed +
- files     text +    boiler-  provenance  units      store
-           layout    plate                (Post 11)
-```
+Ingestion is invisible until answers go wrong. A demonstration built on three tidy Markdown files retrieves well, ships, and meets a real document store, where the embedded chunk is half a table caption glued to a footer line and the answer sits in a cell the parser dropped. Nothing in the retrieval stack is broken: the embedding model, the reranker and the vector database all work. The tokens that carried the answer never entered the index, and recall@N, the share of the relevant chunks that reach the top-N candidates (post 09), cannot recover a fact destroyed at parse time.
 
-*The ingestion pipeline: five upstream stages that decide what text exists at all, then chunking and indexing (the subject of [Post 11](../11-rag-in-depth/index.md)) that decide how it is retrieved.*
+Debugging attention flows to what is easy to instrument, such as retrieval scores, and away from parsing scripts nobody owns. The cheapest check comes first: **before tuning retrieval, read the text the parser actually produced.** The question of this post is what the parse, clean and enrich stages must do so that the right text exists, and how a corpus that changes daily is kept from going stale.
 
-- **Source**: fetch the raw bytes and record where they came from. A PDF from a document management system, an HTML page from a crawl, a row exported from a wiki.
-- **Parse**: turn bytes into structured text, ideally preserving reading order, headings, and tables. This is the stage that makes or breaks everything downstream, and most of this post lives here.
-- **Clean**: strip what is not content, boilerplate, repeated headers and footers, navigation, advertisements, and normalise whitespace and encoding.
-- **Enrich**: attach metadata, source URL or path, page number, section heading, timestamp, document type, so the text carries its own provenance into the index (§7).
+---
+
+## 2. The six stages of an ingestion pipeline
+
+Every ingestion pipeline, whatever its sources, has the same six stages, drawn as the hero figure at the top of the post.
+
+- **Source**: fetch the raw bytes and record where they came from: a PDF from a document management system, an HTML page from a crawl, an export from a wiki.
+- **Parse**: turn bytes into structured text, keeping reading order, headings and tables. Most of this post lives here: this stage makes or breaks everything after it.
+- **Clean**: remove what is not content (boilerplate, repeated headers and footers, navigation, advertisements) and normalise whitespace and encoding.
+- **Enrich**: attach metadata (source path or web address (URL), page, section heading, timestamp, document type) so that the text carries its provenance into the index (section 7).
 - **Chunk**: split the cleaned, enriched text into the units retrieval returns.
-- **Index**: embed each chunk and write it to the vector and sparse indexes.
+- **Index**: embed each chunk and write it to the dense (vector) index and the sparse index, a BM25 index (BM25 is the classic lexical ranking function).
 
-The last two stages, chunking and indexing, are the entire subject of [Post 11](../11-rag-in-depth/index.md), and this post hands off to it cleanly. Chunk size, overlap, splitter choice, contextual retrieval, the sparse index: all of that is Post 11's territory and is not repeated here. The point of separating the stages is that a failure in one is diagnosable independently of the others. If the extracted text is wrong, no chunking strategy can fix it, so the stages must be inspected in order, source first.
+The last two stages are the subject of [post 11](../11-rag-in-depth/index.md): chunk size, overlap, splitter choice, contextual chunk headers and the sparse index are treated there and not repeated here. In the vocabulary of [post 07](../07-write-select-compress-isolate/index.md), the whole pipeline is a write operation, the offline write side of RAG that [post 08](../08-write-strategies/index.md) names: it moves information out of any window into a store, and every later select into layer 04 reads from that store.
+
+Separate stages make a failure diagnosable on its own: if the extracted text is wrong, no chunking strategy can fix it, so the stages are inspected in order, source first.
 
 ---
 
 ## 3. Parsing PDFs: three strategies, three situations
 
-PDF is not one format; it is at least three, and each needs a different extractor. Choosing wrong is the most common ingestion mistake.
+A PDF is not one format but at least three, and each needs a different extractor. Using one code path for all of them is an easy mistake, because it silently works on the first kind.
 
-**Born-digital text extraction.** A PDF exported from a word processor or a web page carries its text as actual character data with positions. A library that reads the text layer directly (`pdfplumber`, `PyMuPDF`, `pdfminer.six`) pulls it out quickly and cheaply, no model required. This is the right tool for most business documents and should always be tried first because it is close to free. Its weakness: it reads glyphs by position, so a two-column layout can interleave into nonsense unless the extractor reconstructs reading order.
+**Born-digital text extraction.** A PDF exported from a word processor or a web page carries its text as character data with positions on the page. A library that reads this text layer directly, such as pdfminer.six, pdfplumber (built on pdfminer.six) or PyMuPDF, extracts it quickly and with no model (each project's documentation, consulted October 2026). It is close to free, so it is tried first. Its weakness is that it reads glyphs by position. On a two-column page, a reader that goes top to bottom and left to right crosses the gutter on every line, as `snippets/reading_order.py` shows on a toy page:
 
-**Layout-aware extraction.** When reading order matters, in multi-column papers, forms, and invoices, a layout model is needed. These parsers detect regions (title, paragraph, table, figure, caption) and emit text in human reading order with structure preserved. They are heavier (many run a vision or detection model) but they turn a scrambled two-column extraction into clean, ordered Markdown. This is the class of tool §6 discusses.
+```text
+by position: Refunds over 500 dollars Shipping is free on orders need a manager's approval above 50 dollars to the within two working days. mainland only.
+by column:   Refunds over 500 dollars need a manager's approval within two working days. Shipping is free on orders above 50 dollars to the mainland only.
+```
 
-**OCR for scans.** A scanned document is an *image* of text; there is no text layer to extract. Optical character recognition (OCR, recognising characters from pixels) is the only option. Tesseract (Smith, 2007) is the long-standing open-weight engine; cloud OCR services and modern vision-language models are the higher-accuracy, higher-cost alternatives. OCR introduces its own error class ("rn" read as "m", a dropped decimal point), so measure character-level accuracy on a sample before trusting a scanned corpus.
+The first line is what reaches the index when the extractor does not reconstruct reading order: two policies braided together, each sentence in three pieces.
 
-![Three PDF extraction strategies: born-digital first, escalating to OCR when there is no text layer and to a layout-aware parser when reading order or tables are mangled](diagrams/01-pdf-decision.svg)
+**Layout-aware parsing.** When reading order matters (multi-column papers, forms, invoices), a layout-aware parser detects regions first (title, paragraph, table, figure, caption) and emits the text in reading order with its structure kept, for example as Markdown. It is heavier, since many such parsers run a detection or vision model. Section 6 treats them as a class.
 
-*Two escalations out of one starting point, and the failure each strategy brings with it.*
+**OCR for scans.** A scanned document is an image of text with no text layer to read. Optical character recognition, recognising characters from pixels, is the only route. Tesseract (Smith, 2007), developed at Hewlett-Packard and open-sourced in 2005, is the long-standing open-source engine; cloud OCR services and vision-language models are the alternatives, at a higher cost per page. OCR brings its own class of error ("rn" read as "m", a dropped decimal point), so its character accuracy is measured on a sample of the corpus before the corpus is trusted.
 
-The decision procedure is simple and worth hard-coding: **try born-digital extraction; if the text layer is empty or the page is an image, fall back to OCR; if reading order or tables are mangled, escalate to a layout-aware parser.** A single corpus often needs all three, because it contains all three kinds of PDF.
+![A decision walk for one PDF: try born-digital extraction; if the text layer is empty or the page an image, use OCR; else if reading order or tables are mangled, use a layout-aware parser; else index the born-digital text. Each strategy carries its risk.](diagrams/02-pdf-decision.svg)
+
+*Start cheap and escalate on evidence: each strategy brings its own failure, so each output is still read before it is indexed.*
+
+The decision procedure is simple enough to write into the pipeline, as the figure above walks it: **try born-digital extraction; if the text layer is empty or the page is an image, fall back to OCR; if reading order or tables come out mangled, escalate to a layout-aware parser.** A single corpus often needs all three, because it contains all three kinds of PDF.
 
 ---
 
 ## 4. Tables and structure: the hardest case
 
-Tables are where naive extraction fails most destructively, and where the failure is easiest to miss because the output still *looks* like text.
+Tables are where naive extraction fails most destructively, and where the failure is easiest to miss, because the output still looks like text.
 
-Consider a pricing table. To a human it is a grid: rows are products, columns are tiers, and a cell's meaning comes from its row and column headers. A born-digital text extractor that reads glyphs left-to-right, top-to-bottom flattens that grid into a stream: `Product A Basic $10 Pro $20 Product B Basic $15 Pro $30`. The two-dimensional relationship that carried all the meaning, *which price belongs to which product and tier*, is gone. When a user later asks "what is the Pro price for Product B?", the retrieved chunk contains all four numbers and no reliable way for the model to bind `$30` to the right cell. The answer is often confidently wrong.
+Consider a pricing table with illustrative prices. To a reader it is a grid: rows are products, columns are tiers, and a cell's meaning comes from its row and column headers. A text-layer reader that takes every non-empty cell left to right and top to bottom turns the grid into a stream. This excerpt of `snippets/flatten_table.py` does that:
 
-![A pricing grid flattened into a single stream by a naive extractor, beside the same table preserved as Markdown](diagrams/02-table-flattening.svg)
-
-*The same four numbers survive both readings. Only one of them still says which price belongs to which product.*
-
-The fix is to preserve the grid. A table-aware parser emits the table as **Markdown or HTML**, keeping rows, columns, and headers intact:
-
-```
-| Product   | Basic | Pro  |
-|-----------|-------|------|
-| Product A | $10   | $20  |
-| Product B | $15   | $30  |
+```python
+def flatten(header, rows):
+    """What a reader of glyphs produces: every non-empty cell, left to right, top to bottom."""
+    cells = header + [c for r in rows for c in r]
+    return " ".join(c for c in cells if c)
 ```
 
-Now the row-and-column structure is explicit in the token stream, and a model reading the chunk can bind `$30` to *Product B / Pro* because the header row and the leftmost column are right there. HTML is the better target when cells span multiple rows or columns (invoices and financial statements are full of these), because `rowspan` and `colspan` have no clean Markdown equivalent.
+Product C has no Basic tier, so the table has one empty cell. The snippet flattens the table, reads the stream back into a grid by position (the only cue the stream still carries), and asks two questions of the stream and of the same table as Markdown:
 
-Getting there requires a parser that detects table *regions* and reconstructs cell boundaries, which is what modern layout models (table-transformer-style detectors, and the document parsers in §6) are built to do. The guidance is unambiguous: **if your corpus contains tables that carry answers, table fidelity is not optional, and it is the single parsing capability most worth paying for.** Verify it by reading the extracted table and checking a cell against the source.
+```text
+flattened: Product Basic Pro Product A $10 $20 Product B $15 $30 Product C $25
+  read back by position, Product A: {'Basic': '$10', 'Pro': '$20'}
+  read back by position, Product B: {'Basic': '$15', 'Pro': '$30'}
+  read back by position, Product C: {'Basic': '$25'}
+as Markdown:
+| Product | Basic | Pro |
+|---|---|---|
+| Product A | $10 | $20 |
+| Product B | $15 | $30 |
+| Product C |   | $25 |
+  Product B, Pro: flat stream says $30, Markdown says $30
+  Product C, Basic: flat stream says $25, Markdown says (empty)
+```
 
-Spreadsheets are the adjacent case. A well-formed sheet is already a grid, so serialise it faithfully (one row per record, headers preserved) rather than dumping cell values as prose, and keep sheet and column names as metadata so a filter can scope retrieval to the right sheet.
+![A pricing table with Product C's Basic cell empty, outlined in red; the same table flattened to one stream, read back so that Product C's Basic price is 25 dollars, marked wrong; and the table as Markdown, where that cell stays empty.](diagrams/03-table-flattening.svg)
+
+*A flat stream keeps every number and loses the one thing that said where each belongs.*
+
+The flat stream keeps every number and loses the grid. When every cell is full, binding `$30` to Product B and Pro takes counting positions, which a model reading a chunk does unreliably. When a cell is empty, as the figure above shows, position reads wrong: the stream has no gap where Product C's Basic price should be, so `$25` slides into the Basic column and a question about it gets a confident wrong answer. A chunk boundary inside the table makes it worse: the rows after it arrive without the header row.
+
+The fix is to keep the grid. A table-aware parser emits the table as **Markdown or HTML**, with rows, columns and headers explicit in the token stream, and the empty cell stays empty, so a model reading the chunk can bind each price to its product and tier. HTML is the better target when cells span several rows or columns (invoices and financial statements are full of them), because HTML's `rowspan` and `colspan` have no Markdown equivalent.
+
+Getting there requires a parser that detects table regions and reconstructs cell boundaries, the job of table-recognition models such as the Table Transformer, trained on the PubTables-1M dataset (Smock et al., 2022), and of the parsers of section 6. **When tables in the corpus carry answers, table fidelity is the first parsing capability to check**: read a parsed table and compare a cell with the source.
+
+Spreadsheets are the neighbouring case: a sheet is serialised as a grid (one row per record, headers kept), not as a run of cell values, and its sheet and column names go into the metadata.
 
 ---
 
 ## 5. HTML and boilerplate
 
-HTML is deceptively easy to extract and deceptively hard to extract *well*. Stripping the tags is trivial; the problem is that a web page is mostly not content. Navigation bars, footers, cookie banners, related-article rails, share buttons, and advertisements can outweigh the article by an order of magnitude, and every one of those tokens, once embedded, is a chance for retrieval to match on furniture instead of substance.
+HTML is easy to extract and hard to extract well. Removing the tags is trivial; the problem is that much of a web page is not content. Navigation bars, footers, cookie banners, related-article rails and share buttons can outweigh the article itself, and every one of their tokens, once embedded, is a chance for retrieval to match on furniture instead of substance.
 
-The task is **main-content extraction**: isolate the article and discard the chrome. This is a well-studied problem with mature open tools. Mozilla's Readability (the engine behind Firefox Reader View) and `trafilatura` (Barbaresi, 2021) both score DOM nodes by text density and structural cues to find the main article and drop the rest. `trafilatura` in particular is built for corpus-scale web extraction and reports strong main-content accuracy in its evaluation (Barbaresi, 2021).
+The task is **main-content extraction**: isolate the article and discard the rest. Mature open-source tools exist. Mozilla's Readability is the library behind Firefox Reader View, and Trafilatura (Barbaresi, 2021) is built for extraction at corpus scale; both use heuristics over the page's structure, such as text length and link density, to find the main content. Trafilatura's paper reports that it performed significantly better than other open-source tools in its evaluation and in external benchmarks.
 
-Two boilerplate patterns deserve specific attention because they survive naive cleaning:
+Two boilerplate patterns survive naive cleaning and deserve their own pass:
 
-- **Repeated headers and footers.** In a PDF, the running header and the page-number footer repeat on every page. Concatenate the pages and every chunk near a page boundary is contaminated with `Confidential — Page 14 of 210`. Detect lines that recur at the same position across many pages and drop them.
-- **Duplicated navigation across a crawl.** Every page in a documentation site shares the same sidebar. Embed it once per page and the index fills with hundreds of identical navigation chunks that outrank real content on any query mentioning a section name. Deduplicate near-identical blocks across documents at clean time.
+- **Repeated headers and footers.** In a PDF, the running header and the page footer repeat on every page. Concatenate the pages and every chunk near a page boundary carries `Confidential, page 2 of 3`. The fix is to find lines that recur across many pages, with their page numbers masked, and drop them.
+- **Navigation duplicated across a crawl.** Every page of a documentation site shares the same sidebar. Embedded once per page, it fills the index with near-identical navigation chunks that match any query naming a section. Near-identical blocks are deduplicated across documents at clean time.
 
-The test for this stage is the same as everywhere else: read a sample of cleaned documents. If you see a cookie banner or a `Page 14 of 210` in the text destined for the index, the cleaner is not done.
+The first pass fits in a few lines. This excerpt of `snippets/strip_furniture.py` masks the digits of each line and drops every line whose shape appears on at least 60 percent of the pages (an illustrative threshold):
+
+```python
+def shape(line):
+    """A line with its digits masked, so 'page 1 of 3' and 'page 2 of 3' count as one line."""
+    return re.sub(r"\d+", "#", line.strip().lower())
+
+
+def strip_furniture(pages, min_share=0.6):
+    """Drop every line whose shape appears on at least min_share of the pages."""
+    seen = Counter(s for page in pages for s in {shape(ln) for ln in page})
+    furniture = {s for s, n in seen.items() if n / len(pages) >= min_share}
+    kept = [[ln for ln in page if shape(ln) not in furniture] for page in pages]
+    return kept, sorted(furniture)
+```
+
+On its three-page toy policy document it prints:
+
+```text
+repeated lines dropped: ['acme ltd refund policy', 'confidential, page # of #']
+words before 60, after 33: 27 words (45%) were page furniture
+  page 1: Refunds are paid to the original card. A refund over 500 dollars needs a manager's approval.
+  page 2: Approval is given within two working days. Refused refunds can be appealed once.
+  page 3: Store credit never expires.
+```
+
+The 45 percent belongs to a toy document with short pages; on long pages the share is smaller, but the furniture still lands in every chunk near a page boundary. The test is to read a sample of cleaned documents: a cookie banner or a `page 14 of 210` in text bound for the index means the cleaner is not done.
 
 ---
 
-## 6. Layout-aware tools as a class
+## 6. Layout-aware parsers as a class
 
-Born-digital extraction, OCR fallback, table reconstruction, reading-order recovery, and boilerplate removal are a lot to assemble from primitives. A class of document parsers now packages most of it behind one call. Framework-agnostic examples, treated as a category rather than a recommendation, include **Docling** (IBM, open-weight), **Unstructured**, and **LlamaParse**. Each takes a PDF, DOCX, PPTX, HTML, or image and returns structured, reading-ordered output (usually Markdown or a JSON element tree) with tables preserved and, where needed, OCR applied. Consult each project's own documentation for current capabilities and limits, since this space moves quickly.
+Born-digital extraction, OCR fallback, table reconstruction, reading-order recovery and boilerplate removal are a lot to assemble from separate libraries. A class of document parsers packages most of it behind one call. Three examples, named as a category and not as a recommendation, as their documentation described them when consulted in October 2026:
 
-Reaching for one of these is a genuine **build-versus-buy** decision:
+- **Docling**, started by IBM Research Zurich and released under the MIT licence, parses PDF, Word, PowerPoint, Excel, HTML and image files, among others, with page layout, reading order, table structure and OCR for scans, and exports Markdown, HTML or JavaScript Object Notation (JSON).
+- **Unstructured** is an open-source library that partitions documents into typed elements (titles, narrative text, tables) in its own JSON schema; its documentation says that the open-source version is a starting point for prototyping and that its hosted service has stronger OCR and table extraction.
+- **LlamaParse**, from LlamaIndex, is a parsing service called through an application programming interface or software development kits, which returns Markdown, text or JSON.
 
-- **Buy (adopt a document parser)** when your corpus is heterogeneous (mixed PDFs, scans, decks, tables) and you would otherwise maintain a pile of format-specific scripts. The parser absorbs the long tail of format quirks, which is precisely the work that never ends.
-- **Build (assemble from primitives)** when your corpus is narrow and stable, a single vendor's born-digital PDFs, say, where `pdfplumber` plus a table pass does the whole job at a fraction of the cost, and every dependency you avoid is one you never have to debug.
+Their formats, limits and prices change quickly, so the documentation is read again on the day a choice is made.
 
-The trap on both sides is treating the tool as a black box. A document parser still errs on hard tables and unusual layouts, so the verification discipline does not change: sample the output, check tables against the source, and measure extraction quality on a held-out set before trusting a parser on a corpus you cannot eyeball. The tool changes how much you build, not whether you check.
+Adopting one is a build-or-buy decision:
+
+- **Adopt a document parser** when the corpus is mixed (PDFs, scans, decks, tables) and the alternative is a set of format-specific scripts to maintain: the parser absorbs the long tail of format quirks.
+- **Assemble from libraries** when the corpus is narrow and stable, for example one supplier's born-digital PDFs, where a text-layer library plus a table pass does the whole job at a fraction of the cost.
+
+Either way, a parser still errs on hard tables and unusual layouts, so the discipline does not change: sample the output, check tables against the source, and measure extraction quality on a held-out set of documents. The tool changes how much is built, not whether the output is checked.
 
 ---
 
 ## 7. Metadata and provenance at ingest
 
-Provenance is captured at ingest or it is lost forever. Once a document has been parsed, cleaned, chunked, and embedded, there is no way to reconstruct *which page* a chunk came from unless that fact was attached on the way through. So the enrich stage writes, onto every chunk, at least: **source** (path or URL), **page** (or slide, or sheet), **section** (the nearest heading), **timestamp** (when the source was last modified), and **document type**. This costs almost nothing and is impossible to backfill.
+Provenance is captured at ingest or it is lost. Once a document has been parsed, cleaned, chunked and embedded, nothing can recover which page a chunk came from unless that fact was attached on the way through. So the enrich stage writes onto every chunk at least its **source** (path or URL), **page** (or slide, or sheet), **section** (the nearest heading), **timestamp** (when the source last changed) and **document type**, and a corpus in several languages adds the **language**. It costs almost nothing at ingest and cannot be backfilled afterwards.
 
-It pays off in three places downstream:
+The manifest row that `snippets/reindex.py` (section 8) keeps for one page shows the shape, here for page 2 of a toy refunds policy after an edit:
 
-- **Citations.** [Post 11](../11-rag-in-depth/index.md) shows the model quoting a chunk's header back as a citation the application renders. That header is exactly the provenance captured here. No provenance at ingest, no citation at generation, no way for a user to verify an answer.
-- **Conflict resolution.** When two chunks disagree, an old policy and its replacement, the timestamp and source metadata let the system prefer the newer or more authoritative one. Conflict is one of the five failure modes catalogued in [Post 06](../06-context-failure-modes/index.md), and dated provenance is a large part of the cure: a model told "prefer the source with the most recent timestamp" can resolve a contradiction that would otherwise produce a confidently stale answer.
-- **Filtered retrieval.** Metadata filtering ([Post 09](../09-select-strategies/index.md), §3) is only possible if the metadata exists. Scoping a query to one document, one date range, or one language is free recall, but only if `source`, `timestamp`, and `language` rode along from ingest.
+```text
+manifest row for refunds.pdf p2:
+  source=refunds.pdf, page=2, section=Approval, type=pdf, modified=2026-10-12, hash=1c9875b4b381, chunk=refunds.pdf#p2@1c9875
+```
 
-A useful discipline is a **manifest table**, one row per source document recording its hash, its chunk ids, the parser and embedding-model versions, and the ingest timestamp. [Post 11](../11-rag-in-depth/index.md) introduces the same table from the indexing side; build it once and share it, because it is the record that answers "what changed, and what parsed it".
+Provenance pays off in three places downstream:
+
+- **Citations.** [Post 11](../11-rag-in-depth/index.md) has the model cite the header of each packed chunk, a source the user can check. That header is built from the provenance captured here.
+- **Conflict.** When two chunks disagree, such as an old policy and its replacement, the timestamp and the source let the window say which one wins. Conflict is one of the five failure modes of [post 06](../06-context-failure-modes/index.md), and its first fix is exactly this: a provenance and recency stamp on every retrieved chunk, with a precedence rule in the system prompt ("when sources disagree, the most recent one wins").
+- **Filtered retrieval.** Metadata filtering, one of the ways post 09 narrows the candidate set, scopes a query to one document, date range, document type or language, but only if those fields rode along from ingest.
+
+A **manifest** turns provenance into a record of the index: one row per source document (per page in the snippet) with its content hash and chunk ids; a production row adds the parser and embedding-model versions and the ingest time. Post 11 keeps the same table from the indexing side; it is the record that answers "what changed in the index, and what parsed it".
 
 ---
 
 ## 8. Incremental re-indexing and change detection
 
-A corpus is not a snapshot; it is a stream. Documents are added, revised, and retired, and an index that was correct at launch drifts out of date unless it tracks those changes. Re-parsing and re-embedding the whole corpus on every change works for a thousand documents and is ruinous at a million, so real pipelines re-index *incrementally*.
+A corpus is a stream: documents are added, revised and retired, and an index that was right at launch drifts out of date. Re-embedding everything on every change is affordable for a small corpus and wasteful for a large one, so production pipelines re-index incrementally.
 
-The mechanism is **content hashing**. For each source document, store a hash of its bytes (or of its extracted text) in the manifest. On each ingest run, three cases fall out:
+The mechanism is **content hashing**. For each source document, the manifest stores a hash of its extracted text (or of its bytes); for each page, a hash of that page's text. On every ingest run, four cases fall out:
 
-- **Unchanged** (hash matches the stored hash): skip it. This is the overwhelming majority on a typical run and is why incremental indexing is cheap.
-- **Changed** (hash differs): re-parse, re-chunk, re-embed, and *replace* the document's old chunks. Replacement is the step teams forget, and forgetting it is the "embedding stale chunks" failure from [Post 11](../11-rag-in-depth/index.md): the new chunks land but the old ones linger, so the agent retrieves and confidently cites a policy that was superseded months ago.
+- **Unchanged** (the document hash matches): skip it without embedding again. On a corpus that changes a little each day, most documents fall here, which is why incremental indexing is cheap.
+- **Changed** (the document hash differs): compare the page hashes, re-parse, re-chunk and re-embed only the changed pages, and *replace* their old chunks. Replacement is the step teams forget: if the old chunks stay, the agent can retrieve and cite a superseded policy, one of the ways post 11 lists for production RAG to go wrong.
 - **Deleted** (in the manifest, absent from the source): remove its chunks from both indexes.
+- **New** (in the source, absent from the manifest): parse and index it.
 
-Content hashing also gives near-free **deduplication**: two source documents with the same hash are the same document, and only one copy needs indexing. The whole scheme depends on the manifest from §7, which is why provenance and incremental re-indexing are really one design: the metadata you capture at ingest is the same metadata that lets you keep the index honest over time.
+Hashing the extracted text rather than the bytes avoids a re-index when only a file's metadata changed, such as a PDF re-exported with a new creation date. Content hashing also gives exact deduplication for free: two documents with the same hash are the same text and are indexed once. Near-duplicates, such as the shared sidebars of section 5, have different hashes and need the clean-time deduplication described there.
+
+`snippets/reindex.py` runs a toy corpus through two ingest runs. The second run follows a day in which page 2 of `refunds.pdf` was edited, `faq.md` was retired and `warranty.md` was added; `shipping_copy.html` has the same text as `shipping.html`:
+
+```text
+run 2, the next day:
+  skip      refunds.pdf p1, page hash unchanged
+  replace   refunds.pdf p2: delete refunds.pdf#p2@d8f24b, embed refunds.pdf#p2@1c9875
+  skip      refunds.pdf p3, page hash unchanged
+  skip      shipping.html, document hash unchanged
+  duplicate shipping_copy.html = shipping.html, not indexed
+  embed     warranty.md p1: warranty.md#p1@6dc176
+  delete    faq.md p1: faq.md#p1@6446d9
+  delete    faq.md p2: faq.md#p2@f8f96d
+  pages embedded: 1, replaced: 1, deleted: 2, skipped: 3
+```
+
+![A table of the second run of snippets/reindex.py: two refunds.pdf pages and shipping.html skipped, refunds.pdf page 2 replaced, shipping_copy.html not indexed as a duplicate, warranty.md embedded, and both faq.md pages deleted, shaded red.](diagrams/04-incremental-reindex.svg)
+
+*The manifest turns a day of edits into a short list of work: two pages embedded, three old chunks deleted, the rest untouched.*
+
+Of the five pages in the corpus after the second run, two were embedded (the edited page and the new document), and the edited page's old chunk was deleted in the same step, as the figure above lays out. The scheme rests on the manifest of section 7: the metadata captured at ingest is what keeps the index honest over time.
+
+---
+
+## 9. Make it run: the four snippets
+
+The four snippets use the standard library only, make no network call, and run from the series root in well under a second each:
+
+```text
+uv run python posts/10-data-ingestion-pipelines/snippets/reading_order.py
+uv run python posts/10-data-ingestion-pipelines/snippets/flatten_table.py
+uv run python posts/10-data-ingestion-pipelines/snippets/strip_furniture.py
+uv run python posts/10-data-ingestion-pipelines/snippets/reindex.py
+```
+
+They print the outputs quoted in sections 3, 4, 5, 7 and 8. Every input is a toy written into the file; a real pipeline replaces it with a parser's output and keeps the checks.
+
+---
+
+## 10. What can go wrong?
+
+- **One code path for every PDF.** The pipeline was built on born-digital reports and later receives scans. The scanned documents index as empty or near-empty chunks, nothing errors, and questions about them come back with "not found in the sources".
+- **A table read as a stream.** A pricing sheet is extracted by a text-layer reader. Retrieval finds the right chunk, the answer quotes a real number from it, and the number belongs to the next column, because an empty cell shifted every value after it.
+- **Footers in every chunk.** Running headers and page footers are left in. Queries that mention the company name or the word "confidential" retrieve chunks that matched on the furniture, and precision@k, the share of the packed chunks that are relevant, falls.
+- **Re-embedding without replacing.** A changed page is re-indexed but its old chunk is never deleted. Both versions are retrieved, and the answer wavers between the old rule and the new one: conflict, created by the pipeline.
+- **Hashing the bytes of a regenerated file.** A nightly export rewrites every PDF with a new timestamp. Every byte hash changes, the whole corpus re-embeds every night, and the cost of indexing looks like a full rebuild.
 
 ---
 
 ## Common pitfalls
 
-- **Trusting extracted text you have never read.** The fastest way to catch an ingestion bug is to open the parser's output and read the first page. Most parsing failures are visible immediately.
-- **Using one PDF strategy for all PDFs.** Born-digital, layout-heavy, and scanned PDFs need different extractors. A single code path silently mangles two of the three.
-- **Flattening tables into prose.** A table read left-to-right loses the row-and-column bindings that carried the meaning. Emit Markdown or HTML and check a cell against the source.
-- **Embedding web boilerplate.** Navigation, footers, and cookie banners embedded alongside content give retrieval furniture to match on. Run main-content extraction and strip repeated headers and footers.
-- **Discarding provenance at ingest.** Source, page, section, and timestamp cannot be backfilled after chunking. Capture them on the way through or lose citations and conflict resolution forever.
-- **Re-indexing everything on every change (or nothing at all).** Full re-indexing is ruinous at scale; never re-indexing leaves stale chunks the agent will cite. Hash-based incremental re-indexing with replacement is the middle path.
-- **Treating a document parser as infallible.** Bought or built, the parser still errs on hard tables and odd layouts. Verify on a held-out sample regardless.
+1. **Tuning retrieval before reading the parser's output.** Opening the extracted text of a few documents is the fastest ingestion check there is; many parsing failures are visible on the first page.
+2. **Discarding provenance at ingest.** Source, page, section and timestamp cannot be backfilled after chunking; without them there are no citations and no way to resolve conflict.
+3. **Treating a document parser as infallible.** Adopted or assembled, the parser still errs on hard tables and odd layouts; verify on a held-out sample either way.
+4. **Re-indexing everything on every change, or never.** Full rebuilds waste work at scale, and never re-indexing leaves stale chunks the agent will cite; hash-based incremental re-indexing with replacement sits between them.
+5. **Embedding web pages whole.** Without main-content extraction, navigation and banners are indexed beside the article and compete with it for every query.
 
 ---
 
 ## Further reading
 
-- Smith, R., *"An Overview of the Tesseract OCR Engine"* (ICDAR 2007): the open-weight OCR engine referenced in §3.
-- Barbaresi, A., *"Trafilatura: A Web Scraping Library and Command-Line Tool for Text Discovery and Extraction"* (ACL 2021): main-content extraction from HTML (§5).
-- Mozilla, *"Readability"* library documentation: the Reader View extraction engine (§5).
-- IBM, *"Docling"* documentation; *"Unstructured"* documentation; *"LlamaParse"* documentation: the layout-aware document parsers discussed as a class in §6.
-- Smock, B. *et al.*, *"PubTables-1M: Towards Comprehensive Table Extraction from Unstructured Documents"* (CVPR 2022): the table-transformer approach behind table-region detection (§4).
+- Smith, R., *"An Overview of the Tesseract OCR Engine"* (ICDAR 2007): the open-source OCR engine of section 3.
+- pdfminer.six, pdfplumber and PyMuPDF documentation (consulted October 2026): text-layer extraction for born-digital PDFs.
+- Smock, B., Pesala, R. and Abraham, R., *"PubTables-1M: Towards Comprehensive Table Extraction from Unstructured Documents"* (CVPR 2022): the dataset and the Table Transformer models behind table-region detection in section 4.
+- Barbaresi, A., *"Trafilatura: A Web Scraping Library and Command-Line Tool for Text Discovery and Extraction"* (ACL 2021, system demonstrations): main-content extraction from HTML, section 5.
+- Mozilla, *"Readability"* (GitHub): the library behind Firefox Reader View, section 5.
+- Docling, Unstructured and LlamaParse documentation (consulted October 2026): the layout-aware parsers of section 6, cited as a class.
 
-Full citations in [REFERENCES.md](../../REFERENCES.md).
+Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
 ---
 
 ## What to read next
 
-- **[Post 11 — RAG in depth](../11-rag-in-depth/index.md)** — takes the clean, enriched text this post produces and turns chunking, embedding, and indexing into a production pipeline.
-- **[Post 09 — Select strategies](../09-select-strategies/index.md)** — the four-lever model of Select that this post supplies the upstream half of.
+- **[Post 11 - RAG in depth](../11-rag-in-depth/index.md):** takes the clean, dated text this post produces and turns chunking, embedding and indexing into a production pipeline.
+- **[Post 19 - Multimodal context: images, PDF pages, and audio](../19-multimodal-context/index.md):** the other way to send a PDF page, as an image rather than as extracted text, and when it wins.

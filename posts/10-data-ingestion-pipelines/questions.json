@@ -1,0 +1,757 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-010",
+  "next_ordinal": 17,
+  "questions": [
+    {
+      "id": "ctx-010-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "pdf-parsing",
+        "ocr"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A born-digital text-layer library returns an empty string for every page of a PDF that opens normally in a viewer and shows pages of printed text. What should the pipeline do next with this file?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Run another text-layer library on it, since the first one may have a bug.",
+          "correct": false,
+          "feedback": "An empty result on every page means there is no text layer to read: the pages are images of text. A second text-layer library reads the same missing layer."
+        },
+        {
+          "key": "b",
+          "text": "Run OCR on the page images.",
+          "correct": true,
+          "feedback": "Pages that show text but carry no text layer are scans: optical character recognition is the route from pixels to characters."
+        },
+        {
+          "key": "c",
+          "text": "Index the empty pages and rely on the reranker to skip them.",
+          "correct": false,
+          "feedback": "An empty page indexes as an empty chunk; nothing downstream can retrieve text that was never extracted."
+        },
+        {
+          "key": "d",
+          "text": "Send it to a layout-aware parser because the reading order is mangled.",
+          "correct": false,
+          "feedback": "Reading order is the next question, asked of text that exists. Here there is no text yet; the trigger is the empty text layer, which points to OCR."
+        }
+      ],
+      "explanation": "Section 3: try born-digital extraction first; if the text layer is empty or the page is an image, fall back to OCR. A PDF that shows text but yields none from its text layer is a scan.",
+      "hints": [
+        "Ask what an empty result from the text layer says about how the PDF was made."
+      ]
+    },
+    {
+      "id": "ctx-010-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "pdf-parsing",
+        "reading-order"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A research paper set in two columns is extracted with a born-digital library. The output has text on every page, but its sentences alternate between two unrelated topics line by line. Which change addresses the cause?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Re-extract with a layout-aware parser that detects the columns and emits them in reading order.",
+          "correct": true,
+          "feedback": "The glyphs were read top to bottom across the gutter. A parser that finds the regions first restores the order of each column."
+        },
+        {
+          "key": "b",
+          "text": "Run OCR on the pages instead of reading the text layer.",
+          "correct": false,
+          "feedback": "The text layer is present and its characters are right; the fault is the order in which they were read, which OCR on its own does not fix."
+        },
+        {
+          "key": "c",
+          "text": "Increase chunk overlap so that each sentence appears whole in at least one chunk.",
+          "correct": false,
+          "feedback": "Overlap repeats neighbouring text; it cannot unbraid two columns that were interleaved before chunking."
+        },
+        {
+          "key": "d",
+          "text": "Add a reranker so that the right chunk is ranked first.",
+          "correct": false,
+          "feedback": "Every chunk of this paper carries the braided text, so ranking them differently still packs scrambled sentences."
+        }
+      ],
+      "explanation": "Section 3: a text-layer library reads glyphs by position, so a two-column page interleaves; when reading order or tables are mangled, the pipeline escalates to a layout-aware parser.",
+      "hints": [
+        "Separate what is wrong (the characters, or their order) before choosing a tool."
+      ]
+    },
+    {
+      "id": "ctx-010-q03",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "pdf-parsing",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A pipeline receives a mixed batch of PDFs, some of them scans, and still tries born-digital text extraction on every file before anything else. Why is that a sound first step?",
+      "answer": {
+        "model": "Reading the text layer directly is close to free: no model runs and it is fast, so it is tried first and the pipeline escalates to OCR or a layout-aware parser only when the output shows it failed.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\b(it|this|that|born-digital(\\s+\\w+)?|extraction|the\\s+text\\s+layer)\\s+(is\\s+not|isn'?t|is\\s+never|was\\s+not|wasn'?t)\\s+(\\w+\\s+)?(cheap|free|fast|quick|inexpensive)\\b)(?![\\s\\S]*\\b(ocr|layout[- ]aware(\\s+\\w+)?|vision(\\s+\\w+)?\\s+models?|the\\s+parser)\\s+(is|are)\\s+(\\w+\\s+)?(cheaper|faster|quicker|free|less\\s+expensive)\\b)(?![\\s\\S]*\\b(it|this|born-digital(\\s+\\w+)?|extraction|reading\\s+the\\s+text\\s+layer)\\s+(is|are)\\s+(\\w+\\s+)?(expensive|costly|slow)\\b)(?=[\\s\\S]*(\\bcheap\\w*|\\bfree\\b|\\bcosts?\\s+(almost\\s+|next\\s+to\\s+|nearly\\s+|virtually\\s+)?nothing|\\bcosts?\\s+(very\\s+)?little|\\blow[- ]cost|\\blowest[- ]cost|\\bleast\\s+(expensive|costly)|\\binexpensive|\\bno\\s+(ml\\s+|vision\\s+)?model|\\bwithout\\s+(a|any)\\s+model|\\bno\\s+model\\s+(is\\s+)?(needed|required)|\\bfast\\w*|\\bquick\\w*))(?![\\s\\S]*\\b(ocr|optical\\s+character\\s+recognition|layout[- ]aware|vision|cloud|(the|a)\\s+parser)(\\s+(?!it\\b|this\\b|that\\b|born\\b|text\\b|extraction\\b)[\\w-]+){0,2}\\s+(is|are|runs?|costs?|was)\\s+(\\w+\\s+)?(cheap\\w*|free|fast\\w*|quick\\w*|inexpensive|nothing|little)\\b)(?![\\s\\S]*\\b(accurate|reliable|correct|perfect\\w*)\\b[^.]{0,40}\\b(scans?|scanned|every|all|any)\\b)(?=[\\s\\S]*\\b(is|are|was|costs?|needs?|runs?|requires?|uses?|takes?|reads?|has|have|because|since|so|as)\\b)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 3: a library that reads the text layer extracts born-digital text quickly and with no model, so it is close to free; the more expensive strategies are kept for the files where it fails.",
+      "hints": [
+        "Compare what each of the three strategies needs to run."
+      ]
+    },
+    {
+      "id": "ctx-010-q04",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "pdf-parsing",
+        "decision"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the steps of the post's decision procedure for one PDF in the order the pipeline takes them.",
+      "items": [
+        {
+          "key": "a",
+          "text": "If reading order or tables come out mangled, re-extract with a layout-aware parser."
+        },
+        {
+          "key": "b",
+          "text": "Extract the text layer with a born-digital library."
+        },
+        {
+          "key": "c",
+          "text": "Read a sample of the extracted text, then pass it on to clean and enrich."
+        },
+        {
+          "key": "d",
+          "text": "If the text layer is empty or the page is an image, run OCR instead."
+        }
+      ],
+      "answer": [
+        "b",
+        "d",
+        "a",
+        "c"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 3: try born-digital extraction; if the text layer is empty or the page is an image, fall back to OCR; if reading order or tables are mangled, escalate to a layout-aware parser. The output is read before it goes on, whichever strategy produced it.",
+      "hints": [
+        "Start with the cheapest strategy and ask first whether it produced any text at all."
+      ]
+    },
+    {
+      "id": "ctx-010-q05",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "tables"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A pricing table has an empty cell. A text-layer reader flattens the table into one stream of words, left to right and top to bottom. What has the stream lost?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The empty cell's position, so the values after it can be read into the wrong column.",
+          "correct": true,
+          "feedback": "An empty cell leaves no gap in the stream, and position is the only cue the stream has for which column a value belongs to."
+        },
+        {
+          "key": "b",
+          "text": "Some of the numbers, which the reader skips when a row has a gap.",
+          "correct": false,
+          "feedback": "Every non-empty cell is still in the stream; the numbers survive and their bindings do not."
+        },
+        {
+          "key": "c",
+          "text": "Nothing, because the header row is still at the start of the stream.",
+          "correct": false,
+          "feedback": "The header words are present, but nothing in a flat stream says which value sits under which header once a cell is missing."
+        },
+        {
+          "key": "d",
+          "text": "The currency symbols, which a text-layer reader drops.",
+          "correct": false,
+          "feedback": "The symbols are characters in the text layer and come through like any other glyph."
+        }
+      ],
+      "explanation": "Section 4: the flat stream keeps every number and loses the grid; with an empty cell, reading back by position slides the next value into the wrong column.",
+      "hints": [
+        "Write the stream out for a row with a gap and read it back."
+      ]
+    },
+    {
+      "id": "ctx-010-q06",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 5,
+      "tags": [
+        "incremental-indexing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An index holds 2,000 documents of 40 pages each, one chunk per page (illustrative numbers). In one day, 30 documents have 2 pages edited each, 10 new documents of 30 pages arrive, and 5 documents are retired. With page-level content hashing and replacement, how many pages are embedded, and how many old chunks are deleted? How many pages would a full rebuild of the new corpus embed?",
+      "answer": {
+        "parts": [
+          {
+            "label": "pages embedded incrementally",
+            "value": 360,
+            "tolerance": 0,
+            "unit": "pages"
+          },
+          {
+            "label": "old chunks deleted",
+            "value": 260,
+            "tolerance": 0,
+            "unit": "chunks"
+          },
+          {
+            "label": "pages embedded by a full rebuild",
+            "value": 80100,
+            "tolerance": 0,
+            "unit": "pages"
+          }
+        ]
+      },
+      "precision_note": "Embedded: 30 × 2 changed pages + 10 × 30 new pages = 60 + 300 = 360. Deleted: the 60 replaced chunks + 5 × 40 retired pages = 260. Full rebuild: 2,000 × 40 - 5 × 40 + 10 × 30 = 80,000 - 200 + 300 = 80,100. Forgetting the new documents gives 60 embedded; forgetting replacement gives 200 deleted; rebuilding the old corpus gives 80,000; all are rejected.",
+      "explanation": "Section 8: unchanged pages are skipped, a changed page is re-embedded and its old chunk replaced, a new document is embedded, and a retired one has its chunks deleted. Replacement means every re-embedded page also deletes one chunk.",
+      "hints": [
+        "Count each of the four cases separately: unchanged, changed, new, retired.",
+        "A changed page adds one embedding and one deletion; a retired page only a deletion."
+      ]
+    },
+    {
+      "id": "ctx-010-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 4,
+      "tags": [
+        "boilerplate"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A 210-page report has 300 words on every page, of which a running header of 4 words and the footer \"Confidential, page 14 of 210\" (5 words, with its page number) repeat on every page (illustrative numbers). How many words does stripping the header and footer remove from the whole report, and what percentage of its words is that?",
+      "answer": {
+        "parts": [
+          {
+            "label": "words removed",
+            "value": 1890,
+            "tolerance": 0,
+            "unit": "words"
+          },
+          {
+            "label": "share of the report's words",
+            "value": 3,
+            "tolerance": 0.05,
+            "unit": "%"
+          }
+        ]
+      },
+      "precision_note": "Per page 4 + 5 = 9 words of furniture; 9 × 210 = 1,890 words; 9 / 300 = 3 percent (1,890 / 63,000). Counting only the footer gives 1,050 words and 1.67 percent; both are rejected.",
+      "explanation": "Section 5: running headers and page footers repeat on every page, so they are a fixed share of each page's words and land in every chunk near a page boundary unless they are stripped.",
+      "hints": [
+        "Work out the furniture on one page first.",
+        "Multiply by the pages for the total; divide by the page's words for the share."
+      ]
+    },
+    {
+      "id": "ctx-010-q08",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 12,
+      "tags": [
+        "incremental-indexing",
+        "content-hash"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "implement",
+      "language": "python",
+      "prompt": "Implement `plan_reindex(manifest, pages)`: compare today's extracted pages with the hashes stored by the last run and return which pages to embed, which old chunks to delete and which pages to skip. A changed page must be replaced, not only re-embedded.",
+      "starter": "import hashlib\n\n\ndef plan_reindex(manifest, pages):\n    \"\"\"Plan one incremental ingest run.\n\n    manifest: {(source, page): hash} from the last run.\n    pages: {(source, page): extracted text} found in the source today.\n    A page's hash is hashlib.sha256(text.encode(\"utf-8\")).hexdigest().\n    Return {\"embed\": [...], \"delete\": [...], \"skip\": [...]}, each a sorted list of (source, page) keys:\n      embed  the pages that are new or whose text changed,\n      delete the pages whose old chunk must go: changed pages (replacement) and pages no longer in the source,\n      skip   the pages whose hash is unchanged.\n    \"\"\"\n    return {\"embed\": sorted(pages), \"delete\": [], \"skip\": []}\n",
+      "solution": "import hashlib\n\n\ndef plan_reindex(manifest, pages):\n    \"\"\"Plan one incremental ingest run.\n\n    manifest: {(source, page): hash} from the last run.\n    pages: {(source, page): extracted text} found in the source today.\n    A page's hash is hashlib.sha256(text.encode(\"utf-8\")).hexdigest().\n    Return {\"embed\": [...], \"delete\": [...], \"skip\": [...]}, each a sorted list of (source, page) keys:\n      embed  the pages that are new or whose text changed,\n      delete the pages whose old chunk must go: changed pages (replacement) and pages no longer in the source,\n      skip   the pages whose hash is unchanged.\n    \"\"\"\n    embed, delete, skip = [], [], []\n    for key, text in pages.items():\n        h = hashlib.sha256(text.encode(\"utf-8\")).hexdigest()\n        if key not in manifest:\n            embed.append(key)\n        elif manifest[key] == h:\n            skip.append(key)\n        else:\n            embed.append(key)\n            delete.append(key)\n    delete.extend(key for key in manifest if key not in pages)\n    return {\"embed\": sorted(embed), \"delete\": sorted(delete), \"skip\": sorted(skip)}\n",
+      "tests": "import hashlib\n\n\ndef h(t):\n    return hashlib.sha256(t.encode(\"utf-8\")).hexdigest()\n\n\nold = {(\"refunds.pdf\", 1): h(\"Refunds go to the card.\"), (\"refunds.pdf\", 2): h(\"Over 500 needs approval.\"),\n       (\"faq.md\", 1): h(\"Orders ship in a day.\")}\ntoday = {(\"refunds.pdf\", 1): \"Refunds go to the card.\", (\"refunds.pdf\", 2): \"Over 200 needs approval.\",\n         (\"warranty.md\", 1): \"Two-year warranty.\"}\nplan = plan_reindex(old, today)\nassert plan[\"skip\"] == [(\"refunds.pdf\", 1)], plan\n# A changed page is embedded again AND its old chunk is deleted (replacement); a new page is only embedded.\nassert plan[\"embed\"] == [(\"refunds.pdf\", 2), (\"warranty.md\", 1)], plan\n# A page gone from the source is deleted, and so is the replaced page's old chunk.\nassert plan[\"delete\"] == [(\"faq.md\", 1), (\"refunds.pdf\", 2)], plan\n# An empty manifest embeds everything and deletes nothing.\nfirst = plan_reindex({}, today)\nassert first == {\"embed\": sorted(today), \"delete\": [], \"skip\": []}, first\n# Nothing changed: everything is skipped.\nsame = plan_reindex({k: h(t) for k, t in today.items()}, today)\nassert same == {\"embed\": [], \"delete\": [], \"skip\": sorted(today)}, same\n# Whitespace counts as a change: the hash is of the exact text.\nassert plan_reindex({(\"a\", 1): h(\"x\")}, {(\"a\", 1): \"x \"})[\"embed\"] == [(\"a\", 1)]\n# A document that lost its last page: that page's old chunk is deleted although the document remains.\nshrunk = plan_reindex({(\"memo.md\", 1): h(\"One.\"), (\"memo.md\", 2): h(\"Two.\"), (\"memo.md\", 3): h(\"Three.\")},\n                      {(\"memo.md\", 1): \"One.\", (\"memo.md\", 2): \"Two, revised.\"})\nassert shrunk == {\"embed\": [(\"memo.md\", 2)], \"delete\": [(\"memo.md\", 2), (\"memo.md\", 3)],\n                  \"skip\": [(\"memo.md\", 1)]}, shrunk\nprint(\"all tests passed\")\n",
+      "entry": "python solution_and_tests.py",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 8: hash each page; an unchanged hash is skipped, a new key is embedded, a changed hash is re-embedded and its old chunk deleted, and a key that is in the manifest but no longer in the source is deleted. Forgetting the deletion of a changed page leaves the old chunk to be retrieved beside the new one.",
+      "hints": [
+        "Hash each page's text once, then sort every key into one of the cases.",
+        "A key can be in the manifest only, in today's pages only, or in both with the same or a different hash.",
+        "A changed page belongs in two lists: embed and delete."
+      ]
+    },
+    {
+      "id": "ctx-010-q09",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "7",
+      "est_minutes": 4,
+      "tags": [
+        "provenance",
+        "metadata"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Each need below arises after ingestion. Match it to the metadata field, written onto every chunk at ingest, that it depends on.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Show the user which page of the manual an answer was quoted from."
+        },
+        {
+          "key": "b",
+          "text": "When two retrieved chunks state different refund limits, prefer the more recent one."
+        },
+        {
+          "key": "c",
+          "text": "Restrict a query to spreadsheets, leaving out PDFs and web pages."
+        },
+        {
+          "key": "d",
+          "text": "Label a citation with the heading the passage sits under."
+        },
+        {
+          "key": "e",
+          "text": "Link a citation to the file or URL the text came from."
+        }
+      ],
+      "right": [
+        {
+          "key": "p",
+          "text": "page"
+        },
+        {
+          "key": "q",
+          "text": "timestamp"
+        },
+        {
+          "key": "r",
+          "text": "document type"
+        },
+        {
+          "key": "s",
+          "text": "section"
+        },
+        {
+          "key": "t",
+          "text": "source"
+        },
+        {
+          "key": "u",
+          "text": "chunk size"
+        }
+      ],
+      "answer": {
+        "a": "p",
+        "b": "q",
+        "c": "r",
+        "d": "s",
+        "e": "t"
+      },
+      "explanation": "Section 7 lists source, page, section, timestamp and document type as the fields written onto every chunk at ingest, and names citations, conflict and filtered retrieval as the three places they pay off. Chunk size is a chunking parameter, not provenance.",
+      "hints": [
+        "For each need, ask what fact about the chunk's origin it must look up."
+      ]
+    },
+    {
+      "id": "ctx-010-q10",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "provenance",
+        "conflict"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent's answers waver between a refund limit of 500 dollars and one of 200 dollars, because both versions of the policy are retrieved. Which change made at ingest lets the window settle which version wins?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Stamp every chunk with its source and last-modified timestamp, and add a precedence rule that the most recent source wins.",
+          "correct": true,
+          "feedback": "This is post 06's first fix for conflict, and it needs the timestamp and source to have been written at ingest."
+        },
+        {
+          "key": "b",
+          "text": "Raise top-k so that the model sees more context around both versions.",
+          "correct": false,
+          "feedback": "More chunks give the model more of the same disagreement and nothing that says which side is current."
+        },
+        {
+          "key": "c",
+          "text": "Lower the chunk size so that each version sits in a smaller chunk.",
+          "correct": false,
+          "feedback": "Smaller chunks still carry both versions with nothing to rank them by date or authority."
+        },
+        {
+          "key": "d",
+          "text": "Re-embed both documents with a newer embedding model.",
+          "correct": false,
+          "feedback": "A better embedding model retrieves both versions just as well; the disagreement is in the content, not the vectors."
+        }
+      ],
+      "explanation": "Section 7: dated provenance is what lets the window resolve conflict, one of the five failure modes of post 06, whose first fix is a provenance and recency stamp with a precedence rule.",
+      "hints": [
+        "Ask what the model would need to know to prefer one version.",
+        "That fact has to exist on the chunk, so it is written at ingest."
+      ]
+    },
+    {
+      "id": "ctx-010-q11",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 4,
+      "tags": [
+        "incremental-indexing",
+        "content-hash"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A nightly job exports every policy from a document system as a fresh PDF with a new creation date in its metadata. The incremental ingester hashes each file's bytes, and every night it re-embeds the whole corpus although almost no wording changed. Which fix keeps change detection working?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Hash the extracted text of each page instead of the file's bytes.",
+          "correct": true,
+          "feedback": "The extracted text is the same when only the metadata changed, so the page hashes match and the pages are skipped."
+        },
+        {
+          "key": "b",
+          "text": "Switch from SHA-256 to a faster hash such as MD5.",
+          "correct": false,
+          "feedback": "Any hash of the bytes changes when the embedded creation date changes; speed is not the problem."
+        },
+        {
+          "key": "c",
+          "text": "Compare the files' last-modified times instead of hashing.",
+          "correct": false,
+          "feedback": "The export rewrites every file, so every modification time changes too and everything is still re-embedded."
+        },
+        {
+          "key": "d",
+          "text": "Run the ingester weekly instead of nightly.",
+          "correct": false,
+          "feedback": "Each weekly run would still re-embed the whole corpus, and the index would be up to a week stale."
+        }
+      ],
+      "explanation": "Section 8: hashing the extracted text rather than the bytes avoids a re-index when only a file's metadata changed, such as a PDF re-exported with a new creation date.",
+      "hints": [
+        "Find what actually changes in the files each night.",
+        "Choose a fingerprint that ignores that part."
+      ]
+    },
+    {
+      "id": "ctx-010-q12",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o5",
+        "o4"
+      ],
+      "section": "8",
+      "est_minutes": 15,
+      "tags": [
+        "incremental-indexing",
+        "conflict",
+        "failure-modes"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "connect",
+      "connects": [
+        "ctx-006",
+        "ctx-011"
+      ],
+      "prompt": "A team's ingester re-embeds a changed page but never deletes the page's old chunk. Explain, using the failure modes of post 06 and the retrieval pipeline of post 11, what users will see and why, and which two changes to ingestion prevent it.",
+      "solution": "**What users see.** After a policy page is edited, answers about it waver: some cite the old rule, some the new one, and a single answer can state both. Over time the index holds several versions of every page that was ever edited.\n\n**Why.** Both versions of the page are in the index, with nearly the same wording, so both score well for the same query and both reach the top-k packed into layer 04. Two parts of the window now disagree and nothing tells the model which one wins: that is conflict, the cross-layer failure mode of post 06. Post 11 lists the same symptom, stale chunks, among the ways production RAG goes wrong, and its citations make it worse, since the model can cite the superseded page with confidence.\n\n**The two changes.** First, replacement: the manifest records each page's hash and chunk id, so a changed hash triggers deleting the old chunk in the same step as embedding the new one, and a retired document has its chunks deleted. Second, provenance: every chunk carries its source and last-modified timestamp, so that if two versions ever do meet in the window (a duplicate document, a lagging index), a precedence rule such as the most recent source wins can settle the conflict.",
+      "rubric": [
+        {
+          "criterion": "Describes the symptom: answers that waver or cite a superseded version after an edit.",
+          "points": 2
+        },
+        {
+          "criterion": "Explains that both versions are retrieved into layer 04 and names the result as conflict (post 06).",
+          "points": 2
+        },
+        {
+          "criterion": "Connects to post 11: stale chunks as a production RAG failure, made worse by citations.",
+          "points": 1
+        },
+        {
+          "criterion": "Gives replacement through the manifest (delete the old chunk when the hash changes; delete retired documents).",
+          "points": 2
+        },
+        {
+          "criterion": "Gives provenance with a timestamp and a precedence rule as the second line of defence.",
+          "points": 1
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Section 8 says replacement is the step teams forget and that the old chunks then linger to be cited; section 7 ties dated provenance to post 06's fix for conflict. Post 11 lists stale chunks among production RAG failures.",
+      "hints": [
+        "Start from what is in the index after the edit, then what the select step returns for a query about that page.",
+        "Name the failure mode in which two parts of the window disagree, then fix it at the source and in the window."
+      ]
+    },
+    {
+      "id": "ctx-010-q13",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o1",
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 15,
+      "tags": [
+        "pdf-parsing",
+        "tables",
+        "design"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "design",
+      "prompt": "Design the parse stage for a corpus with three kinds of file: scanned supplier invoices from the 1990s, born-digital annual reports whose answers often sit in financial tables with merged header cells, and single-column born-digital policy memos. For each kind, give the strategy, the output format for tables, and the check that shows the parse worked.",
+      "solution": "**Scanned invoices.** They have no text layer, so born-digital extraction returns nothing and the pipeline falls back to OCR (or a layout-aware parser that applies OCR, since invoices are laid out in regions and contain line-item tables). OCR has its own error class, such as rn read as m and dropped decimal points, which matters on amounts. Check: measure character accuracy on a sample of pages against a hand transcription, and read a few extracted totals against the image.\n\n**Annual reports.** They are born-digital, but the answers live in tables, and a text-layer reader flattens a table into a stream that loses empty and merged cells. Escalate to a layout-aware, table-aware parser. Emit the tables as HTML rather than Markdown, because merged header cells need `rowspan` and `colspan`, which Markdown tables cannot express. Check: read a parsed table and compare several cells, including one under a merged header and one next to an empty cell, with the source.\n\n**Policy memos.** Single-column, born-digital text: born-digital extraction is close to free and sufficient, with no escalation. Check: read a sample of the extracted text for reading order and for headers and footers left in, which the clean stage then strips.\n\nAcross all three, the strategy is chosen per file from evidence (an empty text layer, a mangled order or table), not per corpus.",
+      "rubric": [
+        {
+          "criterion": "Scans: OCR (or a layout-aware parser with OCR) because there is no text layer; names OCR's error class.",
+          "points": 2
+        },
+        {
+          "criterion": "Reports: a table-aware or layout-aware parser because flattening loses cells.",
+          "points": 2
+        },
+        {
+          "criterion": "Chooses HTML for tables with merged cells, with the reason (rowspan and colspan).",
+          "points": 2
+        },
+        {
+          "criterion": "Memos: born-digital extraction, close to free, no escalation needed.",
+          "points": 1
+        },
+        {
+          "criterion": "Gives a concrete check per kind: character accuracy on a sample, a cell compared with the source, reading a sample.",
+          "points": 2
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Sections 3 and 4: born-digital first, OCR when there is no text layer, a layout-aware parser when order or tables are mangled; tables kept as Markdown or HTML (HTML for spanning cells), and every parse checked by reading its output against the source.",
+      "hints": [
+        "For each kind, first ask whether there is a text layer, then whether order and tables survive it.",
+        "Merged cells decide between Markdown and HTML."
+      ]
+    },
+    {
+      "id": "ctx-010-q14",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "boilerplate",
+        "headers-and-footers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A cleaning pass counts how many pages each exact line appears on and drops the lines found on most pages. On a 210-page report it drops the running header but keeps every footer of the form \"Confidential, page 14 of 210\". Why does the pass miss the footers, and what change fixes it?",
+      "answer": {
+        "model": "Each footer line differs from the others because its page number changes, so no footer line repeats exactly; masking the digits (or normalising the numbers) before counting makes all the footers count as one line, which is then dropped.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\b(do\\s+not|don'?t|never|shouldn'?t|should\\s+not|no\\s+need\\s+to|stop|stopping|avoid|avoiding|instead\\s+of|rather\\s+than)\\s+(mask|normali[sz]e|replace|strip|remove|ignore|blank|substitute)\\w*)(?=[\\s\\S]*(\\b(page\\s+)?(numbers?|digits?|numerals?|counts?)\\b[^.]{0,60}\\b(differ\\w*|chang\\w*|vary|varies|unique|distinct|different|increment\\w*)\\b|\\b(differ\\w*|different|unique|distinct|chang\\w*|vary|varies)\\b[^.]{0,60}\\b(numbers?|digits?|numerals?)\\b|\\bnot\\s+(exactly\\s+)?(identical|the\\s+same|exact\\s+(repeats|duplicates|matches))\\b|\\bno\\s+(two\\s+)?(footer\\s+)?lines?\\s+(is|are)\\s+(exactly\\s+)?(identical|the\\s+same)\\b|\\bnever\\s+(repeats?|match(es)?)\\b))(?=[\\s\\S]*(\\b(mask\\w*|normali[sz]\\w*|replac\\w*|strip\\w*|remov\\w*|ignor\\w*|wildcard\\w*|substitut\\w*|blank\\w*|drop\\w*|collaps\\w*)\\b[^.]{0,40}\\b(digits?|numbers?|numerals?|page\\s+numbers?)\\b|\\b(digits?|numbers?|numerals?)\\b[^.]{0,30}\\b(masked|normali[sz]ed|replaced|stripped|removed|ignored|blanked|wildcarded|substituted)\\b|\\b(placeholder|wildcard|regex|regular\\s+expression|pattern)\\b[^.]{0,40}\\b(digits?|numbers?)\\b))(?=[\\s\\S]*(\\b(so|because|since|as|then|which|and|the|by|before|fix\\w*|to|is|are)\\b|[;:,.]\\s))[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 5: repeated lines are found with their page numbers masked; the snippet replaces every run of digits with a placeholder before counting, so 'page 1 of 3' and 'page 2 of 3' count as one line.",
+      "hints": [
+        "Compare the footer of page 14 with the footer of page 15, character by character."
+      ]
+    },
+    {
+      "id": "ctx-010-q15",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "boilerplate",
+        "html"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A crawl of a documentation site is being cleaned before chunking. Which of these should the clean stage remove from the text bound for the index?",
+      "select": "multiple",
+      "options": [
+        {
+          "key": "a",
+          "text": "The cookie-consent banner at the top of every page.",
+          "correct": true,
+          "feedback": "It is page furniture: embedded, it gives retrieval something to match that is not content."
+        },
+        {
+          "key": "b",
+          "text": "The sidebar of links that every page of the site shares.",
+          "correct": true,
+          "feedback": "Duplicated navigation fills the index with near-identical chunks that match any query naming a section; it is deduplicated or removed."
+        },
+        {
+          "key": "c",
+          "text": "A table of supported versions inside an article.",
+          "correct": false,
+          "feedback": "A table in the article is content and may carry answers; it is kept, as a table."
+        },
+        {
+          "key": "d",
+          "text": "The article's own section headings.",
+          "correct": false,
+          "feedback": "Headings are content and also feed the section field of each chunk's provenance; removing them loses both."
+        },
+        {
+          "key": "e",
+          "text": "The site-wide footer with the copyright line.",
+          "correct": true,
+          "feedback": "A footer repeated on every page is boilerplate that survives naive cleaning unless it is stripped."
+        }
+      ],
+      "explanation": "Section 5: main-content extraction keeps the article and discards banners, navigation and footers, and near-identical navigation blocks are deduplicated across documents; tables and headings belong to the content.",
+      "hints": [
+        "For each item, ask whether it would be the same on every page of the site."
+      ]
+    },
+    {
+      "id": "ctx-010-q16",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "tables",
+        "html"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A parser can emit tables as Markdown or as HTML. For which table is HTML the better target?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A financial statement whose header cell \"2025\" spans two columns, Q1 and Q2.",
+          "correct": true,
+          "feedback": "A cell that spans columns needs HTML's colspan; a Markdown table has no way to express it."
+        },
+        {
+          "key": "b",
+          "text": "A three-column price list with one empty cell.",
+          "correct": false,
+          "feedback": "Markdown keeps an empty cell as an empty cell between two pipes; HTML adds nothing here."
+        },
+        {
+          "key": "c",
+          "text": "A two-column glossary of terms and definitions.",
+          "correct": false,
+          "feedback": "A plain grid with no spanning cells is expressed fully in Markdown, which is also shorter."
+        },
+        {
+          "key": "d",
+          "text": "Any table longer than 50 rows.",
+          "correct": false,
+          "feedback": "Length does not decide the format; spanning cells do."
+        }
+      ],
+      "explanation": "Section 4: a table-aware parser emits Markdown or HTML; HTML is the better target when cells span several rows or columns, because rowspan and colspan have no Markdown equivalent.",
+      "hints": [
+        "Ask which table structure a Markdown pipe table cannot express.",
+        "Look for a cell that belongs to more than one column."
+      ]
+    }
+  ]
+}
