@@ -1,0 +1,800 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-001",
+  "next_ordinal": 19,
+  "questions": [
+    {
+      "id": "ctx-001-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 2,
+      "tags": [
+        "definition",
+        "prompt-engineering"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Which sentence states what separates context engineering from prompt engineering?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Context engineering is prompt engineering for models whose windows hold a million tokens.",
+          "correct": false,
+          "feedback": "Window size is not the difference. A small window filled with tools, chunks and history is still an assembled context; the change is in what the request contains, not in how large the limit is."
+        },
+        {
+          "key": "b",
+          "text": "Context engineering assembles everything a model reads on a call; prompt engineering shapes one message.",
+          "correct": true,
+          "feedback": "Correct. The user's sentence is one layer of six; the other five are assembled by an engineer, and that whole window is the surface of the work."
+        },
+        {
+          "key": "c",
+          "text": "Context engineering is the building of retrieval pipelines that add relevant documents to every prompt a model receives.",
+          "correct": false,
+          "feedback": "That is RAG, which fills one layer, layer 04, the retrieved chunks. Treating the two terms as synonyms is the first common pitfall the post names."
+        },
+        {
+          "key": "d",
+          "text": "Context engineering replaces prompt engineering, whose techniques no longer apply to agents.",
+          "correct": false,
+          "feedback": "The post calls it the same craft applied to a larger surface. Prompt problems still exist; they cover less ground than they used to."
+        }
+      ],
+      "explanation": "Section 1 ends on the distinction: a modern call is not a prompt being engineered but a window being assembled, of which the user's sentence is one layer of six. Section 3 adds that the techniques are mostly old; the surface and the budgets are what changed.",
+      "hints": [
+        "Ask what the engineer works on in each case: one string, or the whole request."
+      ]
+    },
+    {
+      "id": "ctx-001-q02",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 2,
+      "tags": [
+        "history",
+        "layers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "By this post's account, three changes between 2022 and 2025 added material to every call that the user never typed. Name the three.",
+      "answer": {
+        "model": "Tools (function calling and MCP), retrieval of outside data (RAG), and memory.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|possibly|probably|i think|i guess|not sure|might be|could be)\\b)(?![\\s\\S]*\\b(not|no|without|never)\\s+(the\\s+)?(tools?|memory|memories|retrieval|rag)\\b)(?=[\\s\\S]*\\b(tools?|function[- ]calling|mcp|model context protocol)\\b)(?=[\\s\\S]*\\b(memory|memories|remember\\w*)\\b)(?=[\\s\\S]*\\b(retriev\\w*|rag|outside data|external data|retrieval-augmented|documents?|search)\\b)"
+        ]
+      },
+      "explanation": "Section 1 lists them in order: models gained tools (function calling in June 2023, then MCP), access to outside data through retrieval-augmented generation, and memory. Together with the system prompt and history that already existed, they make the six layers.",
+      "hints": [
+        "Each of the three added one of the layers 02, 03 and 04."
+      ]
+    },
+    {
+      "id": "ctx-001-q03",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 1,
+      "tags": [
+        "layers",
+        "user-instruction"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In the six-layer window, which layer holds the user's literal sentence? Give its number and name.",
+      "answer": {
+        "model": "Layer 06, the user instruction.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|possibly|probably|i think|i guess|not sure|might be|could be)\\b)(?![\\s\\S]*\\b(not|never|isn't|is not)\\s+(in\\s+)?(layer\\s*)?(0?6|six|sixth|the\\s+user)\\b)(?![\\s\\S]*\\blayers?\\s*0?[1-5]\\b(?!\\s*(to|and|through)\\s*0?[1-5]\\b))(?![\\s\\S]*\\b(0?6|six|sixth)\\b[^.;\\n]{0,12}\\b(is|are)\\s+(the\\s+)?(system prompt|tools?|memory|retrieved|conversation history)\\b)(?=[\\s\\S]*\\b(0?6|six|sixth)\\b)(?=[\\s\\S]*\\buser(\\W?s)?\\s+(instruction|message|sentence|prompt|query|question|input|request)\\b)"
+        ]
+      },
+      "explanation": "Section 1 names the six layers in order; the user's sentence is layer 06, the user instruction, the last layer and usually a small fraction of the tokens.",
+      "hints": [
+        "The layers are numbered in the order they are sent, and the user's sentence goes last."
+      ]
+    },
+    {
+      "id": "ctx-001-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "five-jobs"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A team's agent sends the definitions of 40 tools with every request. The team removes the 34 definitions its tasks never use, so each request carries 6. Which of the five jobs is the team doing?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Deciding what goes in, because it adds the tools its tasks need",
+          "correct": false,
+          "feedback": "Nothing is added: the six useful definitions were already sent. The change is the removal of definitions that only compete with the ones that matter, which the post treats as its own, harder job."
+        },
+        {
+          "key": "b",
+          "text": "Deciding what stays out, because unused definitions compete with the useful ones",
+          "correct": true,
+          "feedback": "Correct. Job 2 is pruning what does not need to be in the window; the post calls it correctness work, not optimisation."
+        },
+        {
+          "key": "c",
+          "text": "Deciding where each piece sits, because the tool layer becomes shorter",
+          "correct": false,
+          "feedback": "Job 3 is about order: stable layers first so they cache, the user instruction last. Removing definitions changes what is sent, not where it sits."
+        },
+        {
+          "key": "d",
+          "text": "Deciding when to refresh, because the tool layer has grown stale over the life of the agent",
+          "correct": false,
+          "feedback": "Job 4 concerns a long-running session that accumulates context over time. A fixed catalogue sent on every call is not accumulating; it was too large from the start."
+        }
+      ],
+      "explanation": "Section 4: job 2, decide what stays out, is the harder sibling of job 1. Every token that does not need to be in the window competes with the tokens that do, so removing unused tool definitions is pruning.",
+      "hints": [
+        "Ask whether anything new entered the request, or whether something left it."
+      ]
+    },
+    {
+      "id": "ctx-001-q05",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "five-jobs"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each piece of work on an LLM feature to the job of a context engineer it belongs to. One entry on the right is not one of the five jobs.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Choosing which three documents to retrieve for a question"
+        },
+        {
+          "key": "b",
+          "text": "Dropping tool definitions the current task never calls"
+        },
+        {
+          "key": "c",
+          "text": "Moving the system prompt and tool definitions to the front of the request so the provider can cache them"
+        },
+        {
+          "key": "d",
+          "text": "Summarising the first forty turns of a long session into a short note"
+        },
+        {
+          "key": "e",
+          "text": "Logging every assembled request and scoring answers against a fixed evaluation set"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Decide where each piece sits"
+        },
+        {
+          "key": "b",
+          "text": "Decide how to measure whether it worked"
+        },
+        {
+          "key": "c",
+          "text": "Decide what goes in"
+        },
+        {
+          "key": "d",
+          "text": "Switch to a larger model"
+        },
+        {
+          "key": "e",
+          "text": "Decide when to refresh, compress, or write out"
+        },
+        {
+          "key": "f",
+          "text": "Decide what stays out"
+        }
+      ],
+      "answer": {
+        "a": "c",
+        "b": "f",
+        "c": "a",
+        "d": "e",
+        "e": "b"
+      },
+      "explanation": "Section 4: retrieval choices are job 1; pruning unused definitions is job 2; ordering the cacheable prefix first is job 3; compacting a long session is job 4; traces and an evaluation set are job 5. A larger model is the fix for a model problem (section 5), not a job of context engineering.",
+      "hints": [
+        "Place the two easiest first: the one about order, and the one about scoring answers."
+      ]
+    },
+    {
+      "id": "ctx-001-q06",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "diagnosis",
+        "context-problem"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A support bot quotes last year's refund policy. The logged request shows that layer 04, the retrieved chunks, holds last year's policy document and not the current one. Which kind of problem is it, by the test of this post?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A prompt problem: the instruction should tell the model to prefer recent policies",
+          "correct": false,
+          "feedback": "Rewording cannot surface a document that is not in the window. The current policy never reached the model, so no instruction can make the model quote it."
+        },
+        {
+          "key": "b",
+          "text": "A model problem: a stronger model would know the policy changed",
+          "correct": false,
+          "feedback": "A stronger model reads the same stale chunk. Upgrading for a context problem gives the same wrong answer at a higher price per call."
+        },
+        {
+          "key": "c",
+          "text": "A context problem: the right information is not in the window",
+          "correct": true,
+          "feedback": "Correct. The first question fails: the information the answer needs is absent, so the fix is to change what the window holds, here what retrieval selects."
+        },
+        {
+          "key": "d",
+          "text": "Both a prompt and a model problem, so both fixes are needed",
+          "correct": false,
+          "feedback": "The test stops at the first question. Neither later fix can help until the current policy is in the window."
+        }
+      ],
+      "explanation": "Section 5 checks the window first. If the right information is not in it, in a sensible place and amount, the problem is a context problem whatever the wording or the model; here the retrieved layer carries a stale document.",
+      "hints": [
+        "Start with the first of the two questions in section 5.",
+        "Is the current policy anywhere in the request that was sent?"
+      ]
+    },
+    {
+      "id": "ctx-001-q07",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "diagnosis",
+        "model-problem"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A short request carries the full, current contract clause near its end, with nothing contradictory in it. The task needs a long chain of date arithmetic from the clause. The model's answer is wrong, and three rewordings of the instruction give three different wrong answers. Which kind of problem is most likely, by the test of this post?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A context problem: more retrieved chunks would give the model more to work with",
+          "correct": false,
+          "feedback": "The right information is already in the window, in a sensible place and amount. Adding chunks adds tokens that compete with the clause."
+        },
+        {
+          "key": "b",
+          "text": "A prompt problem: a fourth rewording will eventually find the right phrasing",
+          "correct": false,
+          "feedback": "The second question has been asked three times and failed. A prompt problem is one that rewording fixes."
+        },
+        {
+          "key": "c",
+          "text": "A context problem: the clause should be moved from the end to the middle of the request, where the model looks hardest",
+          "correct": false,
+          "feedback": "The middle is where long inputs are used least reliably, by the finding the post cites. The clause's position is already sensible."
+        },
+        {
+          "key": "d",
+          "text": "A model problem: the information is present and well placed, yet rewording does not help",
+          "correct": true,
+          "feedback": "Correct. Both questions are answered: the window is right and the wording is not the cause, so the fix is a stronger model."
+        }
+      ],
+      "explanation": "Section 5: when the right information is demonstrably in the window, in a sensible position and amount, and the model still fails however the instruction is worded, for example on a task needing deeper reasoning than the model can do, the problem is the model.",
+      "hints": [
+        "Answer the first question of section 5 from the description.",
+        "Then ask what three failed rewordings say about the second question."
+      ]
+    },
+    {
+      "id": "ctx-001-q08",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 2,
+      "tags": [
+        "diagnosis",
+        "order"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Why does the test of this post check what the window holds before trying a reworded instruction?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Because rewording is slower to try than a change to retrieval",
+          "correct": false,
+          "feedback": "Speed is not the reason. Rewording is usually the quickest thing to try; it is checked second because of what it can fix."
+        },
+        {
+          "key": "b",
+          "text": "Because context problems are the most common kind, so they are found faster on average",
+          "correct": false,
+          "feedback": "The order follows from logic, not from frequency. The post states no measured share of each kind of problem."
+        },
+        {
+          "key": "c",
+          "text": "Because rewording only helps when the needed information is already in the window",
+          "correct": true,
+          "feedback": "Correct. No wording can make a model use a fact that was never sent, so the window is checked first, from the logged request."
+        },
+        {
+          "key": "d",
+          "text": "Because a reworded instruction invalidates the provider's prompt cache",
+          "correct": false,
+          "feedback": "The user instruction is the last layer, after the cached prefix; changing it does not invalidate the cached layers before it."
+        }
+      ],
+      "explanation": "Section 5 defines a prompt problem as one where the information is in the window and rewording fixes the answer. Rewording cannot supply missing information, so the first question, answered from the request actually sent, must come first.",
+      "hints": [
+        "Ask what a reworded instruction can change, and what it cannot."
+      ]
+    },
+    {
+      "id": "ctx-001-q09",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "cost",
+        "pricing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "At the input rate section 3 quotes for Claude Sonnet 4.5 (3 US dollars per million input tokens, as of early 2026), what does one uncached call with 45,000 input tokens cost in input? Give dollars to three decimal places.",
+      "answer": {
+        "value": 0.135,
+        "tolerance": 0.0005,
+        "unit": "USD"
+      },
+      "precision_note": "Section 3's method: tokens times rate divided by 1,000,000; 45,000 x 3 / 1,000,000 = 0.135. Dividing by 1,000 instead gives 135, which the tolerance rejects.",
+      "explanation": "Cost equals input tokens times the per-million rate divided by one million: $45{,}000 \\times 3 / 1{,}000{,}000 = 0.135$ dollars, the same method section 3 uses for 100,000 tokens at 0.30 dollars.",
+      "hints": [
+        "The rate is per million tokens, not per token or per thousand."
+      ]
+    },
+    {
+      "id": "ctx-001-q10",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "3",
+      "est_minutes": 4,
+      "tags": [
+        "cost",
+        "pricing",
+        "estimation"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A feature serves 20,000 uncached calls a day (an illustrative workload). Each request carries 12,000 input tokens, of which the user's sentence is 50. At 3 US dollars per million input tokens, give the daily input cost of the full requests, and the daily input cost an estimate would show if it counted only the user's sentence.",
+      "answer": {
+        "parts": [
+          {
+            "label": "daily input cost of the full requests",
+            "value": 720,
+            "tolerance": 0.5,
+            "unit": "USD"
+          },
+          {
+            "label": "daily input cost counting only the user's sentence",
+            "value": 3,
+            "tolerance": 0.05,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "20,000 x 12,000 x 3 / 1,000,000 = 720; 20,000 x 50 x 3 / 1,000,000 = 3. Pricing a single call (0.036 dollars) instead of the day is the nearest wrong method.",
+      "explanation": "The day sends $20{,}000 \\times 12{,}000 = 240$ million input tokens, which at 3 dollars per million is 720 dollars. Counting only the user's sentence prices 1 million tokens, 3 dollars: an estimate 240 times too low, the mistake section 8 calls pricing only the user's message.",
+      "hints": [
+        "Work out the tokens sent in a day first.",
+        "Then apply the per-million rate to each total."
+      ]
+    },
+    {
+      "id": "ctx-001-q11",
+      "type": "numeric",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "3",
+      "est_minutes": 4,
+      "tags": [
+        "layers",
+        "cost",
+        "share"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "One assembled request has these illustrative layer sizes: system prompt 1,200 tokens, tools and MCP descriptions 3,000, memory and state 400, retrieved chunks 2,500, conversation history 850, user instruction 50. Give the user instruction's share of the request as a percentage to three decimal places, and the request's uncached input cost in dollars at 3 US dollars per million input tokens.",
+      "answer": {
+        "parts": [
+          {
+            "label": "user instruction share of the request",
+            "value": 0.625,
+            "tolerance": 0.01,
+            "unit": "%"
+          },
+          {
+            "label": "uncached input cost of the request",
+            "value": 0.024,
+            "tolerance": 0.0005,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "Total 1,200 + 3,000 + 400 + 2,500 + 850 + 50 = 8,000 tokens; 50 / 8,000 = 0.625 percent; 8,000 x 3 / 1,000,000 = 0.024 dollars. Pricing only the user's 50 tokens gives 0.00015, which the tolerance rejects.",
+      "explanation": "The six layers total 8,000 tokens, so the user's sentence is $50 / 8{,}000 = 0.625$ percent of what the model reads, the point of section 1. The whole request is priced, at $8{,}000 \\times 3 / 1{,}000{,}000 = 0.024$ dollars.",
+      "hints": [
+        "Add the six layers first.",
+        "Divide the user instruction by the total, then price the total, not the user's tokens."
+      ]
+    },
+    {
+      "id": "ctx-001-q12",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 2,
+      "tags": [
+        "diagnosis",
+        "order"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the steps of diagnosing a bad answer from an LLM feature in the order this post's test takes them.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Log the request the application actually sent"
+        },
+        {
+          "key": "b",
+          "text": "Check whether the right information is in it, in a sensible place and amount"
+        },
+        {
+          "key": "c",
+          "text": "If it is, try rewording the instruction"
+        },
+        {
+          "key": "d",
+          "text": "If rewording does not fix the answer either, try a stronger model"
+        }
+      ],
+      "answer": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 5 asks its first question of the request actually sent, so logging comes first; the window check comes before rewording because rewording cannot supply missing information; a stronger model is the fix only when both earlier checks pass.",
+      "hints": [
+        "Each step needs the answer of the one before it."
+      ]
+    },
+    {
+      "id": "ctx-001-q13",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 12,
+      "tags": [
+        "five-jobs",
+        "layers",
+        "audit"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Read the description of the feature. For one call, list which of the six layers are present and which are empty. Then go through the five jobs of a context engineer and say, for each, whether the team does it, and for two jobs it skips, the symptom to expect.",
+      "stimulus": {
+        "kind": "data",
+        "content": "An internal helpdesk assistant answers staff questions. On each call the application sends: a system prompt with the company's tone and escalation rules; the definitions of 25 tools, including a ticket-search tool and a password-reset tool; every earlier turn of the conversation; and the staff member's question. It retrieves no documents and keeps nothing between sessions. The team wrote the tool list once and never revisited it, appends turns until the provider rejects the request, and judges changes by trying a few questions by hand.",
+        "caption": "An illustrative feature description."
+      },
+      "kind": "design",
+      "solution": "1. **Layers present:** layer 01, the system prompt (tone and escalation rules); layer 02, tools and MCP descriptions (25 tool definitions); layer 05, conversation history (every earlier turn); layer 06, the user instruction (the question). **Empty:** layer 03, memory and state (nothing kept between sessions) and layer 04, retrieved chunks (no retrieval).\n2. **Job 1, what goes in:** done once, when the tool list was written, and not revisited.\n3. **Job 2, what stays out:** skipped. All 25 definitions go on every call, whether or not the question needs them. Expected symptom: the model picks the wrong tool, or the unused definitions crowd the window and the bill.\n4. **Job 3, where each piece sits:** the order is not described; a reader should check that the stable prefix (system prompt and tools) goes first so it can cache, and the question last.\n5. **Job 4, when to refresh:** skipped. History grows until the provider rejects the request. Expected symptom: long sessions slow down, cost more each turn, and finally fail with an error about the request size.\n6. **Job 5, how to measure:** skipped. A few hand-tried questions are not an evaluation set. Expected symptom: a change that helps the tried questions quietly breaks others, and nobody sees it until users complain.",
+      "answer_length": "half a page",
+      "rubric": [
+        {
+          "criterion": "Names layers 01, 02, 05 and 06 as present and 03 and 04 as empty, with the reason for each",
+          "points": 2
+        },
+        {
+          "criterion": "Identifies job 2 (no pruning of the 25 tools) as skipped, with a plausible symptom",
+          "points": 2
+        },
+        {
+          "criterion": "Identifies job 4 (history grows until rejected) as skipped, with a plausible symptom",
+          "points": 2
+        },
+        {
+          "criterion": "Identifies job 5 (hand-tried questions instead of an evaluation set) as skipped",
+          "points": 1
+        },
+        {
+          "criterion": "Comments on job 3 (order and caching) rather than skipping it",
+          "points": 1
+        }
+      ],
+      "explanation": "Section 4 defines the five jobs and section 1 the six layers. The feature populates four layers, never prunes its tool catalogue, lets history grow without compaction, and has no evaluation set, so three of the five jobs are skipped.",
+      "hints": [
+        "List the layers first, from the four things the application sends.",
+        "For each job, ask whether any sentence of the description shows the team doing it."
+      ]
+    },
+    {
+      "id": "ctx-001-q14",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 12,
+      "tags": [
+        "critique",
+        "diagnosis"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A manager writes: \"Context engineering is a new name for prompt engineering. When our assistant gives a bad answer, the fix is either a better prompt or a better model.\" Critique both sentences, using the post's account of what changed and its test for sorting problems.",
+      "kind": "critique",
+      "solution": "1. **The first sentence is half right.** The techniques are mostly old, and the post calls context engineering the same craft. But the surface changed: a modern call carries six layers, five of them assembled by an engineer, and the window has a hard limit and a real price per token. Engineering that request is more than engineering one sentence.\n2. **The second sentence leaves out the largest class of problems.** The post's test checks the window first. If the right information is missing, misplaced or buried in too much else, neither fix works: a better prompt cannot supply a fact that was never sent, and a better model reads the same stale or missing context and gives the same wrong answer at a higher price.\n3. **Where the manager is right.** A prompt problem exists when the information is in the window and rewording fixes the answer; a model problem exists when the information is present and well placed and the model still fails however it is asked. Both are real, but they are the two ends, and context problems are the large middle.\n4. **What to do instead.** Log the request actually sent, answer the first question from it, and only then reach for rewording or a stronger model.",
+      "answer_length": "half a page",
+      "rubric": [
+        {
+          "criterion": "Grants that the techniques are old but shows what is new: the layered request and the finite, priced window",
+          "points": 2
+        },
+        {
+          "criterion": "Shows that neither a better prompt nor a better model fixes missing or misplaced information",
+          "points": 2
+        },
+        {
+          "criterion": "States the post's definitions of a prompt problem and a model problem correctly",
+          "points": 1
+        },
+        {
+          "criterion": "Recommends checking the logged request first",
+          "points": 1
+        }
+      ],
+      "explanation": "Section 3 separates what is old (the techniques) from what is new (the layered interface and the budgets), and section 5 gives the test whose first question, about the window, the manager's two fixes skip.",
+      "hints": [
+        "Take the sentences one at a time.",
+        "For the second, ask what each fix can do when the needed fact never reached the window."
+      ]
+    },
+    {
+      "id": "ctx-001-q15",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 15,
+      "tags": [
+        "five-jobs",
+        "layers",
+        "failure-modes"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Take job 2 (decide what stays out) and job 3 (decide where each piece sits). For each, name the layers it acts on most in a typical agent call, using the numbers and names of post 02, and one of the five failure modes that post 06 names (distraction, confusion, conflict, lost-in-the-middle, tool-storm) that the job guards against, with the reason.",
+      "kind": "connect",
+      "connects": [
+        "ctx-002",
+        "ctx-006"
+      ],
+      "solution": "1. **Job 2, what stays out,** acts most on the layers that grow by inclusion: layer 02, tools and MCP descriptions (a catalogue of unused tools), layer 04, retrieved chunks (marginal or stale chunks) and layer 05, conversation history. It guards against **distraction** (irrelevant material pulls the answer off course) and **tool-storm** (a crowded catalogue invites repeated, useless calls); stale chunks beside current ones also invite **conflict**.\n2. **Job 3, where each piece sits,** acts on the order of the whole stack: the stable prefix, layer 01, the system prompt, and layer 02, goes first so it can be cached, and layer 06, the user instruction, goes last. Inside a long layer such as layer 04 it decides which chunk sits at the ends. It guards against **lost-in-the-middle**: models use information at the start and end of a long input more reliably than in the middle, by the Liu et al. finding.\n3. **The connection:** both jobs act on the same window that post 02 lays out; post 06 names what goes wrong when they are skipped.",
+      "answer_length": "half a page",
+      "rubric": [
+        {
+          "criterion": "Places job 2 on layers that accumulate (02, 04 or 05) with numbers and names",
+          "points": 1
+        },
+        {
+          "criterion": "Links job 2 to distraction, tool-storm or conflict with a correct reason",
+          "points": 2
+        },
+        {
+          "criterion": "Places job 3 on the order of the stack: prefix first for caching, layer 06 last",
+          "points": 1
+        },
+        {
+          "criterion": "Links job 3 to lost-in-the-middle with the position finding as the reason",
+          "points": 2
+        }
+      ],
+      "explanation": "Section 4 of this post defines the jobs and cites the position finding; post 02 (`ctx-002`) names and orders the six layers, and post 06 (`ctx-006`) gives the five failure modes the skipped jobs produce.",
+      "hints": [
+        "For job 2, ask which layers tend to grow when nobody prunes them.",
+        "For job 3, recall what section 4 says about the start, the end and the middle of a long input."
+      ]
+    },
+    {
+      "id": "ctx-001-q16",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "3",
+      "est_minutes": 8,
+      "tags": [
+        "cost",
+        "pricing",
+        "debugging"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "`request_cost(layers, usd_per_million)` should return the input cost in dollars of one uncached call, given a dictionary of the request's layers and their token counts and a per-million-token input rate. A team's estimates from it come in far below the bill. Find the bug and fix it.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "def request_cost(layers, usd_per_million):\n    \"\"\"Return the input cost in US dollars of one uncached call.\n\n    layers maps each layer's name to its token count; usd_per_million is the provider's\n    input rate in dollars per million tokens.\n    \"\"\"\n    return layers[\"user instruction\"] * usd_per_million / 1_000_000\n",
+      "solution": "def request_cost(layers, usd_per_million):\n    \"\"\"Return the input cost in US dollars of one uncached call.\n\n    layers maps each layer's name to its token count; usd_per_million is the provider's\n    input rate in dollars per million tokens.\n    \"\"\"\n    return sum(layers.values()) * usd_per_million / 1_000_000\n",
+      "tests": "layers = {\n    \"system prompt\": 1200,\n    \"tools and MCP descriptions\": 3000,\n    \"memory and state\": 400,\n    \"retrieved chunks\": 2500,\n    \"conversation history\": 850,\n    \"user instruction\": 50,\n}\n\n# 1. every layer is priced, not only the user's sentence\nassert abs(request_cost(layers, 3) - 0.024) < 1e-12, request_cost(layers, 3)\n\n# 2. the rate is per million tokens: section 3's call of 100,000 tokens costs 0.30 dollars\nassert abs(request_cost({\"user instruction\": 100000}, 3) - 0.30) < 1e-12\nassert abs(request_cost({\"system prompt\": 99950, \"user instruction\": 50}, 3) - 0.30) < 1e-12\n\n# 3. no rounding: 45,000 tokens cost 0.135 dollars\nassert abs(request_cost({\"retrieved chunks\": 44990, \"user instruction\": 10}, 3) - 0.135) < 1e-12\n\n# 4. a different rate and an empty request\nassert abs(request_cost(layers, 15) - 0.12) < 1e-12\nassert request_cost({}, 3) == 0\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "The starter prices only the user instruction, the mistake section 8 calls pricing only the user's message. Every layer is sent and billed, so the cost is the sum of all layers' tokens times the rate divided by one million, the method of section 3.",
+      "hints": [
+        "Compare what the function prices with what the request sends.",
+        "Every layer in the dictionary is billed at the same input rate."
+      ]
+    },
+    {
+      "id": "ctx-001-q17",
+      "type": "code",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 6,
+      "tags": [
+        "diagnosis",
+        "decision"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Implement `classify(info_in_window, rewording_fixes)`, which returns `\"context\"`, `\"prompt\"` or `\"model\"` for a failing LLM feature, following the two questions of this post in the order it asks them.",
+      "kind": "implement",
+      "language": "python",
+      "starter": "def classify(info_in_window, rewording_fixes):\n    \"\"\"Sort a failing LLM feature into \"context\", \"prompt\" or \"model\".\n\n    info_in_window: True if the right information is in the logged request, in a sensible\n    place and in a sensible amount.\n    rewording_fixes: True if a reworded instruction makes the answer right.\n    \"\"\"\n    raise NotImplementedError\n",
+      "solution": "def classify(info_in_window, rewording_fixes):\n    \"\"\"Sort a failing LLM feature into \"context\", \"prompt\" or \"model\".\n\n    info_in_window: True if the right information is in the logged request, in a sensible\n    place and in a sensible amount.\n    rewording_fixes: True if a reworded instruction makes the answer right.\n    \"\"\"\n    if not info_in_window:\n        return \"context\"\n    if rewording_fixes:\n        return \"prompt\"\n    return \"model\"\n",
+      "tests": "assert classify(False, False) == \"context\"\nassert classify(True, True) == \"prompt\"\nassert classify(True, False) == \"model\"\n# the window is checked first: a lucky rewording does not make a missing fact a prompt problem\nassert classify(False, True) == \"context\", classify(False, True)\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 5 asks first whether the right information is in the window, in a sensible place and amount; if not, the problem is a context problem whatever else is true. Only then does a successful rewording mark a prompt problem, and a failed one a model problem.",
+      "hints": [
+        "Write the first question as the first `if`.",
+        "A missing fact is a context problem even when some rewording happens to help."
+      ]
+    },
+    {
+      "id": "ctx-001-q18",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "five-jobs",
+        "caching",
+        "order"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Job 3 places the layers meant to be cached at the front of the request. What is the reason the post gives?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Provider prompt caches match on a prefix of the request",
+          "correct": true,
+          "feedback": "Correct. A cache that matches a prefix can only reuse layers that come first and stay the same from call to call."
+        },
+        {
+          "key": "b",
+          "text": "Models attend only to the first tokens of a long request",
+          "correct": false,
+          "feedback": "The position finding is about the middle being used less reliably than both ends, not about the start alone; the user instruction goes last on purpose."
+        },
+        {
+          "key": "c",
+          "text": "The provider bills the first part of a request at a lower rate",
+          "correct": false,
+          "feedback": "Position alone does not change the rate. A discount applies to tokens read from the cache, which requires the stable prefix to come first."
+        },
+        {
+          "key": "d",
+          "text": "Cached layers are the largest, and the largest layer must go first",
+          "correct": false,
+          "feedback": "Size is not the rule. Order follows lifetime: stable layers first so they cache, the user instruction last."
+        }
+      ],
+      "explanation": "Section 4, job 3: provider prompt caches match on a prefix of the request, so the layers meant to be cached go first; post 05 works through caching in full.",
+      "hints": [
+        "Ask how a cache could recognise that part of a new request was sent before."
+      ]
+    }
+  ]
+}

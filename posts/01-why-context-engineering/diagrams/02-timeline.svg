@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="ctx-02-timeline-title" aria-describedby="ctx-02-timeline-desc">
+<title id="ctx-02-timeline-title">The work changed for years before the name did</title>
+<desc id="ctx-02-timeline-desc">A horizontal timeline from 2020 to 2026 with a tick at each year. Below the axis, the changes to the work: the RAG paper by Lewis et al. in 2020, OpenAI function calling in June 2023, and the Model Context Protocol in November 2024. Above the axis, the naming of the work: Lance Martin's essay and Andrej Karpathy's post in June 2025, and Anthropic Engineering's article in September 2025.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-ink { fill: var(--ctx-ink); }
+  .s-ink { stroke: var(--ctx-ink); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+  .s-rule { stroke: var(--ctx-rule); }
+  .s-surface { stroke: var(--ctx-surface); }
+</style>
+<defs>
+<marker id="ctx-02-timeline-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="540"/>
+<text x="40" y="48" class="t-title" data-w="589">The work changed for years before the name did</text>
+<text x="40" y="76" class="t-subtitle" data-w="707">Dates as the post cites them: changes to the work below the axis, the naming of the work above it.</text>
+<path d="M72,328 L888,328" class="s-ink w15 nofill"/>
+<path d="M72,320 L72,336" class="s-ink-muted w1 nofill"/>
+<text x="72" y="312" text-anchor="middle" class="t-tick" data-w="31">2020</text>
+<path d="M208,320 L208,336" class="s-ink-muted w1 nofill"/>
+<text x="208" y="312" text-anchor="middle" class="t-tick" data-w="31">2021</text>
+<path d="M344,320 L344,336" class="s-ink-muted w1 nofill"/>
+<text x="344" y="312" text-anchor="middle" class="t-tick" data-w="31">2022</text>
+<path d="M480,320 L480,336" class="s-ink-muted w1 nofill"/>
+<text x="480" y="312" text-anchor="middle" class="t-tick" data-w="31">2023</text>
+<path d="M616,320 L616,336" class="s-ink-muted w1 nofill"/>
+<text x="616" y="312" text-anchor="middle" class="t-tick" data-w="31">2024</text>
+<path d="M752,320 L752,336" class="s-ink-muted w1 nofill"/>
+<text x="752" y="312" text-anchor="middle" class="t-tick" data-w="31">2025</text>
+<path d="M888,320 L888,336" class="s-ink-muted w1 nofill"/>
+<text x="888" y="312" text-anchor="middle" class="t-tick" data-w="31">2026</text>
+<g data-grid="skip">
+<path d="M140,336 L140,400" class="s-rule w1 nofill"/>
+<circle cx="140" cy="328" r="5" class="f-ink s-surface w1"/>
+<text x="148" y="376" class="t-value" data-w="34">2020</text>
+<text x="148" y="396" class="t-label" data-w="158">RAG paper, Lewis et al.</text>
+</g>
+<g data-grid="skip">
+<path d="M542.33,336 L542.33,400" class="s-rule w1 nofill"/>
+<circle cx="542.33" cy="328" r="5" class="f-ink s-surface w1"/>
+<text x="550.33" y="376" class="t-value" data-w="73">June 2023</text>
+<text x="550.33" y="396" class="t-label" data-w="156">OpenAI function calling</text>
+</g>
+<g data-grid="skip">
+<path d="M735,336 L735,400" class="s-rule w1 nofill"/>
+<circle cx="735" cy="328" r="5" class="f-ink s-surface w1"/>
+<text x="743" y="376" class="t-value" data-w="112">November 2024</text>
+<text x="743" y="396" class="t-label" data-w="161">Model Context Protocol</text>
+</g>
+<g data-grid="skip">
+<path d="M814.33,320 L814.33,238" class="s-rule w1 nofill"/>
+<circle cx="814.33" cy="328" r="5" class="f-ink s-surface w1"/>
+<text x="806.33" y="252" text-anchor="end" class="t-value" data-w="73">June 2025</text>
+<text x="806.33" y="272" text-anchor="end" class="t-label" data-w="210">Martin's essay, Karpathy's post</text>
+</g>
+<g data-grid="skip">
+<path d="M848.33,320 L848.33,166" class="s-rule w1 nofill"/>
+<circle cx="848.33" cy="328" r="5" class="f-ink s-surface w1"/>
+<text x="840.33" y="180" text-anchor="end" class="t-value" data-w="116">September 2025</text>
+<text x="840.33" y="200" text-anchor="end" class="t-label" data-w="195">Anthropic Engineering article</text>
+</g>
+<text x="40" y="504" class="t-note" data-w="612">Function calling shipped two years before "context engineering" became the common term.</text>
+</svg>

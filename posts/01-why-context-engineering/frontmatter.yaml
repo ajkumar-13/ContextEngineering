@@ -1,45 +1,23 @@
 id: ctx-001
 slug: 01-why-context-engineering
-title: "01 · Why context engineering — and why now"
-
-description: >
-  Why modern LLM work moved from prompt engineering to context
-  engineering, and why the shift matters now.
-
-author: "Ajay"
-
+title: "01 - Why context engineering, and why now"
+summary: "Why the work moved from engineering one prompt to assembling a six-layer context window, what is genuinely new, the five jobs of the work, and how to tell a context problem from a prompt or model problem."
 date: 2026-05-12
-last_modified: 2026-05-12
-
-tags:
-  - context-engineering
-  - foundations
-  - llm
-  - ai-agents
-  - rag
-
-category: Foundations
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part I - Foundations"
-chapter: "Part I — Foundations"
-
-hero: diagrams/01-timeline.svg
-hero_alt: "Timeline from prompt engineering to context engineering"
-
-reading_time: 12
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - Prompt Engineering
-  - LLM
-  - RAG
-  - AI Agents
-  - Context Window
-
-canonical_url: ""
-
-prev: null
-next: ../02-six-layers-of-context/
+level: beginner
+reading_time: 13
+tags: [context-engineering, prompt-engineering, foundations, llm, rag, ai-agents]
+hero: diagrams/01-from-message-to-window.svg
+prerequisites: []
+code: none
+outcomes:
+  - id: o1
+    text: "State in one sentence what separates context engineering from prompt engineering."
+  - id: o2
+    text: "Recognise the five recurring jobs of a context engineer in a description of an LLM feature."
+  - id: o3
+    text: "Decide whether a given problem is a prompt problem, a context problem, or a model problem."
+  - id: o4
+    text: "Price one uncached call from its input tokens and a per-million-token input rate."
