@@ -2,7 +2,7 @@
 
 A chunk is a window of consecutive sentences whose combined length is close to a
 target token count, with a few sentences of overlap carried into the next chunk.
-Token counts here are approximated by whitespace-delimited words — good enough to
+Token counts here are approximated by whitespace-delimited words, good enough to
 teach the shape; a production pipeline would count real model tokens (see
 ``ragkit.tokens``-style helpers in the post). The approximation is documented so
 the numbers in the tests are reproducible offline with no dependencies.

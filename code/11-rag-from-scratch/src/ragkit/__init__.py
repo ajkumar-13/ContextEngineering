@@ -1,19 +1,19 @@
-"""ragkit — a minimal, readable RAG pipeline in plain Python.
+"""ragkit: a minimal, readable RAG pipeline in plain Python.
 
-Companion code for Post 11 — RAG in depth.
+Companion code for Post 11 - RAG in depth.
 
 The package is split into an OFFLINE core (pure functions, no network, no
 optional dependencies) and an ONLINE adapter (guarded behind an env key):
 
     Offline core (import-safe, unit-tested):
-        ingest  — read .md / .txt files off disk (with provenance)
-        chunk   — sentence-aware chunking, ~400-600 tokens, 10-20% overlap
-        bm25    — pure-Python lexical index (Okapi BM25)
-        fuse    — Reciprocal Rank Fusion (RRF) of ranked lists
-        pack    — bookend context packing (lost-in-the-middle mitigation)
+        ingest   - read .md / .txt files off disk (with provenance)
+        chunk    - sentence-aware chunking (500 words with a 75-word overlap by default)
+        bm25     - pure-Python lexical index (Okapi BM25)
+        fuse     - Reciprocal Rank Fusion (RRF) of ranked lists
+        pack     - bookend context packing (lost-in-the-middle mitigation)
 
     Online adapter (needs an API key; imported lazily inside the function):
-        generate — grounded answer with citations via the Anthropic SDK
+        generate - grounded answer with citations via the Anthropic SDK
 
 Nothing in the offline core imports an SDK, so ``import ragkit`` never fails
 because a provider package or key is missing.

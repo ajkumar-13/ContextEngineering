@@ -30,7 +30,7 @@ def answer(question: str, packed_chunks: list[tuple[str, str]], model: str = "cl
     with a clear message if either is missing.
     """
     if not os.getenv("ANTHROPIC_API_KEY"):
-        raise RuntimeError("ANTHROPIC_API_KEY is not set — this is the online path; see README.")
+        raise RuntimeError("ANTHROPIC_API_KEY is not set: this is the online path; see README.")
     try:
         import anthropic  # lazy import: offline core never needs this
     except ImportError as e:  # pragma: no cover - exercised only when SDK absent
