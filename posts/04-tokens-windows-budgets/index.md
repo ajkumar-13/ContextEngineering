@@ -200,7 +200,7 @@ The arithmetic above holds only if each layer has a budget that the code enforce
 | 02 Tools and MCP descriptions | 5 to 15 percent | above this, select tools per call rather than sending the whole catalogue ([post 15](../15-tools-and-mcp/index.md)) |
 | 03 Memory and state | 5 to 10 percent | recall a few relevant facts; a memory layer that grows without bound crowds the rest |
 | 04 Retrieved chunks | 20 to 40 percent | the largest variable lever; tune top-k to the budget, not the other way round |
-| 05 Conversation history | 10 to 30 percent | summarise on a schedule ([post 12](../12-compress-strategies/index.md)), not at the limit |
+| 05 Conversation history | 10 to 30 percent | summarise at a trigger well below the limit ([post 12](../12-compress-strategies/index.md)), not at the limit |
 | 06 User instruction | 1 to 5 percent | the smallest layer, although it is the reason for the call |
 | Output reserve | 10 to 20 percent of the *window* | set by `max_tokens`; the model is not trusted to be brief |
 
