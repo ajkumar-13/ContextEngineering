@@ -1,0 +1,753 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-008",
+  "next_ordinal": 18,
+  "questions": [
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "destination",
+        "memory"
+      ],
+      "prompt": "Midway through a support chat, the user says: \"From now on, please answer me in formal English.\" Where should the agent write this, if anywhere?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Nowhere: it is already in the conversation history",
+          "correct": false,
+          "feedback": "The history is transient and is trimmed or summarised as the conversation grows. A preference meant to outlive this chat must be written to a store that lasts."
+        },
+        {
+          "key": "b",
+          "text": "A semantic memory row, with source and date",
+          "correct": true,
+          "feedback": "Right. A stated preference is a fact about the user that should last for months and decay if never confirmed: semantic memory, with provenance."
+        },
+        {
+          "key": "c",
+          "text": "The rules block of the project's AGENTS.md",
+          "correct": false,
+          "feedback": "AGENTS.md holds rules for every session of every user of the repository, changed by review. One user's preference does not belong there."
+        },
+        {
+          "key": "d",
+          "text": "The task's scratchpad",
+          "correct": false,
+          "feedback": "A scratchpad lasts one task and is deleted or promoted at the end. The preference would be lost when the task closes."
+        }
+      ],
+      "explanation": "Section 6's table sends a stated preference to the memory store as a semantic row that lasts months and decays. Section 2 adds that every row carries its source and date, so the preference can be checked or overruled later.",
+      "hints": [
+        "Ask how long the preference should last, and whose it is."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3",
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "transient",
+        "tool-results"
+      ],
+      "prompt": "A weather tool returns `temperature: 32` for Mumbai. A developer proposes saving every tool result to semantic memory so the agent can answer faster next time. What is the right call?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Save it, with the tool name as the source and a confidence of 1.0",
+          "correct": false,
+          "feedback": "Provenance does not fix the problem: the reading describes one moment, and every later answer would start from a stale value that looks authoritative."
+        },
+        {
+          "key": "b",
+          "text": "Save it with an expiry date of one year",
+          "correct": false,
+          "feedback": "An expiry bounds how long the damage lasts, but a temperature is stale within hours. A year-long row is still the wrong content in a long-lived store."
+        },
+        {
+          "key": "c",
+          "text": "Write nothing; call the tool again when the value is needed",
+          "correct": true,
+          "feedback": "Right. A tool result is transient and has its own place in the window; when it is needed again, the tool is called again."
+        },
+        {
+          "key": "d",
+          "text": "Save it as an episodic memory instead, since it is an event",
+          "correct": false,
+          "feedback": "Changing the kind does not change the problem: the store would still hand a stale reading back to later calls as if it were current."
+        }
+      ],
+      "explanation": "Section 2, 'When not to write': tool results are not memories. Writing one into a long-lived store is the second class of bug of section 1, the wrong content.",
+      "hints": [
+        "Ask how long the value stays true."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q03",
+      "type": "match",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "destination"
+      ],
+      "prompt": "Match each piece of information to where it should be written. One option on the right matches nothing.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Refunds above \\$1,000 go to the manager queue (company policy)"
+        },
+        {
+          "key": "b",
+          "text": "\"Still to check: the retry logic in client.py\", mid-task"
+        },
+        {
+          "key": "c",
+          "text": "A 300-page installation guide the agent must be able to quote"
+        },
+        {
+          "key": "d",
+          "text": "The user escalated ticket 812 to engineering last Tuesday"
+        },
+        {
+          "key": "e",
+          "text": "The user pastes a database password into the chat"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "AGENTS.md rules block"
+        },
+        {
+          "key": "b",
+          "text": "Scratchpad for this task"
+        },
+        {
+          "key": "c",
+          "text": "Embedding index"
+        },
+        {
+          "key": "d",
+          "text": "Memory store, kind episodic"
+        },
+        {
+          "key": "e",
+          "text": "Nothing: no writable store"
+        },
+        {
+          "key": "f",
+          "text": "Memory store, kind procedural, with a confidence that decays"
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "c",
+        "d": "d",
+        "e": "e"
+      },
+      "explanation": "Section 6: a policy every session must follow is a reviewed repository rule; a mid-task note lasts one task; a long document is chunked into an index; a dated event is episodic memory; a secret never enters a writable store. A decaying procedural row is the wrong home for a policy, which should not fade because nobody re-read it.",
+      "hints": [
+        "Sort by lifetime first: one task, until reviewed, until the source changes, decays, never."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q04",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "5",
+      "est_minutes": 2,
+      "tags": [
+        "embedding-index",
+        "pipeline"
+      ],
+      "prompt": "Put the steps of the offline write path of an embedding index in order, from the raw documents to a searchable index.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Embed each chunk"
+        },
+        {
+          "key": "b",
+          "text": "Prepend a short context to each chunk"
+        },
+        {
+          "key": "c",
+          "text": "Collect the canonical version of each document and keep a hash"
+        },
+        {
+          "key": "d",
+          "text": "Insert the vectors into a vector store, beside a keyword index"
+        },
+        {
+          "key": "e",
+          "text": "Split the text into chunks"
+        },
+        {
+          "key": "f",
+          "text": "Strip boilerplate and normalise whitespace"
+        }
+      ],
+      "answer": [
+        "c",
+        "f",
+        "e",
+        "b",
+        "a",
+        "d"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 5: collect, clean, chunk, enrich, embed, index. The context is written per chunk, so it comes after chunking, and it is embedded with the chunk, so it comes before embedding.",
+      "hints": [
+        "The context header describes one chunk, and is embedded together with it."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q05",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "schema",
+        "decay"
+      ],
+      "prompt": "In the nine-field memory row, which field is updated every time the row is read, so that a decay job can tell how long the row has gone unused?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "created_at",
+          "correct": false,
+          "feedback": "created_at records the original write and never changes. A row written long ago but read every day should not decay."
+        },
+        {
+          "key": "b",
+          "text": "last_accessed_at",
+          "correct": true,
+          "feedback": "Right. It is refreshed on every read; the time since it is what the decay job measures."
+        },
+        {
+          "key": "c",
+          "text": "confidence",
+          "correct": false,
+          "feedback": "confidence is the value that decays, and it decides whether the agent asserts or asks. It is lowered by the decay job, not refreshed by each read."
+        },
+        {
+          "key": "d",
+          "text": "expires_at",
+          "correct": false,
+          "feedback": "expires_at is set once, for facts known to be short-lived, and most rows leave it empty. It does not move when the row is read."
+        }
+      ],
+      "explanation": "Section 2's schema: last_accessed_at is updated on every read and drives decay; confidence is what decays; created_at and expires_at are written once.",
+      "hints": [
+        "Which value changes when the row is used, rather than when it is written?"
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q06",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2",
+        "o3"
+      ],
+      "section": "2",
+      "est_minutes": 4,
+      "tags": [
+        "decay",
+        "confidence"
+      ],
+      "prompt": "A semantic row is written with confidence 0.85. The store uses the illustrative scheme of the post: confidence falls by 0.01 for every day without a read, and the agent asserts a fact when its confidence is at least 0.6 and asks first when it is below. Nobody reads the row. What is its confidence after 40 idle days, and on which idle day does the agent first ask rather than assert?",
+      "answer": {
+        "parts": [
+          {
+            "label": "confidence after 40 idle days",
+            "value": 0.45,
+            "tolerance": 0.005,
+            "unit": ""
+          },
+          {
+            "label": "first idle day on which the agent asks",
+            "value": 26,
+            "tolerance": 0,
+            "unit": "days"
+          }
+        ]
+      },
+      "precision_note": "0.85 - 0.01 × 40 = 0.45. Asking starts when 0.85 - 0.01 d < 0.6, so d > 25: day 26 (day 25 gives exactly 0.60, still asserted). The rule is decayed() and ASK_BELOW in snippets/memory_store.py; answering 25 is the nearest wrong method.",
+      "explanation": "Section 2, 'Decay': with a linear drop of 0.01 per idle day, 40 days remove 0.40, leaving 0.45. The cutoff is crossed when more than 0.25 has gone, after 25 days; at day 25 the value is exactly 0.6, which is still asserted, so the first ask is on day 26.",
+      "hints": [
+        "Write confidence as a function of idle days.",
+        "Check whether the boundary value 0.6 asserts or asks."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "5",
+      "est_minutes": 4,
+      "tags": [
+        "contextual-retrieval",
+        "retrieval-failure"
+      ],
+      "prompt": "An evaluation set has 2,000 queries (an illustrative size). Before enrichment, the top-20 retrieval failure rate is 5.7%, the baseline in Anthropic's \"Introducing Contextual Retrieval\" (September 2024). Assume the page's 49% reduction for contextual embeddings plus contextual BM25 carries over. How many queries fail before enrichment, and how many after, to the nearest whole query?",
+      "answer": {
+        "parts": [
+          {
+            "label": "failing queries before enrichment",
+            "value": 114,
+            "tolerance": 0,
+            "unit": "queries"
+          },
+          {
+            "label": "failing queries after enrichment",
+            "value": 58,
+            "tolerance": 0.5,
+            "unit": "queries"
+          }
+        ]
+      },
+      "precision_note": "2,000 × 0.057 = 114; 114 × (1 - 0.49) = 58.14, so 58 (the page's 2.9% gives 2,000 × 0.029 = 58 too). Taking 49% as the share that remains gives 55.86, about 56: the nearest wrong method.",
+      "explanation": "Section 5 quotes the page: the failure rate falls from 5.7% to 2.9%, a 49% reduction. A reduction removes 49% of the failures and keeps 51% of them: 114 × 0.51 = 58.14, about 58 queries.",
+      "hints": [
+        "A 49% reduction keeps 51% of the failures.",
+        "Start from 2,000 × 5.7%."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q08",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 1,
+      "tags": [
+        "schema"
+      ],
+      "prompt": "The agent learns that the user is on holiday until 1 May. Which field of the nine-field row should it set for this fact, a field that most rows leave empty?",
+      "answer": {
+        "model": "expires_at: the fact is knowingly short-lived, so the row records when it stops being true.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(not|never|isn'?t)\\s+(the\\s+)?`?expir)(?![\\s\\S]*(?<!not )(?<!not the )(?<!not a )(?<!not an )(?<!n't )(?<!never )\\b(created_at|last_accessed_at|confidence|subject|source|kind)\\b)[\\s\\S]*\\bexpir(es[_ ]?at|y|ation|es)\\b"
+        ]
+      },
+      "explanation": "Section 2's schema makes expires_at optional, for facts that are knowingly short-lived, and gives this example. After the date the row can be dropped without waiting for decay.",
+      "hints": [
+        "The fact has a known end date."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q09",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o3",
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 10,
+      "tags": [
+        "write-gate",
+        "provenance"
+      ],
+      "kind": "fix",
+      "language": "python",
+      "prompt": "`check_write` is a memory write gate. It must refuse a row with no provenance (a `source` that is missing, None, empty or only whitespace), then a row whose content holds a secret, then a tool result, and accept everything else. Rows with an empty `source` are getting through. Fix the gate without changing the order of the checks.",
+      "starter": "import re\n\nSECRET = re.compile(r\"\\bsk-[A-Za-z0-9-]{8,}|\\b(password|api[_ ]?key)\\s*[:=]\", re.IGNORECASE)\n\n\ndef check_write(row, origin):\n    \"\"\"Return why a memory write must be refused, or None when it may go in.\n\n    row is a dict with the nine fields; origin says where the candidate came from\n    (\"user_assertion\", \"session_summary\", \"tool_result\", ...).\n    \"\"\"\n    if row.get(\"source\") is None:\n        return \"no provenance\"\n    if SECRET.search(row.get(\"content\", \"\")):\n        return \"secret\"\n    if origin == \"tool_result\":\n        return \"transient\"\n    return None\n",
+      "solution": "import re\n\nSECRET = re.compile(r\"\\bsk-[A-Za-z0-9-]{8,}|\\b(password|api[_ ]?key)\\s*[:=]\", re.IGNORECASE)\n\n\ndef check_write(row, origin):\n    \"\"\"Return why a memory write must be refused, or None when it may go in.\n\n    row is a dict with the nine fields; origin says where the candidate came from\n    (\"user_assertion\", \"session_summary\", \"tool_result\", ...).\n    \"\"\"\n    if not str(row.get(\"source\") or \"\").strip():\n        return \"no provenance\"\n    if SECRET.search(row.get(\"content\", \"\")):\n        return \"secret\"\n    if origin == \"tool_result\":\n        return \"transient\"\n    return None\n",
+      "tests": "def row(**kw):\n    base = {\"id\": \"m1\", \"kind\": \"semantic\", \"subject\": \"user:u-1\", \"content\": \"Prefers formal English\",\n            \"source\": \"conversation:c-9\", \"created_at\": \"2026-09-01\", \"last_accessed_at\": \"2026-09-01\",\n            \"confidence\": 0.9, \"expires_at\": None}\n    base.update(kw)\n    return base\n\nassert check_write(row(), \"user_assertion\") is None\nassert check_write(row(source=\"\"), \"session_summary\") == \"no provenance\"\nassert check_write(row(source=\"   \"), \"session_summary\") == \"no provenance\"\nassert check_write(row(source=None), \"session_summary\") == \"no provenance\"\nmissing = row()\ndel missing[\"source\"]\nassert check_write(missing, \"session_summary\") == \"no provenance\"\nassert check_write(row(content=\"password: hunter2\"), \"user_assertion\") == \"secret\"\nassert check_write(row(source=\"tool:get_weather\", content=\"temperature: 32\"), \"tool_result\") == \"transient\"\nassert check_write(row(source=\"\", content=\"api key = abc123\"), \"user_assertion\") == \"no provenance\"\nassert check_write(row(source=\"web:https://example.com/policy\"), \"session_summary\") is None\nassert check_write(row(source=\"crm\"), \"session_summary\") is None\n",
+      "explanation": "Section 2's gate refuses the first two classes of bug. The starter only catches a source of None; an empty or blank string passes, so rows with no provenance enter the store. Testing the stripped value for truth catches every case, including a missing key.",
+      "hints": [
+        "Which values of source does `is None` let through?",
+        "Treat None, a missing key, an empty string and a blank string the same way."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q10",
+      "type": "short",
+      "track": "run",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "write-gate",
+        "snippet"
+      ],
+      "prompt": "`check_write` in `snippets/memory_store.py` is offered a row whose `source` is the empty string and whose `content` is \"password: hunter2\", with origin `user_assertion`. Which reason does it return, and why that one?",
+      "answer": {
+        "model": "\"no provenance: the row has no source\", because the source check runs first and returns before the secret check is reached.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?!\\W*(the\\s+)?(reason\\s+is\\s+)?[\\\"'`]?(secret|transient|none|accepted|written)\\b)(?![\\s\\S]*\\b(returns?|prints?|gives?|says?|reason is|answer is|it'?s|outputs?)\\s+(the\\s+)?[\\\"'`]?(secret|transient|none)\\b)(?![\\s\\S]*\\bsecrets?(\\s+check)?\\s+(runs|comes|is checked|is evaluated|happens|goes|is tested)\\s+(first|before|earlier))(?![\\s\\S]*\\b(or|and)\\s+(the\\s+)?[\\\"'`]?(secret|transient)\\b)(?![\\s\\S]*\\b(not|never|isn'?t|doesn'?t return)\\s+(the\\s+)?[\\\"'`]?no[- ]provenance)(?![\\s\\S]*\\bboth\\b)(?=[\\s\\S]*\\b(no[- ]provenance|no source|empty source|source is empty|missing source|has no source|without a source))(?=[\\s\\S]*\\b(first|before|order|earlier|precedes|returns early|short[- ]circuit|top|ahead))"
+        ]
+      },
+      "explanation": "The gate checks in a fixed order and returns at the first failure: provenance, then secrets, then transient tool results. The row fails the first check, so the secret is never examined; it is refused either way.",
+      "hints": [
+        "Read the order of the if statements.",
+        "The function returns as soon as one check fails."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q11",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "skills",
+        "progressive-disclosure"
+      ],
+      "prompt": "In Anthropic's Agent Skills format, the agent pre-loads two front-matter fields of every installed skill's SKILL.md into its system prompt and reads the rest only when a task needs it. Which two fields?",
+      "answer": {
+        "model": "name and description",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(not|never|isn'?t|without)\\s+(the\\s+)?`?(name|description)\\b)(?![\\s\\S]*(?<!not )(?<!not the )(?<!not a )(?<!not an )(?<!n't )(?<!never )\\b(version|author|license|tags|title|allowed[-_ ]?tools|summary|keywords|id)\\b)(?![\\s\\S]*\\b(names?|descriptions?)`?\\s*(,|and|plus|&)\\s*(the\\s+|its\\s+)?`?(instructions|scripts|body)\\b)(?![\\s\\S]*\\b(instructions|scripts|body)`?\\s*(,|and|plus|&)\\s*(the\\s+|its\\s+)?`?(names?|descriptions?)\\b)(?=[\\s\\S]*\\bnames?\\b)(?=[\\s\\S]*\\bdescriptions?\\b)[\\s\\S]+"
+        ]
+      },
+      "explanation": "Section 4: the front matter must give a name and a description; the agent pre-loads both for every skill, and reads the full SKILL.md into the window only when it judges the skill relevant.",
+      "hints": [
+        "One field identifies the skill; the other lets the agent judge when it applies."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q12",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "1",
+      "est_minutes": 2,
+      "tags": [
+        "bug-classes",
+        "secrets"
+      ],
+      "prompt": "A row with a valid source, date and decay schedule stores the content \"API key: sk-live-4f9a2b7c1d\" in semantic memory. Which of the post's three classes of bug is this, given that the metadata is complete?",
+      "answer": {
+        "model": "The wrong content: a secret written into a long-lived store, where complete metadata does not help.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(not|isn'?t|never)\\s+(the\\s+|a\\s+)?(wrong|bad|incorrect)\\s+(content|data|thing))(?![\\s\\S]*(?<!not )(?<!not the )(?<!not a )(?<!not an )(?<!n't )(?<!never )(?<!not no )(?<!n't no )\\b(no provenance|provenance|no expiry|expiry|expire\\w*|decay\\w*|stale)\\b)(?=[\\s\\S]*\\b((wrong|bad|incorrect|forbidden|inappropriate)\\s+(kind of\\s+)?(content|data|thing|information)|second class|class (2|two)|the second)\\b)[\\s\\S]+"
+        ]
+      },
+      "explanation": "Section 1 names three classes: no provenance, the wrong content, no expiry. The metadata here is complete, so the first and third do not apply; a secret is content that never belongs in a writable store, which is the second class.",
+      "hints": [
+        "The metadata is complete, so two of the three classes are ruled out."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q13",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "agents-md",
+        "monorepo"
+      ],
+      "prompt": "A monorepo has an AGENTS.md at its root, which says tests run with `pytest`, and another in `packages/web/`, which says tests run with `npm test`. Following the convention the agents.md site describes, which instruction should an agent follow when it edits `packages/web/src/app.ts`?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The root file's, because the root describes the whole project",
+          "correct": false,
+          "feedback": "The root file sets the defaults; a subdirectory's own file refines them for that subdirectory, and the edited file sits inside packages/web."
+        },
+        {
+          "key": "b",
+          "text": "Both: the agent runs pytest and then npm test",
+          "correct": false,
+          "feedback": "Nothing in the convention merges contradictory rules; it names one file as the winner for each edited file."
+        },
+        {
+          "key": "c",
+          "text": "The packages/web file's: the closest file wins",
+          "correct": true,
+          "feedback": "Right. The agents.md site puts it in those words; a monorepo relies on it to keep each package's rules separate."
+        },
+        {
+          "key": "d",
+          "text": "Neither: contradictory files are ignored and the agent asks the user",
+          "correct": false,
+          "feedback": "Two files that disagree are the normal case in a monorepo, not an error; the convention resolves them by distance."
+        }
+      ],
+      "explanation": "Section 4: the convention is recursive, and in the agents.md site's words the closest AGENTS.md to the edited file wins, so the front-end can carry its own rules without the root's drowning them.",
+      "hints": [
+        "Count the directories between each AGENTS.md and the edited file.",
+        "The convention picks one file per edited file; it does not merge them."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q14",
+      "type": "mcq",
+      "track": "connect",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "1",
+      "est_minutes": 3,
+      "tags": [
+        "conflict",
+        "provenance"
+      ],
+      "connects": [
+        "ctx-006"
+      ],
+      "prompt": "Months ago the agent misread a log and wrote \"the customer is on the Basic plan\" into memory, with a source and a date. Today that row is recalled next to a freshly retrieved invoice that says Enterprise, and the answer wavers between the two. How does post 06 classify this, and what is its first fix?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Memory poisoning; isolate the memory store behind a security review",
+          "correct": false,
+          "feedback": "Post 06 reserves poisoning for content planted on purpose, an attack handled in post 23. An error the agent wrote itself is handled as conflict."
+        },
+        {
+          "key": "b",
+          "text": "Conflict; a precedence rule over the provenance and recency stamps",
+          "correct": true,
+          "feedback": "Right. Two parts of the window disagree; because the row carries a source and a date, a rule such as 'the most recent source wins' can overrule it."
+        },
+        {
+          "key": "c",
+          "text": "Distraction; lower top-k so the old memory is not recalled",
+          "correct": false,
+          "feedback": "Distraction is irrelevant material pulling the answer off course. Here both items are relevant and contradict each other."
+        },
+        {
+          "key": "d",
+          "text": "Lost-in-the-middle; move the invoice to the end of the window",
+          "correct": false,
+          "feedback": "Nothing suggests the invoice was overlooked because of its position; the answer wavers because two sources disagree with no rule between them."
+        }
+      ],
+      "explanation": "Section 1 of this post points to post 06, which handles an error the agent wrote and keeps citing as conflict, fixed by a provenance and recency stamp with a precedence rule. That fix only works because the row was written with its metadata.",
+      "hints": [
+        "Is anything here planted on purpose?",
+        "Which mode needs two parts of the window to disagree?"
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q15",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "re-index",
+        "embedding-model"
+      ],
+      "prompt": "A team switches its query embedding to a newer model on Monday. No service reports an error, but from Monday the retrieved chunks are close to random. Which chunk metadata field shows the cause fastest?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "created_at",
+          "correct": false,
+          "feedback": "It shows when each chunk was indexed, which says nothing about whether the stored vectors and the query vectors come from the same model."
+        },
+        {
+          "key": "b",
+          "text": "embedding_model",
+          "correct": true,
+          "feedback": "Right. The stored chunks still name the old model while queries use the new one; vectors from two different models are not comparable."
+        },
+        {
+          "key": "c",
+          "text": "chunk_index",
+          "correct": false,
+          "feedback": "The position of a chunk within its source is unaffected by the model change and cannot explain random results."
+        },
+        {
+          "key": "d",
+          "text": "source_url",
+          "correct": false,
+          "feedback": "It traces a chunk to its document, which helps for a stale source but not for a mismatch between query and index vectors."
+        }
+      ],
+      "explanation": "Section 7: a new embedding model without a re-index compares query vectors from one model with stored vectors from another, and quality collapses while every component reports healthy. The embedding_model field on the chunks shows the mismatch; the fix is to re-embed the corpus.",
+      "hints": [
+        "What changed on Monday?",
+        "Vectors are comparable only when the same model produced them; which field records the model?"
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q16",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 20,
+      "tags": [
+        "schema",
+        "destination",
+        "provenance"
+      ],
+      "kind": "design",
+      "prompt": "Design the write side of a customer-support agent. Give the memory row schema with all nine fields and one line on each field's job. Then show one concrete write to each of the four destinations (a memory row, a scratchpad entry, an AGENTS.md rule, an index chunk), each with its provenance filled in, and name one piece of information the agent will meet that must be written nowhere, with the reason.",
+      "answer_length": "a table and about 200 words",
+      "solution": "**Schema.** `id` (stable reference for updates and deletes), `kind` (episodic, semantic or procedural: decides decay and access), `subject` (the customer or account the row is about), `content` (the fact), `source` (the conversation, ticket or tool it came from), `created_at` (when it was first written), `last_accessed_at` (refreshed on every read; drives decay), `confidence` (0 to 1; below a cutoff the agent asks before asserting), `expires_at` (only for short-lived facts).\n\n**Four writes.**\n\n1. Memory row: id mem-0101, kind semantic, subject customer:c-88, content \"prefers email over phone\", source conversation:c-4012, created_at 2026-10-12, last_accessed_at 2026-10-12, confidence 0.9, expires_at null.\n2. Scratchpad (`.scratch/ticket-5531.md`): \"- [x] Found the duplicate charge (billing API, invoice INV-77). Note: refund needs manager approval, amount above the limit.\" The ticket id names the file; the invoice and tool name are its provenance.\n3. AGENTS.md rules block: \"Refunds above \\$1,000 go to the manager queue.\" added in a reviewed change whose description cites the policy document and the incident that motivated it; the version history records who and when.\n4. Index chunk: the refund-policy page, chunk 3, with source_id policy-refunds, source_url, chunk_index 3, tokens, created_at and embedding_model recorded, and a manifest row with the page's hash.\n\n**Written nowhere.** A card number or password the customer pastes: secrets never enter a writable store. (A live order-status lookup is another: it is transient; call the tool again.)",
+      "rubric": [
+        {
+          "criterion": "Lists all nine fields with a correct one-line job for each, including what drives decay",
+          "points": 3
+        },
+        {
+          "criterion": "Gives one concrete write per destination, each in the right destination for its lifetime",
+          "points": 3
+        },
+        {
+          "criterion": "Every write carries provenance: a source and a date, or the review history for AGENTS.md",
+          "points": 2
+        },
+        {
+          "criterion": "Names a secret or a transient value as written nowhere, with the reason",
+          "points": 2
+        }
+      ],
+      "explanation": "Sections 2 to 6 together: the nine-field row of section 2, one destination per lifetime as in section 6's table, provenance on every write as section 1 requires, and the two rows of the table that are written nowhere.",
+      "hints": [
+        "Start from the table of section 6 and pick one row per destination.",
+        "For each write, say where it came from and when; for AGENTS.md, the review itself is the provenance."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-008-q17",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "4",
+      "est_minutes": 15,
+      "tags": [
+        "claude-md",
+        "review"
+      ],
+      "kind": "critique",
+      "prompt": "A team's CLAUDE.md has grown to 600 lines over a year: every incident added a rule, none was removed, and nothing was reviewed. Agents now follow some rules and ignore others, and two rules about test commands contradict each other. Explain how the file reaches the model, why its size and its history cause these symptoms, and what the team should change.",
+      "answer_length": "three short paragraphs",
+      "solution": "**How it reaches the model.** Claude Code reads CLAUDE.md at the start of every session, so the whole file rides in the window on every session as standing instructions, the job of layer 01, the system prompt. Every line costs tokens on every session and competes for the model's attention.\n\n**Why the symptoms.** Claude Code's documentation targets under 200 lines per CLAUDE.md and says longer files consume more context and reduce adherence: 600 lines explains rules being followed unevenly. Rules added without review accumulate contradictions, and when two instructions contradict each other the model may pick one arbitrarily, which is the test-command symptom.\n\n**What to change.** Treat the file as code: every change through review, with the failure that motivated it. Cut back to a minimal file and add rules only for observed failures. Remove or reconcile contradictions. Move instructions that matter only for part of the work out of the always-loaded file: a subdirectory's own file that loads when work reaches it, or a skill whose SKILL.md is read only when a task needs it.",
+      "rubric": [
+        {
+          "criterion": "Says the file is loaded on every session as standing instructions (layer 01)",
+          "points": 2
+        },
+        {
+          "criterion": "Connects length to lower adherence, citing the documented guidance or the token cost",
+          "points": 2
+        },
+        {
+          "criterion": "Connects unreviewed growth to contradictory rules and the arbitrary choice between them",
+          "points": 2
+        },
+        {
+          "criterion": "Proposes review like code, a minimal start, and moving partial instructions to nested files or skills",
+          "points": 3
+        }
+      ],
+      "explanation": "Section 4: repository files reach the model as standing instructions; Claude Code's documentation gives a target under 200 lines and warns about contradictions; the three rules of thumb are keep it short, iterate from minimal, and review every change like code; skills load on demand.",
+      "hints": [
+        "Ask when, and how often, the file enters the window.",
+        "Separate the cost of length from the cost of contradictions, then fix each."
+      ]
+    }
+  ]
+}

@@ -1,60 +1,25 @@
 id: ctx-008
 slug: 08-write-strategies
-title: "08 · Write Strategies"
-
-description: >
-  Learn how to design durable write paths for AI agents using memory stores,
-  scratchpads, repository documentation, and embedding indexes. Explore
-  metadata, governance, decay policies, and best practices for building
-  reliable long-term memory systems.
-
-author: "Ajay"
-
+title: "08 - Write strategies"
+summary: "Where to write information that is needed later but not now (memory stores, scratchpads, repository files, embedding indexes), and the metadata every write carries so the store does not become a liability."
 date: 2026-05-16
-last_modified: 2026-05-16
-
-tags:
-  - context-engineering
-  - wsci
-  - write
-  - memory
-  - scratchpad
-  - agents-md
-  - rag
-  - embeddings
-
-category: The Four Primitives
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part II - The WSCI operating system"
-chapter: "Part II — The Four Primitives (WSCI)"
-
-hero: diagrams/00-hero-write-strategies.svg
-hero_alt: "The four write destinations — memory store, scratchpad, repository docs, embedding index — with the lifetime of each"
-
-reading_time: 12
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - WSCI
-  - Write Strategy
-  - AI Memory
-  - Episodic Memory
-  - Semantic Memory
-  - Procedural Memory
-  - Scratchpad
-  - AGENTS.md
-  - CLAUDE.md
-  - Skill Files
-  - Embedding Index
-  - RAG
-  - Long-Term Memory
-  - Memory Governance
-  - Vector Database
-
-canonical_url: ""
-
-prev: ../07-write-select-compress-isolate/
-next: ../09-select-strategies/
+level: intermediate
+reading_time: 18
+tags: [context-engineering, wsci, write, memory, scratchpad, agents-md, rag, embeddings]
+hero: diagrams/01-four-destinations.svg
+prerequisites: [ctx-007]
+code: optional
+outcomes:
+  - id: o1
+    text: "Choose the write destination for a piece of information (memory store, scratchpad, repository file or embedding index), or decide it belongs in none."
+  - id: o2
+    text: "Specify the nine metadata fields of a memory row and say what each one is for."
+  - id: o3
+    text: "Recognise the three classes of bug that turn a memory store into a liability, and the guard against each."
+  - id: o4
+    text: "Explain how repository files such as AGENTS.md and a skill's SKILL.md reach the window, and why every change to them is reviewed like code."
+  - id: o5
+    text: "Describe the offline write path of an embedding index and the metadata each chunk must carry so the index can be traced and rebuilt."
