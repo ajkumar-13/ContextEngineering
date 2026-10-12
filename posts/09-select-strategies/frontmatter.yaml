@@ -1,66 +1,25 @@
 id: ctx-009
 slug: 09-select-strategies
-title: "09 · Select Strategies"
-
-description: >
-  Learn the Select primitive of the WSCI framework and discover how the same
-  retrieval pipeline powers RAG, tool selection, memory recall, and few-shot
-  example selection. Explore query construction, candidate generation,
-  re-ranking, and packing to build accurate, efficient retrieval systems.
-
-author: "Ajay"
-
+title: "09 - Select strategies"
+summary: "RAG, tool selection, memory recall and few-shot picking are one select operation with four levers: query, candidates, re-rank and pack. Recall@N and precision@k show which lever a failure needs."
 date: 2026-05-17
-last_modified: 2026-05-17
-
-tags:
-  - context-engineering
-  - wsci
-  - select
-  - retrieval
-  - rag
-  - reranking
-  - embeddings
-  - hybrid-search
-
-category: The Four Primitives
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part II - The WSCI operating system"
-chapter: "Part II — The Four Primitives (WSCI)"
-
-hero: diagrams/00-hero-select-pipeline.svg
-hero_alt: "The four levers of Select — query construction, candidate generation, re-ranking, and packing — from user turn to packed prompt"
-
-reading_time: 16
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - WSCI
-  - Select
-  - Retrieval
-  - Retrieval-Augmented Generation
-  - RAG
-  - Hybrid Search
-  - Dense Retrieval
-  - Sparse Retrieval
-  - BM25
-  - Reciprocal Rank Fusion
-  - RRF
-  - Re-ranking
-  - Cross Encoder
-  - HyDE
-  - Query Rewriting
-  - Few-shot Selection
-  - Tool Selection
-  - Memory Retrieval
-  - Embeddings
-  - ANN Search
-  - Contextual Retrieval
-
-canonical_url: ""
-
-prev: ../08-write-strategies/
-next: ../10-data-ingestion-document-pipelines/
+level: intermediate
+reading_time: 15
+tags: [context-engineering, wsci, select, retrieval, rag, reranking, hybrid-search, evaluation]
+hero: diagrams/01-select-pipeline.svg
+prerequisites: [ctx-007]
+code: optional
+outcomes:
+  - id: o1
+    text: "Recognise RAG, tool selection, memory recall and few-shot picking as one select operation, and name the corpus, the query and the layer packed for each."
+  - id: o2
+    text: "Explain what each of the four levers (query, candidates, re-rank, pack) does, and what it trades among recall, precision, latency and cost."
+  - id: o3
+    text: "Compute recall@N and precision@k for a retrieval run, and say which lever can move each."
+  - id: o4
+    text: "Fuse ranked lists with reciprocal rank fusion and pack the survivors in bookend order."
+  - id: o5
+    text: "Pick the lever most likely to fix a given select failure, and tune the dials in a defensible order."

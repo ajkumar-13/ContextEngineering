@@ -1,0 +1,765 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-009",
+  "next_ordinal": 18,
+  "questions": [
+    {
+      "id": "ctx-009-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 2,
+      "tags": [
+        "select",
+        "rag"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "How does this series relate retrieval-augmented generation (RAG) to the select operation?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "They are two names for the same technique.",
+          "correct": false,
+          "feedback": "The post rejects the synonym reading: tool selection, memory recall and few-shot picking are select too, and none of them is RAG."
+        },
+        {
+          "key": "b",
+          "text": "RAG is one application of select: select over a corpus of documents.",
+          "correct": true,
+          "feedback": "Right. Select is the operation; RAG runs it over documents, and the same four stages run over tools, memory rows and examples."
+        },
+        {
+          "key": "c",
+          "text": "RAG is a write operation, because its chunks are written to an index.",
+          "correct": false,
+          "feedback": "Indexing the chunks is the offline write side; choosing which chunks enter the window for this call is select."
+        },
+        {
+          "key": "d",
+          "text": "Select is one stage inside RAG, the stage that ranks the chunks.",
+          "correct": false,
+          "feedback": "That inverts the relation: the whole pipeline (query, candidates, re-rank, pack) is select, and RAG is one instance of it."
+        }
+      ],
+      "explanation": "Section 1: RAG is one application of select; select is the operation. Tool selection, memory recall and few-shot example selection run the same four-stage pipeline over different corpora.",
+      "hints": [
+        "Ask whether tool selection is RAG, and whether it is select."
+      ]
+    },
+    {
+      "id": "ctx-009-q02",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "four-corpora",
+        "layers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Each source below supplies items to the window. Match each one to the layer of the window its items go into.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Help-centre documents, chunked"
+        },
+        {
+          "key": "b",
+          "text": "The tool catalogue's schemas"
+        },
+        {
+          "key": "c",
+          "text": "Rows of the user's memory store"
+        },
+        {
+          "key": "d",
+          "text": "A small set of examples that never changes between calls"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Layer 04, retrieved chunks"
+        },
+        {
+          "key": "b",
+          "text": "Layer 02, tools and MCP descriptions"
+        },
+        {
+          "key": "c",
+          "text": "Layer 03, memory and state"
+        },
+        {
+          "key": "d",
+          "text": "Layer 01, the system prompt"
+        },
+        {
+          "key": "e",
+          "text": "Layer 05, conversation history"
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "c",
+        "d": "d"
+      },
+      "explanation": "Section 6: documents fill layer 04, the surviving tool schemas layer 02, recalled memories layer 03. Examples picked per turn travel with the retrieved material in layer 04, but a fixed set that never changes can live in layer 01 and cache. Nothing selected goes into the conversation history.",
+      "hints": [
+        "Name the lifetime of each item: does it change per turn or stay the same on every call?"
+      ]
+    },
+    {
+      "id": "ctx-009-q03",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "8",
+      "est_minutes": 3,
+      "tags": [
+        "recall",
+        "precision",
+        "metrics"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "For one question, four articles in the knowledge base are relevant. Candidate generation returns a top-50 that contains three of them, and the top-5 packed after re-ranking contains two of them. Give recall@50 and precision@5 for this question.",
+      "answer": {
+        "parts": [
+          {
+            "label": "recall@50",
+            "value": 0.75,
+            "tolerance": 0.005,
+            "unit": ""
+          },
+          {
+            "label": "precision@5",
+            "value": 0.4,
+            "tolerance": 0.005,
+            "unit": ""
+          }
+        ]
+      },
+      "precision_note": "recall@50 = |R ∩ top50| / |R| = 3 / 4 = 0.75; precision@5 = |R ∩ top5| / 5 = 2 / 5 = 0.40 (section 8's formulas, as in select_pipeline.py's recall_at and precision_at). Dividing by the candidate count gives 3 / 50 = 0.06, and dividing precision by the relevant count gives 2 / 4 = 0.50, the nearest wrong methods.",
+      "explanation": "Section 8: recall@N divides the relevant items found in the top-N by all relevant items; precision@k divides the relevant items among the k packed by k.",
+      "hints": [
+        "Recall is measured against the relevant items, precision against the packed slots.",
+        "Count the relevant articles in each set, then divide by the size the metric names as its denominator."
+      ]
+    },
+    {
+      "id": "ctx-009-q04",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "3",
+      "est_minutes": 4,
+      "tags": [
+        "rrf",
+        "fusion",
+        "arithmetic"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Reciprocal rank fusion with $k = 60$ merges a dense list and a BM25 list. Article A is ranked 3rd by the dense retriever and 7th by BM25. Article B is ranked 1st by BM25 and does not appear in the dense list. Give the fused score of each, to four decimal places.",
+      "answer": {
+        "parts": [
+          {
+            "label": "score of A",
+            "value": 0.0308,
+            "tolerance": 0.0001,
+            "unit": ""
+          },
+          {
+            "label": "score of B",
+            "value": 0.0164,
+            "tolerance": 0.0001,
+            "unit": ""
+          }
+        ]
+      },
+      "precision_note": "A: 1/(60 + 3) + 1/(60 + 7) = 0.015873 + 0.014925 = 0.030798, so 0.0308. B: 1/(60 + 1) = 0.016393, so 0.0164 (the rrf function of select_pipeline.py gives the same). Counting ranks from 0 gives 1/62 + 1/66 = 0.0313 for A; leaving out k gives 1/3 + 1/7 = 0.4762.",
+      "explanation": "Section 3: an item scores the sum of $1/(k + r)$ over the lists it appears in, with ranks counted from 1. A, present in both lists, outscores B, which is first in one list only: agreement between retrievers counts for more than one high rank.",
+      "hints": [
+        "Each list an item appears in contributes one term $1/(k + r)$.",
+        "A has two terms, $1/63$ and $1/67$; B has one, $1/61$."
+      ]
+    },
+    {
+      "id": "ctx-009-q05",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "re-ranking",
+        "recall",
+        "metrics"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A team switches on a cross-encoder reranker over its top-50 candidates and changes nothing else. Measured on the same labelled questions, which number cannot change?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Precision@5 of the packed chunks",
+          "correct": false,
+          "feedback": "Precision@5 is what the reranker exists to move: it reorders the 50 and so changes which 5 are packed."
+        },
+        {
+          "key": "b",
+          "text": "Recall@50 of the candidate set",
+          "correct": true,
+          "feedback": "Right. The reranker only reorders the top-50; which items are in it is decided before it runs."
+        },
+        {
+          "key": "c",
+          "text": "Citation accuracy of the answers",
+          "correct": false,
+          "feedback": "Different chunks in the window can change what the model cites and whether the cited chunk holds the fact."
+        },
+        {
+          "key": "d",
+          "text": "End-to-end answer correctness",
+          "correct": false,
+          "feedback": "Changing the packed chunks changes the evidence the model answers from, so correctness can move either way."
+        }
+      ],
+      "explanation": "Sections 4 and 8: re-ranking cannot recover an item candidate generation missed. It reorders the top-N, so it moves precision@k and leaves recall@N where it was; the toy run shows recall@6 at 1.00 with and without the reranker.",
+      "hints": [
+        "Ask which set the reranker reads and which set it writes."
+      ]
+    },
+    {
+      "id": "ctx-009-q06",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 1,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "1",
+      "est_minutes": 2,
+      "tags": [
+        "pipeline",
+        "stages"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the stages of a select pipeline in the order they run on one call, from the user's turn to the window.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Pack the survivors into the layer they fill"
+        },
+        {
+          "key": "b",
+          "text": "Re-rank the candidates down to the top-k"
+        },
+        {
+          "key": "c",
+          "text": "Build a self-contained search query from the turn"
+        },
+        {
+          "key": "d",
+          "text": "Retrieve a broad top-N candidate set"
+        }
+      ],
+      "answer": [
+        "c",
+        "d",
+        "b",
+        "a"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 1 and the hero figure: construct the query, generate candidates (top-N, for recall), re-rank (top-k, for precision), pack (for the budget).",
+      "hints": [
+        "The stage with the largest set of items comes before the stage with the smallest."
+      ]
+    },
+    {
+      "id": "ctx-009-q07",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "cross-encoder",
+        "candidate-generation",
+        "latency"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A cross-encoder judges relevance better than a dense retriever does. Why does a select pipeline not simply score every item of the corpus with the cross-encoder?",
+      "answer": {
+        "model": "Because a cross-encoder reads the query and each item together, one pair at a time, it is far too slow to run over a whole corpus; cheap candidate generation first shrinks the set to the top-N, and only those are re-ranked.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(is|are|it'?s|being|they'?re)\\s+(very\\s+|quite\\s+|fast\\s+and\\s+)?(fast|quick|cheap)\\b)(?![\\s\\S]*\\bnot\\s+(too\\s+|very\\s+|that\\s+)?(slow|expensive|costly)\\b)(?![\\s\\S]*\\b(isn'?t|aren'?t|never)\\s+(too\\s+|very\\s+|that\\s+)?(slow|expensive|costly)\\b)(?![\\s\\S]*\\b(cost|speed|latency|time|slowness)\\b[\\s\\S]{0,12}\\b(is|isn'?t|are)\\s+not\\s+(the\\s+)?(issue|problem|reason)\\b)(?![\\s\\S]*\\b(cost|speed|latency|time|slowness)\\b\\s+(isn'?t|is\\s+not)\\b)(?![\\s\\S]*\\b(dense|bi-?encoder|retriever|bm25|embedding\\w*)\\b[\\s\\S]{0,40}\\b(more accurate|more precise|better quality|is better)\\b)(?![\\s\\S]*\\b(fit|fits|fitting)\\s+(in|into|inside)\\b)(?![\\s\\S]*\\bcontext\\s+window\\b)(?=[\\s\\S]*\\b(slow\\w*|expensive|costly|cost\\w*|latency|hours|seconds|minutes|compute|computation\\w*|impractical|infeasible|prohibitive\\w*|scale|scales|scaling|run\\s*time|time\\s+per|query\\s+time|response\\s+time|(too\\s+much|a\\s+lot\\s+of|more|far\\s+more)\\s+time|too\\s+long(?!\\s+to\\s+(train|fit|collect|label|build|learn)))\\b)(?=[\\s\\S]*\\b(is|are|would|takes?|taking|because|so|since|too|must|needs?|cannot|can'?t|only|runs?|reads?|scores?)\\b)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 4: a cross-encoder scores one query and candidate pair at a time. At an illustrative 20 milliseconds per pair, 50 candidates take one second and a million items about 5.6 hours, which is why candidate generation shrinks the set first.",
+      "hints": [
+        "Think about what one cross-encoder score costs, and how many scores a whole corpus needs.",
+        "Compare 50 pairs with a million pairs at the same cost per pair."
+      ]
+    },
+    {
+      "id": "ctx-009-q08",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "rrf",
+        "notation",
+        "top-k"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Reciprocal rank fusion scores an item by summing $1/(k + r)$ over the ranked lists it appears in. What is $k$ there, and what does it have to do with the top-k of the packing stage?",
+      "answer": {
+        "model": "A damping constant, 60 in Cormack et al.'s paper, that softens the advantage of the very top ranks; it is unrelated to top-k, the number of items packed into the window.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\bk\\s+(is|equals|=|means|sets|gives)\\s+(the\\s+)?(top-?k|packed|number\\s+of\\s+(packed|items|chunks|results|documents)|count\\s+of\\s+(packed|items|chunks)|how\\s+many)\\b)(?![\\s\\S]*(?<!not the )(?<!n't the )(?<!not )(?<!n't )\\b(same as|equal to|identical to)\\s+(the\\s+)?top-?k)(?=[\\s\\S]*\\b(is|it'?s|are|has|means|a|an|the|which|that|does|doesn'?t)\\b)(?![\\s\\S]*\\b(it|k)\\s+is\\s+top-?k\\b)(?![\\s\\S]*\\b(it|k)\\s+(also\\s+)?(sets|decides|determines|controls|limits)\\s+(the\\s+)?(top-?k|number\\s+(of\\s+)?(packed|items|chunks)|how\\s+many)\\b)(?![\\s\\S]*\\bnot\\s+unrelated\\b)(?![\\s\\S]*\\bsame\\s+(thing|number|value|quantity)\\s+as\\s+(the\\s+)?top-?k)(?=[\\s\\S]*\\b(constant|damp\\w*|smooth\\w*|offset|60|fixed|parameter|hyper-?parameter|softens?|flatten\\w*)\\b)(?=[\\s\\S]*(\\bunrelated\\b|\\bnot\\s+related\\b|\\bno\\s+relation|\\bnothing\\s+to\\s+do\\b|\\bdifferent\\b|\\bindependent\\b|\\bnot\\s+the\\s+same\\b|\\bisn'?t\\s+the\\s+same\\b|\\bseparate\\b|\\bdistinct\\b|\\bno\\s+connection\\b|\\bnot\\s+connected\\b|\\bnot\\s+top-?k\\b|\\bisn'?t\\s+top-?k\\b|\\bno\\s+link\\b|\\bunconnected\\b|\\bnot\\s+linked\\b|\\bdoes\\s+not\\s+(set|control|affect|change|decide)\\b|\\bdoesn'?t\\s+(set|control|affect|change|decide)\\b|\\bnot\\s+the\\s+packed\\b|\\b(only|just)\\s+the\\s+(same\\s+)?letter\\b|\\bsame\\s+letter\\b))[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 3 and the notation guide: the $k$ of reciprocal rank fusion is a damping constant (Cormack et al. fixed it at 60 and found the choice not critical). It shares a letter with top-k, the packed count, and nothing else.",
+      "hints": [
+        "Look at what happens to $1/(k + r)$ for rank 1 and rank 2 when $k$ is 0 and when it is 60.",
+        "Top-k counts packed items; ask whether changing the fusion constant changes that count."
+      ]
+    },
+    {
+      "id": "ctx-009-q09",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 3,
+      "tags": [
+        "diagnosis",
+        "recall",
+        "levers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Users report that answers leave out facts the knowledge base does contain. On a labelled set, recall@50 is 0.55, and when a relevant article is in the top-50 the reranker almost always puts it in the top-5. Which change is most likely to help?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Replace the reranker with a stronger cross-encoder.",
+          "correct": false,
+          "feedback": "The reranker already does its job on what it is given; it cannot promote an article that never reached the top-50."
+        },
+        {
+          "key": "b",
+          "text": "Raise k from 5 to 10 so more chunks are packed.",
+          "correct": false,
+          "feedback": "More packed chunks come from the same top-50; the missing 45 percent of relevant articles are not in it."
+        },
+        {
+          "key": "c",
+          "text": "Work on candidate generation and the query: add BM25 beside the dense retriever with RRF, rewrite follow-up turns, check the metadata filter.",
+          "correct": true,
+          "feedback": "Right. Recall@50 is the ceiling for every later stage, and these are the levers that move it."
+        },
+        {
+          "key": "d",
+          "text": "Switch the packing to the bookend layout.",
+          "correct": false,
+          "feedback": "Packing order changes where the chunks sit, not which chunks were found; the missing facts are missing from the candidates."
+        }
+      ],
+      "explanation": "Section 8: recall@N measures candidate generation and caps everything after it. With recall@50 at 0.55 and a reranker that works, the fix lies in the first two levers (query construction and candidate generation), not in re-ranking or packing.",
+      "hints": [
+        "Decide which half of the pipeline the 0.55 measures.",
+        "Ask which stages can add an article that is not already among the candidates."
+      ]
+    },
+    {
+      "id": "ctx-009-q10",
+      "type": "mcq",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "tuning-order",
+        "reranker"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A new support assistant uses dense retrieval into a top-50, no reranker, and packs the top 5. On its labelled set recall@50 is 0.92 and precision@5 is 0.38. Following the series' tuning order, what should the team change first?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Switch on a cross-encoder reranker over the top-50.",
+          "correct": true,
+          "feedback": "Right. Recall is already high, precision is low, and the reranker is the dial that attacks precision directly; it comes first in the order."
+        },
+        {
+          "key": "b",
+          "text": "Switch to a different embedding model.",
+          "correct": false,
+          "feedback": "The embedding model comes late in the order and only with an offline benchmark; it mainly affects which items reach the candidates, which is not the problem here."
+        },
+        {
+          "key": "c",
+          "text": "Raise top-N from 50 to 100.",
+          "correct": false,
+          "feedback": "Top-N trades latency for recall, and recall@50 is already 0.92; precision is the weak number."
+        },
+        {
+          "key": "d",
+          "text": "Raise k from 5 to 10.",
+          "correct": false,
+          "feedback": "Packing more of an unreranked list adds more irrelevant chunks; precision@k would likely fall, not rise."
+        }
+      ],
+      "explanation": "Section 7 orders the dials reranker, k, top-N, hybrid weighting, chunk size, embedding model, query rewriting. Section 8 reads the numbers: high recall@N and low precision@k point at the re-rank lever.",
+      "hints": [
+        "Read the two numbers first: which half of the pipeline is weak?",
+        "Find the dial that acts on precision and where it sits in the order."
+      ]
+    },
+    {
+      "id": "ctx-009-q11",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "cross-encoder",
+        "latency",
+        "arithmetic"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A cross-encoder takes an illustrative 15 milliseconds per query-candidate pair, scoring one pair at a time. How many seconds does it take to re-rank a top-80 candidate set, and how many hours would it take to score a whole corpus of 2,000,000 items for one query?",
+      "answer": {
+        "parts": [
+          {
+            "label": "top-80",
+            "value": 1.2,
+            "tolerance": 0.01,
+            "unit": "s"
+          },
+          {
+            "label": "whole corpus",
+            "value": 8.33,
+            "tolerance": 0.05,
+            "unit": "h"
+          }
+        ]
+      },
+      "precision_note": "80 x 15 ms = 1,200 ms = 1.2 s; 2,000,000 x 15 ms = 30,000,000 ms = 30,000 s = 30,000 / 3,600 h = 8.33 h (section 4's arithmetic with the question's illustrative numbers). Forgetting to convert seconds to hours gives 30,000; dividing by 60 once gives 500. The 0.05 tolerance accepts 8.3 and 8.33.",
+      "explanation": "Section 4: re-ranking cost grows with the number of pairs scored. A top-80 set costs about a second; the whole corpus costs hours, which is why candidate generation shrinks the set first.",
+      "hints": [
+        "Multiply the pairs by the time per pair, then convert the units.",
+        "An hour is 3,600 seconds."
+      ]
+    },
+    {
+      "id": "ctx-009-q12",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 8,
+      "tags": [
+        "bookend",
+        "packing",
+        "python"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "fix",
+      "language": "python",
+      "prompt": "`bookend` should put the best chunk first, the second-best last and the rest in between in rank order, as the packing stage does. The starter returns the chunks in plain score order. Fix it so the tests pass, without modifying the input list.",
+      "starter": "def bookend(ranked):\n    \"\"\"Return the items of `ranked` (best first) in bookend order.\n\n    The best item comes first, the second-best last, and the rest in between in rank order.\n    The input list is not modified.\n    \"\"\"\n    if len(ranked) < 3:\n        return list(ranked)\n    return [ranked[0]] + ranked[1:-1] + [ranked[-1]]\n",
+      "solution": "def bookend(ranked):\n    \"\"\"Return the items of `ranked` (best first) in bookend order.\n\n    The best item comes first, the second-best last, and the rest in between in rank order.\n    The input list is not modified.\n    \"\"\"\n    if len(ranked) < 3:\n        return list(ranked)\n    return [ranked[0]] + ranked[2:] + [ranked[1]]\n",
+      "tests": "# 1. Five chunks, ranked 1 (best) to 5: best first, second-best last.\nassert bookend([1, 2, 3, 4, 5]) == [1, 3, 4, 5, 2], \"five items: 1, 3, 4, 5, 2\"\n\n# 2. Other lengths and other item types, so a hard-coded answer cannot pass.\nassert bookend([\"a\", \"b\", \"c\"]) == [\"a\", \"c\", \"b\"], \"three items: a, c, b\"\nassert bookend(list(range(1, 8))) == [1, 3, 4, 5, 6, 7, 2], \"seven items\"\n\n# 3. Short lists come back unchanged, and as a new list.\nassert bookend([\"x\", \"y\"]) == [\"x\", \"y\"], \"two items keep their order\"\nassert bookend([\"x\"]) == [\"x\"], \"one item\"\nassert bookend([]) == [], \"no items\"\ntwo = [\"x\", \"y\"]\nassert bookend(two) is not two, \"a short list comes back as a new list\"\n\n# 4. Nothing is dropped or duplicated, and the input is not modified.\nsrc = [\"d10\", \"d11\", \"d17\", \"d12\", \"d13\", \"d16\"]\nout = bookend(src)\nassert src == [\"d10\", \"d11\", \"d17\", \"d12\", \"d13\", \"d16\"], \"the input list must not change\"\nassert sorted(out) == sorted(src) and len(out) == len(src), \"same items, each once\"\nassert out[0] == \"d10\" and out[-1] == \"d11\", \"best first, second-best last\"\n\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 5: the bookend layout puts the two best passages at the start and the end, where models use information most reliably (Liu et al., 2023). The starter keeps the worst chunk last instead of the second-best.",
+      "hints": [
+        "Write out the bookend order of five chunks ranked 1 to 5, then compare it with what the starter returns.",
+        "The item at index 1 moves to the end; everything from index 2 on stays in order between the two best."
+      ]
+    },
+    {
+      "id": "ctx-009-q13",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "8",
+      "est_minutes": 8,
+      "tags": [
+        "recall",
+        "precision",
+        "python"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "implement",
+      "language": "python",
+      "prompt": "Implement `recall_at` and `precision_at` as the post defines recall@N and precision@k, so that the tests pass. Use only the standard library.",
+      "starter": "def recall_at(relevant, candidates):\n    \"\"\"recall@N: the share of the relevant items that appear among the N candidates.\n\n    relevant: the items relevant to the query (any iterable); candidates: the top-N list.\n    \"\"\"\n    raise NotImplementedError\n\n\ndef precision_at(relevant, packed, k):\n    \"\"\"precision@k: the share of the k packed slots that hold a relevant item.\n\n    If fewer than k items were packed, the empty slots count as not relevant.\n    \"\"\"\n    raise NotImplementedError\n",
+      "solution": "def recall_at(relevant, candidates):\n    \"\"\"recall@N: the share of the relevant items that appear among the N candidates.\n\n    relevant: the items relevant to the query (any iterable); candidates: the top-N list.\n    \"\"\"\n    relevant = set(relevant)\n    return len(relevant & set(candidates)) / len(relevant)\n\n\ndef precision_at(relevant, packed, k):\n    \"\"\"precision@k: the share of the k packed slots that hold a relevant item.\n\n    If fewer than k items were packed, the empty slots count as not relevant.\n    \"\"\"\n    return len(set(relevant) & set(packed[:k])) / k\n",
+      "tests": "from math import isclose\n\nR = {\"a\", \"b\", \"c\", \"d\"}\n\n# 1. Recall divides by the relevant items, not by the candidates.\nassert isclose(recall_at(R, [\"a\", \"x\", \"c\", \"y\", \"b\"]), 0.75), \"3 of 4 relevant found: 0.75\"\nassert isclose(recall_at([\"p\", \"q\"], (\"q\", \"r\", \"s\")), 0.5), \"lists and tuples work too\"\nassert isclose(recall_at(R, [\"x\", \"y\"]), 0.0), \"none found\"\n\n# 2. Precision divides by k, the packed slots.\nassert isclose(precision_at(R, [\"a\", \"x\", \"c\"], 3), 2 / 3), \"2 of 3 packed are relevant\"\nassert isclose(precision_at(R, [\"a\", \"b\", \"c\", \"d\", \"x\"], 5), 0.8), \"4 of 5\"\n\n# 3. Fewer items packed than k: empty slots are not relevant.\nassert isclose(precision_at(R, [\"a\", \"b\"], 4), 0.5), \"2 relevant in 4 slots: 0.5, not 1.0\"\n\n# 4. The post's toy question q2 after re-ranking: all three packed are relevant.\nassert isclose(precision_at({\"d10\", \"d11\", \"d17\"}, [\"d17\", \"d11\", \"d10\"], 3), 1.0)\nassert isclose(recall_at({\"d10\", \"d11\", \"d17\"}, [\"d17\", \"d11\", \"d16\", \"d10\", \"d12\", \"d13\"]), 1.0)\n\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 8: recall@N $= |R \\cap \\mathrm{top}N| / |R|$ and precision@k $= |R \\cap \\mathrm{top}k| / k$. Recall divides by the relevant items; precision divides by the k slots, so a short packed list is not rewarded for packing less.",
+      "hints": [
+        "Write each metric as a fraction and name its denominator before coding.",
+        "Recall's denominator is the number of relevant items; precision's is k, even when fewer than k were packed."
+      ]
+    },
+    {
+      "id": "ctx-009-q14",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o2",
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 12,
+      "tags": [
+        "distraction",
+        "precision",
+        "levers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "connect",
+      "connects": [
+        "ctx-006"
+      ],
+      "prompt": "Post 06 gives distraction's first fix as \"lower top-k, add a reranker, scope the index\". Place each of the three fixes on this post's four levers, say which of recall@N and precision@k each is meant to move and what it risks, and describe the measurement that would show the fix worked.",
+      "answer_length": "half a page",
+      "solution": "1. **Lower top-k** is the packing lever (and the k dial of the tuning order). Fewer packed chunks means fewer weak ones in the window, so precision@k should rise; the risk is dropping a relevant chunk that ranked just below the new cut, which shows as a lower share of answers whose supporting fact was packed.\n2. **Add a reranker** is the re-rank lever. It reorders the top-N so the packed top-k holds more relevant items: precision@k should rise and recall@N cannot change, because the reranker sees only the candidates. Its costs are latency (one model pass per candidate pair) and money.\n3. **Scope the index** is candidate generation, through a metadata filter or a router to a topic index. Items outside the scope can no longer crowd the candidates, so more of the top-N is relevant and precision@k rises with it; the risk is a filter or router that excludes the right scope, which lowers recall@N.\n4. **Measurement.** On a labelled set of questions, measure recall@N and precision@k before and after each change, one change at a time. Post 06 names a falling precision@k as distraction's signal, so the fix worked if precision@k rises while recall@N holds; citation accuracy on sampled answers and end-to-end correctness (post 20) confirm the answers improved, not just the retrieval.",
+      "rubric": [
+        {
+          "criterion": "Places lower top-k on the cut from re-ranking to packing (either stage), the reranker on re-ranking and scoping on candidate generation",
+          "points": 3
+        },
+        {
+          "criterion": "Says precision@k is the target of all three and that a reranker cannot change recall@N",
+          "points": 2
+        },
+        {
+          "criterion": "Names a real risk for at least two fixes (dropped relevant chunk, latency or cost, a filter that lowers recall)",
+          "points": 2
+        },
+        {
+          "criterion": "Describes a before-and-after measurement on a labelled set, one change at a time, with both metrics",
+          "points": 2
+        }
+      ],
+      "explanation": "Post 06 (`ctx-006`) names distraction's first fix and its signal, a falling precision@k; sections 3 to 5 and 8 of this post place each fix on a lever and say which metric it can move. A reranker moves only precision@k, and a scope that is wrong costs recall@N.",
+      "hints": [
+        "Take each of the three fixes and ask which stage of the pipeline it changes.",
+        "For each stage, recall which of the two metrics it can move, and which it cannot."
+      ]
+    },
+    {
+      "id": "ctx-009-q15",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 4,
+      "outcomes": [
+        "o5",
+        "o3"
+      ],
+      "section": "8",
+      "est_minutes": 15,
+      "tags": [
+        "evaluation",
+        "tuning-order",
+        "design"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "design",
+      "prompt": "A help-desk assistant uses hybrid search into a top-50, no reranker, and packs the top 5. Two complaints arrive: some answers leave out facts the knowledge base holds, and some mix in irrelevant articles. The team has 40 questions labelled with their relevant articles. Design the experiment that decides which levers to turn and in what order, and say what each measurement must show before a change ships.",
+      "answer_length": "half a page",
+      "solution": "1. **Baseline.** Run the 40 questions and record recall@50 for the candidate set and precision@5 for the packed set, per question and on average. Keep the run reproducible (same index, same settings).\n2. **Split the complaints.** Questions whose relevant articles are missing from the top-50 are recall failures: no later stage can fix them. Questions whose relevant articles are in the top-50 but not in the packed 5, or share the 5 with irrelevant ones, are precision failures.\n3. **Precision first, in the tuning order.** Switch on a cross-encoder reranker over the top-50. Recall@50 must not move (a check that the change is wired correctly); precision@5 should rise. Then tune k: lower it if precision stays low on short factual questions.\n4. **Recall next.** For the recall failures, look at the query first (follow-up turns sent verbatim need rewriting), then candidate generation: the metadata filter, the BM25 and dense lists, top-N. Each change must raise recall@50 without lowering precision@5 after re-ranking. Chunk size and the embedding model come last, and only with this benchmark.\n5. **Discipline.** One change at a time, both metrics recorded each time, and a change ships only if its target metric rises and the other does not fall. Online, sample answers for citation accuracy; end-to-end correctness on a held-out set (post 20) closes the loop.",
+      "rubric": [
+        {
+          "criterion": "Measures recall@50 and precision@5 as a baseline on the labelled set",
+          "points": 2
+        },
+        {
+          "criterion": "Maps missing facts to recall (candidates, query) and irrelevant articles to precision (re-rank, k)",
+          "points": 2
+        },
+        {
+          "criterion": "Orders the changes as the post does: reranker and k before top-N, chunking and the embedding model last",
+          "points": 2
+        },
+        {
+          "criterion": "Changes one lever at a time with a stated pass condition on both metrics",
+          "points": 2
+        },
+        {
+          "criterion": "Mentions citation accuracy or end-to-end evaluation as the check on the answers",
+          "points": 1
+        }
+      ],
+      "explanation": "Sections 7 and 8: recall@N measures candidate generation and caps the rest; precision@k measures re-ranking and the choice of k. The tuning order puts the reranker first, and a change is believed only when the number it targets moves.",
+      "hints": [
+        "Decide which of the two complaints each metric measures.",
+        "Write down the first change in the tuning order and what both metrics must do after it."
+      ]
+    },
+    {
+      "id": "ctx-009-q16",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "6",
+      "est_minutes": 4,
+      "tags": [
+        "few-shot",
+        "prompt-caching",
+        "layers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An assistant used a fixed set of three examples in its system prompt, which was otherwise identical on every call and was cached. The team switches to picking the three most similar examples per turn and writes them into the same place in the system prompt. Answers improve, but the input bill rises although the examples are no longer than before. What is the most likely cause?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The system prompt now differs on every call, so the cached prefix no longer matches and is billed in full.",
+          "correct": true,
+          "feedback": "Right. Per-turn content inside layer 01 breaks the stable prefix; examples picked per turn belong after it, with the retrieved material in layer 04."
+        },
+        {
+          "key": "b",
+          "text": "Example selection adds an extra model call whose tokens are billed as output.",
+          "correct": false,
+          "feedback": "Selecting examples by similarity needs an embedding lookup, not a generation call billed at output rates; and the main call's input bill is what rose."
+        },
+        {
+          "key": "c",
+          "text": "Maximal marginal relevance adds a diversity penalty to every token of the prompt.",
+          "correct": false,
+          "feedback": "MMR is a re-ranking rule over candidates; it adds nothing to the prompt and has no price."
+        },
+        {
+          "key": "d",
+          "text": "Dynamic examples are tokenised differently from static ones.",
+          "correct": false,
+          "feedback": "The tokeniser does not know where text came from; the same text has the same token count."
+        }
+      ],
+      "explanation": "Section 6: examples picked per turn are per-turn content and travel with the retrieved material in layer 04, after the cached prefix; a fixed set can live in layer 01 and cache. Writing per-turn examples into the system prompt changes the prefix on every call, so the prompt cache stops matching (post 05).",
+      "hints": [
+        "Ask which part of the request a prompt cache reuses, and whether it is still identical between calls.",
+        "Find where the post says per-turn examples should go."
+      ]
+    },
+    {
+      "id": "ctx-009-q17",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "bm25",
+        "dense-retrieval",
+        "identifiers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A user asks what the error code E-4012 means. Which retriever is the more likely to put the article about E-4012 at the top of its list?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The dense retriever, because it matches meaning rather than words.",
+          "correct": false,
+          "feedback": "Matching meaning is the dense retriever's strength on paraphrase; an identifier it never learned to tell apart from E-4021 is its weak point."
+        },
+        {
+          "key": "b",
+          "text": "BM25, because it scores exact tokens and rewards a rare one.",
+          "correct": true,
+          "feedback": "Right. A rare exact token such as E-4012 has a high inverse document frequency, so BM25 ranks the articles that contain it first."
+        },
+        {
+          "key": "c",
+          "text": "Neither: only a reranker can match an identifier.",
+          "correct": false,
+          "feedback": "The reranker works on candidates; sparse retrieval already matches exact tokens, which is why it is in the hybrid."
+        },
+        {
+          "key": "d",
+          "text": "Both equally, because the identifier appears in the query.",
+          "correct": false,
+          "feedback": "Appearing in the query helps only a retriever that matches tokens exactly; the toy run shows the dense stand-in losing an E-4012 article."
+        }
+      ],
+      "explanation": "Section 3: dense retrieval is strong on paraphrase and weak on exact identifiers; BM25 is strong on exact tokens and rare terms. Hybrid search runs both so that each covers the other's weakness.",
+      "hints": [
+        "Recall each retriever's stated weakness."
+      ]
+    }
+  ]
+}
