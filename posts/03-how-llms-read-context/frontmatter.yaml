@@ -1,53 +1,25 @@
 id: ctx-003
 slug: 03-how-llms-read-context
-title: "03 · How LLMs Actually Read Context"
-
-description: >
-  Learn how large language models process context through tokenization,
-  self-attention, positional embeddings, attention sinks, and the KV-cache.
-  Understand why ordering matters, why information is lost in the middle,
-  and how prompt placement affects cost, latency, and model performance.
-
-author: "Ajay"
-
+title: "03 - How LLMs actually read context"
+summary: "How tokens, causal attention, positions and the KV cache explain why order, position and a stable prefix change what a prompt costs and what the model recalls, with the measured lost-in-the-middle curve."
 date: 2026-05-13
-last_modified: 2026-05-13
-
-tags:
-  - context-engineering
-  - attention
-  - kv-cache
-  - transformers
-  - tokenization
-  - positional-encoding
-  - llm
-
-category: Foundations
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part I - Foundations"
-chapter: "Part I — Foundations"
-
-hero: diagrams/03-lost-in-the-middle.svg
-hero_alt: "Illustration of the Lost-in-the-Middle U-curve showing recall across a long context window"
-
-reading_time: 14
-
-toc: true
-draft: false
-
-keywords:
-  - Large Language Models
-  - Self Attention
-  - Transformer Architecture
-  - KV Cache
-  - Prompt Caching
-  - Lost in the Middle
-  - RoPE
-  - Positional Encoding
-  - Context Window
-  - Context Engineering
-
-canonical_url: ""
-
-prev: ../02-six-layers-of-context/
-next: ../04-tokens-windows-budgets/
+level: intermediate
+reading_time: 17
+tags: [context-engineering, tokenisation, attention, positional-encoding, lost-in-the-middle, kv-cache, prompt-caching]
+hero: diagrams/01-lost-in-the-middle.svg
+prerequisites: [ctx-002]
+code: included
+outcomes:
+  - id: o1
+    text: "Explain in one sentence each what tokens, attention, positions, and the KV cache are."
+  - id: o2
+    text: "Predict where in a long prompt a model is likely to under-use information, and place content to avoid it."
+  - id: o3
+    text: "Decide which part of a prompt a prefix cache can reuse on the next call, and why one changed token ends the reuse."
+  - id: o4
+    text: "Count the tokens of a string with tiktoken and explain why questions about single letters are hard for a model."
+  - id: o5
+    text: "State what a needle-in-a-haystack score measures and what it does not."

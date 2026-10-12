@@ -1,0 +1,849 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-003",
+  "next_ordinal": 19,
+  "questions": [
+    {
+      "id": "ctx-003-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "attention",
+        "causal-mask"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In the decoder-only models behind today's chat APIs, which tokens may a token attend to when its representation is updated?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Every token of the input, before and after it.",
+          "correct": false,
+          "feedback": "That describes attention without a mask, as in an encoder. Chat models apply a causal mask, so later tokens are hidden from earlier ones."
+        },
+        {
+          "key": "b",
+          "text": "Itself and the tokens before it.",
+          "correct": true,
+          "feedback": "Right. The causal mask lets each position attend only to itself and the positions before it."
+        },
+        {
+          "key": "c",
+          "text": "Only the token immediately before it, one step at a time.",
+          "correct": false,
+          "feedback": "Attention is not a step-by-step chain over neighbours: a token attends to all earlier tokens at once, weighting them by query-key scores."
+        },
+        {
+          "key": "d",
+          "text": "Only the tokens of the system prompt and the user instruction.",
+          "correct": false,
+          "feedback": "Attention knows nothing about layers. Every earlier token is visible, whichever layer it came from."
+        }
+      ],
+      "explanation": "Section 3: in decoder-only models a token compares its query with the keys of itself and the tokens before it, a rule called the causal mask. It is why text appended at the end cannot change what was computed for the text before it.",
+      "hints": [
+        "Think about which direction a chat model is allowed to look."
+      ]
+    },
+    {
+      "id": "ctx-003-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "tokenisation",
+        "tiktoken"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A chat model is asked \"How many r's are in strawberry?\" and answers two. Under OpenAI's `o200k_base` encoding, the word after a space is the single token `' strawberry'`. Which explanation fits what the model receives?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The tokeniser removes repeated letters, so the model sees the word with one r.",
+          "correct": false,
+          "feedback": "Tokenisation is lossless: decoding the tokens gives back every character. The letters are not removed; they are packed into a token the model receives as one unit."
+        },
+        {
+          "key": "b",
+          "text": "The model receives one token for the whole word, not its ten letters, so it has to recall the spelling rather than read it.",
+          "correct": true,
+          "feedback": "Right. No single letter reaches the input, so a question about letters asks the model for knowledge about a token's spelling, which it may not have learned reliably."
+        },
+        {
+          "key": "c",
+          "text": "The model cannot count above two, which is a limit of its reasoning.",
+          "correct": false,
+          "feedback": "Models count objects that arrive as separate tokens well enough. The difficulty here comes from the input representation, not from arithmetic."
+        },
+        {
+          "key": "d",
+          "text": "British and American vocabularies spell the word differently, which confuses the tokeniser.",
+          "correct": false,
+          "feedback": "The word is spelled the same in both. The split depends on the vocabulary and on the leading space, not on the spelling convention."
+        }
+      ],
+      "explanation": "Section 2: `tokens.py` shows `' strawberry'` as one token and `'strawberry'` at the start of a string as `st`, `raw`, `berry`. Either way the model never receives the letters, so questions about characters are harder than they look.",
+      "hints": [
+        "Look at what the snippet prints for the word with a leading space.",
+        "Ask whether any token in that output is a single letter."
+      ]
+    },
+    {
+      "id": "ctx-003-q03",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "tokens",
+        "rule-of-thumb"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A help-centre article of common English prose is 2,400 characters long. Using the rule of thumb on OpenAI's \"Tokenizer\" page (one token is about four characters, or about three quarters of a word), estimate its length in tokens and in words.",
+      "answer": {
+        "parts": [
+          {
+            "label": "estimated tokens",
+            "value": 600,
+            "tolerance": 5,
+            "unit": "tokens"
+          },
+          {
+            "label": "estimated words",
+            "value": 450,
+            "tolerance": 5,
+            "unit": "words"
+          }
+        ]
+      },
+      "precision_note": "2,400 / 4 = 600 tokens; 600 tokens × 0.75 words per token = 450 words. Multiplying the characters by 0.75 (1,800) or dividing tokens by 0.75 (800 words) are the nearest wrong methods.",
+      "explanation": "Section 2 quotes the rule of thumb: about four characters per token for common English text, and a token is about three quarters of a word. It is a rough guide for prose; code, other languages and punctuation differ, which is why a real tokeniser is used for budgets.",
+      "hints": [
+        "Turn characters into tokens first.",
+        "Then turn tokens into words with the three-quarters ratio."
+      ]
+    },
+    {
+      "id": "ctx-003-q04",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 4,
+      "tags": [
+        "attention",
+        "quadratic"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "With the causal mask, each of the $N$ tokens computes one query-key product with itself and with every token before it, for each head and each layer. How many query-key products does one head of one layer need for an input of 1,000 tokens, and how many for 2,000 tokens? Give whole numbers.",
+      "answer": {
+        "parts": [
+          {
+            "label": "products for 1,000 tokens",
+            "value": 500500,
+            "tolerance": 600,
+            "unit": "products"
+          },
+          {
+            "label": "products for 2,000 tokens",
+            "value": 2001000,
+            "tolerance": 1100,
+            "unit": "products"
+          }
+        ]
+      },
+      "precision_note": "Token i (counting from 1) has i products, so the total is $N(N+1)/2$: 1,000 × 1,001 / 2 = 500,500 and 2,000 × 2,001 / 2 = 2,001,000, about four times as many. The post's approximation $N^2/2$ (500,000 and 2,000,000) is within tolerance; $N^2$ without the mask (1,000,000 and 4,000,000) and the linear guess 2 × 500,500 = 1,001,000 for the second part are not.",
+      "explanation": "Section 3: the attention scores of an $N$-token input need about $N^2/2$ query-key products per head and layer, so doubling the input roughly quadruples that part of the work. Here the count goes from 500,500 to 2,001,000, a factor of about 4.",
+      "hints": [
+        "Count how many products the first token needs, then the second, and so on.",
+        "The sum 1 + 2 + ... + N is N(N+1)/2."
+      ]
+    },
+    {
+      "id": "ctx-003-q05",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "prefill",
+        "kv-cache"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the steps in the order a model goes through to read a prompt and produce its first two output tokens.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Compute the new token's query, key and value, append the key and value to the cache, and attend over the cache"
+        },
+        {
+          "key": "b",
+          "text": "Map each token to its embedding vector"
+        },
+        {
+          "key": "c",
+          "text": "Produce a distribution over the next token and choose the first output token"
+        },
+        {
+          "key": "d",
+          "text": "Split the input string into tokens"
+        },
+        {
+          "key": "e",
+          "text": "Run the attention layers over every prompt position at once, keeping each position's keys and values"
+        },
+        {
+          "key": "f",
+          "text": "Produce a distribution over the next token and choose the second output token"
+        }
+      ],
+      "answer": [
+        "d",
+        "b",
+        "e",
+        "c",
+        "a",
+        "f"
+      ],
+      "partial_credit": true,
+      "explanation": "Sections 2, 3 and 7: tokenise, embed, then prefill computes every prompt position in parallel and fills the KV cache; the first output token comes from that pass. Each later token computes only its own query, key and value and attends over the cache before the next distribution.",
+      "hints": [
+        "Everything about the prompt is computed before anything is generated.",
+        "The cache is filled during the pass over the prompt and used for every token after the first."
+      ]
+    },
+    {
+      "id": "ctx-003-q06",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "positions",
+        "attention-sinks",
+        "kv-cache"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each term to what it does. One description on the right matches no term.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Rotary position embeddings (RoPE)"
+        },
+        {
+          "key": "b",
+          "text": "Attention with Linear Biases (ALiBi)"
+        },
+        {
+          "key": "c",
+          "text": "Causal mask"
+        },
+        {
+          "key": "d",
+          "text": "Attention sink"
+        },
+        {
+          "key": "e",
+          "text": "KV cache"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Rotates each token's query and key by angles proportional to its position"
+        },
+        {
+          "key": "b",
+          "text": "Subtracts from each attention score a penalty that grows with distance"
+        },
+        {
+          "key": "c",
+          "text": "Lets a token attend only to itself and the tokens before it"
+        },
+        {
+          "key": "d",
+          "text": "Initial positions that collect attention left over by queries with nothing useful to attend to"
+        },
+        {
+          "key": "e",
+          "text": "Stores the keys and values already computed, so they are not computed again"
+        },
+        {
+          "key": "f",
+          "text": "Adds a learned vector for the user instruction so the model attends to it most"
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "c",
+        "d": "d",
+        "e": "e"
+      },
+      "explanation": "Sections 3, 4, 6 and 7 define each: RoPE rotates queries and keys by position, ALiBi penalises scores by distance, the causal mask hides later tokens, sinks are the first positions that absorb leftover attention, and the KV cache stores computed keys and values. No mechanism gives the user instruction a special vector; its advantage comes from sitting at the end.",
+      "hints": [
+        "Two of the terms are about positions, one about which tokens are visible, two about attention and its stored results."
+      ]
+    },
+    {
+      "id": "ctx-003-q07",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 2,
+      "tags": [
+        "lost-in-the-middle",
+        "placement"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A prompt carries a system prompt, 30 retrieved chunks and a question about them. Going by Liu et al.'s measurements, where should the question go?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "At the very end, after the chunks.",
+          "correct": true,
+          "feedback": "Right. The end of a long input is one of the two best-used positions, and the question is new on every call, so it also belongs after the stable prefix."
+        },
+        {
+          "key": "b",
+          "text": "Before the chunks, so the model knows what to look for while it reads them.",
+          "correct": false,
+          "feedback": "Attention is not a reader scanning with a goal in mind. Putting the question first places it far from the end of a long input, where models use information best."
+        },
+        {
+          "key": "c",
+          "text": "In the middle of the chunks, next to the most relevant one.",
+          "correct": false,
+          "feedback": "The middle is the region Liu et al. found least used, the worst place for the thing the answer must address."
+        },
+        {
+          "key": "d",
+          "text": "Anywhere: a model with a long enough window uses every position equally.",
+          "correct": false,
+          "feedback": "Liu et al. measured the dip inside the models' windows, and the extended-context models did no better. A long window does not remove it."
+        }
+      ],
+      "explanation": "Section 5: accuracy was often highest when the relevant information sat at the start or the end of the input and dropped in the middle. The system prompt takes the start; the question goes at the end.",
+      "hints": [
+        "Which two positions did the measured curve favour, and which is already taken?"
+      ]
+    },
+    {
+      "id": "ctx-003-q08",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "lost-in-the-middle",
+        "liu-et-al"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Liu et al. report, for GPT-3.5-Turbo with 20 documents, 75.8% accuracy with the answer in the first document and 53.8% with it in the tenth, and 56.1% with no documents at all. By how many percentage points does accuracy fall from the first position to the tenth, and by how many points is the tenth position below the no-document score?",
+      "answer": {
+        "parts": [
+          {
+            "label": "drop from first to tenth position",
+            "value": 22.0,
+            "tolerance": 0.05,
+            "unit": "points"
+          },
+          {
+            "label": "tenth position below no documents",
+            "value": 2.3,
+            "tolerance": 0.05,
+            "unit": "points"
+          }
+        ]
+      },
+      "precision_note": "75.8 - 53.8 = 22.0 points; 56.1 - 53.8 = 2.3 points (Liu et al., Tables 6 and 1). The relative drop 22.0 / 75.8 = 29.0% is the nearest wrong method for the first part.",
+      "explanation": "Section 5 and the hero figure: the drop from the first to the tenth position is 22.0 points, and with the answer in the middle the model does 2.3 points worse than with no evidence at all, so the distractors actively hurt.",
+      "hints": [
+        "Both parts are differences of the reported percentages.",
+        "Subtract the tenth-position score from each of the other two."
+      ]
+    },
+    {
+      "id": "ctx-003-q09",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 4,
+      "tags": [
+        "lost-in-the-middle",
+        "long-context"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A colleague argues: \"Lost in the middle only happens when the input is longer than the model was trained on, so a model with a million-token window will not have it.\" Which fact from Liu et al. contradicts the argument most directly?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The 20-document inputs averaged about 2,946 tokens, inside GPT-3.5-Turbo's 4K window, and the extended-context versions did no better.",
+          "correct": true,
+          "feedback": "Right. The dip appeared at positions the models were trained on, and giving a model a longer window did not change how it used the same input."
+        },
+        {
+          "key": "b",
+          "text": "Claude-1.3 was nearly perfect on the key-value retrieval task, at every input length the paper evaluated it on.",
+          "correct": false,
+          "feedback": "That shows one model can retrieve exact keys well; it says nothing about whether the dip depends on exceeding the trained length."
+        },
+        {
+          "key": "c",
+          "text": "With 30 documents the inputs were longer than with 10, and accuracy in the middle was lower with 30.",
+          "correct": false,
+          "feedback": "Longer inputs within the window do not test the claim; the question is whether the dip appears below the trained length, which the 20-document numbers answer."
+        },
+        {
+          "key": "d",
+          "text": "GPT-4, tested on a subset of the multi-document task, scored higher than every other model the paper evaluated.",
+          "correct": false,
+          "feedback": "A higher overall score is compatible with the colleague's claim; the paper notes GPT-4 still showed the U shape, but the decisive point is where the inputs sat relative to the window."
+        }
+      ],
+      "explanation": "Section 5: the inputs were short and inside the models' windows, so the dip is not the out-of-range problem of section 4. A longer window gives a longer middle, not a shorter one.",
+      "hints": [
+        "The argument is about input length relative to the trained length.",
+        "Look for the option that compares the inputs' size with a model's window."
+      ]
+    },
+    {
+      "id": "ctx-003-q10",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 4,
+      "tags": [
+        "prompt-caching",
+        "prefix"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A cache breakpoint sits at the end of layer 02. Between two consecutive calls, which changes still let layers 01 and 02 be read from the cache? Select every one.",
+      "select": "multiple",
+      "options": [
+        {
+          "key": "a",
+          "text": "A different set of retrieved chunks in layer 04.",
+          "correct": true,
+          "feedback": "Right. Layer 04 comes after the breakpoint; changing it cannot alter the keys and values of the tokens before it."
+        },
+        {
+          "key": "b",
+          "text": "The user's first name formatted into the opening sentence of the system prompt.",
+          "correct": false,
+          "feedback": "That changes layer 01 itself, so the prefix differs from the first changed token on and nothing is read from the cache."
+        },
+        {
+          "key": "c",
+          "text": "Two more turns appended to layer 05, the conversation history.",
+          "correct": true,
+          "feedback": "Right. The history grows after the breakpoint; the prefix before it is untouched."
+        },
+        {
+          "key": "d",
+          "text": "An extra space added to one tool description in layer 02.",
+          "correct": false,
+          "feedback": "A cache needs an exact match up to the breakpoint. One changed character in layer 02 changes its tokens, so the cached entry no longer matches."
+        },
+        {
+          "key": "e",
+          "text": "A new user instruction in layer 06.",
+          "correct": true,
+          "feedback": "Right. The user instruction is new on every call by design and sits at the end, after the breakpoint."
+        }
+      ],
+      "explanation": "Section 7: because of the causal mask, the keys and values of the first tokens depend only on those tokens, so anything after the breakpoint may change freely, while any change before it, however small, ends the match.",
+      "hints": [
+        "Ask, for each change, whether it lies before or after the breakpoint.",
+        "Before the breakpoint, a match must be exact."
+      ]
+    },
+    {
+      "id": "ctx-003-q11",
+      "type": "numeric",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 5,
+      "tags": [
+        "prompt-caching",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A call has 6,500 input tokens: a 4,000-token stable prefix (layers 01 and 02) with a cache breakpoint at its end, then 2,500 tokens of layers 03 to 06. The base input rate is an illustrative \\$3 per million tokens and a cache read costs 0.1 times that. Ignoring output and the write premium, give the input cost of a call whose prefix is read from the cache, and of the same call after a request id was added at token 300 of the system prompt. Give each in dollars to four decimal places.",
+      "answer": {
+        "parts": [
+          {
+            "label": "input cost with the prefix read from the cache",
+            "value": 0.0087,
+            "tolerance": 0.0001,
+            "unit": "USD"
+          },
+          {
+            "label": "input cost with the request id in the system prompt",
+            "value": 0.0195,
+            "tolerance": 0.0001,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "Hit: 4,000 × 0.30 / 1,000,000 + 2,500 × 3 / 1,000,000 = 0.0012 + 0.0075 = 0.0087 dollars. With the request id the prefix differs from token 300 on, so nothing is read from the cache: 6,500 × 3 / 1,000,000 = 0.0195 dollars. The tolerance of 0.0001 dollars accepts the four-decimal answers only. Crediting the first 300 tokens at the cache rate gives 0.0187, applying the cache rate to the 2,500 per-turn tokens instead of the prefix gives 0.01275, and leaving the cache read unpaid gives 0.0075; all are rejected.",
+      "explanation": "Section 7: a cache with its breakpoint at the end of layer 02 reuses the whole of layers 01 and 02 or nothing. A request id inside the system prompt makes every call a miss, which here more than doubles the input cost.",
+      "hints": [
+        "Decide first how many tokens are read from the cache in each case.",
+        "With a breakpoint, a prefix that differs anywhere before it is reused not at all."
+      ]
+    },
+    {
+      "id": "ctx-003-q12",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "attention-sinks"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An attention visualisation of a production prompt shows very large weights on the first few tokens, a greeting line. A team deletes the greeting to make the model \"focus\" on the rules that follow. What does the post's account of attention sinks predict?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The rules now receive the attention the greeting had, so the model follows them better.",
+          "correct": false,
+          "feedback": "The weight on the first tokens was leftover attention parked on a sink, not attention diverted from the rules. Removing the greeting does not hand that weight to anything meaningful."
+        },
+        {
+          "key": "b",
+          "text": "The model collapses, as window attention did in Xiao et al. when the first tokens were evicted.",
+          "correct": false,
+          "feedback": "The collapse happened when the first tokens' keys and values were dropped from a sliding-window cache. Here the input still has first tokens; they are just different words."
+        },
+        {
+          "key": "c",
+          "text": "Whatever tokens now come first become the sink, so behaviour barely changes.",
+          "correct": true,
+          "feedback": "Right. Xiao et al. found the sink is about position, not content: even line breaks in those positions kept the effect. The deletion does change the prefix, so the cache is rebuilt once."
+        },
+        {
+          "key": "d",
+          "text": "The prompt becomes cheaper per call by the share of attention the greeting received.",
+          "correct": false,
+          "feedback": "Cost is billed per token, not per unit of attention. Deleting a few tokens saves only those few tokens."
+        }
+      ],
+      "explanation": "Section 6: a large attention weight is not evidence of importance, and deleting the opening words does not remove the sink, because whatever comes first takes its place.",
+      "hints": [
+        "Is the sink about what the first tokens say or where they are?",
+        "Recall what replacing the first tokens with line breaks did."
+      ]
+    },
+    {
+      "id": "ctx-003-q13",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 2,
+      "tags": [
+        "needle-in-a-haystack",
+        "evaluation"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A model card reports near-perfect needle-in-a-haystack recall at every length and depth up to a million tokens. Which conclusion does that result support?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The model can find a single planted sentence anywhere in inputs of that length.",
+          "correct": true,
+          "feedback": "Right. That is exactly what the test measures: recall of one planted fact across lengths and depths."
+        },
+        {
+          "key": "b",
+          "text": "The model reasons as well over a million tokens as over a thousand.",
+          "correct": false,
+          "feedback": "The test asks for one fact back, not reasoning. RULER found models with near-perfect needle scores dropping sharply on harder tasks as the context grew."
+        },
+        {
+          "key": "c",
+          "text": "Answers that combine facts from different parts of the input will be reliable at that length.",
+          "correct": false,
+          "feedback": "Combining facts is a different ability from finding one; a single-needle test does not exercise it."
+        },
+        {
+          "key": "d",
+          "text": "The application's own task will not degrade as its prompts grow.",
+          "correct": false,
+          "feedback": "Only an evaluation of the application's task at its own length shows that. Context Rot found degradation with length even on tasks that are easy when short."
+        }
+      ],
+      "explanation": "Section 8: a needle test measures recall of one planted fact, not reasoning, combination or use of what was found. The operational rule is to evaluate the application's own task at its own length.",
+      "hints": [
+        "Describe in one line what the test asks the model to do."
+      ]
+    },
+    {
+      "id": "ctx-003-q14",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1",
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "kv-cache",
+        "prompt-caching",
+        "causal-mask"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Two calls share their first $k$ tokens exactly but differ afterwards. In one sentence, why can the provider reuse the keys and values it computed for those $k$ tokens on the first call?",
+      "answer": {
+        "model": "Because of the causal mask each token attends only to itself and earlier tokens, so the keys and values of the first k tokens depend only on those k tokens and nothing after them can change them.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*(?<!not )(?<!n't )(?<!never )(?<!cannot )\\b(sees?|attends? to|looks? at|depends? on) (the )?(tokens?|ones|words|text|positions?) (after|ahead|that follow))(?![\\s\\S]*(?<!not )(?<!n't )(?<!never )(?<!cannot )(?<!nothing )\\b(attends?|looks?|sees?|depends?|relies?) (to |on |at )?(all|every|the whole|the entire|later|future|following|subsequent|the rest)\\b)(?![\\s\\S]*\\b(later|future|following|subsequent) tokens? (can |do |does )?(change|affect|alter|influence)s?\\b)(?![\\s\\S]*\\b(and|or) (later|future|following|subsequent)\\b)(?![\\s\\S]*\\b(bidirectional|both directions|both ways)\\b)(?=[\\s\\S]*\\b(is|are|depends?|depending|attends?|attending|sees?|looks?|affects?|changes?|computed|means?|so|because|since|only|cannot|can'?t|never|masked)\\b)(?=[\\s\\S]*(causal|\\bmask|only (attends?|looks?|sees?|depends?) (to |on |at )?(itself and )?(the )?(earlier|previous|preceding|prior|tokens? before|ones? before)|only (on |to |at )?(itself and )?(the )?(earlier|previous|preceding|prior|first|tokens? before|ones? before|those)|depends? only|depend on nothing|(do(es)?n'?t|do(es)? not|cannot|can'?t|never|won'?t|will not) (depend on|see|attend to|look at|affect|change|alter|influence)\\b[\\s\\S]{0,40}(later|after|following|subsequent|rest|future|what comes)|nothing (after|later|that follows|that comes after)|look(s|ing)? (only )?back|backwards?|(computed|depends?|determined) (only )?(from|on|by) [\\s\\S]{0,40}(before|earlier|previous|preceding|prior)))(?=[\\s\\S]*\\b(key|keys|values?|kv|computation|computed|representations?|tokens?|prefix|cache)\\b)[\\s\\S]*\\s\\S",
+          "^\\W*(because of |due to |it'?s |by )?(the )?causal (mask|masking|attention)( mask)?\\W*$"
+        ]
+      },
+      "explanation": "Sections 3 and 7: attention looks back, never forward, so text added after the first $k$ tokens cannot change what was computed for them. That is what makes an identical prefix reusable.",
+      "hints": [
+        "Ask which tokens a token's computation can see.",
+        "If later text cannot reach the first k tokens, what can change their keys and values?"
+      ]
+    },
+    {
+      "id": "ctx-003-q15",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 2,
+      "tags": [
+        "needle-in-a-haystack"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Name one ability that a high needle-in-a-haystack score does not show a model to have.",
+      "answer": {
+        "model": "Combining several facts spread across the input (or noticing contradictions, or using what it found to answer a harder question), rather than retrieving one planted fact.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\b(not|n't|never|nor|without) (measure|test|check|show|captur|cover|assess)\\w* (\\w+ ){0,3}(recall|retriev|find|locat|position|depth))(?![\\s\\S]*(?<!not )(?<!n't )(?<!only )\\b(measures?|shows?|tests?|checks?|proves?|demonstrates?) (whether |that |if |how well )?(\\w+ ){0,4}(reason|combin|aggregat|synthes|multi))(?=[\\s\\S]*(\\b(rather than|not|instead|beyond|more than|only|just|but|whereas|while|other than|besides)\\b|n't)|(?![\\s\\S]*\\b(recall\\w*|retrieving|retrieval|retrieve|find|finding|locat\\w*|position\\w*|depths?)\\b))(?=[\\s\\S]*(combin|synthes|aggregat|multi[- ]?(hop|step|fact|needle)|reason|several facts|multiple facts|many facts|two facts|facts (spread|scattered)|contradict|conflict|inconsisten|use (the |what |that |it |those |them|information|facts)|using (the |what |it |them)|apply|answer(ing)? (a )?(harder|complex|non-trivial|difficult)|understand|summari[sz]|trac(e|ing)|count))[\\s\\S]*\\S",
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*(?<!not )(?<!n't )\\b(shows?|measures?|tests?|proves?) (that )?(it|the model) (can )?(combin|reason|aggregat))[\\s\\S]*\\b(multi[- ]?needle|several needles|multiple needles|many needles)\\b[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 8: the test measures recall of a single planted fact. It does not show whether the model can combine facts, notice contradictions or use what it found; RULER and Context Rot measure those gaps.",
+      "hints": [
+        "The test asks for one sentence back; think of what a real question needs beyond that."
+      ]
+    },
+    {
+      "id": "ctx-003-q16",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 10,
+      "tags": [
+        "prompt-caching",
+        "prefix",
+        "breakpoint"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "fix",
+      "language": "python",
+      "prompt": "`cached_tokens` should return how many tokens of a call are read from the cache written by the previous call, when the cache breakpoint sits after the first `breakpoint` tokens: all of them if the two calls agree exactly on those tokens, and 0 otherwise. The starter returns a partial reuse when the calls differ before the breakpoint. Fix it.",
+      "starter": "def cached_tokens(prev_ids, ids, breakpoint):\n    \"\"\"Tokens of `ids` read from the cache written by `prev_ids`, given a cache breakpoint after\n    the first `breakpoint` tokens. The cache matches the whole prefix up to the breakpoint or nothing.\"\"\"\n    n = 0\n    while n < min(len(prev_ids), len(ids)) and prev_ids[n] == ids[n]:\n        n += 1\n    return min(n, breakpoint)\n",
+      "solution": "def cached_tokens(prev_ids, ids, breakpoint):\n    \"\"\"Tokens of `ids` read from the cache written by `prev_ids`, given a cache breakpoint after\n    the first `breakpoint` tokens. The cache matches the whole prefix up to the breakpoint or nothing.\"\"\"\n    if breakpoint <= 0 or len(prev_ids) < breakpoint or len(ids) < breakpoint:\n        return 0\n    return breakpoint if list(prev_ids[:breakpoint]) == list(ids[:breakpoint]) else 0\n",
+      "tests": "# The snippet's layout A: 109 identical leading tokens, breakpoint after layer 02 at 99.\na1 = list(range(130))\na2 = list(range(109)) + [900 + i for i in range(57)]\nassert cached_tokens(a1, a2, 99) == 99, \"an identical prefix up to the breakpoint is read in full\"\n\n# Layout B: the time differs at token 6, so nothing is reused, not 6 tokens.\nb1 = list(range(120))\nb2 = list(range(6)) + [700 + i for i in range(170)]\nassert cached_tokens(b1, b2, 109) == 0, \"a prefix that differs before the breakpoint is not reused at all\"\n\n# Identical tokens after the breakpoint are not read from the cache.\nassert cached_tokens(list(range(50)), list(range(50)), 30) == 30\n\n# One changed token just before the breakpoint ends the reuse.\nc2 = list(range(40))\nc2[29] = -1\nassert cached_tokens(list(range(40)), c2, 30) == 0\n\n# One token changed inside the prefix, the first and last tokens before the breakpoint unchanged.\nd2 = list(range(40))\nd2[10] = -1\nassert cached_tokens(list(range(40)), d2, 30) == 0\n\n# A previous call shorter than the breakpoint wrote no entry to match.\nassert cached_tokens([1, 2, 3], [1, 2, 3], 5) == 0\nassert cached_tokens([1, 2, 3, 4, 5], [1, 2, 3], 5) == 0\n\n# A breakpoint at 0 caches nothing.\nassert cached_tokens([1, 2], [1, 2], 0) == 0\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 7 and its figure: a cache with a breakpoint matches the whole prefix up to the breakpoint or nothing. In layout B the calls agree for 6 tokens, yet nothing is read from the cache; in layout A they agree for 109, yet only the 99 before the breakpoint are read.",
+      "hints": [
+        "The starter counts identical leading tokens correctly; the problem is what it returns.",
+        "Return the breakpoint only when the identical run reaches it, and 0 in every other case, including a previous call shorter than the breakpoint."
+      ]
+    },
+    {
+      "id": "ctx-003-q17",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o2",
+        "o3"
+      ],
+      "section": "9",
+      "est_minutes": 12,
+      "tags": [
+        "placement",
+        "prompt-caching",
+        "lost-in-the-middle"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "design",
+      "prompt": "A support assistant sends, on every call: a 3,000-token policy and style guide, 12 tool schemas, the customer's stored preferences, eight retrieved help-centre chunks ranked by a reranker, the last 20 turns of the chat, the current time, and the customer's new question. Lay out the window from first to last token, say where the cache breakpoint goes, where the time goes, and how the eight chunks are ordered, and justify each choice with the cache and with the position results of this post.",
+      "answer_length": "half a page",
+      "solution": "1. **Front, the stable prefix.** Layer 01, the policy and style guide, then layer 02, the 12 tool schemas, in a fixed order. They are identical on every call, so a cache breakpoint at the end of layer 02 lets every later call read them from the cache; the start of the input is also one of the two best-used positions, which suits the rules.\n2. **The time.** Not in the system prompt: a value that changes on every call makes the prefix differ from its first changed token and ends all reuse. It goes after the breakpoint, for example with the user's turn in layer 06, or rounded to the date if it must sit earlier.\n3. **Middle.** Layer 03, the preferences, then layer 04, the chunks, then layer 05, the 20 turns. These change or grow on every call, so they cannot be cached as prefix, and the middle is the least-used region (Liu et al.), so it should be kept short: select fewer chunks and summarise old turns if it grows.\n4. **Chunk order.** Bookend: the best chunk first and the second best last within layer 04, the weaker ones between them, so the strongest evidence avoids the deepest part of the middle.\n5. **End.** Layer 06, the new question, last: it is new on every call, so placing it last keeps the reusable prefix as long as possible, and the end is the other best-used position.",
+      "rubric": [
+        {
+          "criterion": "Puts layers 01 and 02 first in a fixed order with the breakpoint at the end of layer 02, and justifies it by the identical-prefix rule",
+          "points": 2
+        },
+        {
+          "criterion": "Moves the time out of the stable prefix and explains that one changed token ends the reuse",
+          "points": 2
+        },
+        {
+          "criterion": "Orders the middle as memory, chunks, history and argues for keeping it short from the lost-in-the-middle result",
+          "points": 2
+        },
+        {
+          "criterion": "Orders the chunks bookend style and says why",
+          "points": 1
+        },
+        {
+          "criterion": "Puts the question last and gives both reasons, cache and position",
+          "points": 2
+        }
+      ],
+      "explanation": "Section 9 combines the cache rule of section 7 with the position result of section 5: stable layers at the front, volatile content after the breakpoint, the middle kept short with its strongest evidence at the edges, and the question at the end.",
+      "hints": [
+        "Separate what is identical on every call from what is not.",
+        "Then ask, for each piece that is not, whether it needs to be near an end of the window."
+      ]
+    },
+    {
+      "id": "ctx-003-q18",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o5",
+        "o2"
+      ],
+      "section": "8",
+      "est_minutes": 15,
+      "tags": [
+        "needle-in-a-haystack",
+        "long-context",
+        "evaluation"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "critique",
+      "connects": [
+        "ctx-025",
+        "ctx-020"
+      ],
+      "prompt": "A team proposes to drop its retrieval pipeline and send the whole 400-page product manual on every call, because the manual fits the new model's window and the vendor's needle-in-a-haystack chart is perfect at that length. Critique the argument with the evidence of this post, say what the team should measure before deciding, and name the two later posts of the series that treat the decision and the measurement.",
+      "answer_length": "half a page",
+      "solution": "1. **What the chart shows.** A needle score shows that the model can retrieve one planted sentence at that length and depth. It does not show that the model can combine facts spread across the manual, notice contradictions between sections, or use what it found to answer a real question. RULER reports models with near-perfect needle scores dropping sharply on harder tasks as the context grows, and Context Rot finds degradation with length even on easy tasks.\n2. **Position.** Most of a 400-page manual would sit in the middle of the window, the region Liu et al. found least used, and their dip appeared well inside the models' windows; a larger window gives a longer middle, not a shorter one.\n3. **Cost and latency.** Every call would carry the whole manual. Attention work grows with the square of the input, prefill delays the first token, and even a cached prefix is paid at the cache-read price on every call and the full price whenever the cache expires or the manual changes.\n4. **What to measure.** An evaluation of the application's own questions, including ones that need two or three facts combined, at the real context length, comparing the full-manual design with the retrieval design on accuracy, latency and cost per call.\n5. **Where the series treats it.** Post 25 gives the long-context-against-retrieval decision framework (`ctx-025`), and post 20 the evaluation design (`ctx-020`).",
+      "rubric": [
+        {
+          "criterion": "States what a needle score does and does not measure",
+          "points": 2
+        },
+        {
+          "criterion": "Uses the lost-in-the-middle result, including that the dip appeared inside the window",
+          "points": 2
+        },
+        {
+          "criterion": "Notes the cost and latency of sending the whole manual on every call, cache or not",
+          "points": 1
+        },
+        {
+          "criterion": "Proposes an evaluation of the application's own task at its real length, comparing both designs",
+          "points": 2
+        },
+        {
+          "criterion": "Names post 25 for the decision and post 20 for the evaluation",
+          "points": 1
+        }
+      ],
+      "explanation": "Sections 5, 7 and 8: a needle chart is evidence of recall only, the middle of a long input is the least used even inside the window, and a whole-corpus prompt pays for every token on every call. Post 25 turns this into a decision; post 20 builds the evaluation that settles it.",
+      "hints": [
+        "Separate what the vendor's chart measured from what the application needs.",
+        "Where in the window would most of the manual sit, and what did Liu et al. find there?"
+      ]
+    }
+  ]
+}
