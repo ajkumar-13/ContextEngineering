@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="ctx-02-same-content-tokens-title" aria-describedby="ctx-02-same-content-tokens-desc">
+<title id="ctx-02-same-content-tokens-title">The same content, a different number of tokens</title>
+<desc id="ctx-02-same-content-tokens-desc">Two bar charts of token counts measured with OpenAI's cl100k_base and o200k_base encodings. Left, one support ticket written three ways: prose 87 tokens, a Python dictionary 148 (1.70 times the prose) and indented JSON 183 (2.10 times), the same under both encodings. Right, one 57-character customer message: English 14 tokens under both encodings, Hindi 61 under cl100k_base and 22 under o200k_base.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-ink { fill: var(--ctx-ink); }
+</style>
+<defs>
+<marker id="ctx-02-same-content-tokens-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+<clipPath id="ctx-02-same-content-tokens-clip-1"><rect x="176" y="136" width="168" height="292"/></clipPath>
+<clipPath id="ctx-02-same-content-tokens-clip-2"><rect x="624" y="136" width="256" height="292"/></clipPath>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="540"/>
+<text x="40" y="48" class="t-title" data-w="581">The same content, a different number of tokens</text>
+<text x="40" y="76" class="t-subtitle" data-w="677">Counted by snippets/count_tokens.py with OpenAI's cl100k_base and o200k_base encodings.</text>
+<text x="40" y="120" class="t-head" data-w="198">One ticket, three shapes</text>
+<g data-grid="skip">
+<path d="M176,136V428M260,136V428M344,136V428" class="gridline"/>
+<text x="176" y="448" text-anchor="middle" class="t-tick" data-w="8">0</text>
+<text x="260" y="448" text-anchor="middle" class="t-tick" data-w="23">100</text>
+<text x="344" y="448" text-anchor="middle" class="t-tick" data-w="23">200</text>
+<g clip-path="url(#ctx-02-same-content-tokens-clip-1)">
+<rect x="176" y="172.67" width="73.08" height="24" class="f-ink" data-fit="skip"/>
+<rect x="176" y="270" width="124.32" height="24" class="f-ink" data-fit="skip"/>
+<rect x="176" y="367.33" width="153.72" height="24" class="f-ink" data-fit="skip"/>
+</g>
+<path d="M176,136V428" class="axis"/>
+<text x="40" y="189.67" class="t-label" data-w="40">Prose</text>
+<text x="257.08" y="189.67" class="t-value f-ink" data-w="17">87</text>
+<text x="40" y="287" class="t-label" data-w="118">Python dictionary</text>
+<text x="308.32" y="287" class="t-value f-ink" data-w="122">148, 1.70 × prose</text>
+<text x="40" y="384.33" class="t-label" data-w="104">Indented JSON</text>
+<text x="337.72" y="384.33" class="t-value f-ink" data-w="122">183, 2.10 × prose</text>
+</g>
+<text x="260" y="472" text-anchor="middle" class="t-note" data-w="240">tokens, same under both encodings</text>
+<text x="496" y="120" class="t-head" data-w="238">One message, two languages</text>
+<g data-grid="skip">
+<path d="M624,136V428M752,136V428M880,136V428" class="gridline"/>
+<text x="624" y="448" text-anchor="middle" class="t-tick" data-w="8">0</text>
+<text x="752" y="448" text-anchor="middle" class="t-tick" data-w="16">40</text>
+<text x="880" y="448" text-anchor="middle" class="t-tick" data-w="16">80</text>
+<g clip-path="url(#ctx-02-same-content-tokens-clip-2)">
+<rect x="624" y="160.5" width="44.8" height="24" class="f-ink" data-fit="skip"/>
+<rect x="624" y="233.5" width="44.8" height="24" class="f-ink" data-fit="skip"/>
+<rect x="624" y="306.5" width="195.2" height="24" class="f-ink" data-fit="skip"/>
+<rect x="624" y="379.5" width="70.4" height="24" class="f-ink" data-fit="skip"/>
+</g>
+<path d="M624,136V428" class="axis"/>
+<text x="496" y="177.5" class="t-label" data-w="101">English, cl100k</text>
+<text x="676.8" y="177.5" class="t-value f-ink" data-w="17">14</text>
+<text x="496" y="250.5" class="t-label" data-w="99">English, o200k</text>
+<text x="676.8" y="250.5" class="t-value f-ink" data-w="17">14</text>
+<text x="496" y="323.5" class="t-label" data-w="86">Hindi, cl100k</text>
+<text x="827.2" y="323.5" class="t-value f-ink" data-w="17">61</text>
+<text x="496" y="396.5" class="t-label" data-w="84">Hindi, o200k</text>
+<text x="702.4" y="396.5" class="t-value f-ink" data-w="17">22</text>
+</g>
+<text x="752" y="472" text-anchor="middle" class="t-note" data-w="262">tokens, 57 characters in each language</text>
+<text x="40" y="504" class="t-note" data-w="642">Keys, quotes and indentation are tokens; so are the pieces of a script the vocabulary rarely saw.</text>
+</svg>

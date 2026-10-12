@@ -1,56 +1,25 @@
 id: ctx-004
 slug: 04-tokens-windows-budgets
-title: "04 · Tokens, Windows, and Budgets"
-
-description: >
-  Understand tokens, context windows, token budgets, latency, and API costs.
-  Learn how to estimate prompt size, optimize context allocation, reduce
-  inference costs with prompt caching, and design efficient LLM agents.
-
-author: "Ajay"
-
+title: "04 - Tokens, windows, and budgets"
+summary: "Tokens are the unit a model reads and bills, and the context window caps one call. This post measures tokens by shape and language, then sizes an agent's tokens, dollars and latency on an envelope."
 date: 2026-05-13
-last_modified: 2026-05-13
-
-tags:
-  - context-engineering
-  - tokens
-  - context-window
-  - token-budget
-  - prompt-caching
-  - kv-cache
-  - llm-cost
-  - latency
-
-category: Foundations
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part I - Foundations"
-chapter: "Part I — Foundations"
-
-hero: diagrams/00-hero-token-window-budget.svg
-hero_alt: "Illustration showing the relationship between tokens, context windows, and token budgets"
-
-reading_time: 13
-
-toc: true
-draft: false
-
-keywords:
-  - Tokenization
-  - Context Window
-  - Token Budget
-  - Prompt Budget
-  - Prompt Caching
-  - KV Cache
-  - LLM Pricing
-  - Inference Cost
-  - Latency
-  - Prefill
-  - Decode
-  - Long Context
-  - Context Engineering
-
-canonical_url: ""
-
-prev: ../03-how-llms-read-context/
-next: ../05-context-lifecycle/
+level: beginner
+reading_time: 20
+tags: [context-engineering, tokens, context-window, token-budget, prompt-caching, latency, llm-cost]
+hero: diagrams/01-window-and-budget.svg
+prerequisites: [ctx-003]
+code: optional
+outcomes:
+  - id: o1
+    text: "Explain why the same content costs more tokens as code, JSON or non-English text than as English prose, and estimate tokens from a word count."
+  - id: o2
+    text: "Check that a prompt plus its output reserve fits the context window, treating the window as a ceiling rather than a target."
+  - id: o3
+    text: "Estimate the cost and latency of a call from its input and output tokens, with and without a cached prefix."
+  - id: o4
+    text: "Set a per-layer token budget for an agent and identify the layer that breaks it."
+  - id: o5
+    text: "Decide between a smaller model on a longer prompt and a larger model on a shorter one for a given task."

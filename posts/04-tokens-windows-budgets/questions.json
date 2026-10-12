@@ -1,0 +1,815 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-004",
+  "next_ordinal": 19,
+  "questions": [
+    {
+      "id": "ctx-004-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 2,
+      "tags": [
+        "tokens",
+        "json"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "One support ticket is written once as a paragraph of prose and once as indented JSON with the same facts. Under the same encoding the JSON version takes about twice as many tokens. Which statement explains the difference?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "JSON tokens are billed at a higher rate per token than prose tokens.",
+          "correct": false,
+          "feedback": "The rate per token is the same for any input text on a given model. The JSON costs more because it has more tokens, not dearer ones."
+        },
+        {
+          "key": "b",
+          "text": "The keys, quotes, braces and indentation of the JSON are tokens too, on top of the facts.",
+          "correct": true,
+          "feedback": "Right: every character of the string goes through the tokeniser, so the structure of the JSON adds tokens that the prose does not carry."
+        },
+        {
+          "key": "c",
+          "text": "The tokeniser skips the punctuation of prose but not the punctuation of JSON.",
+          "correct": false,
+          "feedback": "No text is skipped: punctuation and whitespace are part of the tokens in prose as well. The prose simply has much less of it."
+        },
+        {
+          "key": "d",
+          "text": "The JSON version holds more information than the prose, so it needs more tokens.",
+          "correct": false,
+          "feedback": "The two versions carry the same facts. The extra tokens are structure, which is the point of the comparison."
+        }
+      ],
+      "explanation": "Section 1 writes one ticket as prose, as a Python dictionary and as indented JSON with identical facts: 87, 148 and 183 tokens. The difference is the syntax around the facts, which the tokeniser counts like any other text.",
+      "hints": [
+        "Compare what the two versions contain apart from the facts themselves."
+      ]
+    },
+    {
+      "id": "ctx-004-q02",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 4,
+      "tags": [
+        "tokens",
+        "estimation"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A product manual is 1,500 words of English prose. Estimate its tokens with OpenAI's rule of thumb that one token is about three quarters of a word. Then estimate the tokens of the same content exported as indented JSON, using the ratio of JSON to prose that the post measured for its support ticket.",
+      "answer": {
+        "parts": [
+          {
+            "label": "tokens as prose",
+            "value": 2000,
+            "tolerance": 1,
+            "unit": "tokens"
+          },
+          {
+            "label": "tokens as indented JSON",
+            "value": 4200,
+            "tolerance": 10,
+            "unit": "tokens"
+          }
+        ]
+      },
+      "precision_note": "1,500 / 0.75 = 2,000 tokens; 2,000 × 2.10 = 4,200 tokens (2.10 is 183 / 87 from snippets/count_tokens.py). Multiplying by 0.75 instead of dividing gives 1,125, the nearest wrong method; the JSON tolerance of 10 accepts the ratio taken as 183 / 87 = 2.103 (4,207 tokens).",
+      "explanation": "Section 1: three quarters of a word per token means tokens = words / 0.75, so 1,500 words are about 2,000 tokens. The measured JSON form of the same facts took 2.10 times the tokens of the prose, so the export is about 4,200 tokens, an estimate that only the real tokeniser can confirm.",
+      "hints": [
+        "A token is smaller than a word, so there are more tokens than words.",
+        "Divide the words by 0.75, then scale by the JSON to prose ratio of 2.10."
+      ]
+    },
+    {
+      "id": "ctx-004-q03",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 3,
+      "tags": [
+        "tokens",
+        "tokeniser"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A team counts a Claude prompt with `tiktoken` and the `o200k_base` encoding, gets 9,800 tokens, and writes that number into its budget. Why is the number not a reliable count for Claude?",
+      "answer": {
+        "model": "Claude uses its own tokeniser, not OpenAI's encodings, so the same text splits into a different number of tokens; the count should come from Anthropic's token-counting endpoint.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(claude|anthropic|it)\\s+(?:(?!not\\b|doesn|never\\b|don)\\w+\\s+){0,2}(uses?|using|should\\s+use|needs?)\\s+(the\\s+)?(cl100k|o200k))(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\b(same|identical|shared?)\\s+(tokeni[sz]er|vocabulary|encoding)s?\\b(?![\\s\\S]*\\bnot\\b))(?![\\s\\S]*\\b(uses?|has|have|share)\\s+(the\\s+)?(same|identical)\\b)(?![\\s\\S]*\\b(tiktoken|it)\\s+(is|was)\\s+(buggy|broken|random|inaccurate|wrong|imprecise|approximate)\\b)(?![\\s\\S]*\\b(not|isn'?t|aren'?t|doesn'?t|does not|don'?t|do not)\\s+(use\\s+)?(an?\\s+)?(its\\s+own|their\\s+own|different|separate|another|own)\\s+(tokeni[sz]er|vocabulary|encoding)\\b)(?=[\\s\\S]*(\\bopenai'?s?\\b[\\s\\S]{0,60}\\b(claude|anthropic)\\s+(doesn'?t|does not|do not|never)\\s+use\\s+(it|that|this|them|those|openai'?s?|o200k\\w*|cl100k\\w*|tiktoken|the same)\\b|\\b(its\\s+own|their\\s+own|own|different|separate|another|other|distinct|proprietary|anthropic'?s)\\s+(\\w+\\s+)?(tokeni[sz](er|ation)|vocabular(y|ies)|encodings?)|\\b(tokeni[sz]ers?|vocabular(y|ies)|encodings?)\\s+(\\w+\\s+){0,3}(differ|is different|are different|is not the same|isn'?t the same|are not the same|aren'?t the same)|\\btiktoken\\b[\\s\\S]{0,60}\\b(only|just)\\b[\\s\\S]{0,40}\\bopenai\\b|\\bopenai'?s?\\b[\\s\\S]{0,40}\\b(only|not claude|not anthropic)\\b|\\b(not|doesn'?t|does not|cannot|can'?t)\\s+(reproduce|match|model|implement|use|know)\\w*\\s+(\\w+\\s+){0,2}(claude|anthropic)|\\b(tokeni[sz]ers?|vocabular\\w*|encodings?)\\b[\\s\\S]{0,40}\\b(are not|aren'?t|is not|isn'?t) the same|\\bnot\\s+(\\w+\\s+){0,2}(openai'?s?|o200k\\w*|cl100k\\w*|tiktoken'?s?)\\s+(tokeni[sz]er|vocabular|encoding)|\\b(claude|anthropic)\\w*\\s+(\\w+\\s+){0,2}(doesn'?t|does not|do not|don'?t|never)\\s+use\\s+(\\w+\\s+){0,2}(openai|o200k|cl100k|tiktoken)))(?=[\\s\\S]*\\b(uses?|has|have|is|are|differs?|split|splits|does|doesn'?t|reproduces?|because|so|only|tokeni[sz]es|should|comes?)\\b)(?=(\\S+\\s+){3}\\S)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 1: the measured counts come from OpenAI's encodings, which `tiktoken` reproduces. Claude and Gemini use their own tokenisers, so a number quoted for them comes from the provider's own counter, such as Anthropic's token-counting endpoint.",
+      "hints": [
+        "Ask which provider's vocabulary `tiktoken` implements."
+      ]
+    },
+    {
+      "id": "ctx-004-q04",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 3,
+      "tags": [
+        "tokens",
+        "languages"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "The same 57-character customer message is 14 tokens in English under both `cl100k_base` and `o200k_base`, and 61 tokens in Hindi under `cl100k_base` but 22 under `o200k_base`. What follows for budgeting a bilingual support agent?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Hindi text always costs about four times as many tokens as English text, whatever the model.",
+          "correct": false,
+          "feedback": "The ratio is about 4.4 under one encoding and about 1.6 under the other, so no single multiple holds; it depends on the tokeniser."
+        },
+        {
+          "key": "b",
+          "text": "Counting characters is enough for the budget, since both versions of the message have 57 characters.",
+          "correct": false,
+          "feedback": "Equal character counts gave 14 tokens in English and 22 or 61 in Hindi, so characters do not predict tokens across scripts."
+        },
+        {
+          "key": "c",
+          "text": "The Hindi traffic is counted with the model's own tokeniser, because the premium depends on the vocabulary.",
+          "correct": true,
+          "feedback": "Right: the same Hindi sentence changed from 61 to 22 tokens between two vocabularies, while English stayed at 14, so the premium is a property of the tokeniser."
+        },
+        {
+          "key": "d",
+          "text": "The newer encoding makes every language cheaper, English included, so the Hindi premium disappears.",
+          "correct": false,
+          "feedback": "English stayed at 14 tokens under both encodings; only the Hindi count fell, and at 22 tokens against 14 it is still a premium."
+        }
+      ],
+      "explanation": "Section 1's second measurement shows that non-English text can cost more tokens and that the size of the premium depends on the vocabulary: 61 tokens under `cl100k_base` against 22 under `o200k_base`, for 14 in English. A budget for the Hindi conversations is therefore counted per model.",
+      "hints": [
+        "Compare how much each count changes between the two encodings.",
+        "Ask whether the English count moved at all."
+      ]
+    },
+    {
+      "id": "ctx-004-q05",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "context-window"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "On Anthropic's API, as its documentation describes the context window, which tokens count toward it on one call?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Only the messages; the system prompt and the tool definitions sit outside the window.",
+          "correct": false,
+          "feedback": "The system prompt and the tool definitions are part of the request, and everything in the request counts."
+        },
+        {
+          "key": "b",
+          "text": "Only the input; the generated answer has a separate allowance set by `max_tokens`.",
+          "correct": false,
+          "feedback": "The output generated for the turn counts too, which is why an output reserve is carved out of the window."
+        },
+        {
+          "key": "c",
+          "text": "Only the tokens not read from the prompt cache, since cached tokens are already stored by the provider.",
+          "correct": false,
+          "feedback": "Caching changes what the prefix costs, not whether it occupies the window; cached tokens still count."
+        },
+        {
+          "key": "d",
+          "text": "The whole request, system prompt and tool definitions included, plus the output generated for the turn.",
+          "correct": true,
+          "feedback": "Right: the window holds the entire input and the answer the model writes on that call."
+        }
+      ],
+      "explanation": "Section 2 defines the context window as the most tokens one call may hold, input and output together, and cites Anthropic's page: the system prompt, every message, the tool definitions and the generated output all count.",
+      "hints": [
+        "Think of everything the model reads and writes on the call."
+      ]
+    },
+    {
+      "id": "ctx-004-q06",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 4,
+      "tags": [
+        "context-window",
+        "output-reserve"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A model has a 200,000-token context window. The application reserves 16,000 tokens for the answer through `max_tokens`. On a given call, layers 01 to 04 and layer 06 take 30,500 tokens in total (illustrative numbers). What is the largest conversation history, in tokens, that this call can carry without eating into the output reserve?",
+      "answer": {
+        "value": 153500,
+        "tolerance": 0,
+        "unit": "tokens"
+      },
+      "precision_note": "200,000 - 16,000 - 30,500 = 153,500 tokens. Forgetting the output reserve gives 169,500, the nearest wrong method.",
+      "explanation": "Section 2: input and output share the window. The reserve for the answer comes off first, then the other layers, and the history gets what is left: 200,000 minus 16,000 minus 30,500 is 153,500 tokens.",
+      "hints": [
+        "The answer and the prompt share one window.",
+        "Subtract the output reserve and the other layers from the window."
+      ]
+    },
+    {
+      "id": "ctx-004-q07",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 4,
+      "tags": [
+        "context-window",
+        "max-tokens"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A call to Claude Sonnet 4.5, whose window is 200,000 tokens, sends 195,000 input tokens with `max_tokens` set to 16,000. According to Anthropic's documentation as the post cites it, what happens?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The API rejects the request with a \"prompt is too long\" error, because input plus `max_tokens` exceeds the window.",
+          "correct": false,
+          "feedback": "That error is for an input that alone exceeds the window, and here the input of 195,000 tokens fits. Rejecting a request whose input plus `max_tokens` exceeds the window was the behaviour of models before Claude 4.5."
+        },
+        {
+          "key": "b",
+          "text": "The API accepts it; generation stops at the window with `model_context_window_exceeded`, after at most 5,000 output tokens.",
+          "correct": true,
+          "feedback": "Right: on Claude 4.5 and newer models an input that fits is accepted even when input plus `max_tokens` does not, and the answer is cut off at the window."
+        },
+        {
+          "key": "c",
+          "text": "The API silently drops the oldest messages from the input to make room for all 16,000 output tokens.",
+          "correct": false,
+          "feedback": "The API does not trim the input on its own; managing the history is the application's job."
+        },
+        {
+          "key": "d",
+          "text": "The model writes all 16,000 tokens, because `max_tokens` takes priority over the context window limit.",
+          "correct": false,
+          "feedback": "The window is a hard limit on input plus output: 195,000 plus 16,000 does not fit in 200,000."
+        }
+      ],
+      "explanation": "Section 2 distinguishes the two overflows Anthropic's page describes: an input that alone exceeds the window is rejected on every model, while on Claude 4.5 and newer an input that fits is accepted and the generation stops at the window with `model_context_window_exceeded`. Here only 5,000 tokens of room remain for the answer.",
+      "hints": [
+        "First check whether the input alone fits the window.",
+        "Then work out how much room is left for the answer."
+      ]
+    },
+    {
+      "id": "ctx-004-q08",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 5,
+      "tags": [
+        "cost",
+        "prompt-caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A call on Claude Sonnet 4.5 sends 8,000 input tokens, of which the first 5,000 are a stable prefix, and returns 600 output tokens. Using the rates the post cites (3 dollars per million input tokens, 15 dollars per million output tokens, a cache read at 0.1 times the input price), give the cost of the call in dollars with nothing cached, and with the prefix read from the cache. Ignore the write premium.",
+      "answer": {
+        "parts": [
+          {
+            "label": "cost with nothing cached",
+            "value": 0.033,
+            "tolerance": 0.003,
+            "unit": "USD"
+          },
+          {
+            "label": "cost with the prefix read from the cache",
+            "value": 0.0195,
+            "tolerance": 0.0006,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "Uncached: 8,000 × 3 / 1,000,000 + 600 × 15 / 1,000,000 = 0.024 + 0.009 = 0.033. Cached: 5,000 × 0.30 / 1,000,000 + 3,000 × 3 / 1,000,000 + 0.009 = 0.0015 + 0.009 + 0.009 = 0.0195 (call_cost in snippets/envelope.py gives the same). The tolerances accept the answers rounded to cents or to three decimals (0.03; 0.02 or 0.020). Leaving out the output gives 0.024 and 0.0105, and billing the prefix at the full rate as well as the cache rate gives 0.0345 for the cached call; all are rejected.",
+      "explanation": "Section 5 prices a call as input tokens times the input rate plus output tokens times the output rate, all per million. With caching, only the 5,000 prefix tokens move to the cache-read price of 0.30 dollars per million; the other 3,000 input tokens and the output pay full price.",
+      "hints": [
+        "Price input and output separately, per million tokens.",
+        "With caching, only the prefix tokens change price, to 0.1 times 3 dollars per million."
+      ]
+    },
+    {
+      "id": "ctx-004-q09",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "3",
+      "est_minutes": 4,
+      "tags": [
+        "latency",
+        "prefill",
+        "decode"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "At the post's illustrative mid-class rates of 0.2 ms per input token for prefill and 16 ms per output token for decode, estimate the prefill time, the decode time and the total time of a call with 30,000 input tokens and 1,000 output tokens, in seconds.",
+      "answer": {
+        "parts": [
+          {
+            "label": "prefill",
+            "value": 6.0,
+            "tolerance": 0.05,
+            "unit": "s"
+          },
+          {
+            "label": "decode",
+            "value": 16.0,
+            "tolerance": 0.05,
+            "unit": "s"
+          },
+          {
+            "label": "total",
+            "value": 22.0,
+            "tolerance": 0.05,
+            "unit": "s"
+          }
+        ]
+      },
+      "precision_note": "Prefill 30,000 × 0.2 ms = 6,000 ms = 6.0 s; decode 1,000 × 16 ms = 16,000 ms = 16.0 s; total 22.0 s (wall_time in snippets/envelope.py). Swapping the two rates gives 480.2 s, the nearest wrong method.",
+      "explanation": "Section 3: a call's time is about the input tokens times the prefill time per token plus the output tokens times the decode time per token. Even with a prompt 30 times longer than the answer, decode takes most of the time at these rates, because the prompt is under 80 times the output.",
+      "hints": [
+        "Prefill is paid per input token, decode per output token.",
+        "Convert milliseconds to seconds at the end."
+      ]
+    },
+    {
+      "id": "ctx-004-q10",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "latency"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "The support agent's call has 10,500 input and 400 output tokens and takes 8.50 seconds at the post's illustrative mid-class rates (0.2 ms per input token, 16 ms per output token). Which single change saves the most time?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Halving the prompt to 5,250 tokens.",
+          "correct": false,
+          "feedback": "That saves 5,250 × 0.2 ms = 1.05 seconds, less than a third of what halving the answer saves."
+        },
+        {
+          "key": "b",
+          "text": "Halving the answer to 200 tokens.",
+          "correct": true,
+          "feedback": "Right: that saves 200 × 16 ms = 3.20 seconds, because the prompt is far less than 80 times the output, so decode dominates."
+        },
+        {
+          "key": "c",
+          "text": "Turning on streaming.",
+          "correct": false,
+          "feedback": "Streaming changes when the first words appear, not when the call finishes; the total time stays 8.50 seconds."
+        },
+        {
+          "key": "d",
+          "text": "Halving the prompt and the answer save the same time, since both are halved.",
+          "correct": false,
+          "feedback": "Halving the prompt saves 1.05 seconds and halving the answer 3.20, because an output token takes 80 times as long as an input token at these rates."
+        }
+      ],
+      "explanation": "Section 3: per token, decode costs far more time than prefill. At these rates the two take equal time only when the prompt is 80 times the output; at 10,500 against 400 the prompt is about 26 times the output, so shrinking the answer helps more.",
+      "hints": [
+        "Compute the time each change removes.",
+        "Each input token costs 0.2 ms and each output token 16 ms."
+      ]
+    },
+    {
+      "id": "ctx-004-q11",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "latency",
+        "streaming",
+        "prefill"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A long-context agent streams its answers, yet users still wait several seconds before the first word appears. Why does streaming not remove that wait?",
+      "answer": {
+        "model": "The first token cannot appear until prefill has read the whole long prompt. Streaming shows the answer as decode produces it, so it hides decode time but not prefill time.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\bstream\\w*\\s+(also\\s+)?(hides?|removes?|skips?|speeds? up|shortens?|overlaps?)\\s+(the\\s+)?(prefill|reading)\\b)(?![\\s\\S]*\\b(prefill|reading the prompt)\\s+(is|happens)\\s+(after|during|in parallel with)\\s+(the\\s+)?(decod|stream|generat|first token))(?![\\s\\S]*\\b(no|without)\\s+(any\\s+)?prefill\\b)(?![\\s\\S]*\\b(doesn'?t|does not|don'?t|do not|never)\\s+(need|needs|require|requires|have|has)\\s+(to\\s+)?(any\\s+|a\\s+)?(prefill|read)\\b)(?![\\s\\S]*\\bprefill\\s+(is|takes)\\s+(negligible|instant|free|nothing)\\b)(?=[\\s\\S]*(\\bprefill|\\b(read|reads|reading|process|processes|processing|ingest|ingests|ingesting|encod\\w*|comput\\w*)\\s+(\\w+\\s+){0,3}(prompt|input|context|tokens)|\\b(prompt|input|context)\\s+(\\w+\\s+){0,3}(must|has to|have to|needs? to)\\s+(\\w+\\s+){0,2}(be\\s+)?(read|processed|ingested|encoded)|\\b(prompt|input|context)\\s+(is|has been|was|gets)\\s+(fully\\s+|all\\s+)?(read|processed|ingested|encoded)))(?=[\\s\\S]*\\b(first|before|until|wait|waits|start|starts|begin|begins|only|hides?|after)\\b)(?=[\\s\\S]*\\b(is|are|must|has|have|needs?|reads?|takes?|happens?|comes?|can'?t|cannot|does|doesn'?t|hides?|waits?|finish\\w*|starts?|begins?)\\b)(?=(\\S+\\s+){3}\\S)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 3 splits a call into prefill, which reads the whole prompt, and decode, which writes the answer one token at a time. Streaming shows decoded tokens as they arrive, but the first one waits for prefill, and prefill grows with the prompt.",
+      "hints": [
+        "Name the phase that has to finish before any output exists."
+      ]
+    },
+    {
+      "id": "ctx-004-q12",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4",
+        "o3",
+        "o2"
+      ],
+      "section": "9",
+      "est_minutes": 5,
+      "tags": [
+        "diagnosis",
+        "budgets"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each symptom to the budgeting mistake that produces it.",
+      "left": [
+        {
+          "key": "a",
+          "text": "The `usage` block reports about twice the estimated input tokens on calls full of JSON tool results."
+        },
+        {
+          "key": "b",
+          "text": "Answers stop mid-sentence with the stop reason `max_tokens`, and nothing in the input looks wrong."
+        },
+        {
+          "key": "c",
+          "text": "A 3,000-token prefix marked for caching on Claude Haiku 4.5 reports zero `cache_read_input_tokens` on every call."
+        },
+        {
+          "key": "d",
+          "text": "The cost per call rises turn after turn until the provider rejects the prompt as too long."
+        },
+        {
+          "key": "e",
+          "text": "A feature that writes long answers comes in well over a forecast built from its input tokens."
+        }
+      ],
+      "right": [
+        {
+          "key": "p",
+          "text": "Tokens estimated from a word count"
+        },
+        {
+          "key": "q",
+          "text": "No output reserve"
+        },
+        {
+          "key": "r",
+          "text": "A cached prefix below the model's minimum length"
+        },
+        {
+          "key": "s",
+          "text": "No cap on the growing layers"
+        },
+        {
+          "key": "t",
+          "text": "Pricing only the input"
+        },
+        {
+          "key": "u",
+          "text": "The context window set too small by the provider"
+        }
+      ],
+      "answer": {
+        "a": "p",
+        "b": "q",
+        "c": "r",
+        "d": "s",
+        "e": "t"
+      },
+      "explanation": "Section 9 gives each mistake with its symptom: word-based estimates miss the extra tokens of JSON; an input that fills the window leaves no room for the answer; a prefix under 4,096 tokens on Haiku 4.5 is never cached; uncapped history and retrieval grow until the window overflows; and output at five times the input rate dominates a long-answer feature.",
+      "hints": [
+        "Each symptom names the number or field that is off; ask which estimate produced it."
+      ]
+    },
+    {
+      "id": "ctx-004-q13",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 12,
+      "tags": [
+        "budgets",
+        "per-layer"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "implement",
+      "language": "python",
+      "prompt": "Implement `over_budget(layers, bands)`: given each layer's token count and each layer's default band of shares in percent, return the names of the layers whose share of the input falls outside their band, in send order. Bounds are inclusive.",
+      "starter": "def over_budget(layers, bands):\n    \"\"\"Return the names of the layers whose share of the input lies outside their band.\n\n    layers: {name: tokens}, in send order. bands: {name: (low, high)}, in percent, bounds inclusive.\n    A share is 100 times the layer's tokens divided by the sum of all the layers' tokens.\n    The names come back in send order.\n    \"\"\"\n    return []\n",
+      "solution": "def over_budget(layers, bands):\n    \"\"\"Return the names of the layers whose share of the input lies outside their band.\n\n    layers: {name: tokens}, in send order. bands: {name: (low, high)}, in percent, bounds inclusive.\n    A share is 100 times the layer's tokens divided by the sum of all the layers' tokens.\n    The names come back in send order.\n    \"\"\"\n    total = sum(layers.values())\n    outside = []\n    for name, tokens in layers.items():\n        low, high = bands[name]\n        share = 100 * tokens / total\n        if not low <= share <= high:\n            outside.append(name)\n    return outside\n",
+      "tests": "agent = {\"01 System prompt\": 3000, \"02 Tools and MCP descriptions\": 1600, \"03 Memory and state\": 1200,\n         \"04 Retrieved chunks\": 2500, \"05 Conversation history\": 2000, \"06 User instruction\": 200}\nbands = {\"01 System prompt\": (5, 15), \"02 Tools and MCP descriptions\": (5, 15), \"03 Memory and state\": (5, 10),\n         \"04 Retrieved chunks\": (20, 40), \"05 Conversation history\": (10, 30), \"06 User instruction\": (1, 5)}\nassert over_budget(agent, bands) == [\"01 System prompt\", \"02 Tools and MCP descriptions\",\n                                     \"03 Memory and state\"], over_budget(agent, bands)\n# Bounds are inclusive: 25 percent sits inside a band that ends at 25.\nassert over_budget({\"a\": 25, \"b\": 75}, {\"a\": (5, 25), \"b\": (75, 90)}) == []\n# Shares, not raw token counts, are compared with the bands.\nassert over_budget({\"p\": 1, \"q\": 3}, {\"p\": (20, 30), \"q\": (70, 80)}) == []\n# Send order, not the order of the shares.\nassert over_budget({\"x\": 50, \"y\": 10, \"z\": 40}, {\"x\": (0, 30), \"y\": (20, 30), \"z\": (0, 30)}) == [\"x\", \"y\", \"z\"]\n# Every layer counts toward the total, including the small ones.\nassert over_budget({\"m\": 9, \"n\": 1}, {\"m\": (85, 95), \"n\": (5, 15)}) == []\n# Send order, not the alphabetical order of the names.\nassert over_budget({\"z\": 50, \"a\": 50}, {\"z\": (0, 10), \"a\": (0, 10)}) == [\"z\", \"a\"]\nprint(\"all tests passed\")\n",
+      "entry": "python solution_and_tests.py",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 6 checks the support agent's layers against the default bands: a share is the layer's tokens divided by the total input, times 100, and a layer is flagged when that share is below the low bound or above the high one. The agent's layers 01, 02 and 03 come out at 28.6, 15.2 and 11.4 percent, outside their bands.",
+      "hints": [
+        "Compute the total input once, then each layer's share in percent.",
+        "Compare the share, not the token count, with the band, and keep the bounds inclusive.",
+        "Walk the layers in the order they are given, so the result keeps send order."
+      ]
+    },
+    {
+      "id": "ctx-004-q14",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 4,
+      "tags": [
+        "budgets",
+        "retrieval"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An interactive assistant has an input budget of 16,000 tokens per call. Using the top of the post's default bands, layer 04, retrieved chunks, may take 40 percent and layer 05, conversation history, 30 percent. Chunks are 500 tokens each. What is the largest top-k that fits layer 04's budget, and how many tokens may layer 05 hold?",
+      "answer": {
+        "parts": [
+          {
+            "label": "largest top-k",
+            "value": 12,
+            "tolerance": 0,
+            "unit": "chunks"
+          },
+          {
+            "label": "layer 05 budget",
+            "value": 4800,
+            "tolerance": 0,
+            "unit": "tokens"
+          }
+        ]
+      },
+      "precision_note": "Layer 04: 0.40 × 16,000 = 6,400 tokens, and floor(6,400 / 500) = 12 chunks (12.8 rounded down; 13 chunks would take 6,500). Layer 05: 0.30 × 16,000 = 4,800 tokens. Rounding 12.8 up to 13 is the nearest wrong method.",
+      "explanation": "Section 6 sets each layer's budget as a share of the input budget and says top-k is tuned to the budget, not the other way round: 40 percent of 16,000 is 6,400 tokens, which holds 12 whole chunks of 500 tokens. The history gets 30 percent, 4,800 tokens.",
+      "hints": [
+        "Turn each percentage into tokens first.",
+        "A chunk either fits whole or not at all, so round the number of chunks down."
+      ]
+    },
+    {
+      "id": "ctx-004-q15",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 12,
+      "tags": [
+        "model-choice",
+        "triangle"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "design",
+      "prompt": "For each task, choose a cheap-tier model on a longer prompt or a frontier model on a shorter prompt, and justify the choice with the post's model-picking questions and the latency, cost and quality triangle: (1) extract every renewal date from a 150-page contract; (2) plan a database migration from a two-paragraph description of the schema; (3) label 2 million support tickets by intent overnight.",
+      "solution": "1. **Renewal dates from a long contract: cheap tier, long prompt.** The input is long but the task is simple extraction (question 3 of section 7), so the money should not pay frontier rates for every one of the many input tokens. A cheap-tier model whose window holds the contract does the reading; an evaluation on a few contracts confirms it finds every date.\n\n2. **Migration plan from a short description: frontier tier, short prompt.** The input is short but the task is hard (question 4), so the cost of the call is dominated by reasoning, not reading, and the frontier model's higher rate applies to few input tokens. This sits in the fast and high-quality or cheap and high-quality corner depending on whether a person waits for it.\n\n3. **Two million tickets overnight: cheap tier, short prompts.** A short, well-defined classification (question 2) at high volume is the cheap and fast corner that section 4 gives to intent detection: a cheap model and a small prompt with a cached prefix holding the label definitions, which can run as a batch job since nobody waits on it overnight. Quality is the corner given up, so an evaluation set checks the labels, and a cascade can send the tickets the cheap model is unsure about to a stronger model.\n\nThe common rule: put the money where the difficulty is, in volume of input (cheap model, long prompt) or in reasoning (frontier model, short prompt), and check the choice on an evaluation set.",
+      "rubric": [
+        {
+          "criterion": "Task 1 is given to a cheap-tier model with a window that holds the contract, because the input is long and the task simple.",
+          "points": 2
+        },
+        {
+          "criterion": "Task 2 is given to a frontier model with a short prompt, because the difficulty is reasoning, not reading.",
+          "points": 2
+        },
+        {
+          "criterion": "Task 3 is given to a cheap tier on short prompts, the cheap and fast corner that section 4 assigns to intent detection, with quality checked on an evaluation set or backed by a cascade.",
+          "points": 2
+        },
+        {
+          "criterion": "The justification uses the triangle (which two of cost, latency and quality each task favours).",
+          "points": 1
+        },
+        {
+          "criterion": "The answer says the choice is confirmed on an evaluation set rather than assumed.",
+          "points": 1
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Section 7's questions 2 to 4 sort these three tasks: a long input with a simple task goes to a cheap model, a short input with a hard task to a frontier model, and a short, well-defined task at high volume to the cheap tier. Section 4's triangle adds which two of cost, latency and quality each task can favour.",
+      "hints": [
+        "For each task, decide whether the difficulty lies in the amount of input or in the reasoning.",
+        "Then ask which two corners of the triangle the task needs."
+      ]
+    },
+    {
+      "id": "ctx-004-q16",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o4",
+        "o3"
+      ],
+      "section": "6",
+      "est_minutes": 15,
+      "tags": [
+        "budgets",
+        "prompt-caching",
+        "lifetime-classes"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "connect",
+      "prompt": "The support agent's system prompt takes 28.6 percent of its input, nearly twice the top of its default band, yet the post says the overrun costs little money. Using the lifetime classes of post 02 and what post 03 says about how a model reads a long input, explain why the overrun is cheap, why it still matters, and what a team should do about it.",
+      "connects": [
+        "ctx-002",
+        "ctx-003"
+      ],
+      "solution": "**Why it is cheap.** In post 02's lifetime classes, layers 01 and 02 are the stable prefix: identical on every call and sent first. That is exactly what a prompt cache reuses, so after the first call the 3,000 system-prompt tokens are read from the cache at 0.1 times the base input price. On Claude Sonnet 4.5 that is 0.30 dollars per million instead of 3, so the overrun adds roughly a tenth of what the same tokens would cost in a per-turn layer.\n\n**Why it still matters.** Caching changes the price of the tokens, not their presence: they still occupy the window and the model still reads them on every call. Post 03 explains that attention is spread over every token in the window and that information in the middle of a long input is used less reliably, so a bloated system prompt competes with the evidence in layer 04 and with the user's question. A long system prompt is also harder to review as software, and every edit to it breaks the cached prefix for all calls.\n\n**What to do.** Treat the per-layer budget as a check: move material the model needs only sometimes out of the system prompt (into retrieved chunks or memory selected per call), keep rules short and motivated, and re-measure the share. If the prompt genuinely needs the room, raise its band deliberately and take the room from another layer, so the total input budget still holds.",
+      "rubric": [
+        {
+          "criterion": "Identifies layer 01 as part of the stable prefix (post 02) that a prompt cache reuses at about a tenth of the input price.",
+          "points": 2
+        },
+        {
+          "criterion": "States that cached tokens still occupy the window and are still read on every call.",
+          "points": 2
+        },
+        {
+          "criterion": "Connects the cost in attention to post 03: more tokens dilute attention and middle positions are used less reliably.",
+          "points": 2
+        },
+        {
+          "criterion": "Proposes a concrete fix: move occasional material to a per-turn layer, trim the prompt, or rebalance the bands deliberately.",
+          "points": 2
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Section 6 notes that the overrun in layers 01 and 02 is cached and therefore cheap in money but still takes window and attention. Post 02 supplies why those layers cache (the stable prefix), and post 03 supplies why extra tokens still cost quality.",
+      "hints": [
+        "Start from the lifetime class that layer 01 belongs to and what that means for the cache.",
+        "Then separate what caching changes (the price) from what it does not (the tokens in the window)."
+      ]
+    },
+    {
+      "id": "ctx-004-q17",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "estimation",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the steps of sizing an agent's daily bill on an envelope in the order they are carried out.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Multiply the cost of one call by the calls per day: conversations times turns times calls per turn."
+        },
+        {
+          "key": "b",
+          "text": "Write down the token count of each layer and of a typical answer."
+        },
+        {
+          "key": "c",
+          "text": "Check the estimate against the provider's own token counter and its dated price page."
+        },
+        {
+          "key": "d",
+          "text": "Price one call from its input and output tokens at the per-million-token rates."
+        },
+        {
+          "key": "e",
+          "text": "Add the layers to get the input tokens of one call."
+        }
+      ],
+      "answer": [
+        "b",
+        "e",
+        "d",
+        "a",
+        "c"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 5 builds the envelope from the layers up: token counts per layer, their sum, the cost of one call, then the daily bill; section 8 then checks the estimate against the real tokeniser and the current price page.",
+      "hints": [
+        "The cost of one call needs the input total first.",
+        "The check against reality comes after there is an estimate to check."
+      ]
+    },
+    {
+      "id": "ctx-004-q18",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 2,
+      "tags": [
+        "model-choice"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A nightly job summarises a 200-page report into ten bullet points. The task is simple, but the input is long. Which choice matches the post's model-picking questions?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A cheap-tier model whose window holds the report.",
+          "correct": true,
+          "feedback": "Right: when the input is long but the task simple, the money should not pay a frontier rate on every input token."
+        },
+        {
+          "key": "b",
+          "text": "A frontier model with the report cut to a short excerpt.",
+          "correct": false,
+          "feedback": "That pattern fits a short input with a hard task; here cutting the report would lose content the summary needs."
+        },
+        {
+          "key": "c",
+          "text": "A mid-tier model with streaming and a latency budget.",
+          "correct": false,
+          "feedback": "Streaming and a latency budget serve a user-facing, time-critical call; a nightly job has no one waiting for the first token."
+        },
+        {
+          "key": "d",
+          "text": "No model can do it, because 200 pages exceed every context window.",
+          "correct": false,
+          "feedback": "At three quarters of a word per token, 200 pages of prose are on the order of 100,000 tokens, within the 200,000-token and larger windows the post cites."
+        }
+      ],
+      "explanation": "Section 7's third question covers a long input with a simple task: a cheap-tier model whose window holds the input. The frontier tier is kept for short inputs with hard tasks, where the money pays for reasoning rather than reading.",
+      "hints": [
+        "Ask where the difficulty lies: in the amount of input or in the reasoning."
+      ]
+    }
+  ]
+}

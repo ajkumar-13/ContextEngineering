@@ -1,251 +1,295 @@
-# 04 · Tokens, windows, and budgets
+# 04 - Tokens, windows, and budgets
 
-> **TL;DR.** A token is the smallest unit a language model bills, attends to, and forgets. Three numbers govern every design decision in this series: the **context window** (how many tokens the model will accept), the **token budget** (how many you choose to spend), and the **latency–cost–quality triangle** (which two you optimise for at the expense of the third). This post defines all three precisely and walks through the arithmetic that lets you size an agent on the back of an envelope before a single line of code is written.
+> **TL;DR.** A token is the unit a large language model (LLM) reads, bills and runs out of room in, and how many tokens a piece of content takes depends on its shape (prose, code or JavaScript Object Notation, JSON) and on its language. Three numbers then govern every design decision in this series: the context window (the most tokens one call may hold), the budget (how many tokens, dollars and seconds a call may spend) and the triangle of latency, cost and quality, of which a design can favour two at the expense of the third. This post defines all three and sizes a customer-support agent on an envelope: about 10,500 input and 400 output tokens per call (illustrative counts), priced and timed before a line of the application is written.
 >
-> **After reading this you will be able to:**
-> - Estimate the token cost and latency of any prompt without running it.
-> - Decide between a smaller model on a longer prompt and a larger model on a shorter one.
-> - Set a defensible token budget for each layer of your agent.
+> **Prerequisites:** [Post 03](../03-how-llms-read-context/index.md).
+> **Safe to skip?** Skip it if a call's tokens, dollars and seconds can already be estimated from its layers without running it, and each layer of an agent already has an enforced token budget.
+>
+> **After reading, you will be able to:**
+>
+> - Explain why the same content costs more tokens as code, JSON or non-English text than as English prose, and estimate tokens from a word count.
+> - Check that a prompt plus its output reserve fits the context window, treating the window as a ceiling rather than a target.
+> - Estimate the cost and latency of a call from its input and output tokens, with and without a cached prefix.
+> - Set a per-layer token budget for an agent and identify the layer that breaks it.
+> - Decide between a smaller model on a longer prompt and a larger model on a shorter one for a given task.
 
-![Token, window, and budget at a glance](./diagrams/00-hero-token-window-budget.svg)
-*The token is the unit, the window is the ceiling, and the budget is the smaller share you actually spend.*
+![A long bar for the 200,000-token context window of Claude Sonnet 4.5 with a thin slice at its left end, zoomed into a strip of one call: 01 System prompt 3,000, 02 Tools and MCP descriptions 1,600, 03 Memory and state 1,200, 04 Retrieved chunks 2,500, 05 Conversation history 2,000, 06 User instruction 200, then 400 output tokens, 10,900 in all, with layers 01 and 02 bracketed as the 4,600-token stable prefix.](diagrams/01-window-and-budget.svg)
+
+*The window is the ceiling and the budget is the much smaller share one call spends; the six layers divide that share.*
 
 ---
 
-## 1. What a token is, exactly
+## 1. The question: what is a token, and what does one call spend?
 
-A token is the unit your provider's tokeniser produces when it splits the input string. Modern frontier models almost all use a **byte-pair encoding** (BPE) variant: a deterministic, reversible algorithm that learns a vocabulary of sub-word units from a large training corpus (Sennrich et al., 2016). Production tokenisers land in the range of roughly 50,000 to 200,000 units, for example OpenAI's `cl100k` vocabulary is about 100,000 tokens (OpenAI, "Tokenizer"). Common words become a single token; rare words and unfamiliar names get split into multiple. Whitespace is part of the token. Code, JSON, URLs, and non-English scripts tokenise much worse than running prose.
+Before a context can be designed, three quantities need numbers: how much a call may hold, how much it should spend, and what it costs in money and time. All three are counted in tokens, so the unit comes first.
 
-The famous rule of thumb is that **one token is roughly three quarters of an English word**, equivalently, 100 tokens is about 75 words, or roughly half a paragraph (OpenAI, "Tokenizer"). The rule is good enough for budgeting and dangerously off for billing. The same string can produce noticeably different token counts across providers. The counts below are illustrative and provider-dependent; the point is the spread, not the exact digits (run the actual tokeniser to get real numbers):
+A token is the unit a provider's tokeniser produces when it splits the input string. OpenAI's tokenisers, and many others, are **byte-pair encoding** (BPE) variants: a deterministic, reversible scheme that learns a vocabulary of sub-word units from a training corpus (Sennrich et al., 2016). Post 03 shows the mechanism. Common words become one token; rare words, names and unusual strings split into several, and whitespace is part of the token. OpenAI's `cl100k_base` encoding has a vocabulary of 100,277 tokens and its `o200k_base` encoding 200,019, as `snippets/count_tokens.py` prints with the `tiktoken` library.
 
-| String | Frontier GPT (cl100k) | Claude | Gemini |
-|---|---|---|---|
-| `"context engineering"` | 2 | 3 | 2 |
-| `"def parse_iso8601(s: str) -> datetime:"` | 12 | 14 | 13 |
-| One page of English prose (≈300 words) | ~400 | ~410 | ~395 |
-| One page of Python code | ~520 | ~570 | ~530 |
-| One page of densely-nested JSON | ~700 | ~780 | ~720 |
+OpenAI's "Tokenizer" page gives the usual rule of thumb: for common English text, one token is roughly three quarters of a word, so 100 tokens are about 75 words. The snippet's English paragraph of 69 words is 87 tokens under both encodings, 0.79 words per token, close to the rule. The rule is good enough for a budget and too rough for a bill, because the ratio depends on what the text is.
 
-Three operational consequences fall out of this:
+The snippet makes this visible by writing one support ticket three ways: as a paragraph of prose, as a Python dictionary and as indented JSON. The facts are identical; the token counts are not.
 
-1. **Code and structured data are, as a rule of thumb, tens of per cent more expensive per page than prose** (illustratively, on the order of 30–80 %). A 50-page PDF of well-formatted English may fit in a 32 k window; the same 50 pages dumped as JSON often will not.
-2. **Non-English text is more expensive still.** Many tokenisers split CJK characters, Arabic, and Indic scripts at one token per character or worse. A bilingual support agent that bills the same per turn for English and Hindi customers is silently subsidising the latter.
-3. **Counting words is not counting cost.** Always run the actual tokeniser (`tiktoken` for OpenAI, Anthropic's token-counting endpoint, Vertex's `count_tokens` for Gemini) before quoting numbers to anyone with a budget (OpenAI, "Tokenizer"; Anthropic, "Token counting").
+```text
+the same ticket, three shapes (characters, then tokens per encoding):
+  prose    356 chars    87 (1.00x prose)    87 (1.00x prose)
+  python   425 chars   148 (1.70x prose)   148 (1.70x prose)
+  json     517 chars   183 (2.10x prose)   183 (2.10x prose)
+```
+
+![Two bar charts of measured token counts. Left, one support ticket written three ways: prose 87 tokens, a Python dictionary 148, 1.70 times the prose, and indented JSON 183, 2.10 times, the same under cl100k_base and o200k_base. Right, one customer message: English 14 tokens under both encodings, Hindi 61 under cl100k_base and 22 under o200k_base.](diagrams/02-same-content-tokens.svg)
+
+*Punctuation, quotes, indentation and keys are tokens too, and a script the vocabulary saw less often splits into more pieces.*
+
+The figure adds the second effect: the same customer message, 57 characters in English and 57 in Hindi, is 14 tokens in English under both encodings, but 61 tokens in Hindi under `cl100k_base` and 22 under the newer `o200k_base`. Three consequences follow for budgeting.
+
+1. **Code and structured data cost more per fact than prose.** In this measurement the Python form took 1.70 times the tokens of the prose and the JSON 2.10 times. By the same ratio (illustrative arithmetic), a record that fills 20,000 tokens as prose would need about 42,000 as indented JSON, which changes whether it fits a budget at all.
+2. **Non-English text costs more, and by an amount that depends on the tokeniser.** A bilingual support agent priced on its English traffic underestimates the cost of its Hindi conversations, and the size of the error changes when the provider changes the vocabulary.
+3. **Counting words is not counting tokens.** The counts above are OpenAI's encodings; Claude and Gemini use their own tokenisers, which `tiktoken` does not reproduce. A number quoted to anyone with a budget comes from the provider's own counter: `tiktoken` for OpenAI models (OpenAI, "Tokenizer"), Anthropic's token-counting endpoint for Claude (Anthropic, "Token counting"), and Google's token-counting method for Gemini.
 
 ---
 
 ## 2. The context window
 
-The **context window** is the maximum number of tokens, input *plus* output, that the model will accept in a single call. It is a hard architectural limit: pass a single token over and the API returns an error.
+The **context window** is the maximum number of tokens one call may hold, the input *and* the output it generates. Anthropic's "Context windows" page (consulted October 2026) says so directly: everything in the request counts, the system prompt, every message, the tool definitions, and the output generated for the turn as well.
 
-A short table of where the frontier sits as of early 2026. Window sizes are the vendors' published figures (Anthropic, "Token counting"; Google, "Long context"); they change often, so confirm against the provider's docs:
+What happens at the limit depends on which side overflows. On Anthropic's application programming interface (API), as that page describes it, an input that alone exceeds the window is rejected with an error ("prompt is too long") on every model. When the input fits but the input plus `max_tokens` does not, Claude 4.5 and newer models accept the request and stop generating when the window is full, with the stop reason `model_context_window_exceeded`; earlier models reject the request instead. Either way the window is a hard limit, and the failure on newer models is a truncated answer rather than an error.
 
-| Model family | Window (tokens) | Approx. pages of prose | Notes |
-|---|---|---|---|
-| A frontier GPT model | 128 k+ | ~300+ | Most ChatGPT-class deployments |
-| Claude Haiku 4.5 | 200 k | ~500 | Cheap/fast tier default |
-| Claude Sonnet 4.5 | 1 M | ~2 500 | Mid-tier running example; 1 M tier |
-| Claude Opus 4.x | 1 M | ~2 500 | Frontier tier; premium pricing |
-| Gemini 2.5 | up to ~2 M | ~5 000 | Largest broadly-available window |
+Window sizes, as the providers' pages give them:
 
-Model names and prices in this post are current as of early 2026; providers change both often, so check the provider's pricing page before you commit a number to a budget.
+| Model | Window (tokens) | Source, date consulted |
+|---|---|---|
+| Claude Haiku 4.5 | 200,000 | Anthropic, "Context windows", October 2026 |
+| Claude Sonnet 4.5 | 200,000 | Anthropic, "Context windows", October 2026 |
+| Claude Opus 4.6 | 1,000,000 | Anthropic, "Context windows", October 2026 |
+| Many Gemini models | 1,000,000 or more | Google, "Long context", page updated June 2026 |
 
-Two warnings before anyone gets excited.
+These were current models in early 2026 (Anthropic now marks Claude Sonnet 4.5 deprecated), and windows change with new releases, so a real design reads the provider's page on the day. By the three-quarters rule, 200,000 tokens are about 150,000 words of English prose. The hero figure puts one call of the support agent of section 5 against the 200,000-token window: 10,900 tokens, a thin slice at the left of the bar.
 
-First, **the window is a ceiling, not a target.** Quality degrades long before the ceiling, for the reasons covered in [Post 03](../03-how-llms-read-context/index.md): positional encodings extrapolate, attention dilutes, the middle gets lost. A safe operational range is the lower 25–50 % of the advertised window for a frontier model and the lower 10–20 % for an open-weight one.
+Two warnings follow.
 
-Second, **input plus output share the window.** A 200 k Claude call configured to return a 16 k response leaves you 184 k for the prompt, not 200 k. Forget this and your long-context agent will silently start truncating its own answers.
+First, **the window is a ceiling, not a target.** Quality degrades well before the ceiling, for the reasons post 03 covers: attention spreads over more tokens, and information in the middle of a long input is used less reliably (Liu et al., "Lost in the Middle", 2023). Anthropic's page names the effect too: as the token count grows, accuracy and recall degrade. This series' working rule of thumb, an illustrative heuristic and not a measured threshold, is to plan for a fraction of the advertised window and to test before relying on the rest.
+
+Second, **the input and the output share the window.** A call to a 200,000-token model that reserves 20,000 tokens for the answer through `max_tokens` leaves 180,000 for the input (illustrative numbers). An agent whose input creeps up to the window without that reserve gets its answers cut short.
 
 ---
 
 ## 3. The three budgets
 
-Every LLM call is constrained by three independent budgets. Engineering for one without thinking about the other two is the most common failure mode in early production deployments.
+Every call is constrained by three budgets at once. Engineering for one while ignoring the other two is a way for a feature to fail in production.
 
-**The token budget** is the one engineers think of first. It is the number of *input* tokens you choose to spend per call. It is bounded above by the context window and, more often, by your patience for cost. As a rule of thumb, a reasonable default for an interactive assistant is 8–16 k input tokens; for a background agent that runs for an hour, 50–100 k is normal; for batch document analysis, 200 k is the working range.
+**The token budget** is the number of *input* tokens a design chooses to spend per call. It is bounded above by the context window and, more often, by cost and latency. As a starting point (illustrative rules of thumb, not measurements): 8,000 to 16,000 input tokens for an interactive assistant, 50,000 to 100,000 for a background agent that works for an hour, and up to 200,000 for batch document analysis on a model whose window allows it.
 
-**The cost budget** is what each token costs in dollars. Notice the **input–output asymmetry**: output tokens are priced several times higher than input tokens (roughly 5× across the tiers below), because generating a token runs the full model forward once per token, whereas ingesting the prompt is parallelised. A short prompt with a long answer can cost more than a long prompt with a short answer. Modern frontier pricing for *input* tokens spans roughly two orders of magnitude. The figures below are representative early-2026 published prices (Anthropic, "Prompt caching"); confirm against the provider's page:
+**The cost budget** is what the tokens cost in dollars. Prices are quoted per million tokens, separately for input and output. The table gives Anthropic's published rates in dollars per million tokens as of early 2026 (Anthropic, "Pricing"), still listed for these models when consulted in October 2026; prices change, so a design checks the page before committing a number:
 
-| Tier | Example model | $ / 1 M input | $ / 1 M output | Cached-read input |
+| Tier | Model | Input | Output | Cache read |
 |---|---|---|---|---|
-| Frontier | Claude Opus 4.x | ~$5 | ~$25 | ~10 % of input |
-| Mid | Claude Sonnet 4.5, a frontier GPT model | ~$3 | ~$15 | ~10 % of input |
-| Cheap | Claude Haiku 4.5, Gemini Flash | ~$1 | ~$5 | ~10 % of input |
+| Frontier | Claude Opus 4.6 | 5.00 | 25.00 | 0.50 |
+| Mid | Claude Sonnet 4.5 | 3.00 | 15.00 | 0.30 |
+| Cheap | Claude Haiku 4.5 | 1.00 | 5.00 | 0.10 |
 
-The "~10 % of input" cached-read figure is the Anthropic prompt-caching discount: a cache read is billed at about 0.1× the base input price (Anthropic, "Prompt caching"). OpenAI's automatic caching discounts cached input by a smaller amount (around 50 %), so the numbers here are the Anthropic case. Pricing changes monthly; treat the table as orders of magnitude. The decisive ratio is not the absolute number but the roughly five-to-one gap between the cheap tier and the frontier tier, and the further ten-to-one gap that prefix caching opens up *within* a tier.
+Two ratios in the table matter more than any single price. First, the **input and output asymmetry**: at each of these tiers an output token costs five times an input token, so a short prompt with a long answer can cost more than a long prompt with a short one. Second, the **tier gap**: the frontier model's input costs five times the cheap model's, and a cache read (section 5) costs a tenth of the base input price for these three models (Anthropic, "Prompt caching", consulted October 2026), a further ten-to-one gap within a tier.
 
-**The latency budget** is how long the user (or upstream service) will wait. It decomposes into two terms that compose differently than people expect:
+**The latency budget** is how long the user, or the service upstream, will wait. A call's time splits into two terms (Pope et al., 2022): *prefill*, which reads the whole prompt in one parallel pass, and *decode*, which generates the answer one token at a time. With $N_{\text{in}}$ input tokens, $N_{\text{out}}$ output tokens and per-token times $t_{\text{prefill}}$ and $t_{\text{decode}}$,
 
-$$
-T_{\text{total}} = T_{\text{prefill}} + N_{\text{out}} \cdot T_{\text{decode}}
-$$
+$T \approx N_{\text{in}} \, t_{\text{prefill}} + N_{\text{out}} \, t_{\text{decode}}$.
 
-*Prefill* is the time to ingest the prompt, roughly linear in input length; *decode* is the per-token generation time, roughly constant per output token at a given model size (Pope et al., 2022). The figures below are illustrative rules of thumb, not measured benchmarks: use them to reason about *shape*, and measure your own workload before quoting a latency to anyone:
+Per token, prefill is far cheaper than decode, because the prompt's tokens are processed together while each output token waits for the one before it. The rates below are illustrative, chosen to show the shape and not measured on any provider; `snippets/envelope.py` applies them to the support agent's call of 10,500 input and 400 output tokens:
 
-| Model class | Prefill | Decode | 8 k-in / 800-out wall time |
-|---|---|---|---|
-| Cheap (Haiku, Flash) | ~1 ms / token | ~10 ms / token | ~10 s |
-| Mid (Sonnet) | ~2 ms / token | ~20 ms / token | ~30 s |
-| Frontier (Opus) | ~3 ms / token | ~40 ms / token | ~60 s |
+```text
+latency of one call (10500 in, 400 out), illustrative rates:
+  class      prefill ms/tok  decode ms/tok  prefill s  decode s  total s
+  cheap                0.1            8.0       1.05      3.20     4.25
+  mid                  0.2           16.0       2.10      6.40     8.50
+  frontier             0.4           32.0       4.20     12.80    17.00
+  prefill and decode take equal time when the prompt is 80 times the output
+```
 
-The numbers move every quarter, but the shape is durable. Two consequences: shrinking the *prompt* helps latency on long inputs; shrinking the *output* helps latency on short ones. Streaming hides decode time but not prefill time, which is why a long-context agent feels sluggish to first token even with streaming on.
+![Three horizontal bars for one call of 10,500 input and 400 output tokens at illustrative rates, each split into prefill and decode: cheap 1.05 plus 3.20 seconds, 4.25 in all; mid 2.10 plus 6.40, 8.50; frontier 4.20 plus 12.80, 17.00. Dashed outlines mark the rates as illustrative.](diagrams/03-latency-split.svg)
+
+*At these rates a prompt 26 times longer than the answer still spends most of the call's time on the answer.*
+
+The figure shows the consequence: although the prompt is 26 times longer than the answer, decode takes three times as long as prefill in every class. Under these rates, the prompt dominates only once it is more than 80 times the output. Shrinking the *prompt* helps latency on long inputs; shrinking the *output* helps on everything else. Streaming hides decode time, because the first tokens appear while the rest are generated, but it cannot hide prefill: the first token waits for the whole prompt to be read, which is why a long-context agent is slow to start even with streaming on. Real rates vary by provider, model, load and hardware, so a latency quoted to anyone is measured on the real workload.
 
 ---
 
 ## 4. The triangle
 
-The three budgets pull against each other. You pick any two and the third goes wherever it must.
+The three budgets pull against each other, and a design can favour any two at the expense of the third.
 
-- **Cheap and fast** ⇒ accept lower quality. Use a Haiku/Flash/mini-tier model on a small prompt. Good for high-throughput auto-classification, intent detection, simple extraction.
-- **Cheap and high-quality** ⇒ accept slow. Use a frontier model with prompt caching, batch endpoints, or off-peak processing. Good for nightly analytics jobs.
-- **Fast and high-quality** ⇒ accept expensive. Use a frontier model on a focused prompt with reserved-capacity hosting and cache hits. Good for the user-facing critical path of a paid product.
+- **Cheap and fast** means accepting lower quality: a cheap-tier model on a small prompt. It suits high-volume classification, intent detection and simple extraction.
+- **Cheap and high-quality** means accepting slow: a frontier model with prompt caching, batch processing or off-peak runs. It suits nightly analytics jobs.
+- **Fast and high-quality** means accepting expensive: a frontier model on a focused prompt, with cache hits and reserved capacity. It suits the user-facing critical path of a paid product.
 
-![The cost-latency-quality triangle](./diagrams/01-budget-triangle.svg)
-*Pick any two corners; the third is whatever the first two leave you. There is no configuration that is cheap, fast, and high-quality at once.*
+No configuration is cheap, fast and high-quality at once. A product that seems to be deserves a check: it may be compared with an older generation of models, or measured in a configuration other than the one in production.
 
-There is no fourth corner. The marketing material that promises all three is selling either the cheapest tier with the smallest prompt (calling it "fast and high-quality" relative to the previous generation of cheap models), or a benchmark configuration that nobody actually runs in production.
-
-The practical mental model: choose the corner you are optimising for *per workflow*, not per company. A coding agent's "explain this stack trace" call lives in the fast-and-high-quality corner; its "summarise the last 200 turns" maintenance call lives in the cheap-and-high-quality corner. Different models, different prompts, same product.
+The practical rule is to choose the corner per workflow, not per company. A coding agent's "explain this stack trace" call belongs in the fast and high-quality corner; its "summarise the last 200 turns" maintenance call belongs in the cheap and high-quality corner. Different models, different prompts, same product.
 
 ---
 
 ## 5. Sizing an agent on an envelope
 
-The arithmetic that follows is the back-of-envelope every team eventually does, written out once. To keep the sums easy to follow, it uses round illustrative rates of **\$2.50 / 1 M input** and **\$10 / 1 M output** (close to the mid tier above; plug in your provider's current numbers to get real figures).
+The arithmetic below is a back-of-envelope sizing, written out once. It uses the mid-tier rates of section 3, Claude Sonnet 4.5 at 3 dollars per million input tokens and 15 dollars per million output tokens (Anthropic, "Pricing", as of early 2026).
 
-Consider a customer-support agent with the following per-turn shape. Two acronyms appear here: **MCP** (Model Context Protocol, the open standard for exposing tools to a model; [Post 15](../15-tools-and-mcp/index.md)) and **RAG** (retrieval-augmented generation, pulling in the *top-k* most relevant chunks from a store; [Post 11](../11-rag-in-depth/index.md)). Each contributes its own slice of the input budget:
+Consider a customer-support agent with the per-call shape below. Two acronyms appear in it: **MCP** (Model Context Protocol, the open protocol through which an application connects a model to tool servers; [post 15](../15-tools-and-mcp/index.md)) and **RAG** (retrieval-augmented generation, which retrieves the top-k most relevant chunks from a store for this turn; [post 11](../11-rag-in-depth/index.md)). The token counts are illustrative:
 
-| Layer | Tokens per call |
-|---|---|
-| System prompt + format + rules | 3,000 |
-| Tool / MCP schemas (8 tools) | 1,600 |
-| Memory (user profile + 5 prior tickets summarised) | 1,200 |
-| RAG (top-5 chunks of 500 tokens each) | 2,500 |
-| Conversation history (compressed) | 2,000 |
-| User message | 200 |
-| **Input total** | **10,500** |
-| Output (typical reply) | 400 |
+| Layer | What it holds | Tokens per call (illustrative) |
+|---|---|---|
+| 01 System prompt | identity, format and rules | 3,000 |
+| 02 Tools and MCP descriptions | the schemas of 8 tools | 1,600 |
+| 03 Memory and state | the user's profile and 5 earlier tickets, summarised | 1,200 |
+| 04 Retrieved chunks | the top-5 chunks from RAG, 500 tokens each | 2,500 |
+| 05 Conversation history | the session so far, compressed | 2,000 |
+| 06 User instruction | the customer's message | 200 |
+| **Input total** | | **10,500** |
+| Output | a typical reply | 400 |
 
-A single call on a mid-tier model at \$2.50 / M input + \$10 / M output:
+One uncached call costs 10,500 times 3 dollars divided by 1,000,000, which is 0.0315 dollars of input, plus 400 times 15 dollars divided by 1,000,000, which is 0.006 dollars of output: 0.0375 dollars, under four cents. Now suppose 10,000 conversations a day, 4 turns per conversation and 5 model calls per turn for sub-agents and tool replies (an illustrative workload). That is 200,000 calls a day, and 200,000 times 0.0375 dollars is 7,500 dollars a day, or 225,000 dollars over 30 days, before any infrastructure. This is the calculation that turns "just call the API" into an engineering project.
 
-$$
-\text{Cost} = \frac{10\,500}{10^6} \times \$2.50 + \frac{400}{10^6} \times \$10.00 \approx \$0.0303
-$$
+**Turn on prefix caching.** The first 4,600 tokens, layers 01 and 02, are identical on every call. A cached prefix has a short lifetime, five minutes by default on Anthropic's API and refreshed at no cost each time it is read (Anthropic, "Prompt caching", consulted October 2026), so under steady traffic the prefix stays warm and nearly every call reads it from the cache. A read costs 0.1 times the base input price, 0.30 dollars per million tokens on Sonnet 4.5. One call then costs 4,600 times 0.30 dollars plus 5,900 times 3 dollars, both divided by 1,000,000, plus the same 0.006 dollars of output: 0.00138 plus 0.0177 plus 0.006, which is 0.02508 dollars. The day's bill falls from 7,500 dollars to 5,016 dollars, a saving of 33.1 percent from one architectural choice: a stable prefix, placed first. The occasional write of the prefix costs 1.25 times the base input price, rare enough at this traffic to round away; [post 05](../05-economics-of-context/index.md) prices it in full.
 
-Three cents. Now suppose 10,000 conversations a day, 4 turns per conversation, 5 of those calls per turn (sub-agents, tool replies):
+**Route the simple turns.** Suppose 60 percent of calls are short, questions of the frequently-asked kind (an illustrative share) and go to Claude Haiku 4.5 at 1 dollar and 5 dollars per million tokens, with the same cached prefix. Such a call costs 0.00836 dollars, the blended cost per call is 0.01505 dollars, and the day costs about 3,010 dollars: 2.49 times cheaper than the uncached baseline. Whether quality holds on the routed turns is a question for an evaluation set ([post 20](../20-evaluation/index.md)), not an assumption.
 
-$$
-10\,000 \times 4 \times 5 \times \$0.0303 \approx \$6\,050\text{ / day}
-$$
-
-About six thousand dollars a day, roughly $180,000 a month, before infrastructure. This is the calculation that turns "just call the API" into a real engineering project.
-
-Now turn on prefix caching. The first 4,600 tokens (system prompt + tools) are byte-identical on every call. A cached prefix has a short time-to-live (Anthropic's default is five minutes, refreshed each time it is hit), so under sustained traffic the prefix is continuously re-warmed and nearly every one of the day's ~200,000 calls reads it from cache rather than reprocessing it. A cache read costs ~10 % of the full input price (Anthropic, "Prompt caching"), so the cached portion is billed at \$0.25 / 1 M rather than \$2.50 / 1 M:
-
-$$
-\text{Cost}_{\text{cached prefix}} = \frac{4\,600}{10^6} \times \$0.25 + \frac{5\,900}{10^6} \times \$2.50 + \frac{400}{10^6} \times \$10.00 \approx \$0.0199
-$$
-
-That single architectural choice, having a stable prefix and putting it at the front, drops the daily bill from about \$6 050 to about \$3 980. A 34 % saving for an afternoon's work.
-
-Finally, route the simpler 60 % of turns (FAQ-shaped questions) to a cheap-tier model at illustrative \$0.30 / M input, \$1.20 / M output. The blended cost drops to roughly \$2 000 / day. The system is now about three times cheaper than the naive baseline, with no measurable change in user-facing quality. **This is what context engineering pays for.**
-
-The whole envelope is fifteen lines of code. The function below takes a per-layer token breakdown and prices and returns the cost of one call; the two calls under it reproduce the \$0.0303 and \$0.0199 figures above:
+The whole envelope fits in a short function. This excerpt of `snippets/envelope.py` takes a per-layer token breakdown and the rates and returns the cost of one call:
 
 ```python
 def call_cost(layers, price_in, price_out, out_tokens,
-              cached_prefix=0, cache_discount=0.10):
+              cached_prefix=0, cache_read=0.10):
     """Cost of one LLM call in dollars.
     layers: {name: input_tokens}; price_* in $ per 1M tokens;
-    cached_prefix: leading tokens billed at cache_discount x price_in."""
+    cached_prefix: leading tokens billed at cache_read x price_in."""
     total_in = sum(layers.values())
     billable_in = total_in - cached_prefix
-    return (cached_prefix / 1e6 * price_in * cache_discount
+    return (cached_prefix / 1e6 * price_in * cache_read
             + billable_in / 1e6 * price_in
             + out_tokens / 1e6 * price_out)
+```
 
-layers = {"system": 3000, "tools": 1600, "memory": 1200,
-          "rag": 2500, "history": 2000, "user": 200}
-per_call = call_cost(layers, 2.50, 10.00, out_tokens=400)          # 0.0303
-cached   = call_cost(layers, 2.50, 10.00, out_tokens=400,
-                     cached_prefix=4600)                            # 0.0199
-daily    = per_call * 10_000 * 4 * 5                                # 6050
+Run from the series root, the snippet prints every figure of this section:
+
+```text
+calls per day: 200000
+                         per call    per day   per 30 days
+  uncached, Sonnet 4.5     0.03750    7500.00    225000.00
+  cached prefix            0.02508    5016.00    150480.00
+  cached, Haiku 4.5        0.00836    1672.00     50160.00
+  routed 60% to Haiku      0.01505    3009.60     90288.00
+
+caching saves 33.1% of the uncached bill
+caching plus routing is 2.49 times cheaper than the uncached bill
 ```
 
 ### What prompt caching does and does not do
 
-Prefix caching (Anthropic, "Prompt caching") stores the model's internal attention state, the **KV-cache** (the cached key and value tensors introduced in [Post 03](../03-how-llms-read-context/index.md)), for a **byte-identical prefix** so repeat calls skip re-processing it. Keeping that prefix stable is one of the highest-leverage moves in agent design (Yao, "Context Engineering for AI Agents: Lessons from Building Manus", 2025). Three properties decide whether it helps:
+Prompt caching, also called prefix caching, stores the model's computed attention state for a prefix, the **key-value (KV) cache** that post 03 introduces, so a later call that starts with the identical prefix skips recomputing it. Yichao Ji's account of building the Manus agent ("Context Engineering for AI Agents: Lessons from Building Manus", July 2025) calls the KV cache hit rate the single most important metric for a production agent, and gives a timestamp at the start of the system prompt as a common way to destroy it. Three properties decide whether caching helps, as Anthropic's "Prompt caching" page describes them (consulted October 2026):
 
-- **It caches only an exact prefix.** Change one token near the front, and the cache misses from that point on. Put the volatile parts (the user turn, freshly retrieved chunks) *last* and the stable parts (system prompt, tool schemas) *first*, or nothing caches.
-- **It has a minimum length.** Prefixes below roughly 1k – 4k tokens (model-dependent) are not cacheable at all, so tiny prompts see no benefit.
-- **It expires.** Anthropic's cache has two time-to-live tiers, a 5-minute default and a 1-hour option; each cache read refreshes the clock, so a prefix stays warm as long as traffic keeps hitting it. Writing to the cache costs *more* than a normal input token (1.25× input for the 5-minute tier, 2× for the 1-hour tier), which is why caching pays off only when the same prefix is reused many times.
+- **It caches only an identical prefix.** One changed token ends the reusable prefix at that point. Volatile content (the user turn, freshly retrieved chunks) goes last and stable content (the system prompt, the tool schemas) first, or nothing caches.
+- **It has a minimum length.** A prefix shorter than the model's minimum is not cached at all: 1,024 tokens for Claude Sonnet 4.5, and 4,096 for Claude Haiku 4.5 and Claude Opus 4.6. The support agent's 4,600-token prefix clears both.
+- **It expires, and writing it costs extra.** The default lifetime is five minutes, refreshed by every read, with a one-hour option. A write costs 1.25 times the base input price for the five-minute lifetime and 2 times for the one hour, so caching pays only when a prefix is read many times after it is written.
 
-Vendors differ. Anthropic caching is explicit (you mark the cache breakpoint) and reads bill at ~10 % of input. OpenAI caching is automatic and discounts cached input by a smaller amount (around 50 %). Gemini offers both implicit and explicit context caching. The architectural lesson is the same everywhere: **order your context stable-to-volatile so the expensive, unchanging bytes sit in front.**
+The cache is marked in the request with `cache_control`, either once at the top level, where the API places the breakpoint itself, or on individual blocks. Other providers cache too, with their own minimum lengths and discounts, and post 05 compares them. The architectural lesson is the same everywhere: **order the context from stable to volatile, so the expensive, unchanging tokens sit in front.**
 
 ---
 
 ## 6. Setting per-layer budgets
 
-The arithmetic above only works if each layer of your context has a budget you actually enforce. A useful starting allocation, treating the *input* token budget as 100 %:
+The arithmetic above holds only if each layer has a budget that the code enforces. A useful starting allocation, treating the input token budget as 100 percent (illustrative defaults, the series' own starting points rather than measured optima):
 
 | Layer | Default share | Why |
 |---|---|---|
-| System prompt | 5–15 % | Must be small enough to keep the cached prefix *cacheable* |
-| Tools / MCP | 5–15 % | RAG over tool schemas ([Post 15](../15-tools-and-mcp/index.md)) when this exceeds 15 % |
-| Memory | 5–10 % | Compress aggressively; episodic memory should not grow unbounded |
-| RAG | 20–40 % | The biggest variable lever; tune retrieval `k` to the budget, not the other way round |
-| History | 10–30 % | Summarise on a schedule ([Post 12](../12-compress-strategies/index.md)), not at the limit |
-| User turn | 1–5 % | Almost always the smallest, despite being the reason for the call |
-| **Output reserve** | 10–20 % of *window* | Cap with `max_tokens`; never trust the model to be brief |
+| 01 System prompt | 5 to 15 percent | it is sent on every call and competes with the evidence for the model's attention |
+| 02 Tools and MCP descriptions | 5 to 15 percent | above this, select tools per call rather than sending the whole catalogue ([post 15](../15-tools-and-mcp/index.md)) |
+| 03 Memory and state | 5 to 10 percent | recall a few relevant facts; a memory layer that grows without bound crowds the rest |
+| 04 Retrieved chunks | 20 to 40 percent | the largest variable lever; tune top-k to the budget, not the other way round |
+| 05 Conversation history | 10 to 30 percent | summarise on a schedule ([post 12](../12-compress-strategies/index.md)), not at the limit |
+| 06 User instruction | 1 to 5 percent | the smallest layer, although it is the reason for the call |
+| Output reserve | 10 to 20 percent of the *window* | set by `max_tokens`; the model is not trusted to be brief |
 
-![Per-layer token budget allocation](./diagrams/02-per-layer-budget.svg)
-*A default split of the input budget across the six layers; RAG and history are the levers that move most, and the output reserve is carved from the window, not the input budget.*
+The percentages are starting points, not laws. What matters is *having* a number per layer and checking it on every call. `snippets/envelope.py` checks the support agent of section 5 against these defaults:
 
-These percentages are starting points, not laws. The discipline that matters is *having* explicit numbers per layer. Without them, the layer that grows fastest (almost always RAG or history) silently consumes everyone else's allocation.
+```text
+layer                            tokens  share  default
+  01 System prompt                 3000  28.6%  5-15%  outside
+  02 Tools and MCP descriptions    1600  15.2%  5-15%  outside
+  03 Memory and state              1200  11.4%  5-10%  outside
+  04 Retrieved chunks              2500  23.8%  20-40%
+  05 Conversation history          2000  19.0%  10-30%
+  06 User instruction               200   1.9%  1-5%
+  input total                     10500
+  output                            400
+```
+
+![For each of the six layers, a dashed band shows its default share of the input budget and a mark shows the support agent's share: 01 System prompt 28.6 percent against 5 to 15, 02 Tools and MCP descriptions 15.2 against 5 to 15, and 03 Memory and state 11.4 against 5 to 10 are outside their bands; 04 at 23.8, 05 at 19.0 and 06 at 1.9 percent are inside.](diagrams/04-layer-shares.svg)
+
+*A per-layer budget turns "the prompt feels long" into a named layer and a number.*
+
+The agent breaks three of the defaults, as the figure shows. Its system prompt is 28.6 percent of the input, nearly twice the top of its band. Because layers 01 and 02 sit in the cached prefix, the overrun costs little money, but it still takes window and attention from the evidence in layer 04. Without explicit numbers per layer, the layer that grows fastest, often the retrieved chunks or the history, silently takes the other layers' share.
 
 ---
 
 ## 7. Picking a model: a one-page decision
 
-The five questions below cover almost every model-selection conversation in practice. Walk them in order; the first that gives you a strong answer wins.
+Model choice is the other half of the triangle. The five questions below are a heuristic for the common cases, walked in order; the first that gives a clear answer decides.
 
-1. **Does the task need state-of-the-art reasoning?** (Multi-step planning, code synthesis, hard math, novel domain.) → Frontier tier.
-2. **Is the task a short, well-defined extraction or classification?** → Cheap tier; you will not measure the difference.
-3. **Is the input long but the task simple?** (Summarise a 200-page report.) → Cheap tier with a long-context model: Gemini Flash, Haiku.
-4. **Is the input short but the task hard?** (Architect a refactor.) → Frontier tier with a small prompt; you are paying for thinking, not reading.
-5. **Is the task user-facing and time-critical?** → Mid tier with streaming, plus an explicit per-call latency budget that triggers fallback to a cheaper model on timeout.
+1. **Does the task need strong reasoning?** Multi-step planning, code synthesis, hard mathematics, an unfamiliar domain: the frontier tier.
+2. **Is the task a short, well-defined extraction or classification?** The cheap tier; check on an evaluation set that the difference is too small to matter.
+3. **Is the input long but the task simple?** Summarising a long report: a cheap-tier model whose window holds the input.
+4. **Is the input short but the task hard?** Planning a refactor: the frontier tier with a small prompt, where the money pays for reasoning, not reading.
+5. **Is the task user-facing and time-critical?** The mid tier with streaming, plus a per-call latency budget that falls back to a cheaper model on timeout.
 
-Two patterns recur often enough to deserve their own names. **Cascade**: try the cheap model first, escalate to the frontier model only when an upstream eval ([Post 20](../20-evaluation/index.md)) flags the cheap answer. **Plan-and-execute**: a frontier model writes the plan once; cheap models execute the steps. Both shrink the average cost per task without sacrificing tail quality.
+Questions 3 and 4 settle the choice between a smaller model on a longer prompt and a larger model on a shorter one: the smaller model when the difficulty lies in the volume of input, the larger when it lies in the reasoning. Two patterns recur often enough to have names. **Cascade**: try the cheap model first and escalate to the frontier model only when a check ([post 20](../20-evaluation/index.md)) flags the cheap answer. **Plan and execute**: a frontier model writes the plan once and cheaper models carry out the steps. Both lower the average cost per task while keeping the frontier model for the cases that need it.
+
+---
+
+## 8. Make it run: the two snippets
+
+Both snippets run from the series root in the root environment, which provides `tiktoken` with its encodings cached; neither makes a network call.
+
+```text
+uv run python posts/04-tokens-windows-budgets/snippets/count_tokens.py
+uv run python posts/04-tokens-windows-budgets/snippets/envelope.py
+```
+
+`count_tokens.py` prints the counts of section 1; `envelope.py` prints the latencies of section 3, the costs of section 5 and the layer shares of section 6. Changing the layer counts, rates or traffic in `envelope.py` sizes any other agent. The estimate is then checked twice: the real prompt is counted with the provider's own token counter, and the rates are read from the provider's price page, with its date.
+
+---
+
+## 9. What can go wrong?
+
+- **Estimating from words when the prompt is code or JSON.** A budget built on three quarters of a word per token is applied to a prompt full of tool results in JSON. The `usage` block of each response reports about twice the estimated input tokens, and the bill and the window fill twice as fast as planned.
+- **No output reserve.** The input grows to fill the window and `max_tokens` is left at whatever fits. Answers stop mid-sentence, with a stop reason of `max_tokens`, or `model_context_window_exceeded` on newer Claude models, and nothing in the input looks wrong.
+- **Pricing only the input.** A forecast multiplies input tokens by the input rate and forgets that output costs five times as much per token at the tiers of section 3. A feature that writes long answers comes in well over its estimate.
+- **A cached prefix below the minimum.** A 3,000-token prefix is marked for caching on Claude Haiku 4.5, whose minimum is 4,096. The response reports zero `cache_read_input_tokens` on every call, and the expected saving never appears.
+- **No cap on the growing layers.** History and retrieved chunks are appended without a per-layer limit. The cost per call climbs turn after turn, the first token arrives later and later, and finally the provider rejects the request because the prompt is too long.
 
 ---
 
 ## Common pitfalls
 
-- **Quoting word counts to engineers and token counts to product**, getting the conversion wrong, and discovering at month's end that the bill is 40 % higher than the forecast.
-- **Sizing the prompt at the window ceiling.** A 200 k call costs the same whether the model uses the last 100 k or not. The lower half of the window is almost always wasted spend.
-- **Forgetting the output reserve.** `max_tokens` is the one parameter teams routinely leave at the API default and then are surprised when long answers truncate mid-sentence.
-- **Treating tool schemas as free.** Eight modest tools is 1–2 k of cached prefix on every call, forever. Worth keeping as long as they are used; worth auditing every quarter.
-- **Optimising the wrong corner of the triangle.** Most user-facing chatbots over-spend on quality and under-spend on latency. Most internal batch jobs do the opposite.
-- **No per-layer budget at all.** RAG and history will eat the system whole if nobody is watching.
+1. **Sizing the prompt at the window ceiling.** A larger window is permission, not advice; every token in it is paid for and read, and quality falls well before the limit.
+2. **Treating tool schemas as free.** Eight tools took 1,600 tokens per call in the support agent's illustrative envelope; each one is worth auditing against how often it is used.
+3. **Optimising the wrong corner of the triangle.** A user-facing call tuned only for cost, or a nightly batch job tuned for latency, pays for the wrong thing.
+4. **Quoting a price without its model and date.** A per-million-token rate copied from an old note, or from another tier, makes the whole envelope wrong without anyone noticing.
+5. **One model for every call.** Routing simple turns to a cheaper tier, checked by an evaluation, cut section 5's illustrative cached bill by a further 40 percent.
 
 ---
 
 ## Further reading
 
-- OpenAI, *"Tokenizer"* (interactive) and the `tiktoken` library: the canonical reference for the cl100k family, the ~0.75 words-per-token ratio, and the illustrative token counts in §1.
-- Anthropic, *"Token counting"* and *"Prompt caching"* (documentation, 2024–25): source of the Claude window sizes in §2, the ~10 % cached-read discount, the cache-write multipliers, and the 5-minute / 1-hour TTL tiers in §5.
-- Google, *"Long context"* (Gemini API documentation): the Gemini window sizes in §2 and best practice for the 1 M / 2 M tier.
-- Yao, S. (Manus), *"Context Engineering for AI Agents: Lessons from Building Manus"* (2025): the KV-cache argument for a stable prefix that underlies the §5 caching example.
-- Sennrich, R. *et al.*, *"Neural Machine Translation of Rare Words with Subword Units"* (2016): the original BPE paper behind §1.
-- Pope, R. *et al.*, *"Efficiently Scaling Transformer Inference"* (2022): prefill/decode mechanics that drive the latency model in §3.
+- OpenAI, *"Tokenizer"* and the `tiktoken` library: the three-quarters-of-a-word rule and the encodings counted in section 1.
+- Anthropic, *"Token counting"* documentation: counting Claude's tokens before sending a request.
+- Anthropic, *"Context windows"* documentation (consulted October 2026): what counts toward the window, the overflow behaviour and the window sizes of section 2.
+- Google, *"Long context"* (Gemini API documentation, updated June 2026): Gemini's windows of a million tokens or more.
+- Anthropic, *"Pricing"* (rates as of early 2026) and *"Prompt caching"* documentation (consulted October 2026): the prices of section 3, and the cache-read price, write premiums, lifetimes and minimum lengths of section 5.
+- Ji, Y. (Manus), *"Context Engineering for AI Agents: Lessons from Building Manus"* (July 2025): the KV cache hit rate as the metric that matters, and the stable prefix that keeps it high.
+- Sennrich, R. *et al.*, *"Neural Machine Translation of Rare Words with Subword Units"* (2016): the paper that adapted byte-pair encoding to sub-word units for neural machine translation.
+- Pope, R. *et al.*, *"Efficiently Scaling Transformer Inference"* (2022): the prefill and decode phases behind the latency model of section 3.
+- Liu, N. F. *et al.*, *"Lost in the Middle: How Language Models Use Long Contexts"* (2023): why quality falls before the window is full.
 
-Full citations in [REFERENCES.md](../../REFERENCES.md).
+Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
 ---
 
 ## What to read next
 
-- **[Post 03 — How LLMs read context](../03-how-llms-read-context/index.md)** (back): why quality degrades well below the window ceiling, and what the KV-cache is that prefix caching reuses.
-- **[Post 06 — Five context failure modes](../06-context-failure-modes/index.md)**: the symptoms that appear when a budget is wrong.
-- **[Post 25 — Long context vs RAG](../25-long-context-vs-rag/index.md)**: the full version of the envelope arithmetic above, applied to the routing decision.
-- **[Post 12 — Compress strategies](../12-compress-strategies/index.md)**: what to do when the history or RAG layer breaks its budget.
+- **[Post 05 - The economics of context: pricing, caching, and latency](../05-economics-of-context/index.md):** prices the same agent in full, with cache writes, latency and cost guardrails.
+- **[Post 12 - Compress strategies](../12-compress-strategies/index.md):** what to do when the history or the retrieved chunks break their per-layer budget.
