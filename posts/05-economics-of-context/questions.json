@@ -1,0 +1,784 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-005",
+  "next_ordinal": 18,
+  "questions": [
+    {
+      "id": "ctx-005-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "pricing",
+        "input-output"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In the table of the three running models (Claude Opus 4.6, Claude Sonnet 4.5 and Claude Haiku 4.5, as of early 2026), how does the price of an output token compare with the price of an input token on the same model?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "They are the same: a token is a token, whichever direction it travels.",
+          "correct": false,
+          "feedback": "Providers quote input and output separately, and in all three rows the output rate is higher (25 against 5, 15 against 3, 5 against 1 dollar per million)."
+        },
+        {
+          "key": "b",
+          "text": "Output costs five times input in every row.",
+          "correct": true,
+          "feedback": "Right. 25/5, 15/3 and 5/1 are all 5, so at these rates one output token costs as much as five input tokens."
+        },
+        {
+          "key": "c",
+          "text": "Output is cheaper, because answers are shorter than prompts.",
+          "correct": false,
+          "feedback": "Answers are often shorter, but the price per token is what is compared here, and the output rate is the higher one on every model."
+        },
+        {
+          "key": "d",
+          "text": "Output costs five times input on the frontier tier only; the cheaper tiers charge the same for both.",
+          "correct": false,
+          "feedback": "The cheap tier charges 1 dollar for input and 5 for output per million tokens, the same five-to-one ratio as the frontier tier."
+        }
+      ],
+      "explanation": "Section 2's table, from Anthropic's \"Pricing\" page as consulted on 12 October 2026: Opus 4.6 is 5 and 25, Sonnet 4.5 is 3 and 15, Haiku 4.5 is 1 and 5 dollars per million input and output tokens. Output is five times input in every row.",
+      "hints": [
+        "Divide the output rate by the input rate in each row of the table."
+      ]
+    },
+    {
+      "id": "ctx-005-q02",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 4,
+      "tags": [
+        "pricing",
+        "arithmetic"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A classification step runs on Claude Haiku 4.5 at 1 dollar per million input tokens and 5 dollars per million output tokens. Each call sends 8,000 input tokens and returns 600 output tokens (illustrative numbers), with no caching. What do 1,000 such calls cost, in dollars?",
+      "answer": {
+        "value": 11.0,
+        "tolerance": 0.01,
+        "unit": "USD"
+      },
+      "precision_note": "1,000 x (8,000 x 1 / 1,000,000 + 600 x 5 / 1,000,000) = 1,000 x (0.008 + 0.003) = 11.00 dollars. Ignoring the output gives 8.00, and swapping the two rates gives 40.60, the nearest wrong methods.",
+      "explanation": "Sections 1 and 2: a call costs its input tokens at the input rate plus its output tokens at the output rate. One call is 0.008 + 0.003 = 0.011 dollars, so 1,000 calls cost 11 dollars.",
+      "hints": [
+        "Price input and output separately, each at its own rate per million tokens.",
+        "One call costs 8,000 x 1 / 1,000,000 plus 600 x 5 / 1,000,000 dollars; multiply by 1,000."
+      ]
+    },
+    {
+      "id": "ctx-005-q03",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o1",
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 6,
+      "tags": [
+        "prompt-caching",
+        "pricing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent on Claude Opus 4.6 (5 dollars per million input tokens, 25 per million output) sends a 6,000-token stable prefix (layers 01 and 02), then 4,000 tokens of layers 03 to 06, and gets 500 output tokens back. Cache writes cost 1.25 times the base input price and cache reads 0.1 times. Give the cost of 1,000 such calls, in dollars, in three cases: no caching; every call reads the prefix from the cache; every call writes the prefix to the cache.",
+      "answer": {
+        "parts": [
+          {
+            "label": "no caching, 1,000 calls",
+            "value": 62.5,
+            "tolerance": 0.01,
+            "unit": "USD"
+          },
+          {
+            "label": "prefix read from the cache, 1,000 calls",
+            "value": 35.5,
+            "tolerance": 0.01,
+            "unit": "USD"
+          },
+          {
+            "label": "prefix written to the cache, 1,000 calls",
+            "value": 70.0,
+            "tolerance": 0.01,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "Per call: no caching 10,000 x 5 / 1,000,000 + 500 x 25 / 1,000,000 = 0.05 + 0.0125 = 0.0625; read 6,000 x 0.5 / 1,000,000 + 4,000 x 5 / 1,000,000 + 0.0125 = 0.003 + 0.02 + 0.0125 = 0.0355; write 6,000 x 6.25 / 1,000,000 + 0.02 + 0.0125 = 0.0375 + 0.02 + 0.0125 = 0.07. Times 1,000: 62.50, 35.50, 70.00 (the call_cost function of snippets/cost_model.py gives the same). Applying the read multiplier to the 4,000 tokens instead of the prefix gives 44.50, the nearest wrong method.",
+      "explanation": "Section 6: the cache multiplier applies to the prefix only; the tokens after it and the output pay the full price in every case. Reading the prefix saves 27 dollars per 1,000 calls, and writing it on every call costs 7.50 dollars more than not caching at all.",
+      "hints": [
+        "Split each call into the prefix, the rest of the input and the output, and price the three parts separately.",
+        "Only the 6,000 prefix tokens change price between the cases: 5, 0.5 or 6.25 dollars per million."
+      ]
+    },
+    {
+      "id": "ctx-005-q04",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "4",
+      "est_minutes": 5,
+      "tags": [
+        "prompt-caching",
+        "write-premium"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A 10,000-token prefix is sent on Claude Haiku 4.5 at a base input price of 1 dollar per million tokens. With the one-hour cache, the first call writes it at 2 times the base price and later calls within the hour read it at 0.1 times. What is the smallest number of calls for which the one-hour cache costs less, in total for the prefix, than sending the prefix without caching? And what does the prefix cost over that many calls with the one-hour cache, in US cents?",
+      "answer": {
+        "parts": [
+          {
+            "label": "smallest number of calls",
+            "value": 3,
+            "tolerance": 0,
+            "unit": "calls"
+          },
+          {
+            "label": "prefix cost over those calls, one-hour cache",
+            "value": 2.2,
+            "tolerance": 0.01,
+            "unit": "cents"
+          }
+        ]
+      },
+      "precision_note": "One full send of the prefix costs 10,000 x 1 / 1,000,000 = 0.01 dollars. With the one-hour cache, n calls cost 0.01 x (2 + 0.1 x (n - 1)); without caching 0.01 x n. n = 2 gives 0.021 against 0.020 (still dearer); n = 3 gives 0.022 against 0.030, so 3 calls, costing 2.2 cents. Using the five-minute write premium (1.25) gives 2 calls, the nearest wrong method.",
+      "explanation": "Section 4: the one-hour write costs 2 times the base price, so one read (0.1) does not repay the extra full price it costs; after two reads the cache is ahead. Anthropic's \"Pricing\" page states the same break-even: one read for the five-minute lifetime, two for the one-hour lifetime.",
+      "hints": [
+        "Write the cumulative cost of the prefix for n calls with and without the cache, in units of one full send.",
+        "With the cache it is 2 + 0.1 x (n - 1) full sends; without, n. Find the first n where the first is smaller."
+      ]
+    },
+    {
+      "id": "ctx-005-q05",
+      "type": "numeric",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o3",
+        "o4"
+      ],
+      "section": "8",
+      "est_minutes": 7,
+      "tags": [
+        "prompt-caching",
+        "timestamp",
+        "diagnosis"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent turn on Claude Sonnet 4.5 sends a 4,600-token prefix (layers 01 and 02), 5,900 other input tokens and 400 output tokens, at 3 dollars per million input tokens and 15 per million output, with cache writes at 1.25 times and reads at 0.1 times the input price. Caching is switched on with one cache breakpoint at the end of the system prompt, and calls arrive every few seconds. Layout A writes the time of the call into the system prompt; layout B keeps the prefix identical. Give the total cost of 1,000 consecutive calls under each layout, in dollars.",
+      "answer": {
+        "parts": [
+          {
+            "label": "layout A, time in the system prompt, 1,000 calls",
+            "value": 40.95,
+            "tolerance": 0.01,
+            "unit": "USD"
+          },
+          {
+            "label": "layout B, identical prefix, 1,000 calls",
+            "value": 25.1,
+            "tolerance": 0.01,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "A: the prefix differs on every call, so every call writes it: 1,000 x (4,600 x 3.75 + 5,900 x 3 + 400 x 15) / 1,000,000 = 1,000 x 0.04095 = 40.95. B: one write, then 999 reads: 0.04095 + 999 x 0.02508 = 25.09587, about 25.10 (the per-call values are printed by snippets/cost_model.py). Treating layout A as uncached gives 37.50, and counting call 1 of layout B as a read gives 25.08, the nearest wrong methods.",
+      "explanation": "Sections 4 and 8: with caching on, a per-call value in the prefix means every call pays the write premium and none reads the prefix, so layout A costs more than switching caching off (37.50 dollars). Layout B pays one write and then reads, about 25.10 dollars.",
+      "hints": [
+        "Decide, for each layout, whether each call writes the prefix or reads it.",
+        "Layout A writes on all 1,000 calls; layout B writes once and reads 999 times. The per-call costs are 0.04095 for a write and 0.02508 for a read."
+      ]
+    },
+    {
+      "id": "ctx-005-q06",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "prefill",
+        "decode"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Which account of the two halves of a call is consistent with output tokens being priced higher than input tokens?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Input tokens are processed together in one parallel prefill, while each output token needs its own forward pass that waits for the one before.",
+          "correct": true,
+          "feedback": "Right. Prefill keeps the hardware busy on many tokens at once; decode produces one token per pass, in sequence, which uses the hardware far less efficiently per token."
+        },
+        {
+          "key": "b",
+          "text": "Output tokens are longer strings of text than input tokens, so each one holds more characters.",
+          "correct": false,
+          "feedback": "Input and output use the same tokeniser, so a token is the same kind of unit in both directions. The difference is in how they are computed."
+        },
+        {
+          "key": "c",
+          "text": "Input tokens are always read from the prompt cache, so they cost almost nothing to process.",
+          "correct": false,
+          "feedback": "Only a cached prefix is read from the cache, and only on a hit. Uncached input still has to be computed in prefill."
+        },
+        {
+          "key": "d",
+          "text": "Output tokens are checked by a moderation model before they are returned, which doubles their compute.",
+          "correct": false,
+          "feedback": "The post explains the ratio by prefill and decode (Pope et al.), not by moderation; a moderation pass would not explain the same five-to-one ratio across all three tiers."
+        }
+      ],
+      "explanation": "Section 3: prefill processes the whole prompt in parallel, while decode runs one forward pass per output token, each depending on the previous token. The post presents this as the explanation the price ratio is consistent with, since providers do not publish their costs.",
+      "hints": [
+        "Compare how many tokens the model can work on at once in each half of the call."
+      ]
+    },
+    {
+      "id": "ctx-005-q07",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2",
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "latency",
+        "ttft"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An assistant streams its answers, yet users wait several seconds before the first word appears. Each request carries a 60,000-token context, of which 50,000 tokens (layers 01 and 02) are identical on every call and never cached, and answers average 300 tokens. Which change most directly shortens the wait for the first word?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Lower `max_tokens` from 1,000 to 400.",
+          "correct": false,
+          "feedback": "`max_tokens` limits decode, which happens after the first token appears. It can shorten the whole turn but not the wait before the first word."
+        },
+        {
+          "key": "b",
+          "text": "Cache the 50,000-token stable prefix, so that prefill computes only the tokens after it.",
+          "correct": true,
+          "feedback": "Right. The first token cannot appear until prefill ends, and a cache hit removes the cached prefix from prefill."
+        },
+        {
+          "key": "c",
+          "text": "Turn streaming on for the tool calls as well.",
+          "correct": false,
+          "feedback": "Streaming shows tokens as they are generated; before prefill ends there is no token to show, so more streaming does not shorten the wait."
+        },
+        {
+          "key": "d",
+          "text": "Ask the model, in the system prompt, to answer more briefly.",
+          "correct": false,
+          "feedback": "A shorter answer reduces decode time and output cost, but the delay before the first word is prefill, which a shorter answer does not touch."
+        }
+      ],
+      "explanation": "Section 5: total time is prefill plus one decode step per output token. Streaming hides decode but not prefill, so the wait for the first token is set by how many input tokens prefill must compute, and a cache hit removes the cached prefix from that work.",
+      "hints": [
+        "Ask which phase of the call happens before the first token exists.",
+        "Of the four changes, only one reduces the work done before the first token."
+      ]
+    },
+    {
+      "id": "ctx-005-q08",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "latency",
+        "ttft",
+        "streaming"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "On a long prompt, what does the time to first token mainly wait for, and why can streaming not hide that wait?",
+      "answer": {
+        "model": "Prefill: the model must process the whole prompt before the first output token exists, and streaming can only show tokens that have been generated, so there is nothing to show until prefill ends.",
+        "accept": [
+          "^(?!\\W*(the |its |it'?s )?(output generation|generation|generating|decod\\w*)\\b)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(wait(s|ing)? (for|on)|because of|due to|caused by|it'?s|is) (the |all the |output )?(decod|generat\\w* (of )?(the )?(output|answer|tokens))\\w*)(?![\\s\\S]*\\bstreaming ((does|do|can|could|will|would)\\s+)?(hides?|covers?|masks?)\\b)(?=[\\s\\S]*\\b(is|are|it|must|has|have|happens?|needs?|wait\\w*|exists?|comes?|finish\\w*|processe[sd]|computed|runs?|because|so|since|until|can'?t|cannot)\\b)(?=[\\s\\S]*(\\bpre-?fill|\\b(process|comput|read|ingest|encod|run)\\w* (through |over )?(the |all (of )?the |every |each |whole |entire |full )?(whole |entire |full |long )?(prompt|input|context)|\\binput tokens? (are |is |being |must be |have to be )?(processed|computed|read|ingested)|\\b(prompt|input|context) ((has|have|must|needs?) (to )?(be )?|(is|are|being|gets) )(fully |all |first |entirely |completely )?(processed|computed|read|ingested)))(?=[\\s\\S]*(before (the |any |a |an )?(first|single|output)|before (the )?pre-?fill\\b|\\bnone (exists?|is (yet )?(generated|produced)|are (yet )?(generated|produced)|yet)\\b|there (are|is) none\\b|(does not|doesn'?t|cannot|can'?t|will not|won'?t) (exist|appear|be (generated|produced)) (yet )?until|before anything|no (output )?tokens? (exists?|yet|has been|have been|to stream)|nothing (yet |exists |has been produced |is produced |to stream|to show)|not (yet )?(produced|generated)|until (it|prefill|the prefill|the prompt|the input|processing)\\w* (is |has )?(done|finish|complete|over|ends?)|has to finish|must finish|must complete|has to complete|first token (only )?(comes|appears|exists) after|precedes|happens first|comes first))[\\s\\S]*\\s\\S"
+        ]
+      },
+      "explanation": "Section 5: prefill grows with the number of input tokens computed and happens before the first output token. Streaming shows decode as it happens, but no token exists during prefill, so the user waits through all of it.",
+      "hints": [
+        "Name the phase that runs over the input.",
+        "Ask what streaming displays, and whether any of it exists yet during that phase."
+      ]
+    },
+    {
+      "id": "ctx-005-q09",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "prompt-caching",
+        "invalidation",
+        "anthropic"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Requests to the Anthropic Messages API. In the first three situations, the request has cache breakpoints at the end of the tool definitions and at the end of the system prompt, and both entries were written by the previous call a minute ago. Match each situation to what the next call can read from the cache.",
+      "left": [
+        {
+          "key": "a",
+          "text": "One tool's description is edited."
+        },
+        {
+          "key": "b",
+          "text": "One sentence of the system prompt is edited."
+        },
+        {
+          "key": "c",
+          "text": "Only the user's new message differs."
+        },
+        {
+          "key": "d",
+          "text": "A 900-token system prompt on a model whose minimum cacheable length is 4,096 tokens, with no tools."
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Nothing is read; the tools, the system prompt and the messages are all processed again."
+        },
+        {
+          "key": "b",
+          "text": "The tool definitions are read; the system prompt and the messages are processed again."
+        },
+        {
+          "key": "c",
+          "text": "The tool definitions and the system prompt are both read."
+        },
+        {
+          "key": "d",
+          "text": "Nothing is ever cached, and no error is returned."
+        },
+        {
+          "key": "e",
+          "text": "Every sentence of the system prompt before the edit is read; only the rest is processed again."
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "c",
+        "d": "d"
+      },
+      "explanation": "Section 4: the cached prefix runs tools, system, messages, and a change at one level invalidates that level and every later one; reuse happens only at positions where an earlier request wrote an entry, so an edit inside the system prompt is not partly reused. A prefix below the model's minimum is processed without caching and no error is returned.",
+      "hints": [
+        "Write down the order in which the cached prefix is built.",
+        "An entry can be read only if everything up to its breakpoint is identical; there is no partial reuse inside a block."
+      ]
+    },
+    {
+      "id": "ctx-005-q10",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "prompt-caching",
+        "anthropic",
+        "layer-order"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put these parts of a request in the order in which Anthropic builds the cached prefix, from first to last, with the messages in this series' layer order.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Conversation history (layer 05)"
+        },
+        {
+          "key": "b",
+          "text": "System prompt (layer 01)"
+        },
+        {
+          "key": "c",
+          "text": "User instruction (layer 06)"
+        },
+        {
+          "key": "d",
+          "text": "Tool definitions (layer 02)"
+        },
+        {
+          "key": "e",
+          "text": "Memory and retrieved chunks (layers 03 and 04)"
+        }
+      ],
+      "answer": [
+        "d",
+        "b",
+        "e",
+        "a",
+        "c"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 4: Anthropic's prefix order is tools, system, messages, so the tool definitions (layer 02) come before the system prompt (layer 01); the messages then carry layers 03 to 06 in the series' order, with the user instruction last.",
+      "hints": [
+        "On this API the layer numbers and the cache order differ at the very start."
+      ]
+    },
+    {
+      "id": "ctx-005-q11",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "prompt-caching",
+        "read-discount"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "According to Anthropic's \"Prompt caching\" and \"Pricing\" pages as consulted for this post, what does a cache read of a prefix cost on Claude Sonnet 4.5?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "0.1 times the base input price.",
+          "correct": true,
+          "feedback": "Right. The pages list 0.1 times for all models except a few named newer ones, which include neither Sonnet 4.5 nor the other two running models."
+        },
+        {
+          "key": "b",
+          "text": "0.05 times the base input price.",
+          "correct": false,
+          "feedback": "The pages list 0.05 times for Claude Opus 5.5 and Claude Sonnet 5.5, not for Claude Sonnet 4.5."
+        },
+        {
+          "key": "c",
+          "text": "1.25 times the base input price.",
+          "correct": false,
+          "feedback": "1.25 times is the price of a five-minute cache write, not of a read."
+        },
+        {
+          "key": "d",
+          "text": "The same as the base input price, with only the latency reduced.",
+          "correct": false,
+          "feedback": "A read is billed far below the base price; the discount, not only the latency, is what makes caching pay."
+        }
+      ],
+      "explanation": "Section 4: a cache read costs 0.1 times the base input price on most models, which include the three running models, with lower multipliers listed for some newer models (0.05 and 0.025). On Sonnet 4.5 that is 0.30 dollars per million tokens against 3.",
+      "hints": [
+        "The multiplier is no longer the same on every model; check which group Sonnet 4.5 is in."
+      ]
+    },
+    {
+      "id": "ctx-005-q12",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "prompt-caching",
+        "lifetime"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A nightly batch job calls the same model every ten minutes with an identical 20,000-token prefix marked for caching, using the default five-minute cache lifetime. What happens to the cost of the prefix?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Every call writes the prefix again at 1.25 times the base price and none reads it, so the prefix costs more than without caching.",
+          "correct": true,
+          "feedback": "Right. The entry expires five minutes after the previous call, before the next one arrives, so each call is a write."
+        },
+        {
+          "key": "b",
+          "text": "The reads refresh the lifetime, so after the first write every call is a read at 0.1 times.",
+          "correct": false,
+          "feedback": "A read refreshes the lifetime, but only a read that arrives within the five minutes; here no read ever arrives in time."
+        },
+        {
+          "key": "c",
+          "text": "The entry expires, but the call is still billed at the read price because the prefix is identical.",
+          "correct": false,
+          "feedback": "An expired entry cannot be read; the call computes the prefix again and, being marked, writes it."
+        },
+        {
+          "key": "d",
+          "text": "Switching to the one-hour lifetime would cost even more, because its write premium is 2 times.",
+          "correct": false,
+          "feedback": "With the one-hour lifetime the prefix is written once and then read by the next calls, so after two reads it is cheaper than no caching."
+        }
+      ],
+      "explanation": "Section 4: a cache entry lives five minutes by default and is refreshed by each read within that time. Calls ten minutes apart never read it, so each pays the five-minute write premium of 1.25 times; the one-hour lifetime fits that cadence.",
+      "hints": [
+        "Compare the gap between calls with the cache lifetime.",
+        "A refresh needs a read, and a read needs an entry that has not expired."
+      ]
+    },
+    {
+      "id": "ctx-005-q13",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "8",
+      "est_minutes": 4,
+      "tags": [
+        "prompt-caching",
+        "diagnosis",
+        "usage-fields"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Prompt caching is on, calls arrive every few seconds, and the prefix is well above the minimum length. Yet every response reports `cache_read_input_tokens: 0` and a `cache_creation_input_tokens` equal to the size of the prefix. In one sentence, what is the most likely cause?",
+      "answer": {
+        "model": "Something in the prefix differs on every call, such as a timestamp or request id in the system prompt or a tool list serialised in an unstable order, so each call writes a new entry and none matches.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(too short|below (the )?minimum|under (the )?minimum|minimum (cacheable )?length|not long enough)\\b)(?![\\s\\S]*(?<!not )(?<!n't )(?<!never )(?<!no )\\b(expir\\w*|ttl|lifetime|time-?to-?live|times? out|evict\\w*))(?![\\s\\S]*\\b(prefix|system prompt|tools?|tool list|it) (does not|doesn'?t|never|did not|didn'?t) change\\b)(?![\\s\\S]*\\bnothing (in the prefix )?changes\\b)(?![\\s\\S]*\\bnot (in |at |inside )?(the )?(system prompt|prefix|tools?|tool list|start|front|beginning)\\b)(?![\\s\\S]*\\b(system prompt|prefix|tools?|tool list) (is|are) (fine|stable|unchanged|identical|the same)\\b)(?=[\\s\\S]*(timestamp|\\btime\\b|\\bdate\\b|clock|request[ -]?id|session[ -]?id|\\buuid\\b|\\bnonce\\b|user'?s? name|per[- ](call|request)|(chang|differ|var)\\w* (on |with |for |in )?(every|each) (call|request)|(every|each) (call|request) (changes?|differs?|varies)|non-?deterministic|unordered|unstable|\\bordering\\b|order of (the )?(tools|keys|tool list)|key order|reorder\\w*|shuffl\\w*|serialis\\w*|serializ\\w*|dynamic|volatile|random))(?=[\\s\\S]*\\b(prefix|system prompt|system|tools?|tool list|tool definitions?|front|start|beginning|top|cached part|first block)\\b)(?=[\\s\\S]*\\b(in|into|inside|is|are|was|has|have|contains?|includes?|holds?|changes?|differs?|varies|so|because|of|on|between|from|by|at|with)\\b)[\\s\\S]*\\s\\S"
+        ]
+      },
+      "explanation": "Section 8: a cache write on every call with no reads means the prefix is never identical twice. With frequent calls and a long enough prefix, expiry and the minimum are ruled out, which leaves a per-call value or unstable serialisation inside the prefix.",
+      "hints": [
+        "A write without a later read means the next call did not find a matching entry.",
+        "The prompt rules out two other causes; what is left is about the bytes of the prefix."
+      ]
+    },
+    {
+      "id": "ctx-005-q14",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3",
+        "o5"
+      ],
+      "section": "4",
+      "est_minutes": 12,
+      "tags": [
+        "layout",
+        "prompt-caching",
+        "design"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "design",
+      "prompt": "A support assistant on the Anthropic Messages API builds its system prompt as \"Today is {date} {time}. You are the support assistant for Acme...\", loads its 12 tools from a dictionary filled in arrival order at start-up, places the retrieved help-centre chunks before the conversation history, and sends the user's message last. Its input bill did not fall when caching was switched on. Redesign the request so that the prefix caches, say where each moved piece goes and where the breakpoints go, and name the signal that shows the fix worked.",
+      "answer_length": "half a page",
+      "solution": "1. **Move the date and time out of the system prompt.** It changes on every call, so it makes the system prompt, and everything after it, differ every time. Put it in the user turn (layer 06) or another late block, behind the breakpoints.\n2. **Make the tool list byte-stable.** A dictionary filled in arrival order can serialise in a different order on each process or deploy. Sort the tools by name and serialise with a fixed key order, so that the tool definitions (layer 02), which come first in Anthropic's prefix order, are identical on every call.\n3. **Breakpoints.** One at the end of the tool definitions and one at the end of the system prompt, so that a later edit to the system prompt still leaves the tools readable. Layers 03 to 06 come after, in the series' order: memory, retrieved chunks, history, then the user message last.\n4. **Check the minimum.** The tools and system prompt together must exceed the model's minimum cacheable length (1,024 tokens on Claude Sonnet 4.5, 4,096 on Claude Haiku 4.5), or nothing is cached and no error is returned.\n5. **Signal.** In the usage block, `cache_read_input_tokens` should become the prefix size on most calls and `cache_creation_input_tokens` should appear only after a deploy or a lapse; the cache-hit rate (cached input tokens over total input tokens) should rise from 0 to roughly the prefix's share of the input, and the cost per call should fall.",
+      "rubric": [
+        {
+          "criterion": "Moves the date and time out of the prefix into a late layer, with the reason (it changes every call)",
+          "points": 2
+        },
+        {
+          "criterion": "Makes the tool serialisation deterministic (sorted, fixed key order), noting that tools come first in Anthropic's prefix",
+          "points": 2
+        },
+        {
+          "criterion": "Places breakpoints after the tools and after the system prompt, and keeps layers 03 to 06 in order with the user message last",
+          "points": 2
+        },
+        {
+          "criterion": "Mentions the minimum cacheable length as a condition",
+          "points": 1
+        },
+        {
+          "criterion": "Names the usage fields or the cache-hit rate as the signal that the fix worked",
+          "points": 2
+        }
+      ],
+      "explanation": "Sections 4, 7 and 8: a hit needs an identical prefix up to a breakpoint, in the order tools, system, messages. A per-call value in the system prompt and an unstable tool order both break it; the usage fields and the cache-hit rate show whether reads have returned.",
+      "hints": [
+        "List every piece that can differ between two calls and check whether it sits before a breakpoint.",
+        "On this API the tools are the first thing in the prefix, so their byte order matters most."
+      ]
+    },
+    {
+      "id": "ctx-005-q15",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 15,
+      "tags": [
+        "guardrails",
+        "routing",
+        "observability"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "connect",
+      "connects": [
+        "ctx-004",
+        "ctx-022"
+      ],
+      "prompt": "Post 04 sized the support agent at about 10,500 input and 400 output tokens per call, and post 22 instruments traces and dashboards. Using this post's rates and multipliers, propose the cost guardrails to set before launch for that agent at 200,000 calls a day on Claude Sonnet 4.5: a per-call dollar ceiling with its reasoning, a routing rule for the cheap tier, a `max_tokens` setting, and the cache-hit alert, with the numbers each one is based on. Say which numbers are illustrative.",
+      "answer_length": "half a page",
+      "solution": "1. **Expected cost.** At 3 and 15 dollars per million, an uncached call costs 0.0375 dollars and a call that reads the 4,600-token prefix 0.02508 (snippets/cost_model.py); the daily bill is about 7,500 dollars uncached and about 5,016 dollars cached. All token counts and the volume are illustrative.\n2. **Per-call ceiling.** Set it above the normal cached cost with room for a cache write (0.04095) and a long answer, for example 0.06 dollars, enforced in code; a call that would exceed it is an error to investigate, not to pay silently. Per-layer token ceilings (post 04's allocation) stop retrieval or history from growing into the budget.\n3. **Routing.** Send short, well-defined steps (intent detection, extraction, summarising old history) to Claude Haiku 4.5, a fifth of the price per token, and escalate to Sonnet only when a check flags the answer (a cascade); quality is confirmed with an evaluation suite, not assumed.\n4. **max_tokens.** Output is five times the input price, so cap it near the typical reply (400 tokens) with some headroom, for example 600, and treat truncations as a design signal.\n5. **Cache-hit alert.** The best case for this layout is 4,600 / 10,500 = 43.8% of input tokens read from the cache. Following post 22, record `cache_read_input_tokens`, `cache_creation_input_tokens` and `input_tokens` per span, and alert when the hit rate falls well below that level (say under 30%) after a deploy, which is the fingerprint of a prefix change.",
+      "rubric": [
+        {
+          "criterion": "Computes the per-call and daily cost with and without caching from the stated rates (0.0375 and 0.02508; about 7,500 and 5,016 dollars a day)",
+          "points": 2
+        },
+        {
+          "criterion": "Sets a per-call ceiling that allows for the cache write and explains how it is enforced; mentions per-layer token budgets from post 04",
+          "points": 2
+        },
+        {
+          "criterion": "Gives a routing rule to the cheap tier with its price ratio, and says quality is checked, not assumed",
+          "points": 2
+        },
+        {
+          "criterion": "Chooses a max_tokens cap from the typical output and the five-to-one price ratio",
+          "points": 1
+        },
+        {
+          "criterion": "Derives the cache-hit ceiling (43.8%) and defines an alert on the usage fields, tying it to post 22's instrumentation",
+          "points": 2
+        },
+        {
+          "criterion": "Labels the token counts, volume and thresholds as illustrative",
+          "points": 1
+        }
+      ],
+      "explanation": "Section 7 names the four guardrails; section 6 supplies the per-call and daily numbers and the 43.8% hit-rate ceiling; post 04 supplies the per-layer budgets and post 22 the instrumentation that feeds the alert.",
+      "hints": [
+        "Start from the per-call costs printed by the post's snippet and scale them to the daily volume.",
+        "For the alert, work out the largest share of input tokens this layout can ever read from the cache."
+      ]
+    },
+    {
+      "id": "ctx-005-q16",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o1",
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 10,
+      "tags": [
+        "prompt-caching",
+        "pricing",
+        "python"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "kind": "fix",
+      "language": "python",
+      "prompt": "`call_cost` should price one call: the cache multiplier (1.25 for a five-minute write, 0.1 for a read, 1 without caching) applies to the prefix tokens only, the input tokens after the prefix pay the base input price, and the output tokens pay the output price. The starter gets the uncached case right but the cached cases wrong. Fix it.",
+      "starter": "CACHE_WRITE_5M = 1.25   # times the base input price\nCACHE_READ = 0.1        # times the base input price\n\n\ndef call_cost(rate, prefix, rest, output, mode=\"none\"):\n    \"\"\"Dollar cost of one call.\n\n    rate: {\"input\": dollars per million tokens, \"output\": dollars per million tokens}\n    prefix: tokens of the cacheable prefix; rest: input tokens after it; output: output tokens\n    mode: \"none\" (no caching), \"write\" (a five-minute cache write) or \"read\" (a cache hit)\n    \"\"\"\n    factor = {\"none\": 1.0, \"write\": CACHE_WRITE_5M, \"read\": CACHE_READ}[mode]\n    input_cost = (prefix + rest) * rate[\"input\"] * factor / 1e6\n    output_cost = output * rate[\"output\"] / 1e6\n    return input_cost + output_cost\n",
+      "solution": "CACHE_WRITE_5M = 1.25   # times the base input price\nCACHE_READ = 0.1        # times the base input price\n\n\ndef call_cost(rate, prefix, rest, output, mode=\"none\"):\n    \"\"\"Dollar cost of one call.\n\n    rate: {\"input\": dollars per million tokens, \"output\": dollars per million tokens}\n    prefix: tokens of the cacheable prefix; rest: input tokens after it; output: output tokens\n    mode: \"none\" (no caching), \"write\" (a five-minute cache write) or \"read\" (a cache hit)\n    \"\"\"\n    factor = {\"none\": 1.0, \"write\": CACHE_WRITE_5M, \"read\": CACHE_READ}[mode]\n    prefix_cost = prefix * rate[\"input\"] * factor / 1e6\n    rest_cost = rest * rate[\"input\"] / 1e6\n    output_cost = output * rate[\"output\"] / 1e6\n    return prefix_cost + rest_cost + output_cost\n",
+      "tests": "from math import isclose\n\nsonnet = {\"input\": 3.0, \"output\": 15.0}\nopus = {\"input\": 5.0, \"output\": 25.0}\n\n# 1. Without caching every input token pays the base price (the post's section 6 turn).\nassert isclose(call_cost(sonnet, 4600, 5900, 400, \"none\"), 0.0375, rel_tol=1e-9), \"no caching: 0.0375 dollars\"\n\n# 2. A cache read discounts the prefix only; the rest of the input and the output pay full price.\nassert isclose(call_cost(sonnet, 4600, 5900, 400, \"read\"), 0.02508, rel_tol=1e-9), \"cache read: 0.02508 dollars\"\n\n# 3. A cache write charges the premium on the prefix only.\nassert isclose(call_cost(sonnet, 4600, 5900, 400, \"write\"), 0.04095, rel_tol=1e-9), \"cache write: 0.04095 dollars\"\n\n# 4. Another tier and another split, so a hard-coded answer cannot pass.\nassert isclose(call_cost(opus, 6000, 4000, 500, \"read\"), 0.0355, rel_tol=1e-9), \"Opus read: 0.0355 dollars\"\nassert isclose(call_cost(opus, 6000, 4000, 500, \"write\"), 0.07, rel_tol=1e-9), \"Opus write: 0.07 dollars\"\n\n# 5. With an empty prefix the mode makes no difference.\nfor mode in (\"none\", \"write\", \"read\"):\n    assert isclose(call_cost(opus, 0, 12000, 200, mode), 0.065, rel_tol=1e-9), \"empty prefix: 0.065 dollars\"\n\n# 6. The output price never takes a cache multiplier.\nassert isclose(call_cost(sonnet, 0, 0, 1000, \"read\"), 0.015, rel_tol=1e-9), \"output is never discounted\"\n\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 6: only the prefix is written or read; the 5,900 tokens after it are new on every call and pay the full input price. The starter multiplies the whole input by the cache factor, which overstates the read discount and the write premium.",
+      "hints": [
+        "Check which tokens the cache multiplier is applied to in the starter.",
+        "Price the prefix, the rest of the input and the output as three separate terms."
+      ]
+    },
+    {
+      "id": "ctx-005-q17",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 2,
+      "tags": [
+        "routing",
+        "guardrails"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Which description is the cascade pattern of model routing?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A frontier model writes a plan once, and cheaper models carry out its steps.",
+          "correct": false,
+          "feedback": "That is plan and execute, the other routing pattern the post names. A cascade sends the call to the cheap model first."
+        },
+        {
+          "key": "b",
+          "text": "Every call goes to the cheap model first, and only answers that a check flags are sent again to a stronger model.",
+          "correct": true,
+          "feedback": "Right. The cheap tier handles what it can, and the stronger model is paid for only when the check escalates."
+        },
+        {
+          "key": "c",
+          "text": "Every call goes to the frontier model, with the stable prefix cached to cut its cost.",
+          "correct": false,
+          "feedback": "Caching lowers the input price of each call, but it does not route anything; every call still pays frontier rates for the rest of the input and the output."
+        },
+        {
+          "key": "d",
+          "text": "Calls are split evenly across the three tiers so that no single tier's price dominates the bill.",
+          "correct": false,
+          "feedback": "An even split ignores which calls need the stronger model, so it either overpays for easy calls or sends hard ones to a model that cannot do them."
+        }
+      ],
+      "explanation": "Section 7: a cascade tries the cheap model and escalates only when a check flags the answer; plan and execute has a frontier model plan and cheaper models execute. Both cut the average cost per task, and an evaluation suite checks that quality holds.",
+      "hints": [
+        "The word cascade describes the order in which models are tried."
+      ]
+    }
+  ]
+}

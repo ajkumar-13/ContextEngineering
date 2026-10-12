@@ -1,59 +1,25 @@
 id: ctx-005
 slug: 05-economics-of-context
-title: "05 · The Economics of Context — Pricing, Caching, and Latency"
-
-description: >
-  Learn how LLM inference is priced, why output tokens cost more than input,
-  how prompt caching reduces both cost and latency, and how to design
-  production AI systems with effective budgeting, model routing, and
-  cache-aware context layouts.
-
-author: "Ajay"
-
+title: "05 - The economics of context: pricing, caching, and latency"
+summary: "A call costs its input and output tokens at the tier's rates, and a cached prefix changes only what the prefix costs. Pricing one agent turn with and without caching shows what decides whether a working demo can ship."
 date: 2026-05-14
-last_modified: 2026-05-14
-
-tags:
-  - context-engineering
-  - economics
-  - pricing
-  - prompt-caching
-  - latency
-  - inference
-  - llm-cost
-  - kv-cache
-  - model-routing
-
-category: Foundations
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part I - Foundations"
-chapter: "Part I — Foundations"
-
-hero: diagrams/00-hero-economics-of-context.svg
-hero_alt: "Illustration showing prompt caching, pricing, and latency trade-offs in LLM systems"
-
-reading_time: 13
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - LLM Economics
-  - Prompt Caching
-  - KV Cache
-  - Prefix Caching
-  - Token Pricing
-  - API Cost
-  - Inference Cost
-  - Latency
-  - Time to First Token
-  - TTFT
-  - Model Routing
-  - Cost Optimization
-  - Anthropic Prompt Caching
-
-canonical_url: ""
-
-prev: ../04-tokens-windows-budgets/
-next: ../06-context-failure-modes/
+level: intermediate
+reading_time: 19
+tags: [context-engineering, economics, pricing, prompt-caching, latency, model-routing, kv-cache]
+hero: diagrams/01-cache-miss-and-hit.svg
+prerequisites: [ctx-004]
+code: optional
+outcomes:
+  - id: o1
+    text: "Price a call at any tier from its input and output tokens, and predict how prompt caching changes the bill."
+  - id: o2
+    text: "Explain why output tokens cost more than input tokens and why a long prompt delays the first token, in terms of prefill and decode."
+  - id: o3
+    text: "Design a stable-prefix layout that maximises cache hits, and name the changes that silently invalidate it."
+  - id: o4
+    text: "Decide whether caching a prefix pays for its write premium, from how often the prefix is reused within the cache lifetime."
+  - id: o5
+    text: "Set cost guardrails before launch: per-call budgets, model routing, a capped output length and cache-hit monitoring."

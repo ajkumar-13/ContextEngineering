@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="ctx-02-output-asymmetry-title" aria-describedby="ctx-02-output-asymmetry-desc">
+<title id="ctx-02-output-asymmetry-title">A sixth of the input, and still the dearer call</title>
+<desc id="ctx-02-output-asymmetry-desc">Two calls on Claude Sonnet 4.5, drawn in tokens on the left and in dollars on the right. The short prompt sends 2,000 input tokens and gets 2,500 output tokens; the long prompt sends 12,000 input tokens and gets 200. In dollars the short prompt costs $0.00600 for input plus $0.03750 for output, $0.04350, and the long prompt $0.03600 plus $0.00300, $0.03900, because an output token costs 5 times an input token.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-ink-muted { fill: var(--ctx-ink-muted); }
+  .f-neutral-soft { fill: var(--ctx-neutral-soft); }
+  .f-surface { fill: var(--ctx-surface); }
+  .s-rule { stroke: var(--ctx-rule); }
+</style>
+<defs>
+<marker id="ctx-02-output-asymmetry-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="540"/>
+<text x="40" y="48" class="t-title" data-w="526">A sixth of the input, and still the dearer call</text>
+<text x="40" y="76" class="t-subtitle" data-w="767">Claude Sonnet 4.5: $3 per million input tokens, $15 per million output tokens (Anthropic, 12 October 2026).</text>
+<text x="232" y="144" class="t-head" data-w="123">Tokens per call</text>
+<text x="584" y="144" class="t-head" data-w="122">Dollars per call</text>
+<text x="40" y="188" class="t-head" data-w="115">Short prompt,</text>
+<text x="40" y="208" class="t-head" data-w="99">long answer</text>
+<g data-grid="skip">
+<rect x="232" y="168" width="47.21" height="48" class="f-neutral-soft" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<rect x="232" y="168" width="47.21" height="48" class="w1 nofill s-rule" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<path d="M255.61,216 L255.61,228" class="brace"/>
+<text x="255.61" y="244" text-anchor="middle" class="t-label" data-w="37">2,000</text>
+</g>
+<g data-grid="skip">
+<rect x="279.21" y="168" width="59.02" height="48" class="f-ink-muted" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<text x="308.72" y="197" text-anchor="middle" class="t-value f-surface" data-w="38">2,500</text>
+</g>
+<g data-grid="skip">
+<rect x="584" y="168" width="34.13" height="48" class="f-neutral-soft" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<rect x="584" y="168" width="34.13" height="48" class="w1 nofill s-rule" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<path d="M601.07,216 L601.07,228" class="brace"/>
+<text x="601.07" y="244" text-anchor="middle" class="t-label" data-w="62">$0.00600</text>
+</g>
+<g data-grid="skip">
+<rect x="618.13" y="168" width="213.33" height="48" class="f-ink-muted" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<text x="724.8" y="197" text-anchor="middle" class="t-value f-surface" data-w="64">$0.03750</text>
+</g>
+<g data-grid="skip">
+<text x="843.47" y="197" class="t-value b" data-w="64">$0.04350</text>
+</g>
+<text x="40" y="300" class="t-head" data-w="111">Long prompt,</text>
+<text x="40" y="320" class="t-head" data-w="107">short answer</text>
+<g data-grid="skip">
+<rect x="232" y="280" width="283.28" height="48" class="f-neutral-soft" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<rect x="232" y="280" width="283.28" height="48" class="w1 nofill s-rule" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<text x="373.64" y="309" text-anchor="middle" class="t-value" data-w="47">12,000</text>
+</g>
+<g data-grid="skip">
+<rect x="515.28" y="280" width="4.72" height="48" class="f-ink-muted" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<path d="M517.64,328 L517.64,340" class="brace"/>
+<text x="517.64" y="356" text-anchor="middle" class="t-label" data-w="25">200</text>
+</g>
+<g data-grid="skip">
+<rect x="584" y="280" width="204.8" height="48" class="f-neutral-soft" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<rect x="584" y="280" width="204.8" height="48" class="w1 nofill s-rule" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<text x="686.4" y="309" text-anchor="middle" class="t-value" data-w="64">$0.03600</text>
+</g>
+<g data-grid="skip">
+<rect x="788.8" y="280" width="17.07" height="48" class="f-ink-muted" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<path d="M797.33,328 L797.33,340" class="brace"/>
+<text x="797.33" y="356" text-anchor="middle" class="t-label" data-w="62">$0.00300</text>
+</g>
+<g data-grid="skip">
+<text x="817.87" y="309" class="t-value" data-w="64">$0.03900</text>
+</g>
+<rect x="40" y="380" width="24" height="16" class="f-neutral-soft" data-fit="skip"/>
+<rect x="40" y="380" width="24" height="16" class="w1 nofill s-rule" data-fit="skip"/>
+<text x="76" y="392" class="t-label" data-w="83">input tokens</text>
+<rect x="240" y="380" width="24" height="16" class="f-ink-muted" data-fit="skip"/>
+<text x="276" y="392" class="t-label" data-w="93">output tokens</text>
+<text x="40" y="444" class="t-label" data-w="550">At 5 times the price, the 2,500 output tokens cost as much as 12,500 input tokens.</text>
+<text x="40" y="504" class="t-note" data-w="655">The bill follows the answer: trimming output saves five times what trimming input does, per token.</text>
+</svg>
