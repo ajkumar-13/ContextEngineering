@@ -5,43 +5,43 @@
 
   <style><![CDATA[
     :root{
-      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
-      --ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;
-      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
-      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-grid:rgba(26,26,26,0.06);
-      --ce-neutral-1:#EAEAE4;--ce-neutral-3:#8E8E88;
+      --ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;
+      --ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;
+      --ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;
+      --ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-grid:rgba(26,26,26,0.06);
+      --ctx-neutral-1:#EAEAE4;--ctx-neutral-3:#8E8E88;
     }
     @media (prefers-color-scheme:dark){
       :root{
-        --ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;
-        --ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;
-        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
-        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-grid:rgba(241,238,232,0.08);
-        --ce-neutral-1:#1F2229;--ce-neutral-3:#6E6E68;
+        --ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;
+        --ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;
+        --ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;
+        --ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-grid:rgba(241,238,232,0.08);
+        --ctx-neutral-1:#1F2229;--ctx-neutral-3:#6E6E68;
       }
     }
-    .bg{fill:var(--ce-bg);}
-    .frame{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
-    .grid{stroke:var(--ce-grid);stroke-width:0.75;fill:none;}
-    .axis{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;}
-    .fill-a{fill:var(--ce-primary);fill-opacity:0.22;stroke:var(--ce-primary);stroke-width:1.5;stroke-linejoin:round;}
-    .fill-b{fill:var(--ce-success);fill-opacity:0.22;stroke:var(--ce-success);stroke-width:1.5;stroke-linejoin:round;}
-    .thresh{stroke:var(--ce-alert);stroke-width:1.5;stroke-dasharray:5 4;fill:none;}
-    .drop{stroke:var(--ce-ink);stroke-width:1.5;fill:none;}
-    .lead{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;}
-    .keep{fill:var(--ce-success);fill-opacity:0.14;stroke:var(--ce-success);stroke-width:1.5;}
-    .lose{fill:var(--ce-alert);fill-opacity:0.14;stroke:var(--ce-alert);stroke-width:1.5;}
-    .card{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
-    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
-    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
-    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ce-ink);}
-    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ce-ink-muted);}
-    .lab-alert{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ce-alert);}
-    .lab-succ{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ce-success);}
-    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ce-ink-muted);}
-    .mono-i{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-weight:600;font-size:12px;fill:var(--ce-ink);}
-    .big{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-weight:700;font-size:22px;fill:var(--ce-success);}
+    .bg{fill:var(--ctx-bg);}
+    .frame{fill:var(--ctx-surface);stroke:var(--ctx-border);stroke-width:1;}
+    .grid{stroke:var(--ctx-grid);stroke-width:0.75;fill:none;}
+    .axis{stroke:var(--ctx-ink-muted);stroke-width:1;fill:none;}
+    .fill-a{fill:var(--ctx-primary);fill-opacity:0.22;stroke:var(--ctx-primary);stroke-width:1.5;stroke-linejoin:round;}
+    .fill-b{fill:var(--ctx-success);fill-opacity:0.22;stroke:var(--ctx-success);stroke-width:1.5;stroke-linejoin:round;}
+    .thresh{stroke:var(--ctx-alert);stroke-width:1.5;stroke-dasharray:5 4;fill:none;}
+    .drop{stroke:var(--ctx-ink);stroke-width:1.5;fill:none;}
+    .lead{stroke:var(--ctx-ink-muted);stroke-width:1;fill:none;}
+    .keep{fill:var(--ctx-success);fill-opacity:0.14;stroke:var(--ctx-success);stroke-width:1.5;}
+    .lose{fill:var(--ctx-alert);fill-opacity:0.14;stroke:var(--ctx-alert);stroke-width:1.5;}
+    .card{fill:var(--ctx-surface);stroke:var(--ctx-border);stroke-width:1;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ctx-ink);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ctx-ink-muted);}
+    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ctx-ink);text-transform:uppercase;letter-spacing:0.06em;}
+    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ctx-ink);}
+    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ctx-ink-muted);}
+    .lab-alert{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ctx-alert);}
+    .lab-succ{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ctx-success);}
+    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ctx-ink-muted);}
+    .mono-i{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-weight:600;font-size:12px;fill:var(--ctx-ink);}
+    .big{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-weight:700;font-size:22px;fill:var(--ctx-success);}
   ]]></style>
 
   <rect class="bg" width="960" height="360"/>
@@ -80,13 +80,13 @@
   <text class="s" x="64" y="315">turns  →</text>
 
   <!-- phase labels -->
-  <text class="l" x="200" y="290" text-anchor="middle" fill="var(--ce-primary)">history grows</text>
-  <text class="l" x="520" y="292" text-anchor="middle" fill="var(--ce-success)">summary + new turns</text>
+  <text class="l" x="200" y="290" text-anchor="middle" fill="var(--ctx-primary)">history grows</text>
+  <text class="l" x="520" y="292" text-anchor="middle" fill="var(--ctx-success)">summary + new turns</text>
 
   <!-- /compact event marker + arrow showing the drop -->
-  <circle cx="345" cy="134" r="4" fill="var(--ce-alert)"/>
+  <circle cx="345" cy="134" r="4" fill="var(--ctx-alert)"/>
   <path class="lead" d="M345,152 C330,170 320,200 322,228" />
-  <path d="M318,220 l4,10 l6,-8 z" fill="var(--ce-ink-muted)"/>
+  <path d="M318,220 l4,10 l6,-8 z" fill="var(--ctx-ink-muted)"/>
   <g transform="translate(150,150)">
     <rect class="card" x="0" y="0" width="128" height="34" rx="6"/>
     <text class="mono-i" x="12" y="22">/compact</text>

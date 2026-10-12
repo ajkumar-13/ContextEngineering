@@ -5,42 +5,42 @@
 
   <style><![CDATA[
     :root{
-      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
-      --ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;
-      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
-      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;--ce-neutral-3:#8E8E88;
+      --ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;
+      --ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;
+      --ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;
+      --ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-neutral-1:#EAEAE4;--ctx-neutral-3:#8E8E88;
     }
     @media (prefers-color-scheme:dark){
       :root{
-        --ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;
-        --ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;
-        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
-        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;--ce-neutral-3:#6E6E68;
+        --ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;
+        --ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;
+        --ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;
+        --ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-neutral-1:#1F2229;--ctx-neutral-3:#6E6E68;
       }
     }
-    .bg{fill:var(--ce-bg);}
-    .card{fill:var(--ce-surface);stroke:var(--ce-ink);stroke-width:1.5;}
-    .cardq{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
-    .flow{stroke:var(--ce-ink-muted);stroke-width:1;fill:none;}
-    .req{stroke:var(--ce-primary);stroke-width:1.5;fill:none;}
-    .res{stroke:var(--ce-success);stroke-width:1.5;fill:none;}
-    .bound{fill:none;stroke:var(--ce-alert);stroke-width:1;stroke-dasharray:4 3;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
-    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
-    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:13px;fill:var(--ce-ink);}
-    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
-    .lab{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ce-ink);}
-    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ce-ink-muted);}
-    .monop{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ce-primary);font-weight:600;}
-    .monog{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ce-success);font-weight:600;}
+    .bg{fill:var(--ctx-bg);}
+    .card{fill:var(--ctx-surface);stroke:var(--ctx-ink);stroke-width:1.5;}
+    .cardq{fill:var(--ctx-surface);stroke:var(--ctx-border);stroke-width:1;}
+    .flow{stroke:var(--ctx-ink-muted);stroke-width:1;fill:none;}
+    .req{stroke:var(--ctx-primary);stroke-width:1.5;fill:none;}
+    .res{stroke:var(--ctx-success);stroke-width:1.5;fill:none;}
+    .bound{fill:none;stroke:var(--ctx-alert);stroke-width:1;stroke-dasharray:4 3;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ctx-ink);}
+    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ctx-ink);text-transform:uppercase;letter-spacing:0.06em;}
+    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:13px;fill:var(--ctx-ink);}
+    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ctx-ink-muted);}
+    .lab{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ctx-ink);}
+    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ctx-ink-muted);}
+    .monop{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ctx-primary);font-weight:600;}
+    .monog{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ctx-success);font-weight:600;}
   ]]></style>
 
   <defs>
     <marker id="arrP" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="var(--ce-primary)"/>
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ctx-primary)"/>
     </marker>
     <marker id="arrS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="var(--ce-success)"/>
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ctx-success)"/>
     </marker>
   </defs>
 
@@ -83,17 +83,17 @@
     <text class="mono" x="904" y="128" text-anchor="end">acme-support</text>
 
     <!-- Tools -->
-    <rect x="508" y="144" width="386" height="46" rx="8" fill="var(--ce-surface)" stroke="var(--ce-primary)" stroke-width="1.5"/>
+    <rect x="508" y="144" width="386" height="46" rx="8" fill="var(--ctx-surface)" stroke="var(--ctx-primary)" stroke-width="1.5"/>
     <text class="lab" x="524" y="164">Tools</text>
     <text class="mono" x="524" y="181">search_orders · issue_refund · escalate_to_human</text>
 
     <!-- Resources -->
-    <rect x="508" y="200" width="386" height="42" rx="8" fill="var(--ce-surface)" stroke="var(--ce-accent)" stroke-width="1.5"/>
+    <rect x="508" y="200" width="386" height="42" rx="8" fill="var(--ctx-surface)" stroke="var(--ctx-accent)" stroke-width="1.5"/>
     <text class="lab" x="524" y="219">Resources</text>
     <text class="mono" x="524" y="235">resource://refunds_policy</text>
 
     <!-- Prompts -->
-    <rect x="508" y="252" width="386" height="42" rx="8" fill="var(--ce-surface)" stroke="var(--ce-success)" stroke-width="1.5"/>
+    <rect x="508" y="252" width="386" height="42" rx="8" fill="var(--ctx-surface)" stroke="var(--ctx-success)" stroke-width="1.5"/>
     <text class="lab" x="524" y="271">Prompts</text>
     <text class="mono" x="524" y="287">triage_intake</text>
 

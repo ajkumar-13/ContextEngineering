@@ -1,230 +1,136 @@
-<div align="center">
-
 # Context Engineering
 
-**A free, framework-agnostic series on engineering the entire input an LLM sees on every call.**
+A free, framework-agnostic series of 30 posts on engineering the whole input a large language model (LLM) sees on every call: the system prompt, the tool and MCP descriptions, memory, retrieved context, conversation history, and the user instruction. It names the six layers of that input, explains how a model reads them and what they cost, gives the four operations that act on them (write, select, compress, isolate), goes deep on each layer, covers the production disciplines (evaluation, structured output, observability, security, privacy, and the choice between long context and retrieval), and ends with the agentic workflow and three runnable builds. A reader who finishes it can diagnose a misbehaving LLM application by layer and failure mode, size and price a context budget, design a retrieval, memory, and tool stack for a given workload, and ship a retrieval-augmented generation (RAG) chatbot, a Model Context Protocol (MCP) server, and an email-reply agent with an evaluation gate in front of them.
 
-System prompt · tools · memory · retrieval · history · user instruction.
+The examples are plain Python against the official provider SDKs (Anthropic, OpenAI, Gemini) and the MCP reference SDK. A framework appears only where it changes the shape of the code, and no framework is the subject of a post.
 
-[![License: CC BY 4.0](https://img.shields.io/badge/Prose-CC--BY--4.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
-[![License: MIT](https://img.shields.io/badge/Code-MIT-green.svg)](LICENSE)
-[![Posts](https://img.shields.io/badge/posts-30-orange.svg)](#-the-series)
-[![Status](https://img.shields.io/badge/status-in%20progress-yellow.svg)](PLAN.md)
-[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+## What a reader builds
 
-[Read the cheatsheet](CHEATSHEET.md) · [Glossary](GLOSSARY.md) · [References](REFERENCES.md) · [Plan](PLAN.md) · [Contribute](CONTRIBUTING.md)
+- A vocabulary that holds across the series: six layers, four operations, five failure modes, and the retrieval numbers top-N, top-k, recall@N, and precision@k.
+- A context budget for an agent, priced per layer, with a prefix laid out so that it caches.
+- A retrieval pipeline from scratch (chunking, BM25, reciprocal rank fusion), a tool-schema budget calculator, a minimal MCP server, and an evaluation harness with a regression gate.
+- Three builds in Part V: a RAG chatbot, a production-shaped MCP server with a permission boundary, and an email-reply agent with a triager, memory, retrieval over earlier replies, and a send gate.
 
-</div>
+## The posts
 
----
+### Part I - Foundations
 
-## What is Context Engineering?
+After this part a reader can name the six layers in a raw API request, estimate the tokens, latency, and dollars of a prompt without running it, lay out a prefix so it caches, and map a production bug report to one of the five failure modes.
 
-Most LLM applications fail not because the model is weak, but because the **context** assembled around each request is wrong. The system prompt is too vague. The wrong chunks were retrieved. Historical context buried the rules. Tool descriptions are incomplete. 
+1. [01 - Why context engineering, and why now](posts/01-why-context-engineering/index.md)
+2. [02 - The six layers of context](posts/02-six-layers-of-context/index.md)
+3. [03 - How LLMs actually read context](posts/03-how-llms-read-context/index.md)
+4. [04 - Tokens, windows, and budgets](posts/04-tokens-windows-budgets/index.md)
+5. [05 - The economics of context: pricing, caching, and latency](posts/05-economics-of-context/index.md)
+6. [06 - Five context failure modes](posts/06-context-failure-modes/index.md)
 
-**Context engineering** is the discipline of assembling that context *well* — across six distinct layers (system prompt, tools, memory, retrieval, conversation history, user instruction) — so the model always has the right information, in the right place, at the right cost.
+### Part II - The WSCI operating system
 
-This repository contains the complete **Context Engineering** series:
+After this part a reader can place any technique under write, select, compress, or isolate (WSCI); choose a write destination and its metadata; tune the four levers of a retrieval pipeline; stand up an ingestion pipeline with provenance; pick a compression policy and measure what it keeps; and decide when a task should be split across sub-agents.
 
-- **30 posts** spanning foundations, primitives, production concerns, and builds
-- **40+ diagrams** illustrating every major concept
-- **7 runnable code companions** with full test suites (offline-testable cores)
-- **One-page cheatsheet** for quick reference
-- **One-page poster** — the whole series on a single hand-drawn A2 sheet
-- **Glossary and bibliography** with every term and citation
+7. [07 - Write, select, compress, isolate](posts/07-write-select-compress-isolate/index.md)
+8. [08 - Write strategies](posts/08-write-strategies/index.md)
+9. [09 - Select strategies](posts/09-select-strategies/index.md)
+10. [10 - Data ingestion and document pipelines](posts/10-data-ingestion-pipelines/index.md)
+11. [11 - RAG in depth](posts/11-rag-in-depth/index.md)
+12. [12 - Compress strategies](posts/12-compress-strategies/index.md)
+13. [13 - Isolate strategies](posts/13-isolate-strategies/index.md)
 
-**The approach:** No marketing voice. Neutral, textbook tone. Examples first, formalism second. Framework-agnostic (applies to any LLM API, any framework).
+### Part III - Layers in depth
 
----
+After this part a reader can write a five-block system prompt under version control and continuous integration, design a tool catalogue and decide when MCP is the integration, route data to episodic, semantic, or procedural memory, pick GraphRAG, late interaction, SQL retrieval, or long-context loading by the shape of a corpus, budget thinking tokens, and account for image tokens.
 
-## How to use this
+14. [14 - The system prompt as software](posts/14-system-prompt-as-software/index.md)
+15. [15 - Tools and MCP](posts/15-tools-and-mcp/index.md)
+16. [16 - Memory systems](posts/16-memory-systems/index.md)
+17. [17 - Advanced retrieval](posts/17-advanced-retrieval/index.md)
+18. [18 - Context for reasoning models](posts/18-reasoning-model-context/index.md)
+19. [19 - Multimodal context: images, PDF pages, and audio](posts/19-multimodal-context/index.md)
 
-**Start with the series index below.** Posts build on each other, but you can also jump to specific topics. Each post links to others for context.
+### Part IV - Production-grade practice
 
-**By time commitment:**
+After this part a reader can wire a four-layer evaluation pyramid with a gate in continuous integration, constrain and validate model output, instrument traces and the four headline dashboard numbers, apply the four architectural defences against prompt injection, govern personal data across prompts, memory, and the trace store, and choose between long context, RAG, and a hybrid with the four-question test.
 
-| Time | Path |
-|------|------|
-| **10 seconds** | Read the TL;DR immediately below. |
-| **10 minutes** | Read the [one-page cheatsheet](CHEATSHEET.md). |
-| **1 hour** | Read [Post 01 (Why)](posts/01-why-context-engineering/index.md), [Post 02 (Six layers)](posts/02-six-layers-of-context/index.md), and [Post 07 (Write–Select–Compress–Isolate)](posts/07-write-select-compress-isolate/index.md). |
-| **Full series** | Follow the linear reading order in the table below. |
+20. [20 - Evaluation](posts/20-evaluation/index.md)
+21. [21 - Structured output and guardrails](posts/21-structured-output-guardrails/index.md)
+22. [22 - Observability, tracing, and cost](posts/22-observability/index.md)
+23. [23 - Security and prompt injection](posts/23-security/index.md)
+24. [24 - Privacy, PII, and data governance](posts/24-privacy-and-governance/index.md)
+25. [25 - Long context vs. RAG: a decision framework](posts/25-long-context-vs-rag/index.md)
 
-**TL;DR:**
+### Part V - Workflow and builds
 
-Every LLM call needs **six layers of context**: system prompt, tools, memory, retrieval, history, user instruction. Four operations — **Write** · **Select** · **Compress** · **Isolate** — let you engineer each one. Five recurring **failure modes** explain most production bugs. The rest is depth.
+After this part a reader has run the agentic workflow locally and remotely and has three working builds whose every function traces to an earlier post.
 
----
+26. [26 - The modern agentic workflow](posts/26-modern-agentic-workflow/index.md)
+27. [27 - Remote agentic workflow](posts/27-remote-agentic-workflow/index.md)
+28. [28 - Build #1: RAG chatbot from scratch](posts/28-build-rag-chatbot/index.md)
+29. [29 - Build #2: MCP server from scratch](posts/29-build-mcp-server/index.md)
+30. [30 - Capstone: email reply agent](posts/30-capstone-email-reply-agent/index.md)
 
-## What you'll learn
+## Where to start
 
-- **How models read context** — token windows, caching, attention patterns, and what actually matters
-- **The six layers** — what each is, when to use it, and how they interact
-- **Write, Select, Compress, Isolate** — four foundational primitives that apply everywhere
-- **Production patterns** — evaluation, observability, security, privacy, structured output
-- **Decision frameworks** — when to use RAG vs. long context, how to scope memory, retrieval strategy trade-offs
-- **Real builds** — complete runnable code for a RAG chatbot, MCP server, and email-reply agent
+The posts are written to be read in order, and each one names the earlier posts it depends on. A reader with an hour reads [post 01](posts/01-why-context-engineering/index.md), [post 02](posts/02-six-layers-of-context/index.md), and [post 07](posts/07-write-select-compress-isolate/index.md): the reason for the discipline, the six layers, and the four operations. A reader who needs the mental models without the code (a product or strategy reader) can take Parts I and IV without running anything. A reader with ten minutes reads the [cheatsheet](CHEATSHEET.md).
 
----
+## Before starting
 
-## 📚 The series
+The series assumes working Python, the ability to call one provider SDK (Anthropic, OpenAI, or Gemini), and the vocabulary of a first RAG tutorial: embedding, vector store, chunk. It does not assume transformer internals: post 03 gives the one-post account of tokens, attention, positions, and the key-value (KV) cache that the rest of the series needs. It depends on no other series. The three builds of Part V also assume a shell, `git`, and the ability to set an API key in a `.env` file.
 
-Thirty posts in five parts. Reading order is linear; the six posts marked ★ were
-added after the first draft and slot into the flow where they belong.
+## How a post is organised
 
-### Part I — Foundations
+Each post opens with a short summary, its prerequisites, and what the reader will be able to do afterwards, then works through numbered sections from the question to the answer, and closes with what can go wrong, the common pitfalls, further reading, and what to read next. Examples come before formalism: a concrete call, trace, or cost table first, the general rule afterwards. Every post names the layer a technique touches and the operation it performs, using the vocabulary fixed in the [notation guide](notation_guide.md). The figures read correctly in light and dark mode. Where a post has review questions, the series website shows them, with hints and explanations, beside the post.
 
-| #  | Title | Folder |
-|----|-------|--------|
-| 01 | [Why context engineering — and why now](posts/01-why-context-engineering/index.md) | `01-why-context-engineering` |
-| 02 | [The six layers of context](posts/02-six-layers-of-context/index.md) | `02-six-layers-of-context` |
-| 03 | [How LLMs actually read context](posts/03-how-llms-read-context/index.md) | `03-how-llms-read-context` |
-| 04 | [Tokens, windows, and budgets](posts/04-tokens-windows-budgets/index.md) | `04-tokens-windows-budgets` |
-| 05 ★ | [The economics of context — pricing, caching, latency](posts/05-economics-of-context/index.md) | `05-economics-of-context` |
-| 06 | [Five context failure modes](posts/06-context-failure-modes/index.md) | `06-context-failure-modes` |
+## What is measured, and what is cited
 
-### Part II — The four primitives (WSCI)
+Every price, token count, window size, and percentage in a post is labelled in the sentence that uses it: cited to a dated provider page or paper (the full entry is in [REFERENCES.md](REFERENCES.md)), produced by a snippet or companion test the post names, or marked illustrative. Model names, prices, and windows are stated as of early 2026 and are expected to go stale; the posts say so where they quote them. Nothing unmeasured is presented as a benchmark result, and the information retention ratio of post 12 is labelled a teaching construct, not a standard metric.
 
-| #  | Title | Folder |
-|----|-------|--------|
-| 07 | [Write, select, compress, isolate](posts/07-write-select-compress-isolate/index.md) | `07-write-select-compress-isolate` |
-| 08 | [Write strategies](posts/08-write-strategies/index.md) | `08-write-strategies` |
-| 09 | [Select strategies](posts/09-select-strategies/index.md) | `09-select-strategies` |
-| 10 ★ | [Data ingestion and document pipelines](posts/10-data-ingestion-pipelines/index.md) | `10-data-ingestion-pipelines` |
-| 11 | [RAG in depth](posts/11-rag-in-depth/index.md) | `11-rag-in-depth` |
-| 12 | [Compress strategies](posts/12-compress-strategies/index.md) | `12-compress-strategies` |
-| 13 | [Isolate strategies](posts/13-isolate-strategies/index.md) | `13-isolate-strategies` |
+## The code
 
-### Part III — The layers in depth
+Seven companions live under [code/](code/), each a self-contained Python project with its own README, `pyproject.toml`, and tests:
 
-| #  | Title | Folder |
-|----|-------|--------|
-| 14 | [The system prompt as software](posts/14-system-prompt-as-software/index.md) | `14-system-prompt-as-software` |
-| 15 | [Tools and MCP](posts/15-tools-and-mcp/index.md) | `15-tools-and-mcp` |
-| 16 | [Memory systems](posts/16-memory-systems/index.md) | `16-memory-systems` |
-| 17 | [Advanced retrieval](posts/17-advanced-retrieval/index.md) | `17-advanced-retrieval` |
-| 18 ★ | [Context for reasoning models](posts/18-reasoning-model-context/index.md) | `18-reasoning-model-context` |
-| 19 ★ | [Multimodal context — images, PDF pages, and audio](posts/19-multimodal-context/index.md) | `19-multimodal-context` |
+| Directory | What it is | Post |
+|---|---|---|
+| [code/11-rag-from-scratch/](code/11-rag-from-scratch/) | chunking, BM25, and reciprocal rank fusion | [11](posts/11-rag-in-depth/index.md) |
+| [code/15-tool-schemas/](code/15-tool-schemas/) | a tool-catalogue token budget and schema validation | [15](posts/15-tools-and-mcp/index.md) |
+| [code/15-mcp-quickstart/](code/15-mcp-quickstart/) | a minimal MCP server | [15](posts/15-tools-and-mcp/index.md) |
+| [code/20-eval-ragas/](code/20-eval-ragas/) | a golden set, a regression gate, and an LLM judge | [20](posts/20-evaluation/index.md) |
+| [code/28-rag-chatbot/](code/28-rag-chatbot/) | the RAG chatbot build | [28](posts/28-build-rag-chatbot/index.md) |
+| [code/29-mcp-server-full/](code/29-mcp-server-full/) | the MCP server build | [29](posts/29-build-mcp-server/index.md) |
+| [code/30-email-reply-agent/](code/30-email-reply-agent/) | the capstone, against a fake mailbox | [30](posts/30-capstone-email-reply-agent/index.md) |
 
-### Part IV — Production concerns
+The four smaller companions (11, both 15s, and 20) have an offline core: their test suites run with no API key and no network. Each installs and tests from its own directory:
 
-| #  | Title | Folder |
-|----|-------|--------|
-| 20 | [Evaluation](posts/20-evaluation/index.md) | `20-evaluation` |
-| 21 ★ | [Structured output and guardrails](posts/21-structured-output-guardrails/index.md) | `21-structured-output-guardrails` |
-| 22 | [Observability, tracing, and cost](posts/22-observability/index.md) | `22-observability` |
-| 23 | [Security and prompt injection](posts/23-security/index.md) | `23-security` |
-| 24 ★ | [Privacy, PII, and data governance](posts/24-privacy-and-governance/index.md) | `24-privacy-and-governance` |
-| 25 | [Long context vs. RAG — a decision framework](posts/25-long-context-vs-rag/index.md) | `25-long-context-vs-rag` |
-
-### Part V — Workflow & builds
-
-| #  | Title | Folder |
-|----|-------|--------|
-| 26 | [The modern agentic workflow](posts/26-modern-agentic-workflow/index.md) | `26-modern-agentic-workflow` |
-| 27 | [Remote agentic workflow](posts/27-remote-agentic-workflow/index.md) | `27-remote-agentic-workflow` |
-| 28 | [Build #1 — RAG chatbot from scratch](posts/28-build-rag-chatbot/index.md) | `28-build-rag-chatbot` |
-| 29 | [Build #2 — MCP server from scratch](posts/29-build-mcp-server/index.md) | `29-build-mcp-server` |
-| 30 | [Capstone — Email reply agent](posts/30-capstone-email-reply-agent/index.md) | `30-capstone-email-reply-agent` |
-
----
-
-## 🧰 Reference assets
-
-| Asset | What it is |
-|-------|-----------|
-| [`CHEATSHEET.md`](CHEATSHEET.md) | Single printable page: six layers, WSCI, five failure modes, debug checklist. |
-| [`GLOSSARY.md`](GLOSSARY.md) | Every term used in any post, alphabetised, one-line definitions. |
-| [`REFERENCES.md`](REFERENCES.md) | Master bibliography for every citation in the series. |
-| [`poster/`](poster/) | *One page of context engineering* — thirty posts in eight panels, drawn by hand, light and dark. Prints at A2. |
-| [`assets/poster/`](assets/poster/) | A2 reference-architecture poster: every concept on one canvas. |
-
----
-
-## 🗂 Repository layout
-
-```
-context-engineering/
-├── README.md              ← you are here
-├── GLOSSARY.md            ← one-line term definitions
-├── CHEATSHEET.md          ← printable single page
-├── REFERENCES.md          ← master bibliography
-├── CONTRIBUTING.md        ← style guide and PR rules
-├── LICENSE                ← CC-BY 4.0 (prose) + MIT (code)
-│
-├── poster/                ← the drawn one-page reference sheet
-│   ├── one-page-of-context-engineering.svg
-│   └── one-page-of-context-engineering.excalidraw
-│
-├── posts/                 ← one folder per post
-│   └── NN-kebab-slug/
-│       ├── index.md       ← the post
-│       ├── diagrams/      ← post-specific SVGs
-│       │   └── excalidraw/  ← the editable scenes behind them
-│       └── snippets/      ← inline code shown in the post
-│
-├── code/                  ← runnable companions (offline-testable cores)
-│   ├── 11-rag-from-scratch/     ← chunk · BM25 · RRF
-│   ├── 15-tool-schemas/         ← token budget · schema validation
-│   ├── 15-mcp-quickstart/       ← ~60-line MCP server
-│   ├── 20-eval-ragas/           ← golden set · gate · judge
-│   ├── 28-rag-chatbot/          ← full build (Post 28)
-│   ├── 29-mcp-server-full/      ← full build (Post 29)
-│   └── 30-email-reply-agent/    ← capstone (Post 30)
-│
-├── assets/
-│   ├── diagrams/
-│   │   └── exports/       ← rendered hero SVGs used by posts
-│   ├── images/
-│   ├── animations/
-│   └── poster/            ← reference-architecture poster
+```bash
+cd code/11-rag-from-scratch
+python -m pip install -e ".[dev]"
+pytest
 ```
 
-**Naming rule.** `posts/NN-kebab-slug/`. `NN` is a stable two-digit number; the slug never changes after publishing (URL stability).
+The three builds use [uv](https://docs.astral.sh/uv/):
 
----
+```bash
+cd code/29-mcp-server-full
+uv sync
+uv run pytest -q
+```
 
-## 💻 Code companions
+Each companion's README gives its quickstart, the keys a live run needs (where it needs any, from its `.env.example` copied to `.env`), and what is deliberately stubbed. The scripts under a post's `snippets/` run from the series root with a plain `python` and the standard library unless the post says otherwise.
 
-Runnable companions live under [`code/`](code/) and are MIT-licensed. They use plain Python and the official provider SDKs first; a framework appears only when it materially changes the shape of the code.
+## Reference pages
 
-| Companion | Code | Post |
-|-----------|------|------|
-| RAG from scratch (chunk · BM25 · RRF) | [`code/11-rag-from-scratch/`](code/11-rag-from-scratch/) | [Post 11](posts/11-rag-in-depth/index.md) |
-| Tool schemas (token budget · validation) | [`code/15-tool-schemas/`](code/15-tool-schemas/) | [Post 15](posts/15-tools-and-mcp/index.md) |
-| MCP quickstart (~60-line server) | [`code/15-mcp-quickstart/`](code/15-mcp-quickstart/) | [Post 15](posts/15-tools-and-mcp/index.md) |
-| Eval harness (golden set · gate · judge) | [`code/20-eval-ragas/`](code/20-eval-ragas/) | [Post 20](posts/20-evaluation/index.md) |
-| RAG chatbot (full build) | [`code/28-rag-chatbot/`](code/28-rag-chatbot/) | [Post 28](posts/28-build-rag-chatbot/index.md) |
-| MCP server (full build) | [`code/29-mcp-server-full/`](code/29-mcp-server-full/) | [Post 29](posts/29-build-mcp-server/index.md) |
-| Email reply agent (capstone) | [`code/30-email-reply-agent/`](code/30-email-reply-agent/) | [Post 30](posts/30-capstone-email-reply-agent/index.md) |
+- [Cheatsheet](CHEATSHEET.md): one printable page with the six layers, WSCI, the five failure modes, the select pipeline, the system prompt's five blocks, and the defaults the posts recommend.
+- [Glossary](GLOSSARY.md): every term the series uses, one entry each.
+- [Notation guide](notation_guide.md): the fixed vocabulary, the claim labels, the spelling, and the figure colours.
+- [References](REFERENCES.md): every paper, provider page, and piece of documentation the posts cite, grouped by post.
 
-Each code folder ships its own `README.md`, `pyproject.toml`, `.env.example`, and `tests/`. The four smaller companions have an offline-runnable core: their whole test suite passes with no API key and no network.
+## The poster
 
----
+[poster/one-page-of-context-engineering.svg](poster/one-page-of-context-engineering.svg) puts the whole series on one sheet, drawn by hand, in eight panels: the six layers in the order they are assembled, the four operations, the five failure modes and the first move against each, the window as a budget and what it costs, retrieval end to end, the system prompt beside the tool catalogue, the evidence worth keeping, and the security floor. It reads in light and dark mode and prints at A2.
 
-## 🤝 Contributing
+## Corrections and feedback
 
-Typos, broken links, and clarity fixes are very welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for style conventions.
+This repository is the published source of the series and is maintained by its author. It does not take pull requests or issues. Provider prices, model names, and documentation pages move quickly, so a dead link or a stale figure is a real bug: corrections and suggestions go through the series website.
 
-For larger changes — a new post, a new hero diagram, a new code companion — please **open an issue first** so we can align on scope before you spend time on a PR.
+## License
 
-Found a factual error or an outdated benchmark? File an issue with a citation; that is the most valuable kind of contribution this series can receive.
-
----
-
-## 📜 License
-
-This repository is **dual-licensed**:
-
-- **Prose, diagrams, illustrations, and hero images** — [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Share and adapt freely with attribution.
-- **Code** under [`code/`](code/) and [`tools/`](tools/) — [MIT](LICENSE).
-
-See [LICENSE](LICENSE) for full terms and the required attribution line.
-
----
-
-<div align="center">
-
-⭐ **If you find this useful, star the repo so others can find it.** ⭐
-
-</div>
+Prose, questions, and figures are licensed under CC BY 4.0. Code is licensed under MIT. See [LICENSE](LICENSE).

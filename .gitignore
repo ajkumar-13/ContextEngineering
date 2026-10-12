@@ -7,14 +7,16 @@ desktop.ini
 *.swp
 *~
 
-# ===== Workspace-only folders (not shipped) =====
-templates/
-tools/
-assets/
-assets/diagrams/src/
-assets/diagrams/style/
+# ===== Claude Code: local settings =====
+.claude/
+
+# ===== Poster and diagram working files (not shipped) =====
+# poster/: only the rendered sheet is published.
 /poster/README.md
 /poster/*.excalidraw
+# Excalidraw working directories: the editable scenes and their notes. The rendered SVG is
+# published one level up, in posts/NN-slug/diagrams/; figure sources in posts/NN-slug/diagrams/src/
+# are published with their figures.
 /posts/*/diagrams/excalidraw/
 
 # ===== Loose notes / drafts / archives =====
@@ -65,5 +67,18 @@ yarn-error.log*
 # ===== Diagram render byproducts =====
 *.drawio.bkp
 *.excalidraw.bak
+.preview/
 
+# Maintainers' question viewer, built on demand by series-standard/tools/build_questions_html.py
+.review/
 
+# Authoring material (series-standard Section 3.1): kept on the author's machine, not published.
+# The website reads posts/, code/, series.yaml, poster/*.svg and the root reference pages only.
+# assets/ holds the design tokens, the old diagram sources and the Excalidraw generator.
+/plan.md
+/CONTRIBUTING.md
+/verify/
+/tools/
+/templates/
+/audits/
+/assets/

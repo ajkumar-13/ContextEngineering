@@ -1,158 +1,165 @@
-# Cheatsheet — Context Engineering on one page
+# Context engineering cheatsheet
+
+One page: the six layers, the four operations, the five failure modes, and the defaults the posts recommend. Print it, pin it. Terms are defined in the [glossary](GLOSSARY.md) and the fixed vocabulary in the [notation guide](notation_guide.md). Every number on this page is either cited (the source is named beside it, and the full entry is in [REFERENCES.md](REFERENCES.md)) or is a default the posts recommend and label as such.
 
 ---
 
-## The six layers (in order)
+## The six layers, in the order they are sent
 
-| # | Layer | One-liner |
-|---|-------|-----------|
-| 1 | **System prompt** | Identity · Rules · Format · Knowledge · Tools |
-| 2 | **Tools** | Typed schemas; descriptions are part of the prompt |
-| 3 | **Memory** | Episodic · Semantic · Procedural — each with its own store |
-| 4 | **Retrieved chunks** | RAG / search / KG output, packed bookend-style |
-| 5 | **Conversation history** | Recent turns; older turns get summarised |
-| 6 | **User instruction** | Last in; pinned; never compressed |
+| # | Layer | What it carries | Lifetime |
+|---|---|---|---|
+| 01 | **System prompt** | Five blocks: identity, rules, format, knowledge, tool-use guidance (when to reach for which tool) | stable prefix |
+| 02 | **Tools and MCP descriptions** | The schema of every callable tool; its description is prompt text | stable prefix |
+| 03 | **Memory and state** | Recalled episodic, semantic, and procedural memory; task state | per-turn injection |
+| 04 | **Retrieved chunks** | Evidence selected for this turn, packed bookend-style with citations | per-turn injection |
+| 05 | **Conversation history** | Earlier turns of this session; older turns get summarised | growing tail |
+| 06 | **User instruction** | The current request: last in, never compressed | trigger |
 
----
-
-## WSCI — the four operations on context
-
-| Op | Direction | Scope | Typical move |
-|----|-----------|-------|---------------|
-| **W**rite | out of context | persistent | save to memory / scratchpad / index |
-| **S**elect | into context | per call | RAG, tool selection, memory recall |
-| **C**ompress | within context | per call | windowing, summarise, prune, clear tool results |
-| **I**solate | across context | per task | sub-agent with its own context window |
+The system prompt's tools block holds only the guidance on when to use each tool; the schemas themselves are layer 02 ([post 14](posts/14-system-prompt-as-software/index.md), [post 15](posts/15-tools-and-mcp/index.md)). Layers 01 and 02 come first so that they cache.
 
 ---
 
-## Five context-failure modes
+## WSCI: the four operations on context
 
-| Mode | Symptom | First fix |
-|------|---------|-----------|
-| Distraction | Model latches on to a stray phrase | tighten Select; cut noise |
-| Confusion | Right info present, wrong choice made | clearer rules; examples |
-| Conflict | Contradictory info in context | resolve in retrieval / dedupe |
-| Lost-in-middle | Long context, middle ignored | bookend packing |
-| Tool-storm | Repeated useless tool calls | catalog trimming; better descriptions |
-
----
-
-## RAG pipeline (offline | online)
-
-**Offline:** ingest (parse / OCR / table-extract; attach provenance at ingest) → chunk (400–600 tok, sentence-aware, overlap 50–100) → contextual header (1 LLM call/chunk) → embed → index (dense + BM25).
-
-**Online:** query rewrite → hybrid search top-50 → RRF merge → cross-encoder rerank top-5 → bookend pack → generate with citations.
-
-**Eval (Ragas):** faithfulness · answer relevancy · context precision · context recall.
+| Operation | Direction | Scope | Typical move |
+|---|---|---|---|
+| **Write** | out of the window | spans several windows | park information in memory, a scratchpad, `AGENTS.md`, or an index |
+| **Select** | into the window | one window | RAG, tool selection, memory recall, few-shot picking |
+| **Compress** | out of the window | one window | windowing, summarisation, tool-result clearing, priority pruning |
+| **Isolate** | into the window | spans several windows | a sub-agent with its own window, each running its own select |
 
 ---
 
-## System-prompt five blocks
+## The five failure modes
+
+| Mode | Symptom | First fix | Operation |
+|---|---|---|---|
+| Distraction | The model latches on to irrelevant material | Lower top-k, add a reranker, scope the index | Select |
+| Confusion | The right information is present, the wrong choice is made | Explicit, motivated, exemplified rules; push rules into code | Select (of rules) |
+| Conflict | Contradictory information in the window | Provenance and recency stamp plus a precedence rule; dedupe the candidates | Compress, select |
+| Lost-in-the-middle | Long context, the middle is ignored | Bookend packing; summarise old history; split into sub-agents | Compress, isolate |
+| Tool-storm | Repeated, redundant, or useless tool calls | Trim the catalogue, add a stop budget, cap result size | Isolate, select |
+
+A bug report that fits none of the five is a model problem, not a context problem ([post 06](posts/06-context-failure-modes/index.md)). Poisoning is a security term ([post 23](posts/23-security/index.md)).
+
+---
+
+## The select pipeline and RAG
+
+**Offline:** source, parse (born-digital extraction, layout-aware parsing, or OCR), clean, enrich (provenance at ingest), chunk, index (dense and BM25). Default chunk for prose: 400 to 600 tokens, sentence-aware, 10 to 20 percent overlap. Contextual retrieval adds a short generated header to each chunk before indexing (Anthropic, 2024).
+
+**Online:** query (rewrite, HyDE, decompose), candidates (dense top-30 plus BM25 top-30, fused by reciprocal rank fusion into a top-50 candidate set), rerank (a cross-encoder keeps the top-5), pack (bookends, citations, dedupe), generate. These are the series' recommended starting defaults, not measurements ([post 09](posts/09-select-strategies/index.md)).
+
+**Measure:** recall@N on the candidate set, precision@k on the packed set. **Ragas:** faithfulness, answer relevancy, context precision, context recall.
+
+---
+
+## The system prompt in five blocks
 
 ```
-# Identity     — who the model is
-# Rules        — one-concept-per-rule, motivated by failure
-# Format       — output shape; examples beat instructions
-# Knowledge    — facts the model needs once
-# Tools        — what's available + when to use each
+# Identity     who the model is
+# Rules        one concept per rule, each motivated by a real failure
+# Format       output shape; examples beat instructions
+# Knowledge    facts the model needs on every call
+# Tools        when to reach for which tool (the schemas are layer 02)
 ```
 
-Six rules for rules: *one concept per rule · motivated by real failure · positive over negative · specific over vague · examples beat instructions · reviewed like code.*
+Six rules for rules: one concept per rule; motivated by a real failure; positive over negative; specific over vague; examples beat instructions; reviewed like code.
 
 ---
 
-## Tool design — iron triangle
+## Tool design
 
-Catalog size · description quality · runtime selection cost — **pick two**.
+**Iron triangle:** catalogue size, per-tool description quality, runtime selection. A design can keep any two.
 
-Each tool description has six elements:
-
-1. What it does · 2. When to use it · 3. When NOT to use it · 4. Parameter schema with descriptions · 5. Structured return shape · 6. Failure modes.
+**One tool description has six parts:** a `verb_object` name; a one-line summary; when to use it; when not to use it; parameters with types and descriptions; one worked example.
 
 ---
 
-## Memory taxonomy
+## Memory
 
-| Kind | What | Schema | Retrieval | Decay |
-|------|------|--------|-----------|-------|
-| Episodic | Past events | `{when, what, who, summary}` | similarity | recency |
-| Semantic | Facts / prefs | `{kind, content, conf, source}` | exact + similarity | confirm-or-decay |
-| Procedural | How-to | `skill.md`, hook scripts | name lookup | versioned |
+| Kind | Holds | Key fields | Retrieval | Ageing |
+|---|---|---|---|---|
+| Episodic | past events | `subject`, `event_type`, `summary`, `source`, `timestamp`, `confidence` | reference recall or recent episodes | confidence decays without confirmation |
+| Semantic | facts and preferences | as episodic, with `kind` in place of `event_type` | top-k background facts on each turn | confirm or decay; never overwrite silently |
+| Procedural | rules and routines | `trigger`, `rule`, `scope` | trigger matching, not similarity | edited by hand, reviewed like code |
 
 ---
 
 ## Compression triggers
 
-- Soft @ **80 %** of budget — windowing, tool-result clearing, P3 drop.
-- Hard @ **95 %** of budget — summarise older turns to ~200-tok brief.
-- Measure with **IRR** (information retention ratio) on a replay set.
+- Soft trigger at **80 percent** of the budget: tool-result clearing, drop the lowest priority band; stop if the prompt falls under 60 percent.
+- Hard trigger at **95 percent**: summarise or semantically chunk the older part of the conversation; keep the original turns in a separate log.
+- Check every summary policy with the information retention ratio on a replay set (a teaching construct, not a standard metric).
+
+The thresholds are the series' recommended defaults ([post 12](posts/12-compress-strategies/index.md)).
 
 ---
 
-## Cost & caching
+## Cost and caching
 
-- **Input vs output asymmetry** — output tokens cost ~5x input; keep generations tight.
-- **Cache read ≈ 10 %** of the base input price; **cache write = 1.25x** (5-min TTL) or **2x** (1-hour TTL) input.
-- **TTL tiers:** 5-minute (default) and 1-hour.
-- **Freeze the prefix** — stable system prompt and tools first, volatile / user content last, so the cached prefix stays intact.
-- **Watch the cache-hit rate** — a dip means the prefix is churning; find what moved.
+Figures from Anthropic's "Pricing" and "Prompt caching" pages, as of early 2026; they go stale ([post 05](posts/05-economics-of-context/index.md)).
 
-**Reasoning models:** thinking tokens count against the budget — keep reasoning traces out of downstream context and out of the cached prefix.
+- **Input against output:** output tokens cost about five times input tokens at every tier. Keep generations tight.
+- **Cache read:** about a tenth of the base input price. **Cache write:** 1.25 times the input price for the five-minute tier, 2 times for the one-hour tier.
+- **Freeze the prefix:** layers 01 and 02 first and byte-identical; every volatile byte last.
+- **Watch the cache-hit rate:** a drop means the prefix is churning; find what moved.
+
+**Reasoning models:** thinking tokens are billed as output and count against the budget; keep raw traces out of later prompts, the cached prefix, and memory ([post 18](posts/18-reasoning-model-context/index.md)).
 
 ---
 
-## Eval pyramid
+## Evaluation pyramid
 
 ```
-        online (production traffic + approval rate)
-      end-to-end (50–500 fixtures, regression-gated)
-   component (retriever, reranker, judge — each in isolation)
-unit (chunker, prompt assembly, send-gate — pure functions)
+            4. online       real users, real traffic, approval rate
+         3. end-to-end      the full pipeline on gold tasks, regression-gated
+      2. component          retriever, reranker, prompt block, each alone
+   1. unit                  deterministic functions: chunker, prompt assembly, send gate
 ```
 
-LLM-judge biases to watch: **position · length · self-preference · rubric drift.**
+LLM-as-judge biases to watch: position, length, self-preference, rubric drift.
 
-**Guardrails:** validate output against a schema · retry-on-invalid · moderate / redact before returning.
-
----
-
-## Observability — four headline numbers
-
-1. Cost per session
-2. p95 latency
-3. Quality (approval rate or eval score)
-4. Error rate, by kind
+**Output guardrails:** validate against a schema, retry on failure with a cap, moderate or redact, then return.
 
 ---
 
-## Security — four architectural defences
+## Observability: the four headline numbers
 
-1. The **model is not the permission system** — enforce in code.
-2. **Constrain blast radius** — least-privileged credentials, sandboxed tools.
-3. **Filter at trust boundaries** — validate args, structure tool returns.
-4. **Never silently merge attacker text** into trusted context.
+1. Cost per session (median and p95).
+2. Latency, p95.
+3. Quality: the end-to-end eval score or explicit feedback.
+4. Error rate, by kind.
 
 ---
 
-## Long context vs RAG — the four-question test
+## Security: the four architectural defences
 
-1. Does the answer require *all* of the document?
-2. Is the document available at query time?
-3. Is the cost of full-context inference acceptable?
-4. Does the model do better with the whole or the relevant part?
+1. The model is not the permission system: enforce permissions in code.
+2. Constrain tool blast radius: least-privileged credentials, sandboxed tools.
+3. Filter at trust boundaries: validate arguments, structure tool returns.
+4. Never silently merge attacker text into trusted context.
 
-If yes-yes-yes-whole → long context. If no anywhere → RAG. Most production systems route per-query.
+---
+
+## Long context or RAG: the four-question test
+
+1. Does the corpus fit in one window, with budget left for the conversation?
+2. Is the corpus stable enough to cache?
+3. Does each query need most of the corpus, or a small slice?
+4. Can the model actually use the long context for this task?
+
+Apply them in order. A no to question 1 settles it for retrieval; the other three weigh caching, the shape of the queries, and what the long-context benchmarks show. Most production systems route per query ([post 25](posts/25-long-context-vs-rag/index.md)).
 
 ---
 
 ## Workflow checklist
 
-- [ ] Project has an `AGENTS.md` (five blocks).
-- [ ] Skills directory for repeated tasks.
+- [ ] The project has an `AGENTS.md` in the five-block form.
+- [ ] Skills for repeated tasks.
 - [ ] Hooks for dangerous commands and post-edit checks.
-- [ ] Auto-compaction enabled; manual `/compact` known to the team.
+- [ ] Auto-compaction on; the team knows `/compact` from `/clear`.
 - [ ] Sub-agent budgets capped.
-- [ ] Eval suite gates the deploy.
-- [ ] Trace store on every call.
-- [ ] Send-gate (or equivalent) on every outbound action.
+- [ ] An eval suite gates the deploy.
+- [ ] A trace on every call.
+- [ ] A send gate, or its equivalent, on every outbound action.

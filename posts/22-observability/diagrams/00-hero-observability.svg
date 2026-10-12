@@ -5,32 +5,32 @@
 
   <style><![CDATA[
     :root{
-      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
-      --ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;
-      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
-      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;
+      --ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;
+      --ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;
+      --ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;
+      --ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-neutral-1:#EAEAE4;
     }
     @media (prefers-color-scheme:dark){
       :root{
-        --ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;
-        --ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;
-        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
-        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;
+        --ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;
+        --ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;
+        --ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;
+        --ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-neutral-1:#1F2229;
       }
     }
-    .bg{fill:var(--ce-bg);}
-    .card{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
-    .node{fill:var(--ce-surface);stroke:var(--ce-ink);stroke-width:1.5;}
-    .edge{fill:none;stroke:var(--ce-ink-muted);stroke-width:1;}
-    .rail{fill:none;stroke:var(--ce-border);stroke-width:0.75;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
-    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
-    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
-    .kind{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ce-ink);}
-    .num{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-weight:700;font-size:19px;fill:var(--ce-ink);}
-    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:10.5px;fill:var(--ce-ink-muted);}
+    .bg{fill:var(--ctx-bg);}
+    .card{fill:var(--ctx-surface);stroke:var(--ctx-border);stroke-width:1;}
+    .node{fill:var(--ctx-surface);stroke:var(--ctx-ink);stroke-width:1.5;}
+    .edge{fill:none;stroke:var(--ctx-ink-muted);stroke-width:1;}
+    .rail{fill:none;stroke:var(--ctx-border);stroke-width:0.75;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ctx-ink);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ctx-ink-muted);}
+    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ctx-ink);text-transform:uppercase;letter-spacing:0.06em;}
+    .kind{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ctx-ink);}
+    .num{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-weight:700;font-size:19px;fill:var(--ctx-ink);}
+    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:10.5px;fill:var(--ctx-ink-muted);}
     .tag{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:10px;fill:#FFFFFF;font-weight:600;}
-    .cap{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:10.5px;fill:var(--ce-ink-muted);}
+    .cap{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:10.5px;fill:var(--ctx-ink-muted);}
   ]]></style>
 
   <rect class="bg" width="960" height="360"/>
@@ -43,7 +43,7 @@
   <!-- Root span -->
   <g>
     <rect class="node" x="48" y="112" width="212" height="34" rx="6"/>
-    <rect x="48" y="112" width="6" height="34" rx="3" fill="var(--ce-ink)"/>
+    <rect x="48" y="112" width="6" height="34" rx="3" fill="var(--ctx-ink)"/>
     <text class="kind" x="64" y="128">turn · session-A1B2</text>
     <text class="mono" x="64" y="140">root span</text>
     <text class="mono" x="248" y="133" text-anchor="end">5.2 s · $0.043</text>
@@ -56,7 +56,7 @@
   <g>
     <line class="edge" x1="70" y1="177" x2="88" y2="177"/>
     <rect class="node" x="88" y="160" width="372" height="34" rx="6"/>
-    <rect x="88" y="160" width="6" height="34" rx="3" fill="var(--ce-primary)"/>
+    <rect x="88" y="160" width="6" height="34" rx="3" fill="var(--ctx-primary)"/>
     <text class="kind" x="104" y="174">assemble_context</text>
     <text class="mono" x="104" y="187">memory · tools</text>
     <text class="mono" x="448" y="180" text-anchor="end">0.05 s · $0.001</text>
@@ -66,7 +66,7 @@
   <g>
     <line class="edge" x1="70" y1="217" x2="88" y2="217"/>
     <rect class="node" x="88" y="200" width="372" height="34" rx="6"/>
-    <rect x="88" y="200" width="6" height="34" rx="3" fill="var(--ce-accent)"/>
+    <rect x="88" y="200" width="6" height="34" rx="3" fill="var(--ctx-accent)"/>
     <text class="kind" x="104" y="214">retrieve_rag</text>
     <text class="mono" x="104" y="227">rewrite · search · rerank</text>
     <text class="mono" x="448" y="220" text-anchor="end">0.40 s · $0.003</text>
@@ -76,7 +76,7 @@
   <g>
     <line class="edge" x1="70" y1="257" x2="88" y2="257"/>
     <rect class="node" x="88" y="240" width="372" height="34" rx="6"/>
-    <rect x="88" y="240" width="6" height="34" rx="3" fill="var(--ce-primary)"/>
+    <rect x="88" y="240" width="6" height="34" rx="3" fill="var(--ctx-primary)"/>
     <text class="kind" x="104" y="254">llm_call · mid-tier</text>
     <text class="mono" x="104" y="267">12 400 tok in / 380 tok out</text>
     <text class="mono" x="448" y="260" text-anchor="end">3.80 s · $0.038</text>
@@ -86,7 +86,7 @@
   <g>
     <line class="edge" x1="70" y1="297" x2="88" y2="297"/>
     <rect class="node" x="88" y="280" width="372" height="34" rx="6"/>
-    <rect x="88" y="280" width="6" height="34" rx="3" fill="var(--ce-warn)"/>
+    <rect x="88" y="280" width="6" height="34" rx="3" fill="var(--ctx-warn)"/>
     <text class="kind" x="104" y="294">tool_call · issue_refund</text>
     <text class="mono" x="104" y="307">db_query nested</text>
     <text class="mono" x="448" y="300" text-anchor="end">0.20 s</text>
@@ -96,7 +96,7 @@
   <g>
     <line class="edge" x1="70" y1="335" x2="88" y2="335"/>
     <rect class="node" x="88" y="320" width="372" height="30" rx="6"/>
-    <rect x="88" y="320" width="6" height="30" rx="3" fill="var(--ce-success)"/>
+    <rect x="88" y="320" width="6" height="30" rx="3" fill="var(--ctx-success)"/>
     <text class="kind" x="104" y="339">sub_agent · own nested trace</text>
     <text class="mono" x="448" y="339" text-anchor="end">0.50 s · $0.002</text>
   </g>
@@ -110,7 +110,7 @@
   <!-- Card 1: cost per session (primary) -->
   <g>
     <rect class="card" x="560" y="112" width="184" height="100" rx="8"/>
-    <rect x="560" y="112" width="184" height="4" rx="2" fill="var(--ce-primary)"/>
+    <rect x="560" y="112" width="184" height="4" rx="2" fill="var(--ctx-primary)"/>
     <text class="h" x="576" y="136">Cost / session</text>
     <text class="num" x="576" y="166">$0.043</text>
     <text class="cap" x="576" y="184">median · p95</text>
@@ -120,7 +120,7 @@
   <!-- Card 2: p95 latency (accent) -->
   <g>
     <rect class="card" x="760" y="112" width="184" height="100" rx="8"/>
-    <rect x="760" y="112" width="184" height="4" rx="2" fill="var(--ce-accent)"/>
+    <rect x="760" y="112" width="184" height="4" rx="2" fill="var(--ctx-accent)"/>
     <text class="h" x="776" y="136">Latency p95</text>
     <text class="num" x="776" y="166">5.2 s</text>
     <text class="cap" x="776" y="184">tail, not average</text>
@@ -130,7 +130,7 @@
   <!-- Card 3: quality (success) -->
   <g>
     <rect class="card" x="560" y="224" width="184" height="100" rx="8"/>
-    <rect x="560" y="224" width="184" height="4" rx="2" fill="var(--ce-success)"/>
+    <rect x="560" y="224" width="184" height="4" rx="2" fill="var(--ctx-success)"/>
     <text class="h" x="576" y="248">Quality</text>
     <text class="num" x="576" y="278">0.87</text>
     <text class="cap" x="576" y="296">LLM-judge · thumbs</text>
@@ -140,7 +140,7 @@
   <!-- Card 4: error rate (alert) -->
   <g>
     <rect class="card" x="760" y="224" width="184" height="100" rx="8"/>
-    <rect x="760" y="224" width="184" height="4" rx="2" fill="var(--ce-alert)"/>
+    <rect x="760" y="224" width="184" height="4" rx="2" fill="var(--ctx-alert)"/>
     <text class="h" x="776" y="248">Error rate</text>
     <text class="num" x="776" y="278">1.4 %</text>
     <text class="cap" x="776" y="296">by kind, never merged</text>

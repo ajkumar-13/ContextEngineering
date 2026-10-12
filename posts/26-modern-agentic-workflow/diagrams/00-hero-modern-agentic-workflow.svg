@@ -5,33 +5,33 @@
 
   <style><![CDATA[
     :root{
-      --ce-bg:#FAFAF7;--ce-surface:#FFFFFF;--ce-ink:#1A1A1A;--ce-ink-muted:#5C5C5C;
-      --ce-ink-subtle:#9A9A9A;--ce-border:#D9D9D4;
-      --ce-primary:#5B7FBF;--ce-accent:#D98E5F;--ce-success:#5C9E78;
-      --ce-warn:#B8895A;--ce-alert:#C66B5E;--ce-neutral-1:#EAEAE4;
+      --ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;
+      --ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;
+      --ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;
+      --ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-neutral-1:#EAEAE4;
     }
     @media (prefers-color-scheme:dark){
       :root{
-        --ce-bg:#0E0F12;--ce-surface:#16181C;--ce-ink:#F2F2EE;--ce-ink-muted:#B4B4AE;
-        --ce-ink-subtle:#6E6E68;--ce-border:#2A2D33;
-        --ce-primary:#8BA8E0;--ce-accent:#E8B088;--ce-success:#7FBF9B;
-        --ce-warn:#D4B58A;--ce-alert:#D88880;--ce-neutral-1:#1F2229;
+        --ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;
+        --ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;
+        --ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;
+        --ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-neutral-1:#1F2229;
       }
     }
-    .bg{fill:var(--ce-bg);}
-    .card{fill:var(--ce-surface);stroke:var(--ce-border);stroke-width:1;}
-    .root{fill:var(--ce-surface);stroke:var(--ce-ink);stroke-width:1.5;}
-    .dir{fill:var(--ce-neutral-1);stroke:var(--ce-border);stroke-width:1;}
-    .flow{fill:none;stroke:var(--ce-ink-muted);stroke-width:1;}
-    .loopring{fill:none;stroke:var(--ce-primary);stroke-width:1.5;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ce-ink);}
-    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ce-ink);text-transform:uppercase;letter-spacing:0.06em;}
-    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ce-ink);}
-    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ce-ink-muted);}
-    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ce-ink-muted);}
-    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:12px;fill:var(--ce-ink);}
-    .monos{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:10px;fill:var(--ce-ink-muted);}
-    .loopt{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ce-primary);}
+    .bg{fill:var(--ctx-bg);}
+    .card{fill:var(--ctx-surface);stroke:var(--ctx-border);stroke-width:1;}
+    .root{fill:var(--ctx-surface);stroke:var(--ctx-ink);stroke-width:1.5;}
+    .dir{fill:var(--ctx-neutral-1);stroke:var(--ctx-border);stroke-width:1;}
+    .flow{fill:none;stroke:var(--ctx-ink-muted);stroke-width:1;}
+    .loopring{fill:none;stroke:var(--ctx-primary);stroke-width:1.5;}
+    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ctx-ink);}
+    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ctx-ink);text-transform:uppercase;letter-spacing:0.06em;}
+    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ctx-ink);}
+    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ctx-ink-muted);}
+    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ctx-ink-muted);}
+    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:12px;fill:var(--ctx-ink);}
+    .monos{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:10px;fill:var(--ctx-ink-muted);}
+    .loopt{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ctx-primary);}
     .chip{stroke-width:1;}
   ]]></style>
 
@@ -42,7 +42,7 @@
   <!-- Arrow marker -->
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="var(--ce-ink-muted)"/>
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--ctx-ink-muted)"/>
     </marker>
   </defs>
 
@@ -50,45 +50,45 @@
   <!-- repo root card -->
   <rect class="root" x="48" y="92" width="230" height="52" rx="8"/>
   <text class="h" x="64" y="114">Repo root</text>
-  <rect class="chip" x="150" y="100" width="118" height="20" rx="4" fill="var(--ce-neutral-1)" stroke="var(--ce-border)"/>
+  <rect class="chip" x="150" y="100" width="118" height="20" rx="4" fill="var(--ctx-neutral-1)" stroke="var(--ctx-border)"/>
   <text class="monos" x="160" y="114">AGENTS.md · CLAUDE.md</text>
   <text class="s" x="64" y="134">the per-project system prompt</text>
 
   <!-- .claude directory container -->
   <rect class="dir" x="48" y="158" width="360" height="170" rx="8"/>
-  <rect class="chip" x="64" y="150" width="86" height="18" rx="4" fill="var(--ce-surface)" stroke="var(--ce-border)"/>
+  <rect class="chip" x="64" y="150" width="86" height="18" rx="4" fill="var(--ctx-surface)" stroke="var(--ctx-border)"/>
   <text class="monos" x="72" y="163">.claude/</text>
 
   <!-- four artefact rows, colour + shape paired with label -->
   <!-- skills -->
   <g>
     <rect class="card" x="66" y="176" width="324" height="30" rx="6"/>
-    <rect x="66" y="176" width="5" height="30" rx="2" fill="var(--ce-primary)"/>
-    <circle cx="86" cy="191" r="5" fill="var(--ce-primary)"/>
+    <rect x="66" y="176" width="5" height="30" rx="2" fill="var(--ctx-primary)"/>
+    <circle cx="86" cy="191" r="5" fill="var(--ctx-primary)"/>
     <text class="l" x="100" y="195">skills/</text>
     <text class="s" x="152" y="195">procedural memory · one concern each</text>
   </g>
   <!-- sub-agents -->
   <g>
     <rect class="card" x="66" y="212" width="324" height="30" rx="6"/>
-    <rect x="66" y="212" width="5" height="30" rx="2" fill="var(--ce-accent)"/>
-    <path d="M81 222 h10 v10 h-10 z M89 214 h10 v10 h-10 z" fill="none" stroke="var(--ce-accent)" stroke-width="1.5"/>
+    <rect x="66" y="212" width="5" height="30" rx="2" fill="var(--ctx-accent)"/>
+    <path d="M81 222 h10 v10 h-10 z M89 214 h10 v10 h-10 z" fill="none" stroke="var(--ctx-accent)" stroke-width="1.5"/>
     <text class="l" x="100" y="231">agents/</text>
     <text class="s" x="152" y="231">isolated delegation with a tool budget</text>
   </g>
   <!-- hooks -->
   <g>
     <rect class="card" x="66" y="248" width="324" height="30" rx="6"/>
-    <rect x="66" y="248" width="5" height="30" rx="2" fill="var(--ce-alert)"/>
-    <path d="M82 259 h8 v8 h-8 z" fill="var(--ce-alert)"/>
+    <rect x="66" y="248" width="5" height="30" rx="2" fill="var(--ctx-alert)"/>
+    <path d="M82 259 h8 v8 h-8 z" fill="var(--ctx-alert)"/>
     <text class="l" x="100" y="267">hooks/</text>
     <text class="s" x="152" y="267">enforcement: format, test, block</text>
   </g>
   <!-- slash commands -->
   <g>
     <rect class="card" x="66" y="284" width="324" height="30" rx="6"/>
-    <rect x="66" y="284" width="5" height="30" rx="2" fill="var(--ce-success)"/>
-    <path d="M84 294 l-4 12 M92 294 l-4 12" stroke="var(--ce-success)" stroke-width="1.5" fill="none"/>
+    <rect x="66" y="284" width="5" height="30" rx="2" fill="var(--ctx-success)"/>
+    <path d="M84 294 l-4 12 M92 294 l-4 12" stroke="var(--ctx-success)" stroke-width="1.5" fill="none"/>
     <text class="l" x="100" y="303">commands/</text>
     <text class="s" x="152" y="303">slash shortcuts for repeated tasks</text>
   </g>
@@ -110,18 +110,18 @@
   <g transform="translate(772,246)">
     <circle class="loopring" r="52"/>
     <!-- arrowheads suggesting direction -->
-    <path d="M52 -6 L52 6 M46 0 L58 0" stroke="var(--ce-primary)" stroke-width="1.5" fill="none" transform="rotate(90)"/>
+    <path d="M52 -6 L52 6 M46 0 L58 0" stroke="var(--ctx-primary)" stroke-width="1.5" fill="none" transform="rotate(90)"/>
     <!-- three stage nodes -->
     <g>
-      <circle cx="0" cy="-52" r="20" fill="var(--ce-surface)" stroke="var(--ce-primary)" stroke-width="1.5"/>
+      <circle cx="0" cy="-52" r="20" fill="var(--ctx-surface)" stroke="var(--ctx-primary)" stroke-width="1.5"/>
       <text class="loopt" x="0" y="-48" text-anchor="middle">think</text>
     </g>
     <g>
-      <circle cx="45" cy="26" r="20" fill="var(--ce-surface)" stroke="var(--ce-primary)" stroke-width="1.5"/>
+      <circle cx="45" cy="26" r="20" fill="var(--ctx-surface)" stroke="var(--ctx-primary)" stroke-width="1.5"/>
       <text class="loopt" x="45" y="30" text-anchor="middle">act</text>
     </g>
     <g>
-      <circle cx="-45" cy="26" r="20" fill="var(--ce-surface)" stroke="var(--ce-primary)" stroke-width="1.5"/>
+      <circle cx="-45" cy="26" r="20" fill="var(--ctx-surface)" stroke="var(--ctx-primary)" stroke-width="1.5"/>
       <text class="loopt" x="-45" y="30" text-anchor="middle">observe</text>
     </g>
   </g>

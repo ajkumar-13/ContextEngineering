@@ -1,239 +1,251 @@
 # Glossary
 
-One-line definitions for every term used in this series. Sorted alphabetically. When a post introduces a term in depth, it links here.
+Every term the series uses, one entry each, in alphabetical order. A post that introduces a term in depth names it; this page gives the one-paragraph definition. The fixed vocabulary of the series (the six layers, the four operations, the five failure modes, the retrieval numbers) is defined once in the [notation guide](notation_guide.md), and the entries below agree with it.
 
 ---
 
-**Active learning.** Using human feedback (edits, accepts, rejects) on agent outputs as training signal for a future fine-tune or routing decision.
+**Active learning.** In the capstone (post 30), treating every human edit, approval, or rejection of an agent's draft as a training signal, so that the pairs of draft and edited draft can later tune a small model or a routing decision.
 
-**Adaptive thinking.** A reasoning-model mode where the model decides on its own how much internal reasoning to spend per request, rather than using a fixed budget.
+**Adaptive thinking.** A reasoning-model mode in which the model decides per request how much internal reasoning to spend, steered by an effort setting rather than a fixed token budget (post 18).
 
-**Agent.** An LLM-driven program that can take multiple steps, call tools, and decide its own next action.
+**Agent.** An LLM-driven program that takes several steps, calls tools, and chooses its own next action. Contrast a workflow, whose steps are fixed in code (post 13).
 
-**AGENTS.md.** A repository-level system prompt convention used by Codex, Cursor, and other coding agents — equivalent to `CLAUDE.md`.
+**AGENTS.md.** A repository-level instruction file read by coding agents (Codex, Cursor, and others), written in the five-block form of a system prompt. `CLAUDE.md` is Claude Code's equivalent.
 
-**Approval rate.** The fraction of agent-produced artefacts (drafts, diffs, plans) that the human accepts without edit. A lightweight quality proxy in production.
+**Approval rate.** The fraction of agent-produced artefacts (drafts, diffs, plans) that a human accepts without editing. A lightweight production signal of quality (posts 20 and 30).
 
-**Attention sink.** A position in the context window (typically the first few tokens) that the model attends to disproportionately, regardless of content.
+**Attention sink.** A position in the context window, typically the first few tokens, that the model attends to heavily regardless of content (Xiao et al., 2023; post 03).
 
-**Audit log.** A structured, append-only record of every consequential action an agent took, with timestamp, args, result, and session id.
+**Audit log.** An append-only record of every consequential action an agent took, with timestamp, arguments, result, and session id.
 
-**Auto-compaction.** A host policy that summarises older portions of a long conversation when the prompt approaches a token threshold.
+**Auto-compaction.** A host policy that summarises older parts of a long conversation when the prompt approaches a token threshold (post 12).
 
-**BABILong.** A long-context benchmark testing multi-hop reasoning over distractor-filled long passages.
+**BABILong.** A long-context benchmark that hides reasoning tasks built from bAbI facts inside long distractor text (Kuratov et al., 2024; post 25).
 
-**BM25.** A classical lexical retrieval algorithm based on term frequency and document length. Often combined with vector search for hybrid retrieval.
+**BM25.** A lexical ranking function based on term frequency, inverse document frequency, and document length. Combined with dense retrieval in hybrid search.
 
-**Bookend packing.** Placing the most relevant retrieved chunk first and the second-most relevant last, with weaker chunks in the middle, to mitigate the lost-in-the-middle effect.
+**Bookend packing.** Placing the highest-ranked retrieved chunk first and the second-highest last, with weaker chunks in the middle, so the strongest evidence avoids the lost-in-the-middle dip (posts 06 and 09).
 
-**Cache breakpoint.** An explicit marker in the prompt telling the provider where a cacheable prefix ends, so the KV-cache up to that point can be stored and re-used.
+**Cache breakpoint.** A marker in a request that tells the provider where a cacheable prefix ends, so the computed state up to that point is stored and reused by later calls (post 05).
 
-**Cache hit / cache miss.** Whether a request's prefix matches a previously stored prompt cache entry. Hits are billed at a fraction of the input rate.
+**Cache hit, cache miss.** Whether a request's prefix matches a stored prompt-cache entry. A hit is billed at a fraction of the base input price; a miss bills the prefix at the full price plus, where the prefix is written to the cache, a write premium (post 05).
 
-**Candidate generation.** The first stage of retrieval — producing a high-recall set (often ~50 items) that a reranker will refine.
+**Candidate generation.** The second stage of the select pipeline: dense, sparse, or hybrid retrieval that produces a high-recall set of top-N candidates (for example top-50) for the reranker to refine (post 09).
 
-**Chain of Thought (CoT).** A prompting pattern where the model is asked to reason step-by-step before answering.
+**Chain of thought (CoT).** A prompting pattern in which the model writes out intermediate reasoning before its answer (Wei et al., 2022).
 
-**Chunking.** Splitting a document into retrieval-sized pieces, typically 400–600 tokens, sentence-aware, with overlap.
+**Chunking.** Splitting a document into retrieval-sized pieces. The series' default for prose is 400 to 600 tokens with sentence-aware boundaries and 10 to 20 percent overlap (posts 09 and 11).
 
-**Citation accuracy.** The fraction of citations in a generated answer that actually point to a chunk supporting the cited claim.
+**Citation accuracy.** The fraction of citations in a generated answer that point to a chunk which supports the cited claim.
 
-**CLAUDE.md.** Anthropic's repository-level system prompt convention for Claude Code; analogous to `AGENTS.md`.
+**CLAUDE.md.** Claude Code's repository-level instruction file; the equivalent of `AGENTS.md`.
 
-**ColBERT.** A late-interaction retrieval model that scores query–document similarity per-token, achieving high accuracy at a higher index cost.
+**ColBERT.** A late-interaction retrieval model that keeps one embedding per token and scores a query against a document with MaxSim, trading a larger index for higher accuracy (Khattab and Zaharia, 2020; post 17).
 
-**ColPali.** A multimodal late-interaction retrieval model that embeds document page images directly, retrieving over visual layout without a separate OCR step.
+**ColPali.** A late-interaction retrieval model that embeds images of document pages directly, so a page-image corpus can be searched without a separate OCR step (Faysse et al., 2024; post 19).
 
-**Compaction.** The act of summarising a long conversation history into a shorter representation that preserves the essential state.
+**Compaction.** Replacing a long conversation history with a shorter summary that keeps the state the task needs. A compress technique (post 12).
 
-**Compression.** The "C" in WSCI — reducing the size of items already in context (windowing, summarisation, pruning, tool-result clearing).
+**Compress.** The third of the four operations (WSCI): shrinking what is already in the window, by windowing, summarisation, tool-result clearing, priority pruning, or token-level compression (post 12).
 
-**Constrained decoding.** Restricting the model's token sampling at generation time to only those tokens allowed by a grammar or schema, guaranteeing syntactically valid output.
+**Confusion.** The failure mode in which the right information is present but the model applies the wrong rule or makes the wrong choice, usually because the rules are vague or unmotivated (post 06).
 
-**Context engineering.** The discipline of deciding what enters an LLM's context window on every call — across all six layers — so that the model has the right information, in the right place, at the right cost.
+**Conflict.** The failure mode in which the window holds contradictory information (an old memory and a new document, two retrieved chunks) and the model picks the wrong one. The first fix is a provenance and recency stamp with an explicit precedence rule (post 06).
 
-**Context precision.** Ragas metric: the fraction of retrieved chunks that were actually relevant to the question.
+**Constrained decoding.** Restricting the model's token sampling at generation time to the tokens a grammar or schema allows, so the output is syntactically valid by construction (post 21).
 
-**Context recall.** Ragas metric: the fraction of ground-truth-relevant chunks that the retriever surfaced.
+**Context engineering.** The discipline of deciding what enters an LLM's context window on every call, across all six layers, so that the model has the right information, in the right place, at the right cost (post 01).
 
-**Context rot.** The gradual degradation of model behaviour as the context window fills with stale, redundant, or low-signal tokens.
+**Context precision.** A Ragas metric: how much of the retrieved context is relevant to the question, with relevant chunks ranked high.
 
-**Context window.** The maximum number of tokens an LLM can attend to in a single call. Hard upper bound set by the model.
+**Context recall.** A Ragas metric: how much of the information the reference answer needs is present in the retrieved context.
 
-**Contextual retrieval.** Anthropic's technique of prepending an LLM-generated one-sentence header to each chunk to capture document-level context for embedding.
+**Context rot.** The gradual degradation of model behaviour as the window fills with stale, redundant, or low-signal tokens (Hong et al., 2025).
 
-**Conversation buffer.** The recent user/assistant turns held in the prompt for the current session.
+**Context window.** The maximum number of tokens a model can take in one call, prompt and output together. A hard ceiling set by the model (post 04).
 
-**Cross-encoder.** A model that takes a (query, document) pair and produces a relevance score. Used as a reranker after first-pass retrieval.
+**Contextual retrieval.** Anthropic's technique of prepending a short, LLM-generated description of the surrounding document to each chunk before it is embedded and indexed (Anthropic, 2024; post 11).
 
-**Data residency.** A requirement that data be stored and processed only within a specified geographic or legal jurisdiction.
+**Conversation buffer.** The recent user and assistant turns held in the prompt for the current session; the near end of layer 05, conversation history.
 
-**Decay.** A periodic job that lowers the confidence of memory cells not recently confirmed, preventing stale facts from dominating recall.
+**Cross-encoder.** A model that reads a query and a document together and outputs one relevance score. Used as the reranker after candidate generation.
 
-**Distraction.** A context-failure mode where irrelevant tokens crowd out relevant ones and the model attends to the wrong material.
+**Data residency.** A requirement that data be stored and processed only within a given geographic or legal jurisdiction (post 24).
 
-**Dual-LLM pattern.** A security pattern where one LLM processes untrusted content into structured output, and a second LLM (with no tools) acts on that output.
+**Decay.** A periodic job that lowers the confidence of memory cells that have not been confirmed recently, so stale facts stop dominating recall (post 16).
 
-**Effort (reasoning).** A provider parameter that sets how much reasoning a reasoning model should spend, trading answer quality against latency and cost.
+**Distraction.** The failure mode in which irrelevant tokens crowd out relevant ones and the model attends to the wrong material. The first fix is a tighter select step (post 06).
 
-**Embedding.** A dense vector representation of a piece of text, used for similarity search.
+**Dual LLM pattern.** A security pattern in which a quarantined model processes untrusted content into structured output and a privileged model, which never sees the raw content, acts on that output (Willison, 2023; post 23).
 
-**Episodic memory.** Long-term memory of specific past interactions, retrieved by similarity to the current situation.
+**Effort (reasoning).** A provider parameter that sets how much reasoning a reasoning model spends, trading answer quality against latency and cost (post 18).
 
-**Eval.** A structured test of model behaviour on a fixed dataset. The unit of measurement for any context change.
+**Embedding.** A dense vector representation of a piece of text or an image, used for similarity search.
 
-**Faithfulness.** Ragas metric: the fraction of claims in the generated answer that are supported by the retrieved context.
+**Episodic memory.** Long-term memory of specific past events and interactions, retrieved by reference or by similarity to the current situation (post 16).
 
-**Fan-out / fan-in.** Sub-agent topology where the parent dispatches the same task to N parallel sub-agents and merges their results.
+**Eval.** A structured test of model or system behaviour on a fixed dataset; the unit of measurement for any context change (post 20).
 
-**Few-shot prompting.** Providing example input/output pairs in the prompt so the model infers the desired pattern.
+**Faithfulness.** A Ragas metric: the fraction of claims in a generated answer that the retrieved context supports.
 
-**Function calling.** A provider feature where the model is given tool schemas and may emit structured calls to them. The provider-side wire format for tool use.
+**Fan-out and fan-in.** A sub-agent topology in which the parent dispatches parts of a task to several sub-agents in parallel and merges their results (post 13).
 
-**GraphRAG.** A retrieval pattern that builds a knowledge graph from the corpus and uses graph queries to assemble context.
+**Few-shot prompting.** Putting example input and output pairs in the prompt so the model infers the pattern. Picking which examples to include is a select operation (post 09).
 
-**Grounding.** Forcing the model to answer from supplied evidence rather than parametric knowledge. The point of RAG.
+**Function calling.** A provider feature in which the model receives tool schemas and may answer with a structured call to one of them; the wire format of tool use.
 
-**Guardrail.** A deterministic check placed around a model call — on the input, the output, or both — that blocks or rewrites unsafe or off-policy content.
+**GraphRAG.** A retrieval pattern that builds a knowledge graph and community summaries from the corpus and answers global or multi-hop questions from them (Edge et al., 2024; post 17).
 
-**Hallucination.** A model output that is fluent but factually wrong, typically because the relevant fact is not in the context.
+**Grounding.** Making the model answer from supplied evidence rather than from what it learned in training. The purpose of RAG.
 
-**Hook.** A script that runs at a specific point in the agent loop (pre-tool-call, post-edit, pre-commit, session-start, etc.) to enforce policy or augment behaviour.
+**Guardrail.** A check placed around a model call, on the input, the output, or both, that blocks or rewrites unsafe or off-policy content (post 21).
 
-**HyDE — Hypothetical Document Embeddings.** A query-construction technique where the model first writes a hypothetical answer and that text is embedded for retrieval.
+**Hallucination.** A fluent but factually wrong output, often because the needed fact is not in the context.
 
-**Hybrid search.** Combining vector (semantic) and lexical (BM25) retrieval, then merging or reranking the results.
+**Hook.** A script the host runs at a fixed point in the agent loop (before a tool call, after an edit, at session start) to enforce a policy or add behaviour (post 26).
 
-**Indirect prompt injection.** An attack where malicious instructions are placed in a third-party document that the model later retrieves or reads.
+**HyDE (Hypothetical Document Embeddings).** A query-construction technique in which the model first writes a hypothetical answer and that text, rather than the question, is embedded for retrieval (Gao et al., 2022; post 09).
 
-**Inference cost.** The dollar cost of one model call, dominated by input tokens at long context lengths.
+**Hybrid search.** Running dense (vector) and sparse (BM25) retrieval together and merging the ranked lists, usually with reciprocal rank fusion.
 
-**Information retention ratio (IRR).** A measurement of how much task-relevant information survives a compression step, measured against a replay set.
+**Indirect prompt injection.** An attack in which malicious instructions sit in third-party content (a web page, an email, a retrieved document) that the model later reads (Greshake et al., 2023; post 23).
 
-**Ingestion pipeline.** The offline sequence — parse, clean, chunk, embed, index — that turns raw source documents into a retrievable corpus.
+**Inference cost.** The dollar cost of one model call: input tokens, output tokens, and cache reads and writes, each at its own price (post 05).
 
-**Inter-agent bus.** A shared substrate (filesystem, message queue, database) through which isolated sub-agents communicate.
+**Information retention ratio (IRR).** The series' teaching construct for how much task-relevant information survives a compression step, measured as the fraction of a replay set's key facts still answerable afterwards. It is not a standard metric (post 12).
 
-**Iron triangle (of tools).** The trade-off between catalog size, per-tool description quality, and runtime selection cost — pick at most two.
+**Ingestion pipeline.** The offline sequence (source, parse, clean, enrich, chunk, index) that turns raw files into a retrievable corpus (post 10).
 
-**Isolation.** The "I" in WSCI — running sub-tasks in their own context windows so noise, errors, and tool storms do not contaminate the parent.
+**Iron triangle (of tools).** The trade-off between catalogue size, per-tool description quality, and runtime selection: a design can keep any two of the three (post 15).
 
-**Layout-aware parsing.** Document parsing that preserves visual structure — tables, columns, headings, reading order — instead of flattening a page to a raw text stream.
+**Isolate.** The fourth of the four operations (WSCI): splitting work across separate context windows (sub-agents, sandboxes) so that one task's noise, errors, and tool output do not enter another's window (post 13).
 
-**LLM-as-judge.** Using a model to score another model's outputs against a rubric. Subject to position bias, length bias, self-preference, and rubric drift.
+**Layer.** One of the six parts of the context window, numbered 01 to 06 in the order they are sent: 01 system prompt, 02 tools and MCP descriptions, 03 memory and state, 04 retrieved chunks, 05 conversation history, 06 user instruction. Each has its own lifetime, cost shape, and failure mode (post 02).
 
-**Long-context routing.** A router that decides per-query between RAG and "load the whole document into context".
+**Layout-aware parsing.** Document parsing that keeps visual structure (tables, columns, headings, reading order) instead of flattening a page to a stream of text (post 10).
 
-**LongBench.** A benchmark suite of long-context tasks across reasoning, summarisation, and question answering.
+**LLM-as-judge.** Using a model to score another model's outputs against a rubric. Subject to position bias, length bias, self-preference, and rubric drift (Zheng et al., 2023; post 20).
 
-**Lost in the middle.** The empirical finding (Liu et al., 2023) that LLMs attend better to the start and end of long contexts than to the middle.
+**Long-context routing.** Deciding per query whether to answer by retrieval or by loading whole documents into the window (posts 17 and 25).
 
-**MCP — Model Context Protocol.** Anthropic-led open protocol for connecting LLM hosts to external tools, resources, and prompts.
+**LongBench.** A bilingual, multitask benchmark of long-context understanding across question answering, summarisation, and code (Bai et al., 2023).
 
-**Memory.** Any persistent state that survives a single LLM call. Subdivided into short-term, long-term, episodic, semantic, and procedural.
+**Lost-in-the-middle.** The finding that models use information at the start and the end of a long context better than information in the middle (Liu et al., 2023), and the failure mode named after it (post 06).
 
-**Memory poisoning.** An attack class where adversarial content is written into the agent's memory store and influences future sessions.
+**MaxSim.** The late-interaction score of ColBERT: for each query token, the highest similarity to any document token, summed over the query tokens (post 17).
 
-**MRCR — Multi-Round Coreference Resolution.** A long-context eval that tests pronoun and entity resolution across long passages.
+**MCP (Model Context Protocol).** An open protocol, introduced by Anthropic in 2024, through which a host connects to servers that expose tools, resources, and prompts. Its descriptions enter the window as layer 02 (post 15).
 
-**Multimodal context.** Context that mixes text with other modalities — images, document page scans, audio — passed to a model that can attend across all of them.
+**Memory.** Any state that outlives a single model call. Short-term memory lives in the window; long-term memory is stored outside it and is episodic, semantic, or procedural (post 16). Recalled memory enters the window as layer 03, memory and state.
 
-**Needle in a haystack (NIAH).** A class of long-context evals where a single fact is hidden in a long document and the model must retrieve it.
+**Memory poisoning.** An attack in which adversarial content is written into an agent's memory store and steers later sessions. A security term, covered in post 23, not one of the five failure modes.
 
-**Observability.** The discipline of inspecting agent behaviour through traces, spans, and metrics so failures can be diagnosed.
+**MRCR (Multi-Round Co-reference Resolution).** A long-context evaluation from the Michelangelo suite in which the model must resolve a reference that depends on a long multi-turn conversation history (Vodrahalli et al., 2024; post 25).
 
-**OCR (optical character recognition).** Converting text embedded in images or scanned pages into machine-readable characters during document ingestion.
+**Multimodal context.** Context that mixes text with images, rendered pages, screenshots, or audio, all of which occupy the same window and budget (post 19).
 
-**OWASP LLM Top 10.** OWASP's prioritised list of the most common security risks in LLM applications.
+**Needle in a haystack (NIAH).** A long-context test that hides one fact in a long document and asks the model to retrieve it. It measures recall of a single fact, not reasoning over many (post 03).
 
-**Prefix caching.** Synonym for prompt caching.
+**Observability.** Inspecting an LLM system's behaviour through traces, spans, and metrics so that failures can be diagnosed and costed (post 22).
 
-**Priority pruning.** A compression technique that drops items in priority bands (P0 keep, P1 keep if room, P2 summarise, P3 drop) instead of by recency.
+**OCR (optical character recognition).** Converting text in images or scanned pages into machine-readable characters during ingestion (post 10).
 
-**Procedural memory.** Long-term memory of how to do things — skills, routines, slash commands, hook scripts.
+**OWASP Top 10 for LLM Applications.** OWASP's ranked list of the most common security risks in LLM applications; prompt injection is first (post 23).
 
-**Prompt cache.** A provider-side cache that stores the KV-cache for a stable prompt prefix and re-uses it on subsequent calls.
+**Precision@k.** The fraction of the top-k packed items that are relevant. The series' measure of the rerank and pack stages (post 09).
 
-**Prompt engineering.** The narrower practice of choosing the wording, structure, and few-shots of a single message. A subset of context engineering.
+**Prefix caching.** Another name for prompt caching.
 
-**Prompt injection.** An attack where adversarial text in the input causes the model to ignore its system prompt or take unintended actions.
+**Priority pruning.** A compress technique that drops items by priority band (keep, keep if room, summarise, drop) rather than by age (post 12).
 
-**Provenance.** The recorded source of a memory cell or a retrieved chunk — who or what put it there, and when.
+**Procedural memory.** Long-term memory of how to do things: rules, skills, and routines, each with a trigger, the rule it injects, and its scope (post 16).
 
-**Query rewriting.** Reformulating the user's query into one or more retrieval-friendly variants before search.
+**Prompt cache.** A provider-side cache that stores the computed state of a stable prompt prefix and reuses it on later calls with the same prefix; the reason the stable prefix (layers 01 and 02) comes first (post 05).
 
-**RAG — Retrieval-Augmented Generation.** A pattern where relevant chunks are retrieved at query time and stuffed into the prompt before generation.
+**Prompt engineering.** The narrower practice of choosing the wording, structure, and examples of a single message. A subset of context engineering (post 01).
 
-**Ragas.** An open-source evaluation library for RAG systems; provides faithfulness, answer relevancy, context precision, and context recall.
+**Prompt injection.** An attack in which adversarial text in the input makes the model ignore its instructions or take unintended actions. Direct injection comes from the user; indirect injection comes from content the model reads (post 23).
 
-**Recall@N.** The fraction of relevant items present in the top-N retrieved set.
+**Provenance.** The recorded source of a memory cell or a retrieved chunk: who or what put it there, and when (posts 08 and 10).
 
-**ReAct.** A prompting pattern interleaving Reason–Act–Observe steps for tool-using agents.
+**Query rewriting.** Reformulating the user's question into one or more retrieval-friendly queries before search; the first stage of the select pipeline (post 09).
 
-**Reasoning model.** A model trained to produce an internal chain of thinking tokens before its final answer, spending extra compute to improve hard-problem accuracy.
+**RAG (retrieval-augmented generation).** A pattern in which relevant chunks are retrieved at query time and placed in the prompt, as layer 04, before generation (post 11).
 
-**Reciprocal Rank Fusion (RRF).** A simple, parameter-light algorithm for merging multiple ranked lists into one.
+**Ragas.** An open-source evaluation library for RAG systems that provides faithfulness, answer relevancy, context precision, and context recall (Es et al., 2023).
 
-**Regression suite.** A small set of fixed input/output pairs run on every prompt change to detect quality drops.
+**Reasoning model.** A model trained to generate thinking tokens before its final answer, spending extra compute to improve accuracy on hard problems (post 18).
 
-**Reranker.** A second-pass model (usually a cross-encoder) that re-scores the top-k from a first-pass retriever.
+**Recall@N.** The fraction of the relevant items that appear in the top-N candidate set. The series' measure of the candidate-generation stage (post 09).
 
-**Resource (MCP).** A read-only document an MCP server exposes; the host can fetch it on demand without invoking a tool.
+**Reciprocal rank fusion (RRF).** A parameter-light method for merging ranked lists: each item scores $\sum_i 1/(k + r_i)$ over the lists it appears in, where $r_i$ is its rank in list $i$ and $k$ is a damping constant, often 60, unrelated to top-k (Cormack et al., 2009; post 11).
 
-**RULER.** A long-context benchmark from NVIDIA covering retrieval, multi-hop, aggregation, and CWE tasks.
+**Regression suite.** A fixed set of inputs and expected outputs run on every prompt or pipeline change to detect quality drops (posts 14 and 20).
 
-**Sandboxing.** Running a sub-agent in a confined process / container so its noisy or risky tool output cannot harm the parent.
+**Reranker.** A second-pass model, usually a cross-encoder, that re-scores the top-N candidates and keeps the top-k for packing (post 09).
 
-**Scratchpad.** A short-term memory area the model writes to and reads from during a single task to externalise reasoning.
+**Resource (MCP).** Read-only data an MCP server exposes, which the host application can fetch without a tool call (post 15).
 
-**Select.** The "S" in WSCI — choosing which items to bring into context (RAG, tool selection, memory recall, few-shot selection).
+**RULER.** A long-context benchmark from NVIDIA that extends needle tests with multi-needle retrieval, multi-hop tracing, aggregation, and question answering, and reports an effective context length (Hsieh et al., 2024).
 
-**Semantic chunking.** Chunking by topic boundary rather than fixed token count, often via embedding similarity between adjacent sentences.
+**Sandboxing.** Running a tool or a sub-agent in a confined process or container so that its output and its side effects cannot reach the parent's context or systems (posts 13 and 15).
 
-**Semantic memory.** Long-term memory of distilled facts and preferences; slowly changing, often hand-curated.
+**Scratchpad.** A working area the agent writes to and reads from during a task, outside the window, such as a plan file (post 08).
 
-**Send-gate.** A deterministic post-draft check that runs before any outbound action (e.g. sending an email), enforcing rules in code that the model is only asked to respect.
+**Select.** The second of the four operations (WSCI): choosing which items enter the window for this call. RAG, tool selection, memory recall, and few-shot picking are all select (post 09).
 
-**Sequential topology.** Sub-agent pattern where each child runs after the previous, with output piped forward.
+**Semantic chunking.** Splitting text at topic boundaries rather than at a fixed token count, often by comparing the embeddings of adjacent sentences.
 
-**Skill.** A re-usable, model-readable workflow definition (e.g. Anthropic's `.skills/` files).
+**Semantic memory.** Long-term memory of distilled facts and preferences, slowly changing and confirmed or decayed over time (post 16).
 
-**Span.** A timed unit of work inside a trace; spans nest to form a tree of operations.
+**Send gate.** A deterministic check that runs before any outbound action (sending an email, issuing a refund) and enforces in code the rules the model is only asked to respect (post 30).
 
-**Structured output.** A provider feature that forces the model's response to conform to a supplied JSON schema, returning parseable data rather than free text.
+**Sequential topology.** A sub-agent pattern in which each child runs after the previous one and receives its output (post 13).
 
-**Sub-agent.** A child LLM call invoked by a parent agent, running in its own isolated context window.
+**Skill.** A reusable workflow the host loads into the window only when a task matches its description. In Anthropic's Agent Skills format each skill is a directory with a `SKILL.md` file (posts 08 and 26).
 
-**Supervisor topology.** Sub-agent pattern where one agent decomposes a task and delegates to specialised workers, then synthesises.
+**Span.** A timed unit of work inside a trace; spans nest into a tree of operations (post 22).
 
-**System prompt.** The first message in an LLM call; sets identity, rules, format, and available tools.
+**Structured output.** A provider feature that constrains the model's response to a supplied JSON Schema, so it returns parseable data rather than free text (post 21).
 
-**Tenant isolation.** Keeping each customer's data, indexes, and memory strictly partitioned so one tenant can never retrieve or influence another's context.
+**Sub-agent.** A child model call invoked by a parent agent, running in its own isolated context window and returning only a structured result (post 13).
 
-**Text-to-SQL.** A retrieval pattern where the model generates a SQL query against a structured database instead of fetching unstructured chunks.
+**Supervisor topology.** A sub-agent pattern in which one agent decomposes a task, delegates parts to specialised workers, and synthesises their results (post 13).
 
-**Thinking tokens.** The intermediate reasoning tokens a reasoning model generates before its answer — billed as output, and usually hidden or summarised in the response.
+**System prompt.** Layer 01: the instructions sent first on every call. In the five-block form it carries identity, rules, format, knowledge, and tool-use guidance; the tool schemas themselves are layer 02 (post 14).
 
-**Token.** The unit the model reads and bills on. Roughly 0.75 English words per token.
+**Tenant isolation.** Keeping each customer's data, indexes, and memory partitioned so that no tenant can retrieve or influence another's context (post 24).
 
-**Tool.** A callable function exposed to the model via a JSON schema.
+**Text-to-SQL.** A retrieval pattern in which the model writes a SQL query against a structured database instead of fetching unstructured chunks (post 17).
 
-**Tool selection.** The runtime act of choosing which subset of an available tool catalog to expose to the model on a given call.
+**Thinking tokens.** The intermediate reasoning tokens a reasoning model generates before its answer. They are billed as output and are usually hidden or summarised in the response (post 18).
 
-**Tool-result clearing.** A compression step that drops or truncates large prior tool outputs once they are no longer needed.
+**Token.** The unit a model reads and bills by. In English prose one token is roughly three quarters of a word (OpenAI, "Tokenizer"; post 04).
 
-**Trace.** The full record of one agent session — every model call, every tool call, every span — used for debugging and audit.
+**Tool.** A callable function exposed to the model through a name, a description, and a JSON Schema for its arguments.
 
-**Triager.** A small sub-agent whose only job is to classify a request and route it.
+**Tool-result clearing.** A compress technique that drops or truncates large earlier tool outputs once they are no longer needed (post 12).
 
-**Trust boundary.** A line in the system across which input is treated as untrusted; filtering, validation, or sandboxing happens at the boundary.
+**Tool selection.** Choosing at run time which subset of the tool catalogue to expose to the model on a given call. A select operation over tool descriptions (posts 09 and 15).
 
-**Validate-and-retry.** A loop that parses or schema-checks a model's output and, on failure, re-prompts the model with the error until it produces valid output or a retry cap is hit.
+**Tool-storm.** The failure mode in which the model makes repeated, redundant, or useless tool calls, usually because the catalogue is too large or the descriptions do not say when not to call a tool (post 06).
 
-**Vector database.** A datastore optimised for nearest-neighbour search over embeddings.
+**Top-k.** The number of items kept after reranking and packed into the window (post 09).
 
-**Windowing.** A compression technique that keeps only the most recent N turns / tokens of a conversation.
+**Top-N.** The size of the candidate set that candidate generation passes to the reranker (post 09).
 
-**Write.** The "W" in WSCI — externalising state out of the context window into memory, files, scratchpads, or indexes.
+**Trace.** The full record of one agent run: every model call, every tool call, every span, with tokens, latency, and cost (post 22).
 
-**WSCI.** Write, Select, Compress, Isolate — the four primitive operations on context, popularised by Lance Martin (2025).
+**Triager.** A small sub-agent whose only job is to classify an input and route it (post 30).
+
+**Trust boundary.** A line in a system across which input is treated as untrusted; filtering, validation, or sandboxing happens at the boundary (post 23).
+
+**Validate-and-retry.** A loop that parses or schema-checks a model's output and, on failure, re-prompts with the error until the output is valid or a retry cap is reached (post 21).
+
+**Vector database.** A datastore built for nearest-neighbour search over embeddings.
+
+**Windowing.** A compress technique that keeps only the most recent turns or tokens of a conversation (post 12).
+
+**Write.** The first of the four operations (WSCI): moving information out of the window into a store (memory, a scratchpad, repository documentation, an index) so that it can be selected later (post 08).
+
+**WSCI.** The series' abbreviation for write, select, compress, isolate, always in that order: the four operations on context named by Lance Martin ("Context Engineering for Agents", 2025). Every technique is placed in exactly one of the four (post 07).
