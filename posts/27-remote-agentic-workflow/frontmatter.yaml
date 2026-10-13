@@ -1,69 +1,25 @@
 id: ctx-027
 slug: 27-remote-agentic-workflow
-title: "27 · Remote Agentic Workflow"
-
-description: >
-  Learn how to build a production-ready remote AI agent workspace using SSH,
-  tmux, cloud servers, VS Code Remote, and messaging bridges. Explore
-  persistent agent sessions, remote development, notifications, security,
-  and multi-device workflows for long-running coding agents.
-
-author: "Ajay"
-
+title: "27 - Remote agentic workflow"
+summary: "A coding agent can run on a rented server inside a tmux session reached from any device, fenced by one inbound rule and scoped credentials, with a chat bridge that notifies on three events."
 date: 2026-06-06
-last_modified: 2026-06-06
-
-tags:
-  - context-engineering
-  - remote-agents
-  - ai-agents
-  - ssh
-  - tmux
-  - cloud
-  - remote-development
-  - devops
-
-category: Case Studies
-series: Context Engineering
+updated: 2026-10-13
+status: complete
 part: "Part V - Workflow and builds"
-chapter: "Part V — Case Studies"
-
+level: intermediate
+reading_time: 15
+tags: [context-engineering, remote-agents, coding-agents, ssh, tmux, cloud-security, cost]
 hero: diagrams/00-hero-remote-agentic-workflow.svg
-hero_alt: "Architecture of a remote AI agent running on a cloud server with SSH, tmux, VS Code Remote, and messaging bridges"
-
-reading_time: 16
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - Remote Agent
-  - Remote Agentic Workflow
-  - AI Agents
-  - SSH
-  - tmux
-  - VS Code Remote
-  - Remote Development
-  - Cloud VM
-  - Amazon EC2
-  - Hetzner
-  - DigitalOcean
-  - Telegram Bot
-  - Notifications
-  - Session Persistence
-  - Thin Client
-  - Multi Device Workflow
-  - Agent Orchestration
-  - DevOps
-  - Infrastructure
-  - Security Groups
-  - IAM Roles
-  - Claude Code
-  - Aider
-  - Codex CLI
-
-canonical_url: ""
-
-prev: ../26-modern-agentic-workflow/
-next: ../28-build-rag-chatbot/
+prerequisites: [ctx-026]
+code: optional
+outcomes:
+  - id: o1
+    text: "Decide when moving a coding agent to a remote server pays for the setup, from the task's length, the machine it needs and the devices that drive it."
+  - id: o2
+    text: "Configure a cloud server behind a security group and an instance role, with key-only SSH and the agent in a tmux session reached over SSH or VS Code."
+  - id: o3
+    text: "Add a chat bridge that notifies on three events and returns a reply to the running session, and keep it from becoming a way in."
+  - id: o4
+    text: "Price a month of remote work from an instance's hourly rate and the model's per-million rates, and say which bill dominates."
+  - id: o5
+    text: "Fence a remote agent box with controls enforced outside the prompt: scoped credentials, network rules, a command deny-list and an audit log."

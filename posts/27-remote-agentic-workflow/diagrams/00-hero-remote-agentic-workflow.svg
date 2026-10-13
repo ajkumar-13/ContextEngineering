@@ -1,142 +1,186 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
-  <title id="t">The remote agentic workflow</title>
-  <desc id="d">A network diagram. On the left a thin client laptop connects over an SSH session to a cloud VM on the right, an EC2 instance drawn inside two nested boundaries: an outer IAM instance-role boundary and an inner security-group firewall. The VM runs a tmux session hosting a long-running coding agent, which reaches the LLM API over HTTPS on port 443. A Telegram and web bridge sits beside the agent and relays notifications and replies to a phone, so the session keeps working after the laptop closes.</desc>
-
-  <style><![CDATA[
-    :root{
-      --ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;
-      --ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;
-      --ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;
-      --ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-neutral-1:#EAEAE4;--ctx-neutral-3:#8E8E88;
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="ctx-00-hero-remote-agentic-workflow-title" aria-describedby="ctx-00-hero-remote-agentic-workflow-desc">
+<title id="ctx-00-hero-remote-agentic-workflow-title">Only SSH comes in; everything else goes out</title>
+<desc id="ctx-00-hero-remote-agentic-workflow-desc">Four boxes from left to right. Thin clients: a laptop with SSH or VS Code, and a phone with an SSH app and a chat app. A dashed security-group boundary admits one inbound connection, SSH on port 52222. Inside it a cloud VM with a scoped instance role holds a tmux session running the coding agent with the repository and the toolchain, and a chat bridge that types replies into the session with send-keys. Both reach out: the agent to the model API, Claude Opus 4.6 or a peer, over HTTPS on port 443, and the bridge to a chat service such as the Telegram Bot API, which it polls. The chat service carries notifications to the phone and replies back.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
     }
-    @media (prefers-color-scheme:dark){
-      :root{
-        --ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;
-        --ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;
-        --ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;
-        --ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-neutral-1:#1F2229;--ctx-neutral-3:#6E6E68;
-      }
-    }
-    .bg{fill:var(--ctx-bg);}
-    .card{fill:var(--ctx-surface);stroke:var(--ctx-ink);stroke-width:1.5;}
-    .inner{fill:var(--ctx-neutral-1);stroke:var(--ctx-border);stroke-width:1;}
-    .iam{fill:none;stroke:var(--ctx-warn);stroke-width:1.5;stroke-dasharray:6 4;}
-    .sg{fill:none;stroke:var(--ctx-alert);stroke-width:1.5;stroke-dasharray:2 3;}
-    .link{stroke:var(--ctx-ink);stroke-width:1.5;fill:none;}
-    .link-sec{stroke:var(--ctx-primary);stroke-width:1.5;fill:none;}
-    .link-brg{stroke:var(--ctx-accent);stroke-width:1.5;fill:none;stroke-dasharray:5 4;}
-    .link-api{stroke:var(--ctx-success);stroke-width:1.5;fill:none;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ctx-ink);}
-    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ctx-ink-muted);}
-    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ctx-ink);text-transform:uppercase;letter-spacing:0.06em;}
-    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ctx-ink);}
-    .cap{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ctx-ink);}
-    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:10.5px;fill:var(--ctx-ink-muted);}
-    .tag{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:10px;letter-spacing:0.04em;}
-  ]]></style>
-
-  <rect class="bg" width="960" height="360"/>
-  <text class="title" x="48" y="42">Remote agentic workflow</text>
-  <text class="s" x="48" y="62">A thin client drives an agent that lives on a cloud VM, fenced by a security group and an IAM role.</text>
-
-  <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="var(--ctx-ink)"/>
-    </marker>
-    <marker id="arrow-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="var(--ctx-primary)"/>
-    </marker>
-    <marker id="arrow-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="var(--ctx-accent)"/>
-    </marker>
-    <marker id="arrow-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="var(--ctx-success)"/>
-    </marker>
-  </defs>
-
-  <!-- ===== Thin client (laptop) ===== -->
-  <g transform="translate(48,150)">
-    <rect class="card" x="0" y="0" width="150" height="96" rx="8"/>
-    <text class="h" x="16" y="26">Thin client</text>
-    <!-- laptop glyph -->
-    <rect x="18" y="40" width="60" height="36" rx="3" fill="none" stroke="var(--ctx-primary)" stroke-width="1.5"/>
-    <line class="link" x1="12" y1="82" x2="84" y2="82"/>
-    <text class="s" x="94" y="52">laptop</text>
-    <text class="s" x="94" y="68">phone</text>
-    <text class="mono" x="16" y="90">ssh · VS Code</text>
-  </g>
-
-  <!-- SSH link: laptop -> VM -->
-  <path class="link-sec" d="M198,190 L300,190" marker-end="url(#arrow-p)"/>
-  <rect x="222" y="172" width="54" height="17" rx="4" fill="var(--ctx-surface)" stroke="var(--ctx-primary)" stroke-width="1"/>
-  <text class="tag" x="249" y="184" text-anchor="middle" fill="var(--ctx-primary)">SSH</text>
-
-  <!-- ===== Cloud VM with nested boundaries ===== -->
-  <!-- outer IAM instance-role boundary -->
-  <rect class="iam" x="308" y="104" width="392" height="200" rx="14"/>
-  <text class="cap" x="322" y="122" fill="var(--ctx-warn)">IAM instance role · scoped cloud identity</text>
-
-  <!-- inner security-group firewall -->
-  <rect class="sg" x="324" y="132" width="360" height="158" rx="10"/>
-  <text class="cap" x="338" y="149" fill="var(--ctx-alert)">Security group · inbound SSH from known IP only</text>
-
-  <!-- EC2 VM card -->
-  <rect class="card" x="342" y="160" width="324" height="118" rx="8"/>
-  <text class="h" x="358" y="182">EC2 VM · tmux session</text>
-
-  <!-- long-running agent box -->
-  <rect class="inner" x="358" y="196" width="150" height="66" rx="6"/>
-  <rect x="358" y="196" width="6" height="66" rx="3" fill="var(--ctx-primary)"/>
-  <text class="l" x="374" y="216">Coding agent</text>
-  <text class="s" x="374" y="234">long-running</text>
-  <text class="mono" x="374" y="252">tmux · persists</text>
-
-  <!-- Telegram / web bridge box -->
-  <rect class="inner" x="518" y="196" width="132" height="66" rx="6"/>
-  <rect x="518" y="196" width="6" height="66" rx="3" fill="var(--ctx-accent)"/>
-  <text class="l" x="534" y="216">Bridge</text>
-  <text class="s" x="534" y="234">Telegram · web</text>
-  <text class="mono" x="534" y="252">send-keys</text>
-
-  <!-- agent <-> bridge internal link -->
-  <path class="link" d="M508,229 L518,229" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
-
-  <!-- ===== LLM API (top right) ===== -->
-  <g transform="translate(742,104)">
-    <rect class="card" x="0" y="0" width="170" height="70" rx="8"/>
-    <text class="h" x="16" y="26">LLM API</text>
-    <text class="s" x="16" y="45">Claude · Gemini · GPT</text>
-    <text class="mono" x="16" y="61">HTTPS · outbound</text>
-  </g>
-  <!-- agent -> LLM API over 443 -->
-  <path class="link-api" d="M508,205 C560,150 660,139 742,139" marker-end="url(#arrow-s)"/>
-  <rect x="600" y="118" width="72" height="17" rx="4" fill="var(--ctx-surface)" stroke="var(--ctx-success)" stroke-width="1"/>
-  <text class="tag" x="636" y="130" text-anchor="middle" fill="var(--ctx-success)">HTTPS · 443</text>
-
-  <!-- ===== Phone (bottom right) ===== -->
-  <g transform="translate(742,232)">
-    <rect class="card" x="0" y="0" width="170" height="72" rx="8"/>
-    <text class="h" x="16" y="26">Phone / chat</text>
-    <text class="s" x="16" y="45">notify · reply</text>
-    <text class="mono" x="16" y="61">async oversight</text>
-  </g>
-  <!-- bridge -> phone (relay) -->
-  <path class="link-brg" d="M650,240 C700,240 710,262 742,262" marker-end="url(#arrow-a)" marker-start="url(#arrow-a)"/>
-  <rect x="668" y="228" width="56" height="17" rx="4" fill="var(--ctx-surface)" stroke="var(--ctx-accent)" stroke-width="1"/>
-  <text class="tag" x="696" y="240" text-anchor="middle" fill="var(--ctx-accent)">relay</text>
-
-  <!-- ===== Legend ===== -->
-  <g transform="translate(48,320)">
-    <line class="link-sec" x1="0" y1="8" x2="24" y2="8"/>
-    <text class="s" x="30" y="12">SSH control</text>
-    <line class="link-api" x1="128" y1="8" x2="152" y2="8"/>
-    <text class="s" x="158" y="12">HTTPS to model</text>
-    <line class="link-brg" x1="286" y1="8" x2="310" y2="8"/>
-    <text class="s" x="316" y="12">chat relay</text>
-    <rect class="iam" x="410" y="2" width="24" height="12" rx="3"/>
-    <text class="s" x="440" y="12">IAM role</text>
-    <rect class="sg" x="540" y="2" width="24" height="12" rx="3"/>
-    <text class="s" x="570" y="12">security group</text>
-  </g>
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-neutral-soft { fill: var(--ctx-neutral-soft); }
+  .f-surface { fill: var(--ctx-surface); }
+  .s-border { stroke: var(--ctx-border); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+  .s-rule { stroke: var(--ctx-rule); }
+</style>
+<defs>
+<marker id="ctx-00-hero-remote-agentic-workflow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="540"/>
+<text x="40" y="48" class="t-title" data-w="548">Only SSH comes in; everything else goes out</text>
+<text x="40" y="76" class="t-subtitle" data-w="723">The four boxes of a remote agent: thin clients, the server, the agent and its toolchain, the model API.</text>
+<text x="40" y="184" class="t-head" data-w="95">Thin clients</text>
+<rect x="40" y="200" width="120" height="104" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="40" y="200" width="120" height="104" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="56" y="228" class="t-head" data-w="58">Laptop</text>
+<text x="56" y="252" class="t-label" data-w="31">SSH</text>
+<text x="56" y="276" class="t-label" data-w="60">VS Code</text>
+<rect x="40" y="336" width="120" height="80" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="40" y="336" width="120" height="80" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="56" y="364" class="t-head" data-w="52">Phone</text>
+<text x="56" y="388" class="t-label" data-w="68">SSH, chat</text>
+<rect x="240" y="112" width="416" height="344" rx="8" class="w15 nofill s-ink-muted d-proj" data-fit="skip"/>
+<text x="256" y="136" class="t-note" data-w="220">Security group: one inbound rule</text>
+<rect x="256" y="144" width="384" height="296" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="256" y="144" width="384" height="296" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="272" y="176" class="t-head" data-w="80">Cloud VM</text>
+<text x="624" y="176" text-anchor="end" class="t-note" data-w="143">instance role: scoped</text>
+<rect x="280" y="200" width="336" height="104" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="280" y="200" width="336" height="104" rx="8" class="w1 nofill s-rule" data-fit="skip"/>
+<text x="296" y="228" class="t-head" data-w="109">tmux session</text>
+<text x="296" y="252" class="t-label" data-w="88">coding agent</text>
+<text x="296" y="276" class="t-label" data-w="138">repository, toolchain</text>
+<rect x="280" y="344" width="336" height="72" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="280" y="344" width="336" height="72" rx="8" class="w1 nofill s-rule" data-fit="skip"/>
+<text x="296" y="372" class="t-head" data-w="95">Chat bridge</text>
+<text x="296" y="396" class="t-label" data-w="126">polls, types replies</text>
+<path d="M544,344 L544,307" class="flow" marker-end="url(#ctx-00-hero-remote-agentic-workflow-arrow)"/>
+<text x="532" y="328" text-anchor="end" class="t-note" data-w="69">send-keys</text>
+<rect x="768" y="200" width="152" height="104" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="768" y="200" width="152" height="104" rx="8" class="w1 nofill s-rule" data-fit="skip"/>
+<text x="784" y="228" class="t-head" data-w="85">Model API</text>
+<text x="784" y="252" class="t-label" data-w="112">Claude Opus 4.6</text>
+<text x="784" y="276" class="t-label" data-w="61">or a peer</text>
+<rect x="768" y="344" width="152" height="72" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="768" y="344" width="152" height="72" rx="8" class="w1 nofill s-rule" data-fit="skip"/>
+<text x="784" y="372" class="t-head" data-w="102">Chat service</text>
+<text x="784" y="396" class="t-label" data-w="119">Telegram Bot API</text>
+<path d="M160,252 L253,252" class="flow" marker-end="url(#ctx-00-hero-remote-agentic-workflow-arrow)"/>
+<text x="200" y="240" text-anchor="middle" class="t-note" data-w="47">SSH in</text>
+<text x="200" y="276" text-anchor="middle" class="t-note" data-w="41">52222</text>
+<path d="M616,252 L765,252" class="flow" marker-end="url(#ctx-00-hero-remote-agentic-workflow-arrow)"/>
+<text x="712" y="240" text-anchor="middle" class="t-note" data-w="75">HTTPS out</text>
+<text x="712" y="276" text-anchor="middle" class="t-note" data-w="25">443</text>
+<path d="M616,380 L765,380" class="flow" marker-end="url(#ctx-00-hero-remote-agentic-workflow-arrow)"/>
+<text x="712" y="368" text-anchor="middle" class="t-note" data-w="58">polls out</text>
+<path d="M844,416 L844,476 L100,476 L100,419" class="flow" marker-end="url(#ctx-00-hero-remote-agentic-workflow-arrow)"/>
+<text x="832" y="452" text-anchor="end" class="t-note" data-w="79">notify, reply</text>
+<text x="40" y="504" class="t-note" data-w="599">The session lives on the server; a client only attaches to it, from wherever the engineer is.</text>
 </svg>

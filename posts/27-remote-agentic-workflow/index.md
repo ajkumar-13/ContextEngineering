@@ -1,58 +1,57 @@
-# 27 · Remote agentic workflow
+# 27 - Remote agentic workflow
 
-> **TL;DR.** Modern coding agents are *latency-sensitive* and *bandwidth-light*: the model lives in the cloud, but the agent process, the codebase, and the toolchain can run anywhere with shell access. The pattern that has emerged for serious work — long-running tasks, large codebases, expensive local hardware not required — is to put **the agent on a remote server** and connect to it from a thin client (a laptop, a phone, a terminal). This post covers the architecture, the standard tooling (`tmux`, `ssh`, VS Code Remote, Telegram bridges), and the ergonomic pieces (notifications, session persistence, multi-device handoff) that make remote agentic work feel native.
+> **TL;DR.** A coding agent spends most of its time waiting on a model in the cloud, so the agent, the repository and the toolchain can live on a rented server while a laptop or phone only attaches to it. The stack is a cloud virtual machine behind a security group and a scoped instance role, SSH (Secure Shell) with keys only, the agent inside a `tmux` session that outlives every disconnect, and a chat bridge that notifies on three events and carries replies back. At the illustrative sizes of section 6 the model bill is several times the server's, so the case for going remote is the workflow, not the hardware.
 >
-> **After reading this you will be able to:**
-> - Decide when remote agentic work is worth the setup.
-> - Configure a remote-agent stack (EC2 or equivalent + tmux + SSH + VS Code Remote).
-> - Add the ergonomic layers (Telegram notifications, web access) that make it usable from anywhere.
+> **Prerequisites:** [Post 26](../26-modern-agentic-workflow/index.md).
+> **Safe to skip?** Skip it if a coding agent already runs on a remote server that survives a closed laptop, notifies only when it needs a person, and holds no credential that reaches production.
+>
+> **After reading, you will be able to:**
+>
+> - Decide when moving a coding agent to a remote server pays for the setup, from the task's length, the machine it needs and the devices that drive it.
+> - Configure a cloud server behind a security group and an instance role, with key-only SSH and the agent in a tmux session reached over SSH or VS Code.
+> - Add a chat bridge that notifies on three events and returns a reply to the running session, and keep it from becoming a way in.
+> - Price a month of remote work from an instance's hourly rate and the model's per-million rates, and say which bill dominates.
+> - Fence a remote agent box with controls enforced outside the prompt: scoped credentials, network rules, a command deny-list and an audit log.
 
-![Network diagram: a laptop connects over SSH to a cloud VM running a tmux agent session, with a chat bridge relaying messages and a security-group boundary around the VM.](diagrams/00-hero-remote-agentic-workflow.svg)
-*A small remote setup keeps the agent working after the laptop closes.*
+![Thin clients on the left reach a cloud VM through a dashed security-group boundary by one inbound connection, SSH on port 52222. Inside, a tmux session runs the agent and a chat bridge types replies into it; the agent calls the model API and the bridge polls a chat service, both outbound.](diagrams/00-hero-remote-agentic-workflow.svg)
 
----
-
-## 1. Why remote
-
-Three reasons that recur, in roughly the order teams discover them.
-
-- **Long-running tasks.** A coding agent that spends, say, 40 minutes refactoring a module (an illustrative figure, not a benchmark) should not require the user's laptop to stay open. On a server, the session keeps running through closed lids, lost Wi-Fi, and meeting blocks.
-- **Bigger machines.** A repository whose tests need 16 GB of RAM and a Postgres + Redis stack is unpleasant on a laptop. A `c6i.4xlarge` is unpleasant for nobody.
-- **Multi-device.** Start a task from the desk; check on it from the couch; respond to its question from a phone in a coffee queue. The session is the same; only the client changes.
-
-A fourth, less universal reason: **separation of compute from credentials**. The remote box has tightly scoped credentials and lives in a known network; the laptop has none. For some teams (regulated industries, security-conscious shops) this is the headline benefit.
-
-The cases where remote does *not* pay back: short, interactive sessions with quick edit-test cycles where the round-trip latency of every keystroke matters; demos and pair-programming that benefit from the local UI's responsiveness; greenfield prototyping where setup overhead exceeds the work itself.
+*Only SSH comes in; the model calls, the package downloads and the chat bridge all go out, so the box needs one inbound rule.*
 
 ---
 
-## 2. The architecture
+## 1. The question: when is a remote agent worth the setup?
 
-A working remote-agent stack has four boxes:
+A coding agent waits seconds on a model in the cloud and sends a few kilobytes of text per step, so nothing ties it to the machine the engineer holds. Moving it changes where the loop runs, not the window: the agent assembles the same six layers either way. Three reasons recur.
 
-```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  Thin client │ →   │   Remote     │  ↔  │  Coding      │  ↔  │  LLM API     │
-│ laptop/phone │ SSH │   server     │     │  agent +     │     │ (Claude,     │
-│              │     │ (tmux + IDE) │     │  toolchain   │     │  Gemini …)   │
-└──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
-```
+- **Long-running tasks.** An agent that spends, say, 40 minutes refactoring a module (an illustrative figure) should not need the laptop to stay open. On a server the session runs on through closed lids, lost Wi-Fi and meetings.
+- **Bigger machines.** Tests that need 16 GB of memory and a Postgres and Redis stack are unpleasant on a laptop; a `c6i.4xlarge`, with 16 vCPUs (virtual processor threads) and 32 GiB, runs them comfortably (Amazon Web Services (AWS), "Amazon EC2 On-Demand Pricing", consulted October 2026).
+- **Several devices.** A task started at the desk is answered from a phone; only the client changes.
 
-- **Thin client.** A laptop, a tablet, a phone. Needs SSH and (optionally) VS Code Remote. Anything that can hold an SSH session can drive the agent.
-- **Remote server.** An EC2 instance, a Hetzner box, a Google Cloud VM, a homelab machine. Sized to the workload (most coding work is fine on a 4–8 core box with 16 GB RAM).
-- **Coding agent + toolchain.** The actual work happens here: Claude Code or Aider or Codex CLI in a `tmux` session, the repository checked out, the language toolchain installed, the test environment configured.
-- **LLM API.** The model (Claude Opus 4.x, Sonnet 4.5, Gemini 2.5, a frontier GPT model). Reached via HTTPS. The same provider the user would reach locally.
+A fourth, for regulated or security-conscious teams the main one, is **separating compute from credentials**: the remote box holds tightly scoped credentials in a known network, and the laptop holds none.
 
-The four boxes communicate over standard protocols: SSH between client and server; HTTPS between server and LLM API. No special networking, no VPN required (though one is wise for production keys), no novel security stance.
+Remote does not pay back for quick edit-and-test cycles, where every keystroke's round trip is felt; for demos and pair programming, which want a local interface; or for a prototype whose setup would outlast the work.
+
+---
+
+## 2. The four-box architecture
+
+A remote-agent stack has four boxes, drawn in the figure at the top of the post.
+
+- **Thin client.** A laptop, tablet or phone with SSH and, optionally, VS Code with the Remote - SSH extension.
+- **Remote server.** An instance of Amazon EC2 (Elastic Compute Cloud), a Hetzner server, a Google Cloud virtual machine (VM) or a machine at home. The author's rule of thumb is that most coding work fits 4 to 8 vCPUs and 8 to 16 GiB of memory.
+- **Coding agent and toolchain.** Claude Code, Aider or Codex CLI in a `tmux` session, with the repository, the toolchain and the test environment.
+- **Model API** (application programming interface). The model, for example Claude Opus 4.6 (as of early 2026), reached over HTTPS from the server.
+
+Direction matters more than protocol. Only SSH comes **in**; the model calls, the package downloads and the chat bridge of section 5 all go **out**, and an EC2 security group is stateful, so responses to outbound requests flow back without an inbound rule (AWS, "Amazon EC2 security groups", consulted October 2026). The server therefore needs exactly one inbound rule.
 
 ---
 
 ## 3. The minimum setup
 
-A reproducible starter that takes about 30 to 45 minutes:
+A reproducible starter, in order:
 
-1. **Provision a server.** A `c6i.xlarge` EC2 instance (Ubuntu 24.04) is a sensible baseline; a smaller `c6i.large` is enough for most coding work. Cheaper providers (Hetzner, DigitalOcean) often beat AWS on price per core for this use case (see the pricing pages in Further reading; treat the ranges in §6 as illustrative, not measured).
-2. **Lock down SSH.** Key-based auth only; no password auth; non-default port; `fail2ban` installed. The agent will be running with elevated trust; treat the box accordingly. The relevant `/etc/ssh/sshd_config` lines:
+1. **Provision a server.** A `c6i.xlarge` (4 vCPUs, 8 GiB) on Ubuntu 24.04 is the baseline; a `c6i.large` (2 vCPUs, 4 GiB) suits a light repository; Hetzner's CPX31 has the xlarge's shape for less, when the plan is in stock (section 6).
+2. **Lock down SSH.** Keys only, no passwords, no root login, a non-default port, `fail2ban`. The `/etc/ssh/sshd_config` lines:
 
    ```conf
    Port 52222
@@ -62,11 +61,12 @@ A reproducible starter that takes about 30 to 45 minutes:
    AllowUsers agent
    ```
 
-3. **Restrict the network and the machine's own permissions.** On EC2 this is two pieces. The **security group** is the instance firewall: allow inbound TCP only on the SSH port, and only from a known IP range (a home or office CIDR, or a bastion), not `0.0.0.0/0`; allow outbound `443` for the LLM API and package registries. The **IAM instance role** is the box's own cloud identity: attach a role scoped to exactly what the workload needs (read a specific S3 prefix, pull from one ECR registry) rather than baking long-lived access keys into the box. Scoped credentials that live on the server and never touch the laptop are the whole point of the separation-of-credentials benefit from §1.
-4. **Install the toolchain.** Whatever the project needs. A minimal modern stack: `git`, `tmux`, `node`, `python` (via `uv` or `pyenv`), `docker`, the language's package manager, `gh` for GitHub access.
-5. **Install the agent.** `npm i -g @anthropic-ai/claude-code` (or the equivalent for the tool of choice). Configure the API key via the host's standard mechanism (environment variable from a `.env` file with strict permissions, ideally a secret manager).
-6. **Clone the repo.** Use a deploy key scoped to the repository, not a personal SSH key.
-7. **Set up `tmux`.** A long-lived session per project (`tmux new -s acme-api`); the agent runs inside it; closing SSH does not kill the session. A minimal `~/.tmux.conf` that survives reconnects and shows which project is attached:
+   Check the file with `sudo sshd -t` before restarting the server (Ubuntu, "OpenSSH server"), and keep the current session open while a second one tests the new port. To avoid long-lived keys on the laptop, EC2 Instance Connect lets IAM policies decide who may connect and pushes an SSH public key to the instance metadata, where it remains for 60 seconds (AWS, "Connect to your Linux instance using a public IP address and EC2 Instance Connect", consulted October 2026).
+3. **Restrict the network and the box's own permissions.** The **security group** is the instance's virtual firewall: inbound TCP only on the SSH port and only from a known address range (an office CIDR, Classless Inter-Domain Routing, block, or a bastion host), never `0.0.0.0/0`; outbound HTTPS for the model API and the package registries. The **IAM instance role** (Identity and Access Management) is the box's cloud identity: software on the instance gets temporary credentials from the role instead of stored access keys (AWS, "IAM roles for Amazon EC2", consulted October 2026), and the role grants only what the work needs, such as one S3 prefix.
+4. **Install the toolchain**: `git`, `tmux`, `node`, `python` (through `uv`), `docker`, `gh`, and whatever the project needs.
+5. **Install the agent.** Claude Code's documented native installer is `curl -fsSL https://claude.ai/install.sh | bash`; `npm install -g @anthropic-ai/claude-code` still works with Node.js 22 or later (Claude Code, "Advanced setup", consulted October 2026). The key goes in `ANTHROPIC_API_KEY`, read from a file only the agent's user can read, or from a secret manager.
+6. **Clone the repository** with a deploy key scoped to it, not a personal SSH key.
+7. **Set up `tmux`**: one long-lived session per project, the agent inside it. A minimal `~/.tmux.conf` keeps a long scrollback and shows which project is attached:
 
    ```conf
    set -g history-limit 50000
@@ -74,132 +74,157 @@ A reproducible starter that takes about 30 to 45 minutes:
    set -g status-left "#S "
    ```
 
-8. **Connect from VS Code Remote.** Install the Remote-SSH extension; point it at the server; the editor experience is local-feeling, the work happens on the server.
+8. **Connect from VS Code.** The Remote - SSH extension installs the VS Code Server on the remote machine and runs commands and extensions there (VS Code, "Remote Development using SSH", consulted October 2026).
 
-Optional but worth adding the same day:
-
-- **A `tmux` window layout** with the editor in one pane and the agent in another, so context-switching is fast.
-- **Shell aliases** for the agent commands the user runs constantly.
-- **A daily-journal file** the agent writes to at the end of each session.
+Worth adding the same day: a progress file the agent writes at the end of each session, a write destination in [post 08](../08-write-strategies/index.md)'s sense that the next session reads back.
 
 ---
 
 ## 4. Persistence and handoff
 
-![What survives a disconnect, beside the two ways a bridge gets a reply into a running agent, and the three events worth notifying on](diagrams/01-persistence-and-handoff.svg)
+The point of the remote setup is that sessions persist. A session is started once and attached to from anywhere:
 
-*The session outliving the connection is the easy half. The reply path is the half that decides whether the setup is usable away from the desk.*
+```bash
+tmux new -s acme-api        # on the server, once: create the session
+claude                      # start the agent inside it
+# detach with Ctrl-b then d, or simply close the laptop
+tmux attach -t acme-api     # later, from any client: the same session
+```
 
-The killer feature of the remote setup: sessions persist. The mechanics:
+Three things survive a disconnect. **The `tmux` session** outlives SSH. **The agent's conversation** survives because the process never stopped; if it does end (a crash, a reboot), Claude Code keeps each session's transcript on disk and `claude --continue` loads the most recent conversation in the directory (Claude Code, "CLI reference", consulted October 2026). **The shell history, working directory and processes in flight** stay alive in their panes.
 
-- **`tmux` sessions** outlive SSH. `tmux attach -t acme-api` reconnects to whatever was running.
-- **The agent's conversation history** persists in its own state file. Reattaching shows the conversation as it was.
-- **The shell history, the working directory, the in-flight processes** all stay alive.
+So the engineer can disconnect, change device and pick up where the work stood; the agent cannot tell that the client changed. The figure below follows one session through a working day reached from three clients.
 
-Combined: the user can disconnect, switch devices, reconnect from anywhere, and pick up *exactly* where they left off. The agent does not know it switched users.
+![A time line with three client lanes above two bars. The laptop attaches and starts the task, then closes. The phone gets a blocked notification, replies through the bridge, and later a complete notification. VS Code on a second computer then attaches. The tmux session runs throughout, the task inside it until it completes.](diagrams/01-persistence-and-handoff.svg)
 
-A useful habit: **one `tmux` session per active project**. Switching projects means switching sessions, not editor tabs. The agent's context per session stays focused.
+*Clients come and go; the session and the task inside it run on without them.*
+
+One habit keeps this tidy: **one `tmux` session per project**, so each agent's window holds one project's material and stays clear of the distraction of [post 06](../06-context-failure-modes/index.md).
 
 ---
 
-## 5. Notifications and async oversight
+## 5. Notifications and asynchronous oversight
 
-The remote agent runs while the user is doing other things. The pattern that makes it usable: **the agent reaches out when it needs the user**. A small bridge does this:
+The agent must reach out when it needs a person, and only then: **notify on three events**, task complete, blocked on a question, and an error that needs a person. Notifying on every step trains the reader to ignore the channel.
 
-- **Telegram bot** for push notifications. The agent calls a `notify_user` tool; the tool posts to a Telegram chat the user is in. *"Tests passing on PR #432, ready to merge?"*
-- **Slack / Discord** equivalents work the same way.
-- **Email** is the lowest-friction option for one-way "task complete" alerts.
+In Claude Code two of the three are hook events ([post 26](../26-modern-agentic-workflow/index.md) introduces hooks). `Stop` fires when Claude finishes responding: task complete. `Notification` fires when Claude Code sends a notification, and a matcher on its type, such as `permission_prompt` or `idle_prompt`, picks out an agent waiting on a person: blocked (Claude Code, "Hooks reference", consulted October 2026). The third is explicit: the agent gets a `notify_user` tool for an error it cannot resolve. The hook or tool posts to a Telegram bot (*"Tests passing on PR #432, ready to merge?"*), Slack, Discord or email.
 
-The reply path is the fiddly half. A running agent is usually mid-turn, so a bridge cannot just write to its `stdin` and expect the text to land in the right place. In practice the bridge either drives the agent's terminal directly (a daemon polls the chat, then writes the reply into the agent's `tmux` pane with `tmux send-keys -t acme-api "$reply" Enter`, which is exactly what a human would type), or it exposes the reply as a tool result the agent reads on its next turn. A poll-and-inject loop is short:
+The reply path is the fiddly half. A bridge cannot write to the agent's standard input, which is the terminal `tmux` holds. It either drives the terminal, typing the reply into the agent's `tmux` pane as a person would, or returns the reply as a tool result on the next turn. A loop of the first kind is short; `telegram_get_reply` stands for a function that long-polls the Telegram Bot API's `getUpdates` and keeps only the engineer's own chat:
 
 ```bash
 while true; do
-  reply=$(telegram_get_updates)          # long-poll the chat
-  [ -n "$reply" ] && tmux send-keys -t acme-api "$reply" Enter
+  reply=$(telegram_get_reply)                 # placeholder: long-poll, one allowed chat id only
+  if [ -n "$reply" ]; then
+    tmux send-keys -t acme-api -l -- "$reply" # -l literal; -- ends the options
+    tmux send-keys -t acme-api Enter
+  fi
   sleep 2
 done
 ```
 
-Several open-source bridges do this out of the box. `claude-code-remote` (sometimes abbreviated CCO) and *OpenClaude* are the community projects most people start from: they run a small server next to the agent, register a `notify_user` tool the agent can call, and relay replies back through a Telegram or web front end using the `send-keys` approach above. Setting one up is: clone the project, set a bot token and the target `tmux` session in its config, and run its daemon under the same `tmux` server as the agent. The Aider Telegram integration is the equivalent for that host.
+Without `-l`, `tmux` looks each argument up as a key name first, so a reply reading `C-c` would arrive as an interrupt. Polling matters too: the Bot API offers long polling with `getUpdates` or a webhook, which needs an inbound HTTPS port (443, 80, 88 or 8443) (Telegram, "Bot API", consulted October 2026); polling keeps section 2's single inbound rule.
 
-The discipline that keeps notifications useful is that **the agent only notifies on three events**: task complete, blocked on a question, error that needs human attention. Notifying on every step trains the user to ignore the channel.
+Community bridges package the pattern: Claude-Code-Remote, a GitHub project (changelog to August 2025), notifies from the `Stop` hook by email, Telegram or LINE and injects replies into the `tmux` session or a pseudo-terminal after checking the sender's id. Anthropic's own Remote Control connects claude.ai/code or the Claude app to a Claude Code session on the engineer's machine, which makes outbound HTTPS requests only and never opens inbound ports; it needs a Pro, Max, Team or Enterprise plan and does not support API keys (Claude Code, "Remote Control", consulted October 2026). It is the stack's web access, and it fits the one-inbound-rule box.
 
 ---
 
 ## 6. The cost model
 
-The numbers below are illustrative order-of-magnitude figures, not measured benchmarks; the live prices are on each provider's pricing page (see Further reading). As a rough rule of thumb, a remote setup runs on the order of tens of dollars a month for the server (an EC2 `c6i.xlarge` on sustained use; a Hetzner CPX31 is cheaper for comparable cores) plus the LLM API bill, which dominates everything else for a productive engineer. That LLM bill, again illustratively, can run from a couple of hundred dollars a month up into four figures for a heavy user on a metered API or a premium coding-agent subscription; at Sonnet-tier input pricing, roughly $3 per million input tokens ([Post 04](../04-tokens-windows-budgets/index.md), §3), a single 1M-token session costs about $3, so the monthly total is driven by session volume more than by any one call.
+A remote setup has two bills. The server rates are AWS On-Demand Linux rates for US East (N. Virginia) and Hetzner's CPX31 price for new US orders from 15 June 2026, excluding VAT and the IPv4 address (AWS, "Amazon EC2 On-Demand Pricing"; Hetzner, "Price adjustment"; both consulted October 2026). The model is Claude Opus 4.6 at 5 dollars per million input tokens and 25 per million output, as of early 2026, with a five-minute cache write at 1.25 times and a cache read at 0.1 times the base input price, the rate for most models (Anthropic, "Pricing" and "Prompt caching", consulted October 2026; [post 05](../05-economics-of-context/index.md), sections 2 and 4). The task sizes are illustrative (64 calls per thirty-minute task, 90% of each call's input read from the cache and the rest written to it, four tasks a day on 22 working days). Run from the series root as `uv run python posts/27-remote-agentic-workflow/snippets/remote_costs.py`, the snippet prints:
 
-The savings over a beefy local laptop are not the point; the point is the *workflow*. An hour of agent-driven refactoring the user can kick off and check on later is worth a lot more than the dollar or so of compute it cost to run.
+```text
+EC2 On-Demand, Linux, US East (N. Virginia), consulted October 2026
+  c6i.large     2 vCPU   4 GiB  0.085 $/h    62.05 $ a 730-hour month
+  c6i.xlarge    4 vCPU   8 GiB  0.170 $/h   124.10 $ a 730-hour month
+  c6i.2xlarge   8 vCPU  16 GiB  0.340 $/h   248.20 $ a 730-hour month
+  c6i.4xlarge  16 vCPU  32 GiB  0.680 $/h   496.40 $ a 730-hour month
+  c6i.xlarge stopped outside working hours, 176 h a month: 29.92 $
+Hetzner CPX31, 4 vCPU, 8 GB, US, from 15 June 2026: 73.49 $ a month (c6i.xlarge all month: 124.10)
+egress: 20 GB a month costs 0.00 $; 150 GB would cost 4.50 $
 
-A useful reality check: **measure both sides**. The trace store from Post 22 captures the LLM cost; standard cloud billing captures the server cost. If the server is idle most of the time, downscale or use a spot/preemptible instance. If the LLM cost is dominating, look at compression, caching, and sub-agent budgets.
+one thirty-minute task, Claude Opus 4.6: 64 calls of 50,000 tokens in and 1,000 out
+  uncached                 input 16.00 + output 1.60 = 17.60 $
+  90% read from the cache  read 1.44 + write 2.00 + output 1.60 = 5.04 $
+  c6i.xlarge for the same half hour: 0.085 $; the model costs 59 times as much
+
+a month of 88 such tasks: model 443.52 $, against the server 124.10 (all month) or 29.92 (working hours)
+```
+
+A server costs rate times hours: $0.17 \times 730 = 124.10$ dollars for a month left running. Egress barely registers: AWS gives the first 100 GB a month to the internet free, then charges 0.09 dollars per GB, so an illustrative 20 GB costs nothing. With the cache, one task's input is $64 \times 45{,}000 \times 0.5 / 10^6 = 1.44$ dollars of reads plus $64 \times 5{,}000 \times 6.25 / 10^6 = 2.00$ of writes, against $16.00$ uncached. The figure below sets the month side by side.
+
+![Five bars of dollars a month. Solid, from cited rates: c6i.4xlarge all month 496.40, c6i.xlarge all month 124.10, Hetzner CPX31 73.49, c6i.xlarge for 176 working hours 29.92. Dashed, illustrative: the model bill for 88 cached tasks on Claude Opus 4.6, 443.52.](diagrams/02-cost-of-a-month.svg)
+
+*The model bill outweighs a right-sized server several times over; only a large instance left running rivals it.*
+
+**Measure both sides**: the trace store of [post 22](../22-observability/index.md), section 2, records the model cost per call, and the cloud bill records the server. An idle server can be stopped outside working hours, at a price: a stopped instance loses its memory, so the `tmux` session and the agent end and the conversation returns only through `claude --continue`; it gets a new public IPv4 address at start unless an Elastic IP is attached; and its EBS (Elastic Block Store) volumes are still billed (AWS, "How EC2 instance stop and start works", consulted October 2026). If the model dominates, the levers are the series' own: a cached prefix (post 05), compression ([post 12](../12-compress-strategies/index.md)) and sub-agent budgets ([post 13](../13-isolate-strategies/index.md), section 5).
 
 ---
 
 ## 7. Security on a remote agent
 
-![Seven things fenced on a remote agent box, the control that fences each, and why none of them is a prompt rule](diagrams/02-remote-controls.svg)
+The box runs an agent with a shell and some credentials; the table below lists every control in one place, with what it fences and what enforces it.
 
-*Sections 3 and 7 give two overlapping lists. This is the single one a reader can work through.*
+![A table of seven controls: a security group, key-only SSH with MFA or Instance Connect, a scoped instance role, a deny-list hook, read-only mounts, staging-only credentials and an audit log, each with what it fences and what enforces it outside the model.](diagrams/03-remote-controls.svg)
 
-The remote box runs an agent with shell access and (probably) deploy credentials. A short list of the controls that matter:
+*Every control is enforced outside the model, so nothing the model reads can switch it off.*
 
-- **No production credentials in the dev box.** Use staging credentials; promote to production via the normal CI/CD (continuous-integration/continuous-deployment) path, not via the agent.
-- **Read-only filesystem mounts** for anything sensitive the agent should not write to (vendor directories, generated code, secrets).
-- **A deny-list of dangerous commands** at the hook level (Post 26, §6) — the agent cannot `rm -rf /`, cannot `git push --force` to `main`, cannot `sudo`.
-- **MFA-protected SSH** (multi-factor authentication) for the human side of the connection.
-- **Audit log** of every shell command the agent ran, with timestamp and user. Saves the on-call engineer's evening when a bug needs to be reproduced.
+- **No production credentials on the development box.** Staging credentials only; production is reached through the continuous-integration and continuous-deployment (CI/CD) path, never through the agent.
+- **Read-only mounts** for what the agent must not write: vendored directories, generated code, secrets.
+- **A deny-list of dangerous commands at the hook level**: no `rm -rf /`, no `git push --force` to `main`, no `sudo`. A Claude Code `PreToolUse` hook runs before a tool call and blocks it by exiting with code 2 or returning a `deny` decision (Claude Code, "Hooks reference", consulted October 2026). A deny-list matches text and a command can be spelled many ways, so it is a backstop behind the credentials and mounts.
+- **MFA on SSH** (multi-factor authentication) for the human side.
+- **An audit log** of every command the agent ran, with timestamp and user, kept where the agent's user cannot edit it.
 
-The threat model on a remote box is the same as on a laptop, *plus* the network. The defences are standard server hygiene with the additional thought that the agent itself is a (mostly) trusted automated user.
+These are [post 23](../23-security/index.md)'s defences on a box. The role, the mounts and the staging credentials bound each tool's blast radius (D2: a sandbox in post 23's security sense, not post 13's output-scoping sense), and the hook checks a proposed action in code (D1). The chat bridge adds a boundary a laptop lacks: a reply from the engineer's chat is `user` content in post 23's trust-tag terms, a message from anyone else is `external` and never reaches `send-keys` (D3, post 23, section 5).
 
 ---
 
 ## 8. The mobile workflow
 
-A pattern several practitioners have made productive: **use a phone as the thin client**. The mobile experience for a coding agent is surprisingly good when the agent does most of the typing.
+A **phone can be the thin client**, which works better than it sounds when the agent does most of the typing:
 
-The setup:
+- **An SSH client on the phone** (Termius, Blink Shell, JuiceSSH), attached to the `tmux` session.
+- **A skill** telling the agent its reader is on a phone: shorter answers, smaller code blocks, more confirmations. A skill is a directory with a `SKILL.md` whose name and description load up front ([post 14](../14-system-prompt-as-software/index.md), section 4).
+- **The chat bridge or Remote Control** for quick replies without SSH.
 
-- **SSH client on phone** (Termius, Blink Shell, JuiceSSH).
-- **`tmux` session** on the server, attached over SSH.
-- **A skill** ([Post 26](../26-modern-agentic-workflow/index.md), §4: a small Markdown file that packages one agent capability) that knows the user is on mobile: smaller code blocks, shorter responses, more confirmation prompts.
-- **Telegram bridge** for notifications and quick replies without opening SSH at all.
+An engineer can then review a pull request, have the agent fix a typo and run the tests, and merge from a 6-inch screen: the agent works and the person approves.
 
-The result is a workflow where you can review a PR, ask the agent to fix a typo, have it run the tests, and merge — all from a 6-inch screen. The leverage is real because the *agent* is doing the work; the user is mostly approving.
+The lab for this post, described as a procedure and not reported as a run: the minimum setup on one small VM, a thirty-minute task started in `tmux`, the laptop closed, and the session resumed from a second device with the task still running.
 
-This is not a primary workflow for most engineers; it is an *available* one, which is itself the point. Remote agents stop being tied to the desk.
+---
+
+## 9. What can go wrong?
+
+- **The agent started outside `tmux`.** Closing the laptop ends SSH and the agent with it; next morning the task stopped where the lid closed.
+- **A reply typed into the wrong place.** The agent has exited, the bridge types the next reply anyway, and it runs as a shell command. The bridge checks that the pane runs the agent (`tmux display -p -t acme-api '#{pane_current_command}'`) first.
+- **A bridge that accepts any chat.** Whoever finds the bot can instruct an agent with a shell; the symptom is commits nobody asked for. Only the engineer's chat id is accepted.
+- **Locked out after moving the SSH port.** The security group still allows only port 22, or a typo stops `sshd`; the connection times out. Open the new port first, run `sudo sshd -t`, keep one session open.
+- **A schedule that kills the session.** The box is stopped each evening, and each morning the `tmux` session, the agent and the test run are gone and the address has changed.
 
 ---
 
 ## Common pitfalls
 
-- **Production credentials on the agent box.** A bug-or-attack on the agent reaches production.
-- **No `tmux`.** Disconnect kills the session; the work is lost.
-- **Notifying on every step.** The user trains themselves to ignore the channel.
-- **No deny-list on dangerous commands.** Eventually the agent runs the wrong one.
-- **Personal SSH key as the deploy key.** Loses the audit trail; widens the blast radius if compromised.
-- **Forgetting to downscale.** A `c6i.4xlarge` running idle for a month is real money.
+1. **Production credentials on the agent box.** A bug in the agent, or an attack on it, reaches production.
+2. **No deny-list on dangerous commands.** Eventually the agent runs the wrong one.
+3. **A personal SSH key as the deploy key.** The audit trail is lost, and a leak widens the blast radius.
+4. **An API key in a world-readable file.** Every process on the box can read it.
+5. **Forgetting to downscale.** A `c6i.4xlarge` left running costs 496.40 dollars a month at section 6's rate.
 
 ---
 
 ## Further reading
 
-- AWS, *"Amazon EC2 On-Demand pricing"* (pricing page, 2025–26): the source for the `c6i` instance figures cited in §6.
-- Hetzner, *"Cloud pricing"* (pricing page, 2025–26): the source for the CPX31 comparison in §6.
-- Anthropic, *"Pricing"* and *"Prompt caching"* docs (2025–26): the per-million and cached-read figures behind the §6 rule of thumb.
-- AWS, *"Connect using EC2 Instance Connect"* docs (2025): the no-key SSH path.
-- VS Code, *"Remote development over SSH"* docs (2025–26).
-- Aider docs, *"Running Aider on a remote server"* (2025).
-- Anthropic, *"Claude Code"* docs and community server guides (2025–26).
-- *OpenClaude / claude-code-remote* (community projects): the Telegram and web bridges from §5.
+- AWS, *"Amazon EC2 On-Demand Pricing"*, and Hetzner, *"Price adjustment"* (consulted October 2026): the rates of section 6.
+- Anthropic, *"Pricing"* and *"Prompt caching"* (Claude API documentation, consulted October 2026).
+- AWS EC2 documentation (consulted October 2026): *"Amazon EC2 security groups"*, *"IAM roles for Amazon EC2"*, *"Connect to your Linux instance using a public IP address and EC2 Instance Connect"*, *"How EC2 instance stop and start works"*.
+- VS Code, *"Remote Development using SSH"*; Claude Code, *"Advanced setup"*, *"CLI reference"*, *"Hooks reference"* and *"Remote Control"*; Telegram, *"Bot API"* (all consulted October 2026).
+- The `tmux` manual page: `new-session`, `attach-session`, `send-keys -l`.
 
-Full citations in [REFERENCES.md](../../REFERENCES.md).
+Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
 ---
 
 ## What to read next
 
-- **[Post 26 — The modern agentic workflow](../26-modern-agentic-workflow/index.md)**: the same workflow on a local machine; the loop, skills, and hooks this post moves to a server.
-- **[Post 28 — Build a RAG chatbot](../28-build-rag-chatbot/index.md)**: the first build, end-to-end.
-- **[Post 29 — Build an MCP server](../29-build-mcp-server/index.md)**: the second build. MCP (Model Context Protocol) is the standard tool-server interface.
-- **[Post 30 — Capstone: email reply agent](../30-capstone-email-reply-agent/index.md)**: the everything-together project.
+- **[Post 28 - Build #1: RAG chatbot from scratch](../28-build-rag-chatbot/index.md):** the first build, a natural first task to run on the remote box.
+- **[Post 23 - Security and prompt injection](../23-security/index.md):** the four defences behind section 7's controls and the trust tag the chat bridge needs.

@@ -1,0 +1,731 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-027",
+  "next_ordinal": 17,
+  "questions": [
+    {
+      "id": "ctx-027-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 2,
+      "tags": [
+        "why-remote"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Which of these four pieces of work gains most from running the coding agent on a remote server instead of the laptop?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A 40-minute refactor that should keep running after the laptop lid closes.",
+          "correct": true,
+          "feedback": "Right. A long task that must outlive the client is the first reason the post gives for going remote."
+        },
+        {
+          "key": "b",
+          "text": "A run of quick edit-and-test cycles where every keystroke's round trip is felt.",
+          "correct": false,
+          "feedback": "Short interactive loops are where remote does not pay back: the network round trip is paid on every keystroke."
+        },
+        {
+          "key": "c",
+          "text": "A live demo in front of a customer that relies on a responsive local interface.",
+          "correct": false,
+          "feedback": "Demos and pair programming benefit from the local interface; the post lists them among the cases where remote does not pay."
+        },
+        {
+          "key": "d",
+          "text": "A throwaway prototype whose server setup would take longer than writing it.",
+          "correct": false,
+          "feedback": "When setup exceeds the work, the remote stack costs more time than it saves."
+        }
+      ],
+      "explanation": "Section 1: a long-running task that should survive closed lids, lost Wi-Fi and meetings is the first reason to go remote. Short interactive cycles, demos and prototypes smaller than the setup are the cases the post says do not pay back.",
+      "hints": [
+        "Ask which task is hurt most when the laptop goes to sleep."
+      ]
+    },
+    {
+      "id": "ctx-027-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "security-group",
+        "architecture"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The agent's server calls a model API, downloads packages and runs a chat bridge, yet its security group carries a single inbound rule, for SSH. Why is that enough?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Every one of those connections is opened from the server outwards, and a security group is stateful, so the responses come back without an inbound rule.",
+          "correct": true,
+          "feedback": "Right. Direction is what matters: only the SSH session is opened from outside."
+        },
+        {
+          "key": "b",
+          "text": "The model API and the package registries connect in on port 443, which a security group always leaves open.",
+          "correct": false,
+          "feedback": "The server opens those connections; nothing on the internet connects in to the agent on 443."
+        },
+        {
+          "key": "c",
+          "text": "The chat bridge receives replies through a Telegram webhook, which does not count as inbound traffic.",
+          "correct": false,
+          "feedback": "A webhook is an inbound HTTPS request to the server; the post's bridge long-polls getUpdates precisely to avoid one."
+        },
+        {
+          "key": "d",
+          "text": "SSH tunnels carry the model calls and the bridge traffic, so only the SSH port is ever used.",
+          "correct": false,
+          "feedback": "The model calls go straight from the server over HTTPS; they do not ride the engineer's SSH session."
+        }
+      ],
+      "explanation": "Section 2: only SSH comes in; the model calls, package downloads and the chat bridge all go out. An EC2 security group is stateful, so responses to outbound requests flow back in without an inbound rule, and the box needs exactly one.",
+      "hints": [
+        "For each connection, ask which end opens it."
+      ]
+    },
+    {
+      "id": "ctx-027-q03",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "tmux",
+        "chat-bridge"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A bridge passes each chat reply to the pane as `tmux send-keys -t acme-api REPLY Enter`, with REPLY replaced by the text of the reply as a single argument. The engineer replies with the text `C-c`, meaning to ask the agent what that key does in the editor. What reaches the agent's pane?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "An interrupt: without -l, tmux first looks the argument up as a key name, and C-c names Ctrl-C.",
+          "correct": true,
+          "feedback": "Right. Key-name lookup turns the reply into a keystroke; -l would have sent the three characters."
+        },
+        {
+          "key": "b",
+          "text": "The three characters C, minus and c, followed by Enter, because the argument is quoted.",
+          "correct": false,
+          "feedback": "Quoting keeps the shell from splitting the argument; tmux still looks the whole argument up as a key name."
+        },
+        {
+          "key": "c",
+          "text": "Nothing: tmux rejects an argument that looks like a key name unless -l is given.",
+          "correct": false,
+          "feedback": "tmux does not reject it; it sends the key the name stands for."
+        },
+        {
+          "key": "d",
+          "text": "The text, because send-keys treats only unquoted arguments as key names.",
+          "correct": false,
+          "feedback": "tmux never sees the shell's quotes; it receives the string C-c either way."
+        }
+      ],
+      "explanation": "Section 5: send-keys looks each argument up as a key name first and sends it as characters only if it is not one; the -l flag turns the lookup off. A reply that reads C-c therefore arrives as Ctrl-C unless the bridge passes -l.",
+      "hints": [
+        "Think about what tmux does with an argument before it types it.",
+        "C-c is a valid tmux key name."
+      ]
+    },
+    {
+      "id": "ctx-027-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 2,
+      "tags": [
+        "controls",
+        "prompt-rules"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A prompt injection in a fetched web page convinces the agent on the remote box to overwrite the vendored dependencies. Which of these measures still stops the write?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The vendored directory is mounted read-only.",
+          "correct": true,
+          "feedback": "Right. The filesystem refuses the write whatever the agent has been persuaded to do."
+        },
+        {
+          "key": "b",
+          "text": "A line in the system prompt: never modify vendored code.",
+          "correct": false,
+          "feedback": "A prompt rule is text in the window that the injected text competes with; it is followed most of the time and bypassed some of the time."
+        },
+        {
+          "key": "c",
+          "text": "A rule in AGENTS.md listing the vendored directory as off limits.",
+          "correct": false,
+          "feedback": "AGENTS.md reaches the model as more context; it does not stop a write the model decides to make."
+        },
+        {
+          "key": "d",
+          "text": "An instruction to ask for confirmation before editing any file.",
+          "correct": false,
+          "feedback": "The confirmation is requested by the same model that was persuaded; nothing outside the model enforces it."
+        }
+      ],
+      "explanation": "Section 7: every control that matters lives outside the model's window: the network, IAM, the filesystem, a hook in the host. A read-only mount is enforced by the filesystem, so no text the model reads can switch it off; prompt rules, AGENTS.md lines and self-requested confirmations all depend on the model.",
+      "hints": [
+        "Ask which measure does not depend on the model choosing to obey."
+      ]
+    },
+    {
+      "id": "ctx-027-q05",
+      "type": "mcq",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o4",
+        "o2"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "cost",
+        "ec2",
+        "persistence"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "To save money, a team stops its c6i.xlarge agent box every evening and starts it every morning. Which statement about the morning after is correct?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The tmux session and the agent process are gone, the box has a new public IPv4 address unless an Elastic IP is attached, and its EBS volume was billed overnight.",
+          "correct": true,
+          "feedback": "Right. A stop loses memory and the automatically assigned address, and EBS storage is charged while stopped."
+        },
+        {
+          "key": "b",
+          "text": "The tmux session is still there, because tmux sessions outlive disconnects.",
+          "correct": false,
+          "feedback": "They outlive SSH disconnects, not a stopped machine: a stop loses everything in memory, the tmux server included."
+        },
+        {
+          "key": "c",
+          "text": "Nothing at all was billed overnight, because a stopped instance costs nothing.",
+          "correct": false,
+          "feedback": "Instance usage stops, but the EBS volumes are still charged while the instance is stopped."
+        },
+        {
+          "key": "d",
+          "text": "The box keeps its address, because a stop is not a termination.",
+          "correct": false,
+          "feedback": "The automatically assigned public IPv4 address is released at stop; a new one is assigned at start unless an Elastic IP is attached."
+        }
+      ],
+      "explanation": "Section 6: stopping an instance loses its memory, so tmux and the agent end and the conversation comes back only through claude --continue; the instance gets a new public IPv4 address at start unless an Elastic IP is attached; and EBS volumes are billed while it is stopped (AWS, How EC2 instance stop and start works).",
+      "hints": [
+        "Separate what lives in memory from what lives on disk.",
+        "Then ask what AWS still charges for a stopped instance."
+      ]
+    },
+    {
+      "id": "ctx-027-q06",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "cost",
+        "ec2"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A repository needs 16 GiB of memory, so the team picks a c6i.2xlarge at 0.34 dollars an hour (On-Demand, Linux, US East (N. Virginia), consulted October 2026). What does it cost for a 730-hour month left running, and for 176 working hours with the box stopped otherwise (instance hours only)?",
+      "answer": {
+        "parts": [
+          {
+            "label": "all month",
+            "value": 248.2,
+            "tolerance": 0.005,
+            "unit": "dollars"
+          },
+          {
+            "label": "working hours",
+            "value": 59.84,
+            "tolerance": 0.005,
+            "unit": "dollars"
+          }
+        ]
+      },
+      "precision_note": "0.34 × 730 = 248.20 and 0.34 × 176 = 59.84, as the EC2 loop of snippets/remote_costs.py prices c6i.2xlarge (rate × MONTH_H, rate × WORK_H). Using the c6i.xlarge rate of 0.17 by mistake gives 124.10 and 29.92.",
+      "explanation": "Section 6: a server bill is the hourly rate times the hours it runs. At 0.34 dollars an hour, $0.34 \\times 730 = 248.20$ dollars for the month and $0.34 \\times 176 = 59.84$ for the working hours; the snippet prints the first.",
+      "hints": [
+        "Multiply the hourly rate by the hours in each schedule."
+      ]
+    },
+    {
+      "id": "ctx-027-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 6,
+      "tags": [
+        "cost",
+        "prompt-caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "An illustrative agent task makes 40 calls to Claude Opus 4.6 (5 dollars per million input tokens, 25 per million output, as of early 2026), each with 60,000 input tokens and 2,000 output tokens. Price the task with no caching, and with 90% of each call's input read from the cache at 0.1 times the input price and the other 10% written to it at 1.25 times.",
+      "answer": {
+        "parts": [
+          {
+            "label": "uncached",
+            "value": 14.0,
+            "tolerance": 0.005,
+            "unit": "dollars"
+          },
+          {
+            "label": "cached",
+            "value": 4.58,
+            "tolerance": 0.005,
+            "unit": "dollars"
+          }
+        ]
+      },
+      "precision_note": "Uncached: 40 × 60,000 × 5 / 10^6 = 12.00 input + 40 × 2,000 × 25 / 10^6 = 2.00 output = 14.00. Cached: reads 40 × 54,000 × 0.5 / 10^6 = 1.08, writes 40 × 6,000 × 6.25 / 10^6 = 1.50, output 2.00, total 4.58, as task_cost(cache=True) in snippets/remote_costs.py computes with these sizes. Forgetting the writes gives 3.08; billing the uncached 10% at the base rate gives 4.28.",
+      "explanation": "Section 6: input is tokens times the rate, so the uncached task is $12.00 + 2.00 = 14.00$ dollars. Cached, the 54,000 read tokens per call cost 0.5 dollars per million and the 6,000 written tokens 6.25, so $1.08 + 1.50 + 2.00 = 4.58$ dollars.",
+      "hints": [
+        "Price input and output separately and add them.",
+        "For the cached case, split each call's input into the read part (0.1 times 5 dollars per million) and the written part (1.25 times)."
+      ]
+    },
+    {
+      "id": "ctx-027-q08",
+      "type": "numeric",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "cost",
+        "egress"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A remote box that also serves build artefacts sends 250 GB a month to the internet. With AWS's free allowance and first-tier rate for US East (N. Virginia), consulted October 2026, what is the month's data-transfer-out charge, assuming nothing else in the account uses the allowance?",
+      "answer": {
+        "value": 13.5,
+        "tolerance": 0.005,
+        "unit": "dollars"
+      },
+      "precision_note": "(250 − 100) × 0.09 = 13.50, as egress() in snippets/remote_costs.py computes. Charging every GB, 250 × 0.09, gives the wrong 22.50.",
+      "explanation": "Section 6: the first 100 GB a month of data transfer out to the internet is free and the next tier costs 0.09 dollars per GB, so $(250 - 100) \\times 0.09 = 13.50$ dollars.",
+      "hints": [
+        "Subtract the free allowance before applying the rate.",
+        "The allowance is 100 GB a month; the rate is 0.09 dollars per GB."
+      ]
+    },
+    {
+      "id": "ctx-027-q09",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "chat-bridge",
+        "hooks"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "An agent on the remote box needs a permission decision while the engineer is out. Put the steps of the round trip in order, from the agent stopping to the reply arriving in its session.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Holding the reply, the bridge checks that the pane is still running the agent."
+        },
+        {
+          "key": "b",
+          "text": "The Notification hook fires and posts to the engineer's chat."
+        },
+        {
+          "key": "c",
+          "text": "The agent waits on a permission prompt."
+        },
+        {
+          "key": "d",
+          "text": "The bridge, long-polling getUpdates, receives the reply and checks the chat id."
+        },
+        {
+          "key": "e",
+          "text": "The engineer answers from the phone."
+        },
+        {
+          "key": "f",
+          "text": "The bridge types the reply with send-keys -l, then sends Enter."
+        }
+      ],
+      "answer": [
+        "c",
+        "b",
+        "e",
+        "d",
+        "a",
+        "f"
+      ],
+      "explanation": "Section 5: the agent blocks on a prompt, the Notification hook reports it, the engineer replies, the bridge's long poll picks the reply up and keeps it only if it comes from the allowed chat, checks that the agent is still the pane's program (section 9), and types it literally before pressing Enter.",
+      "hints": [
+        "Start with what makes the agent need a person, and end with the keystrokes in the pane."
+      ]
+    },
+    {
+      "id": "ctx-027-q10",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 4,
+      "tags": [
+        "hooks",
+        "notifications"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Match each event of a remote session to the mechanism that handles it in a Claude Code setup like the post's. One mechanism matches no event.",
+      "left": [
+        {
+          "key": "a",
+          "text": "The task is complete"
+        },
+        {
+          "key": "b",
+          "text": "The agent waits on a permission prompt"
+        },
+        {
+          "key": "c",
+          "text": "An error the agent cannot resolve"
+        },
+        {
+          "key": "d",
+          "text": "The engineer's reply must reach the running session"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "A call to a notify_user tool the agent was given"
+        },
+        {
+          "key": "b",
+          "text": "The Stop hook"
+        },
+        {
+          "key": "c",
+          "text": "tmux send-keys -l from the bridge"
+        },
+        {
+          "key": "d",
+          "text": "The Notification hook, matching permission_prompt"
+        },
+        {
+          "key": "e",
+          "text": "A PreToolUse hook that blocks the command"
+        }
+      ],
+      "answer": {
+        "a": "b",
+        "b": "d",
+        "c": "a",
+        "d": "c"
+      },
+      "explanation": "Section 5: Stop fires when Claude finishes responding (complete); Notification fires on a notification, and its permission_prompt type marks a blocked agent; the third event is an explicit notify_user call; the reply goes in through send-keys -l. A PreToolUse hook is section 7's deny-list, which blocks a command rather than notifying anyone.",
+      "hints": [
+        "Two events map straight onto hook events; one needs the agent to act; one is the bridge's job."
+      ]
+    },
+    {
+      "id": "ctx-027-q11",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 3,
+      "outcomes": [
+        "o3",
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "chat-bridge",
+        "security-group"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In one sentence: why does the post's chat bridge receive replies by long-polling the Telegram Bot API's getUpdates instead of registering a webhook?",
+      "answer": {
+        "model": "A webhook needs Telegram to reach the server on an inbound HTTPS port, while long polling is an outbound request from the server, so the box keeps SSH as its single inbound rule.",
+        "accept": [
+          "^(?=(?:\\S+\\s+){5}\\S)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might)\\b)(?=[\\s\\S]*\\b(web ?hooks?|poll\\w*|getupdates)\\b)(?=[\\s\\S]*\\b(needs?|requires?|opens?|keeps?|means?|would|avoids?|has to|have to|must|uses?|is|are|only|stays?|leaves?|lets?|allows?|preserves?|adds?|calls?|connects?|reach\\w*|makes?|works?|goes|initiat\\w*)\\b)(?=[\\s\\S]*(\\binbound\\b|\\bincoming\\b|\\bopen\\w*\\b[^.;]{0,30}\\bports?\\b|\\bports?\\b[^.;]{0,20}\\bopen\\b|\\blisten\\w*|\\bexpos\\w*|\\b(one|single|only) (inbound )?rule\\b|\\bfirewall\\b|\\bsecurity group\\b|\\bfrom outside\\b|\\bconnects? in\\b|\\bcalls? in\\b))(?![\\s\\S]*\\bpoll\\w*\\b(?:(?!web ?hook|\\bnot\\b|n't|\\bnever\\b|\\bno\\b|\\bwithout\\b)[^.;]){0,40}\\b(needs?|requires?|opens?|exposes?|uses?|takes?|adds?)\\b(?:(?!\\bnot\\b|\\bno\\b)[^.;]){0,30}\\b(an? |another |extra |new |its own )?(inbound|incoming|open|listening|exposed)\\b)(?![\\s\\S]*\\bpoll\\w*\\b(?:(?!web ?hook|\\bnot\\b|n't)[^.;]){0,20}\\b(is|are)\\b(?:(?!\\bnot\\b)[^.;]){0,10}\\b(inbound|incoming)\\b)(?![\\s\\S]*\\bweb ?hooks?\\b[^.;]{0,30}\\b(is|are|only|just|stays?)\\b[^.;]{0,12}\\boutbound\\b)(?![\\s\\S]*\\bweb ?hooks?\\b[^.;]{0,30}\\b(needs?|requires?|opens?)\\s+no\\b)(?![\\s\\S]*\\bweb ?hooks?\\b[^.;]{0,30}\\b(does not|doesn't|do not|don't|never|would not|wouldn't)\\s+(need|require|open|add|use)\\b)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 5: the Bot API offers two mutually exclusive ways to receive updates, getUpdates long polling or a webhook, which needs an inbound HTTPS port (443, 80, 88 or 8443). Polling is opened from the server, so section 2's one inbound rule, for SSH, stays the only one.",
+      "hints": [
+        "Ask which side opens the connection in each method.",
+        "Recall how many inbound rules section 2 allows."
+      ]
+    },
+    {
+      "id": "ctx-027-q12",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 1,
+      "tags": [
+        "tmux"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Which flag of tmux send-keys turns off key-name lookup, so that a chat reply is typed into the pane as the text it is?",
+      "answer": {
+        "model": "-l",
+        "accept": [
+          "^(?![\\s\\S]*\\b(not|never|without|instead of|rather than|isn't|no)\\s+(the\\s+)?[`'\\\"]?-l(?![\\w-]))(?![\\s\\S]*(?:^|[\\s`'\\\"(,/])-(?![lt]\\b)[a-z]\\b)(?=[\\s\\S]*(?:^|[\\s`'\\\"(])-l(?![\\w-]))[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 5: send-keys first looks each argument up as a key name; -l disables the lookup and sends the argument as literal characters, which is why the bridge's loop passes it.",
+      "hints": [
+        "Look at the bridge loop's first send-keys line."
+      ]
+    },
+    {
+      "id": "ctx-027-q13",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o3",
+        "o5"
+      ],
+      "section": "5",
+      "est_minutes": 12,
+      "tags": [
+        "chat-bridge",
+        "tmux"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "`bridge_commands` turns one chat update into the `tmux` commands that type it into the agent's pane, by the rules in its docstring. The starter types a stranger's message and an empty one, looks the text up as a key name (or, if it starts with a dash, as flags), and sends Enter in the same call. Fix it.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "def bridge_commands(update, allowed_chat, pane_command, session):\n    \"\"\"Return the tmux commands (argument lists) that put one chat reply into the agent's session.\n\n    update is {\"chat_id\": int, \"text\": str}. Return [] unless the message comes from allowed_chat, the pane is\n    running the agent (pane_command == \"claude\") and the text is not empty. Otherwise return two commands: the\n    text typed literally (no key-name lookup, never read as a flag), then Enter on its own.\n    \"\"\"\n    text = update[\"text\"]\n    if pane_command != \"claude\":\n        return []\n    return [[\"tmux\", \"send-keys\", \"-t\", session, text, \"Enter\"]]\n",
+      "solution": "def bridge_commands(update, allowed_chat, pane_command, session):\n    \"\"\"Return the tmux commands (argument lists) that put one chat reply into the agent's session.\n\n    update is {\"chat_id\": int, \"text\": str}. Return [] unless the message comes from allowed_chat, the pane is\n    running the agent (pane_command == \"claude\") and the text is not empty. Otherwise return two commands: the\n    text typed literally (no key-name lookup, never read as a flag), then Enter on its own.\n    \"\"\"\n    text = update[\"text\"]\n    if update[\"chat_id\"] != allowed_chat or pane_command != \"claude\" or not text:\n        return []\n    return [[\"tmux\", \"send-keys\", \"-t\", session, \"-l\", \"--\", text],\n            [\"tmux\", \"send-keys\", \"-t\", session, \"Enter\"]]\n",
+      "tests": "def _target(cmd):\n    return cmd[cmd.index(\"-t\") + 1]\n\n\nOK = {\"chat_id\": 42, \"text\": \"yes, merge it\"}\ncmds = bridge_commands(OK, 42, \"claude\", \"proj-x\")\nassert len(cmds) == 2, cmds\ntyped, enter = cmds\nassert typed[:2] == [\"tmux\", \"send-keys\"] and _target(typed) == \"proj-x\", typed\nassert \"-l\" in typed and typed[-1] == \"yes, merge it\" and \"Enter\" not in typed, typed\nassert enter[:2] == [\"tmux\", \"send-keys\"] and _target(enter) == \"proj-x\", enter\nassert enter[-1] == \"Enter\" and \"-l\" not in enter, enter\n\n# a stranger's message, a pane that is not the agent, an empty reply: nothing is typed\nassert bridge_commands({\"chat_id\": 7, \"text\": \"rm -rf ~\"}, 42, \"claude\", \"proj-x\") == []\nassert bridge_commands(OK, 42, \"bash\", \"proj-x\") == []\nassert bridge_commands({\"chat_id\": 42, \"text\": \"\"}, 42, \"claude\", \"proj-x\") == []\n\n# a reply that looks like a key name is still typed as text\ntyped, _ = bridge_commands({\"chat_id\": 42, \"text\": \"C-c\"}, 42, \"claude\", \"acme-api\")\nassert \"-l\" in typed and typed[-1] == \"C-c\" and _target(typed) == \"acme-api\", typed\n# a reply that starts with a dash is still text: \"--\" ends the options before it\ntyped, _ = bridge_commands({\"chat_id\": 42, \"text\": \"-R hi\"}, 42, \"claude\", \"acme-api\")\nassert typed[-2:] == [\"--\", \"-R hi\"], typed\nprint(\"all tests passed\")\n",
+      "explanation": "Section 5 and section 9: the bridge accepts the engineer's chat only, checks that the pane still runs the agent, types the reply with -l so tmux does no key-name lookup, after -- so a leading dash is not read as a flag, and sends Enter as a separate key. Anything else returns no commands.",
+      "hints": [
+        "Read the docstring's three conditions and check that each one is tested.",
+        "The literal text and the Enter key are two separate send-keys calls, and only the first takes -l.",
+        "A reply such as -R hi would be parsed as options unless something ends the options first."
+      ]
+    },
+    {
+      "id": "ctx-027-q14",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 20,
+      "tags": [
+        "design",
+        "setup"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A four-person team at a payments company runs coding agents on laptops. Its integration tests need about 14 GB of memory and a local Postgres, agent tasks often run 30 to 60 minutes, and compliance forbids cloud credentials on laptops. Decide whether to move the agents to a remote server, and specify the minimum stack: the machine, how people log in, the network rule, the identity of the box, where the agent runs and how a session survives a closed laptop.",
+      "kind": "design",
+      "answer_length": "half a page",
+      "solution": "**Decision.** Remote pays here on three of section 1's four counts: tasks long enough to outlive a closed laptop, tests that need more memory than a laptop spares, and a compliance rule that is exactly the separation of compute from credentials. It would not pay for short edit-and-test loops, so those can stay local.\n\n**Machine.** A box with at least 16 GiB of memory, such as a c6i.2xlarge (8 vCPUs, 16 GiB), or one per person if tasks overlap; Ubuntu 24.04.\n\n**Login.** Keys only, no passwords, no root login, a non-default port, fail2ban, MFA, checked with sshd -t before a restart and tested from a second session; or EC2 Instance Connect so no long-lived key sits on a laptop.\n\n**Network.** A security group with one inbound rule, SSH from the office range or a bastion, never 0.0.0.0/0; outbound HTTPS for the model API and registries.\n\n**Identity.** An IAM instance role scoped to what the work needs, giving the box temporary credentials, so no access keys exist on the box or a laptop; staging credentials only, production through CI/CD; a deploy key per repository.\n\n**Agent and persistence.** The agent installed on the server, its API key readable by the agent user only, running inside one tmux session per project; tmux attach from any client, VS Code Remote - SSH for editing, and claude --continue if the process ever ends.",
+      "rubric": [
+        {
+          "criterion": "Decides for remote with reasons tied to task length, machine size and credential separation, and names a case that stays local",
+          "points": 2
+        },
+        {
+          "criterion": "Sizes the machine to the memory need (at least 16 GiB) and names an instance or equivalent",
+          "points": 1
+        },
+        {
+          "criterion": "Key-only SSH with the other hardening, or EC2 Instance Connect, and a safe way to change the port",
+          "points": 2
+        },
+        {
+          "criterion": "One inbound rule from a known range; everything else outbound",
+          "points": 1
+        },
+        {
+          "criterion": "A scoped instance role instead of stored keys, staging credentials only, a deploy key",
+          "points": 2
+        },
+        {
+          "criterion": "The agent in a tmux session per project, reattached from any client, with a way back if the process ends",
+          "points": 2
+        }
+      ],
+      "explanation": "Sections 1 and 3: the decision rests on task length, machine size, devices and credential separation, and the minimum stack is a right-sized VM, hardened SSH, one inbound rule, a scoped instance role and the agent inside tmux.",
+      "hints": [
+        "Check each of section 1's reasons against the team's situation before designing anything.",
+        "Then walk section 3's steps in order and say what each one becomes for this team."
+      ]
+    },
+    {
+      "id": "ctx-027-q15",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o3",
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 15,
+      "tags": [
+        "security",
+        "trust-tag",
+        "chat-bridge"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "connects": [
+        "ctx-023"
+      ],
+      "prompt": "Post 23 tags every piece of content as system, user or external, and names four defences, D1 to D4. Apply them to the remote box's chat bridge: which messages are user content and which are external, what each defence becomes on this box, and what goes wrong if the bridge skips the tagging.",
+      "kind": "connect",
+      "answer_length": "one paragraph",
+      "solution": "The bridge sets the tag from the channel, never from the text: a message from the engineer's own chat id is `user` content and may instruct the agent; a message from any other chat, and anything quoted from a web page or email, is `external` and is data only. D3 (filter at trust boundaries) is the chat-id check itself: external messages never reach send-keys. D1 (the model is not the permission system) is the PreToolUse deny-list hook and the person who answers a permission prompt through the Notification hook, checks the model cannot rewrite. D2 (constrain each tool's blast radius) is the scoped instance role, read-only mounts and staging-only credentials, which bound what any command can do. D4 (never merge attacker text into trusted context) means a stranger's message must never be saved as a rule in memory or AGENTS.md. Without the tagging, anyone who finds the bot can type instructions straight into an agent with a shell, the attack post 23 describes with a far shorter chain.",
+      "rubric": [
+        {
+          "criterion": "Tags by channel: the allowed chat id is user, everything else external",
+          "points": 2
+        },
+        {
+          "criterion": "Maps D3 to the bridge's chat-id check before send-keys",
+          "points": 1
+        },
+        {
+          "criterion": "Maps D1 to checks outside the model (hook, human approval) and D2 to role, mounts, staging credentials",
+          "points": 2
+        },
+        {
+          "criterion": "Maps D4 to not writing external text into memory or rules files",
+          "points": 1
+        },
+        {
+          "criterion": "States the failure: a stranger's text reaches an agent with a shell",
+          "points": 1
+        }
+      ],
+      "explanation": "Section 7 applies post 23's trust tag to the bridge: the engineer's chat is user, any other sender external and never typed into the session; the hook and human approval are D1, the role, mounts and staging credentials D2, the chat-id check D3.",
+      "hints": [
+        "Start from how post 23 decides a tag: by the channel, not the content.",
+        "Then take D1 to D4 in turn and find the control on the box that plays each part."
+      ]
+    },
+    {
+      "id": "ctx-027-q16",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 4,
+      "tags": [
+        "cost",
+        "decision"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A manager proposes moving the team's agents to c6i.xlarge boxes to cut costs, citing the laptops' price. Using the post's figures (124.10 dollars a month for a c6i.xlarge left running, 443.52 dollars of illustrative model spend for 88 cached tasks), which conclusion is sound?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The server is a minor line next to the model bill; the move is justified by the workflow, and a cost cut has to come from caching, compression or smaller sub-agent budgets.",
+          "correct": true,
+          "feedback": "Right. At these sizes the model costs several times the server, so the server choice barely moves the total."
+        },
+        {
+          "key": "b",
+          "text": "The move cuts costs, because a 124.10-dollar server is cheaper than a laptop.",
+          "correct": false,
+          "feedback": "The comparison leaves out the model bill, which is the same wherever the agent runs and dominates the total."
+        },
+        {
+          "key": "c",
+          "text": "The move doubles costs, because the server bill is added on top of an unchanged model bill.",
+          "correct": false,
+          "feedback": "124.10 on top of 443.52 is about 28% more, not double, and stopping the box outside working hours brings it to 29.92."
+        },
+        {
+          "key": "d",
+          "text": "The model bill falls on the server, because calls from a data centre are billed at a lower rate.",
+          "correct": false,
+          "feedback": "The per-token price does not depend on where the call comes from; the same provider is reached from either place."
+        }
+      ],
+      "explanation": "Section 6: at the illustrative sizes the model costs 443.52 dollars a month against 124.10 for a c6i.xlarge left running, or 29.92 for working hours. The savings over a laptop are not the point; the workflow is, and the model's own levers (caching, compression, sub-agent budgets) are what cut the bill.",
+      "hints": [
+        "Add the two bills and see which one the server choice changes.",
+        "Ask which of the two bills depends on where the agent runs."
+      ]
+    }
+  ]
+}
