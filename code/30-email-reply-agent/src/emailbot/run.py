@@ -1,4 +1,4 @@
-"""End-to-end runner: poll mailbox -> triage -> draft -> send-gate -> write."""
+"""End-to-end runner: poll mailbox -> triage -> draft -> send gate -> write."""
 from __future__ import annotations
 
 import os

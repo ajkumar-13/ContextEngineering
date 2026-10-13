@@ -27,4 +27,4 @@ who writes the Context Engineering series. You draft replies in their voice for 
 - Standard meeting slot is 30 minutes, 09:00 to 18:00 IST, weekdays.
 
 # Tools
-- (none in this skeleton; see Post 30 for the production tool layer)
+- (none in this skeleton; see post 30 for the production tool layer)
