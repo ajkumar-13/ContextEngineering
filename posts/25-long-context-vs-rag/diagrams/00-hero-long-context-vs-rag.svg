@@ -1,140 +1,189 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
-  <title id="t">The long-context vs. RAG decision tree</title>
-  <desc id="d">A four-question decision spine runs left to right. Question one asks whether the corpus fits one window with room to spare; a no branches down to RAG. Question two asks whether the corpus is stable enough to cache; a no branches down to RAG. Question three asks whether each query needs most of the corpus or just a slice; a slice branches down to RAG. Question four asks whether the model can actually reason over the whole at this length; a no branches down to RAG. When every answer stays on the top path, the outcome is long context. The final panel notes that most production systems route per query rather than picking once, mixing both.</desc>
-
-  <style><![CDATA[
-    :root{
-      --ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;
-      --ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;
-      --ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;
-      --ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-muted:#6B6B6B;--ctx-grid:rgba(26,26,26,0.06);
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="ctx-00-hero-long-context-vs-rag-title" aria-describedby="ctx-00-hero-long-context-vs-rag-desc">
+<title id="ctx-00-hero-long-context-vs-rag-title">Four questions decide between loading and retrieving</title>
+<desc id="ctx-00-hero-long-context-vs-rag-desc">A decision chain of four question cards stacked down the left, joined by arrows labelled yes. 1, does the corpus fit one window with room to spare for the prompt, history and output; no leads to RAG. 2, is it stable enough to cache, the prefix staying identical between calls; no leads to RAG indexed incrementally. 3, does each query need most of it; a small slice leads to RAG and a mix of query kinds to a per-query router. 4, can the model use it at that length, judged on the application's own evaluation; no leads to RAG over a curated subset. Four yes answers lead to loading the corpus once and caching it. Retrieval exits are drawn in the per-turn colour, the cached load in the stable-prefix colour, the router in ink.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
     }
-    @media (prefers-color-scheme:dark){
-      :root{
-        --ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;
-        --ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;
-        --ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;
-        --ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-muted:#A6A29B;--ctx-grid:rgba(241,238,232,0.08);
-      }
-    }
-    .bg{fill:var(--ctx-bg);}
-    .q{fill:var(--ctx-surface);stroke:var(--ctx-ink);stroke-width:1.5;}
-    .out{fill:var(--ctx-surface);stroke:var(--ctx-border);stroke-width:1;}
-    .yes{fill:none;stroke:var(--ctx-ink);stroke-width:1.5;}
-    .no{fill:none;stroke:var(--ctx-ink-muted);stroke-width:1;stroke-dasharray:4 3;}
-    .tab{stroke-width:0;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ctx-ink);}
-    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ctx-ink-muted);}
-    .qn{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ctx-ink-subtle);text-transform:uppercase;letter-spacing:0.06em;}
-    .qt{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ctx-ink);}
-    .edge{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:10px;fill:var(--ctx-ink-muted);text-transform:uppercase;letter-spacing:0.05em;}
-    .oname{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:13px;fill:var(--ctx-ink);}
-    .odesc{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ctx-ink-muted);}
-    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:11px;fill:var(--ctx-ink-muted);}
-  ]]></style>
-
-  <rect class="bg" width="960" height="360"/>
-  <text class="title" x="48" y="44">Long context vs. RAG: four questions</text>
-  <text class="sub" x="48" y="64">Walk the spine. Any answer that falls off the top path sends the query to retrieval.</text>
-
-  <!-- ============ Top spine: four question nodes ============ -->
-  <!-- Node geometry: width 158, height 88, top y=104. Centres x: 118, 306, 494, 682 -->
-  <!-- Question 1 -->
-  <g transform="translate(48,104)">
-    <rect class="q" width="140" height="88" rx="10"/>
-    <rect class="tab" x="0" y="0" width="6" height="88" rx="3" fill="var(--ctx-primary)"/>
-    <text class="qn" x="18" y="22">Q1 · Fit</text>
-    <text class="qt" x="18" y="42">Fits one</text>
-    <text class="qt" x="18" y="57">window, with</text>
-    <text class="qt" x="18" y="72">room to spare?</text>
-  </g>
-
-  <!-- Question 2 -->
-  <g transform="translate(236,104)">
-    <rect class="q" width="140" height="88" rx="10"/>
-    <rect class="tab" x="0" y="0" width="6" height="88" rx="3" fill="var(--ctx-primary)"/>
-    <text class="qn" x="18" y="22">Q2 · Cache</text>
-    <text class="qt" x="18" y="42">Stable enough</text>
-    <text class="qt" x="18" y="57">to cache the</text>
-    <text class="qt" x="18" y="72">prefix?</text>
-  </g>
-
-  <!-- Question 3 -->
-  <g transform="translate(424,104)">
-    <rect class="q" width="140" height="88" rx="10"/>
-    <rect class="tab" x="0" y="0" width="6" height="88" rx="3" fill="var(--ctx-primary)"/>
-    <text class="qn" x="18" y="22">Q3 · Scope</text>
-    <text class="qt" x="18" y="42">Query needs</text>
-    <text class="qt" x="18" y="57">most of it, not</text>
-    <text class="qt" x="18" y="72">one slice?</text>
-  </g>
-
-  <!-- Question 4 -->
-  <g transform="translate(612,104)">
-    <rect class="q" width="140" height="88" rx="10"/>
-    <rect class="tab" x="0" y="0" width="6" height="88" rx="3" fill="var(--ctx-primary)"/>
-    <text class="qn" x="18" y="22">Q4 · Reason</text>
-    <text class="qt" x="18" y="42">Model reasons</text>
-    <text class="qt" x="18" y="57">well over the</text>
-    <text class="qt" x="18" y="72">whole length?</text>
-  </g>
-
-  <!-- ============ YES edges along the spine ============ -->
-  <line class="yes" x1="188" y1="148" x2="236" y2="148"/>
-  <text class="edge" x="212" y="140" text-anchor="middle">yes</text>
-  <line class="yes" x1="376" y1="148" x2="424" y2="148"/>
-  <text class="edge" x="400" y="140" text-anchor="middle">yes</text>
-  <line class="yes" x1="564" y1="148" x2="612" y2="148"/>
-  <text class="edge" x="588" y="140" text-anchor="middle">yes</text>
-
-  <!-- yes out of Q4 into Long-context outcome -->
-  <line class="yes" x1="752" y1="148" x2="800" y2="148"/>
-  <text class="edge" x="776" y="140" text-anchor="middle">yes</text>
-
-  <!-- ============ Long-context outcome (top-right, success) ============ -->
-  <g transform="translate(800,104)">
-    <rect class="out" width="128" height="88" rx="10"/>
-    <rect class="tab" x="0" y="0" width="6" height="88" rx="3" fill="var(--ctx-success)"/>
-    <text class="oname" x="18" y="30">Long context</text>
-    <text class="odesc" x="18" y="50">Load the whole</text>
-    <text class="odesc" x="18" y="65">corpus, cache the</text>
-    <text class="odesc" x="18" y="80">prefix, skip retrieval.</text>
-  </g>
-
-  <!-- ============ NO branches drop to the RAG bus ============ -->
-  <!-- RAG bus is a horizontal line at y=252 spanning the four question columns -->
-  <!-- No leg from each question bottom (y=192) down to bus (y=252) -->
-  <line class="no" x1="118" y1="192" x2="118" y2="252"/>
-  <line class="no" x1="306" y1="192" x2="306" y2="252"/>
-  <line class="no" x1="494" y1="192" x2="494" y2="252"/>
-  <line class="no" x1="682" y1="192" x2="682" y2="252"/>
-
-  <!-- no-edge labels -->
-  <text class="edge" x="118" y="212" text-anchor="middle">no</text>
-  <text class="edge" x="306" y="212" text-anchor="middle">no</text>
-  <text class="edge" x="494" y="212" text-anchor="middle">no</text>
-  <text class="edge" x="682" y="212" text-anchor="middle">slice</text>
-
-  <!-- The bus, gathering the four no-legs, running right into the RAG outcome -->
-  <line class="no" x1="118" y1="252" x2="800" y2="252"/>
-  <line class="no" x1="800" y1="252" x2="800" y2="240"/>
-
-  <!-- ============ RAG outcome (mid-right, accent) ============ -->
-  <g transform="translate(800,208)">
-    <rect class="out" width="128" height="72" rx="10"/>
-    <rect class="tab" x="0" y="0" width="6" height="72" rx="3" fill="var(--ctx-accent)"/>
-    <text class="oname" x="18" y="28">RAG</text>
-    <text class="odesc" x="18" y="47">Retrieve a focused</text>
-    <text class="odesc" x="18" y="62">slice, rerank, pack.</text>
-  </g>
-
-  <!-- ============ Bottom panel: per-query routing is the real answer ============ -->
-  <g transform="translate(48,300)">
-    <rect class="out" width="880" height="44" rx="10"/>
-    <rect class="tab" x="0" y="0" width="6" height="44" rx="3" fill="var(--ctx-warn)"/>
-    <text class="oname" x="20" y="20">Per-query router</text>
-    <text class="odesc" x="20" y="36">The production answer: a small classifier runs this test per query, so different queries take different paths.</text>
-    <text class="mono" x="700" y="30" text-anchor="middle">build a router, not a religion</text>
-  </g>
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-blue { fill: var(--ctx-blue); }
+  .f-blue-soft { fill: var(--ctx-blue-soft); }
+  .f-orange { fill: var(--ctx-orange); }
+  .f-orange-soft { fill: var(--ctx-orange-soft); }
+  .s-blue { stroke: var(--ctx-blue); }
+  .s-blue-line { stroke: var(--ctx-blue-line); }
+  .s-orange { stroke: var(--ctx-orange); }
+  .s-orange-line { stroke: var(--ctx-orange-line); }
+</style>
+<defs>
+<marker id="ctx-00-hero-long-context-vs-rag-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="720"/>
+<text x="40" y="48" class="t-title" data-w="655">Four questions decide between loading and retrieving</text>
+<text x="40" y="76" class="t-subtitle" data-w="649">Asked in order. An answer that leaves the spine settles the workload, or that kind of query.</text>
+<rect x="40" y="112" width="408" height="96" rx="8" class="card"/>
+<text x="56" y="144" class="t-head" data-w="272">1. Does it fit, with room to spare?</text>
+<text x="56" y="176" class="t-note" data-w="333">corpus, prompt, history and output in one window</text>
+<path d="M244,208 L244,229" class="flow" marker-end="url(#ctx-00-hero-long-context-vs-rag-arrow)"/>
+<text x="256" y="224" class="t-note" data-w="23">yes</text>
+<path d="M448,160 L557,160" class="flow" marker-end="url(#ctx-00-hero-long-context-vs-rag-arrow)"/>
+<text x="504" y="148" text-anchor="middle" class="t-note" data-w="17">no</text>
+<rect x="560" y="132" width="360" height="56" rx="8" class="f-orange-soft s-orange-line w1"/>
+<text x="576" y="164" class="t-head" data-w="38">RAG</text>
+<rect x="40" y="232" width="408" height="96" rx="8" class="card"/>
+<text x="56" y="264" class="t-head" data-w="254">2. Is it stable enough to cache?</text>
+<text x="56" y="296" class="t-note" data-w="258">the prefix stays identical between calls</text>
+<path d="M244,328 L244,349" class="flow" marker-end="url(#ctx-00-hero-long-context-vs-rag-arrow)"/>
+<text x="256" y="344" class="t-note" data-w="23">yes</text>
+<path d="M448,280 L557,280" class="flow" marker-end="url(#ctx-00-hero-long-context-vs-rag-arrow)"/>
+<text x="504" y="268" text-anchor="middle" class="t-note" data-w="17">no</text>
+<rect x="560" y="252" width="360" height="56" rx="8" class="f-orange-soft s-orange-line w1"/>
+<text x="576" y="284" class="t-head" data-w="226">RAG, indexed incrementally</text>
+<rect x="40" y="352" width="408" height="96" rx="8" class="card"/>
+<text x="56" y="384" class="t-head" data-w="292">3. Does each query need most of it?</text>
+<text x="56" y="416" class="t-note" data-w="228">a global question, not a local slice</text>
+<path d="M244,448 L244,469" class="flow" marker-end="url(#ctx-00-hero-long-context-vs-rag-arrow)"/>
+<text x="256" y="464" class="t-note" data-w="23">yes</text>
+<path d="M448,376 L557,376" class="flow" marker-end="url(#ctx-00-hero-long-context-vs-rag-arrow)"/>
+<text x="504" y="364" text-anchor="middle" class="t-note" data-w="43">a slice</text>
+<rect x="560" y="352" width="360" height="44" rx="8" class="f-orange-soft s-orange-line w1"/>
+<text x="576" y="384" class="t-head" data-w="136">Small slice: RAG</text>
+<path d="M448,424 L557,424" class="flow" marker-end="url(#ctx-00-hero-long-context-vs-rag-arrow)"/>
+<text x="504" y="412" text-anchor="middle" class="t-note" data-w="24">mix</text>
+<rect x="560" y="404" width="360" height="44" rx="8" class="card"/>
+<text x="576" y="436" class="t-head" data-w="182">A mix: route per query</text>
+<rect x="40" y="472" width="408" height="96" rx="8" class="card"/>
+<text x="56" y="504" class="t-head" data-w="311">4. Can the model use it at that length?</text>
+<text x="56" y="536" class="t-note" data-w="236">on the application's own evaluation</text>
+<path d="M244,568 L244,589" class="flow" marker-end="url(#ctx-00-hero-long-context-vs-rag-arrow)"/>
+<text x="256" y="584" class="t-note" data-w="23">yes</text>
+<path d="M448,520 L557,520" class="flow" marker-end="url(#ctx-00-hero-long-context-vs-rag-arrow)"/>
+<text x="504" y="508" text-anchor="middle" class="t-note" data-w="17">no</text>
+<rect x="560" y="492" width="360" height="56" rx="8" class="f-orange-soft s-orange-line w1"/>
+<text x="576" y="524" class="t-head" data-w="219">RAG over a curated subset</text>
+<rect x="40" y="592" width="408" height="56" rx="8" class="f-blue-soft s-blue-line w1"/>
+<text x="56" y="624" class="t-head" data-w="279">Load the corpus once and cache it</text>
+<rect x="560" y="600" width="16" height="16" class="f-orange s-orange w1"/>
+<text x="592" y="612" class="t-label" data-w="222">retrieval fills layer 04 on each call</text>
+<rect x="560" y="624" width="16" height="16" class="f-blue s-blue w1"/>
+<text x="592" y="636" class="t-label" data-w="223">a cached prefix, read on every hit</text>
+<text x="40" y="684" class="t-note" data-w="580">A workload with both whole-corpus and local queries answers question 3 with a router.</text>
 </svg>

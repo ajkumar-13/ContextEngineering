@@ -1,80 +1,24 @@
 id: ctx-025
 slug: 25-long-context-vs-rag
-title: "25 · Long Context vs. RAG — A Decision Framework"
-
-description: >
-  Learn when to choose long-context models, Retrieval-Augmented Generation
-  (RAG), or a hybrid approach. Explore context-window limitations,
-  retrieval benchmarks, routing strategies, cost analysis, and production
-  architectures for building scalable AI systems.
-
-author: "Ajay"
-
+title: "25 - Long context vs. RAG: a decision framework"
+summary: "Four questions decide between loading a corpus and retrieving from it: fit, stability, query scope and measured use. Benchmarks show recall at length is easy and reasoning is not, and caching decides the bill."
 date: 2026-05-20
-last_modified: 2026-05-20
-
-tags:
-  - long-context
-  - rag
-  - retrieval
-  - context-engineering
-  - hybrid-search
-  - vector-database
-  - llm
-  - evaluation
-  - ai-agents
-  - production-ai
-
-category: Advanced Retrieval
-series: Context Engineering
+updated: 2026-10-13
+status: complete
 part: "Part IV - Production-grade practice"
-chapter: "Part V — End-to-End Applications"
-
+level: intermediate
+reading_time: 15
+tags: [context-engineering, long-context, rag, benchmarks, prompt-caching, routing, cost]
 hero: diagrams/00-hero-long-context-vs-rag.svg
-hero_alt: "Decision framework routing user queries between long-context models, RAG, and hybrid retrieval architectures"
-
-reading_time: 20
-
-toc: true
-draft: false
-
-keywords:
-  - Long Context
-  - Context Window
-  - Million Token Context
-  - RAG
-  - Retrieval Augmented Generation
-  - Long Context vs RAG
-  - Hybrid RAG
-  - Context Engineering
-  - Context Routing
-  - Query Router
-  - Hybrid Search
-  - Vector Database
-  - Semantic Search
-  - Dense Retrieval
-  - Sparse Retrieval
-  - BM25
-  - Reranking
-  - Prompt Caching
-  - Prefix Caching
-  - LongBench
-  - RULER
-  - BABILong
-  - NIAH
-  - Needle in a Haystack
-  - MRCR
-  - Gemini 2.5
-  - Claude
-  - GPT
-  - Cost Optimization
-  - Latency Optimization
-  - Production AI
-  - Enterprise AI
-  - AI Architecture
-  - LLM Engineering
-
-canonical_url: ""
-
-prev: ../24-inference-optimization/
-next: ../26-modern-agentic-workflow/
+prerequisites: [ctx-011, ctx-017]
+code: optional
+outcomes:
+  - id: o1
+    text: "Match a workload to long context, RAG or a hybrid by answering the four questions of the test in order."
+  - id: o2
+    text: "Read a long-context benchmark for what it measures, and tell a needle-in-a-haystack score from evidence of reasoning at length."
+  - id: o3
+    text: "Estimate the cost and the time to first token of a long-context load against a retrieval call, with and without a cache hit."
+  - id: o4
+    text: "Design a per-query router between long-context loading and RAG, and say what each route is evaluated on."
+recommended: [ctx-003, ctx-004, ctx-005, ctx-024]

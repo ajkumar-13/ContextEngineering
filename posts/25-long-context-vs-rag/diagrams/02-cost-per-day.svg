@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="ctx-02-cost-per-day-title" aria-describedby="ctx-02-cost-per-day-desc">
+<title id="ctx-02-cost-per-day-title">Caching cuts the corpus bill; retrieval removes it</title>
+<desc id="ctx-02-cost-per-day-desc">Four horizontal bars of dollars per day for 1,000 queries over a 200,000-token corpus on Claude Opus 4.6, prices as of early 2026, every size illustrative and every segment dashed. Long context, uncached: 1,013.00, past a broken axis. Long context, cached, with 10 cache writes a day: 124.50, of which 25.50 is paid in full (the writes, the questions and the answers) and 99.00 is read from the cache. Hybrid, 10% of queries on long context: 57.45, made of 13.80 in full, 9.00 from the cache and 34.65 of RAG calls. RAG alone: 38.50. A note gives the prefill before the first token, uncached, at post 04's illustrative rates: 80.04 seconds for the corpus and 2.00 seconds for a RAG call.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-blue-soft { fill: var(--ctx-blue-soft); }
+  .f-neutral-soft { fill: var(--ctx-neutral-soft); }
+  .f-orange-soft { fill: var(--ctx-orange-soft); }
+  .s-blue { stroke: var(--ctx-blue); }
+  .s-grid { stroke: var(--ctx-grid); }
+  .s-ink { stroke: var(--ctx-ink); }
+  .s-orange { stroke: var(--ctx-orange); }
+  .s-rule { stroke: var(--ctx-rule); }
+  .w075 { stroke-width: 0.75; }
+</style>
+<defs>
+<marker id="ctx-02-cost-per-day-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="540"/>
+<text x="40" y="48" class="t-title" data-w="593">Caching cuts the corpus bill; retrieval removes it</text>
+<text x="40" y="76" class="t-subtitle" data-w="699">Dollars per day, 1,000 queries, Claude Opus 4.6 prices as of early 2026. Dashed: illustrative sizes.</text>
+<rect x="40" y="112" width="16" height="16" class="s-ink w15 nofill d-proj"/>
+<text x="72" y="124" class="t-label" data-w="70">paid in full</text>
+<rect x="176" y="112" width="16" height="16" class="s-blue w15 nofill d-proj"/>
+<text x="208" y="124" class="t-label" data-w="184">corpus read from the cache</text>
+<rect x="416" y="112" width="16" height="16" class="s-orange w15 nofill d-proj"/>
+<text x="448" y="124" class="t-label" data-w="66">RAG calls</text>
+<text x="240" y="404" text-anchor="middle" class="t-tick" data-w="8">0</text>
+<path d="M320,144 L320,384" class="s-grid w075 nofill"/>
+<text x="320" y="404" text-anchor="middle" class="t-tick" data-w="16">20</text>
+<path d="M400,144 L400,384" class="s-grid w075 nofill"/>
+<text x="400" y="404" text-anchor="middle" class="t-tick" data-w="16">40</text>
+<path d="M480,144 L480,384" class="s-grid w075 nofill"/>
+<text x="480" y="404" text-anchor="middle" class="t-tick" data-w="16">60</text>
+<path d="M560,144 L560,384" class="s-grid w075 nofill"/>
+<text x="560" y="404" text-anchor="middle" class="t-tick" data-w="16">80</text>
+<path d="M640,144 L640,384" class="s-grid w075 nofill"/>
+<text x="640" y="404" text-anchor="middle" class="t-tick" data-w="23">100</text>
+<path d="M720,144 L720,384" class="s-grid w075 nofill"/>
+<text x="720" y="404" text-anchor="middle" class="t-tick" data-w="23">120</text>
+<path d="M800,144 L800,384" class="s-grid w075 nofill"/>
+<text x="800" y="404" text-anchor="middle" class="t-tick" data-w="23">140</text>
+<path d="M240,144 L240,384" class="s-rule w1 nofill"/>
+<path d="M240,384 L800,384" class="s-rule w1 nofill"/>
+<text x="520" y="428" text-anchor="middle" class="t-note" data-w="100">dollars per day</text>
+<text x="40" y="176" class="t-label" data-w="161">Long context, uncached</text>
+<g data-grid="skip">
+<rect x="240" y="152" width="544" height="36" class="f-neutral-soft" data-fit="skip"/>
+<rect x="240" y="152" width="544" height="36" class="w15 nofill s-ink d-proj" data-fit="skip"/>
+<rect x="792" y="152" width="24" height="36" class="f-neutral-soft" data-fit="skip"/>
+<rect x="792" y="152" width="24" height="36" class="w15 nofill s-ink d-proj" data-fit="skip"/>
+<text x="828" y="175" class="t-value b" data-w="59">1,013.00</text>
+</g>
+<text x="40" y="236" class="t-label" data-w="144">Long context, cached</text>
+<g data-grid="skip">
+<rect x="240" y="212" width="102" height="36" class="f-neutral-soft" data-fit="skip"/>
+<rect x="240" y="212" width="102" height="36" class="w15 nofill s-ink d-proj" data-fit="skip"/>
+<text x="291" y="235" text-anchor="middle" class="t-label" data-w="37">25.50</text>
+<rect x="342" y="212" width="396" height="36" class="f-blue-soft" data-fit="skip"/>
+<rect x="342" y="212" width="396" height="36" class="w15 nofill s-blue d-proj" data-fit="skip"/>
+<text x="540" y="235" text-anchor="middle" class="t-label" data-w="37">99.00</text>
+<text x="750" y="235" class="t-value" data-w="47">124.50</text>
+</g>
+<text x="40" y="296" class="t-label" data-w="115">Hybrid, 10% long</text>
+<g data-grid="skip">
+<rect x="240" y="272" width="55.2" height="36" class="f-neutral-soft" data-fit="skip"/>
+<rect x="240" y="272" width="55.2" height="36" class="w15 nofill s-ink d-proj" data-fit="skip"/>
+<rect x="295.2" y="272" width="36" height="36" class="f-blue-soft" data-fit="skip"/>
+<rect x="295.2" y="272" width="36" height="36" class="w15 nofill s-blue d-proj" data-fit="skip"/>
+<rect x="331.2" y="272" width="138.6" height="36" class="f-orange-soft" data-fit="skip"/>
+<rect x="331.2" y="272" width="138.6" height="36" class="w15 nofill s-orange d-proj" data-fit="skip"/>
+<text x="400.5" y="295" text-anchor="middle" class="t-label" data-w="37">34.65</text>
+<text x="481.8" y="295" class="t-value" data-w="199">57.45 = 13.80 + 9.00 + 34.65</text>
+</g>
+<text x="40" y="356" class="t-label" data-w="32">RAG</text>
+<g data-grid="skip">
+<rect x="240" y="332" width="154" height="36" class="f-orange-soft" data-fit="skip"/>
+<rect x="240" y="332" width="154" height="36" class="w15 nofill s-orange d-proj" data-fit="skip"/>
+<text x="317" y="355" text-anchor="middle" class="t-label" data-w="37">38.50</text>
+<text x="406" y="355" class="t-value" data-w="38">38.50</text>
+</g>
+<text x="40" y="468" class="t-note" data-w="674">Prefill before the first token, uncached, at post 04's illustrative rates: corpus 80.04 s, RAG call 2.00 s.</text>
+<text x="40" y="504" class="t-note" data-w="678">The hybrid stays within 1.5 times of RAG while whole-document queries still get the whole document.</text>
+</svg>

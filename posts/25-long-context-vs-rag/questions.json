@@ -1,0 +1,727 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-025",
+  "next_ordinal": 17,
+  "questions": [
+    {
+      "id": "ctx-025-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "four-question-test",
+        "corpus-size"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team wants an assistant over a customer-document archive of about 40 million tokens (an illustrative size), served by a model with a 1,000,000-token window. Which question of the test settles the design, and how?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Question 1: the corpus cannot fit one window with room to spare, so retrieval it is.",
+          "correct": true,
+          "feedback": "Right. The archive is forty times the window, so no later question is reached."
+        },
+        {
+          "key": "b",
+          "text": "Question 2: an archive of customer documents changes too often to cache, so retrieval it is.",
+          "correct": false,
+          "feedback": "Question 2 is never reached, and an archive is often the most stable corpus there is; the size has already decided."
+        },
+        {
+          "key": "c",
+          "text": "Question 4: no model can use 40 million tokens well, so the benchmarks decide for retrieval.",
+          "correct": false,
+          "feedback": "The benchmarks never come into it: a corpus that cannot be loaded at all is settled by question 1."
+        },
+        {
+          "key": "d",
+          "text": "None alone: load the most recent 1,000,000 tokens of the archive and route the rest of the queries.",
+          "correct": false,
+          "feedback": "Filling the whole window leaves no room for the prompt, history and output, and the older documents would be unreachable; the archive is a retrieval corpus."
+        }
+      ],
+      "explanation": "Section 2: question 1 is asked first because it can close the case on its own. A 40-million-token archive is forty windows' worth before any room is kept for the prompt, history and output, so retrieval it is.",
+      "hints": [
+        "Start with the first question and check whether the archive could be loaded at all."
+      ]
+    },
+    {
+      "id": "ctx-025-q02",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "four-question-test"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Put the four questions of the long context against RAG test in the order they are asked, so that each one can settle the case before the next is needed.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Can the model actually use the long context for this task?"
+        },
+        {
+          "key": "b",
+          "text": "Does the corpus fit in one window, with room to spare?"
+        },
+        {
+          "key": "c",
+          "text": "Does each query need most of the corpus, or a small slice?"
+        },
+        {
+          "key": "d",
+          "text": "Is the corpus stable enough to cache?"
+        }
+      ],
+      "answer": [
+        "b",
+        "d",
+        "c",
+        "a"
+      ],
+      "explanation": "Section 2: fit comes first because a corpus that cannot be loaded ends the discussion; stability next, because long context is affordable only when the prefix caches; then the shape of the queries; and last whether the model can use the loaded corpus, which only the application's own evaluation answers.",
+      "hints": [
+        "Which question can end the discussion before any cost or benchmark is considered?"
+      ]
+    },
+    {
+      "id": "ctx-025-q03",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 4,
+      "tags": [
+        "four-question-test",
+        "prompt-caching",
+        "freshness"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A pricing assistant answers questions about a 120,000-token product catalogue whose prices are updated every few minutes through the day. The model's window is 1,000,000 tokens, so the catalogue fits with room to spare. Which design does the test point to?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Load the whole catalogue on every call and cache it, since it fits with room to spare.",
+          "correct": false,
+          "feedback": "Fitting is only question 1. Each update changes the prefix, so the cache keeps missing and the calls pay the write premium."
+        },
+        {
+          "key": "b",
+          "text": "RAG with incremental indexing: each update re-indexes one entry and invalidates no cached prefix.",
+          "correct": true,
+          "feedback": "Right. The corpus fails question 2, and retrieval absorbs change without recomputing anything else."
+        },
+        {
+          "key": "c",
+          "text": "Load the catalogue with the one-hour cache lifetime, so that writes become rarer through the day.",
+          "correct": false,
+          "feedback": "The lifetime does not help: any change to the catalogue makes the stored prefix unusable whatever its lifetime, and the one-hour write costs 2 times the input price."
+        },
+        {
+          "key": "d",
+          "text": "A router that sends half of the queries to a cached load and half to retrieval, halving the writes.",
+          "correct": false,
+          "feedback": "A router splits by the shape of each query, not to share a cost; the cached half would still miss after every update."
+        }
+      ],
+      "explanation": "Section 2, question 2: a cache hit needs a prefix identical up to the breakpoint, and a price update anywhere in the loaded catalogue changes it. Calls would keep paying the 1.25-times write instead of the 0.1-times read. Retrieval absorbs the change by re-indexing the entry that changed.",
+      "hints": [
+        "Question 1 passes. What does a price update do to a cached prefix that holds the catalogue?",
+        "A cache entry can be read only while everything up to its breakpoint is unchanged."
+      ]
+    },
+    {
+      "id": "ctx-025-q04",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 4,
+      "tags": [
+        "benchmarks",
+        "niah",
+        "ruler",
+        "babilong",
+        "mrcr"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Match each long-context benchmark to what it adds to the plain task of reading a long input. One description on the right matches no benchmark.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Needle in a haystack (NIAH)"
+        },
+        {
+          "key": "b",
+          "text": "RULER"
+        },
+        {
+          "key": "c",
+          "text": "BABILong"
+        },
+        {
+          "key": "d",
+          "text": "MRCR"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Multiple needles, keys and values, plus multi-hop tracing and aggregation tasks"
+        },
+        {
+          "key": "b",
+          "text": "Reproduce one earlier answer from a long conversation, among adversarially similar ones"
+        },
+        {
+          "key": "c",
+          "text": "Retrieve one sentence planted somewhere in a long document"
+        },
+        {
+          "key": "d",
+          "text": "Score a passage by summing each query token's best match in it"
+        },
+        {
+          "key": "e",
+          "text": "Twenty reasoning tasks whose facts are scattered through long natural text"
+        }
+      ],
+      "answer": {
+        "a": "c",
+        "b": "a",
+        "c": "e",
+        "d": "b"
+      },
+      "explanation": "Section 3: NIAH plants one sentence and asks for it back; RULER adds more needles, keys and values, multi-hop tracing and aggregation; BABILong scatters the facts of 20 reasoning tasks through long text; MRCR asks for one earlier answer among adversarially similar ones. Summing each query token's best match is MaxSim, a retrieval score from post 17, not a benchmark.",
+      "hints": [
+        "For each benchmark, ask what the model must do beyond finding one stated sentence."
+      ]
+    },
+    {
+      "id": "ctx-025-q05",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 4,
+      "tags": [
+        "niah",
+        "benchmarks"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A model announcement reports more than 99% needle-in-a-haystack recall at 1,000,000 tokens. A team plans to load a 900,000-token policy corpus and ask questions such as \"Which two policies conflict on travel approval?\". What does the announcement establish for this plan?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "That the model can retrieve one stated fact planted anywhere in an input of that length, and no more.",
+          "correct": true,
+          "feedback": "Right. Comparing two policies is a combining task, which needle scores do not measure."
+        },
+        {
+          "key": "b",
+          "text": "That the model will answer conflict questions at that length with more than 99% accuracy, because the same retrieval underlies both tasks.",
+          "correct": false,
+          "feedback": "Combining facts is not the same task as recalling one; RULER reports large drops on harder tasks despite nearly perfect needle accuracy."
+        },
+        {
+          "key": "c",
+          "text": "Nothing at all, because needle tests use synthetic filler text unlike real documents and so carry no information.",
+          "correct": false,
+          "feedback": "Too dismissive: the score does establish single-fact recall at that length. It just does not establish reasoning."
+        },
+        {
+          "key": "d",
+          "text": "That the corpus should be loaded, since a published benchmark answers question 4 of the test for any application.",
+          "correct": false,
+          "feedback": "Question 4 is answered on the application's own questions at the real length, not by a vendor's benchmark."
+        }
+      ],
+      "explanation": "Section 3: a needle score shows recall of one planted fact at that length. Finding a conflict means locating two policies and comparing them, the kind of task RULER and BABILong find degrading with length even where needle scores are near perfect. Question 4 is answered by the application's own evaluation.",
+      "hints": [
+        "What exactly does the model do in a needle test, and what does the conflict question ask in addition?",
+        "Which question of the test does a vendor benchmark not settle?"
+      ]
+    },
+    {
+      "id": "ctx-025-q06",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "niah",
+        "reasoning-at-length"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In one sentence: why does a near-perfect single-needle score at 1,000,000 tokens not show that a model can answer questions that combine several facts spread across that length?",
+      "answer": {
+        "model": "Because a needle test only measures recall of one planted fact, not combining several facts, and benchmarks such as RULER show scores on those harder tasks dropping with length while needle scores stay near perfect.",
+        "accept": [
+          "^(?=(?:\\S+\\s+){5}\\S)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*(?<!not )(?<!n't )(?<!never )(?<!only )(?<!RULER )(?<!BABILong )(?<!MRCR )(?<!LongBench )\\b(measures?|tests?|shows?|proves?|demonstrates?|checks?|evaluates?|establish\\w*|captures?)\\s+(that\\s+)?(it\\s+|the model'?s?\\s+|the\\s+)?(ability\\s+to\\s+|can\\s+)?(also\\s+)?(combin\\w*|reason\\w*|synthes\\w*|aggregat\\w*|trac\\w*|connect\\w*|integrat\\w*|multi-?hop|multiple facts|several facts|many facts|two facts|more than one fact|join\\w*|chain\\w*|harder tasks?|complex tasks?|compar\\w*|relat\\w* facts|put\\w* (facts )?together))(?![\\s\\S]*\\b(finds?|found|retriev\\w*|recall\\w*|locat\\w*)\\s+(\\w+\\s+){0,3}(can|will|is able to)\\s+(also\\s+)?(combin\\w*|reason\\w*|synthes\\w*|connect\\w*|join\\w*|chain\\w*|aggregat\\w*))(?![\\s\\S]*(\\bnot|n't|\\bnever|\\bcannot|\\bunable to)\\s+(\\w+\\s+){0,2}(find\\w*|found|retriev\\w*|recall\\w*|locat\\w*|look\\w*[ -]?up|spot\\w*|search\\w*|lookup\\w*|pull\\w* out|fetch\\w*)\\s+(\\w+\\s+){0,2}(one|a single|single)\\b)(?=[\\s\\S]*\\b(one|single|a single|1|lone|isolated)\\b[^.;]{0,40}\\b(fact|needle|sentence|item|piece|detail)s?\\b|[\\s\\S]*\\b(find\\w*|found|retriev\\w*|recall\\w*|locat\\w*|look\\w*[ -]?up|spot\\w*|search\\w*|lookup\\w*|pull\\w* out|fetch\\w*)\\b[^.;]{0,30}\\b(one|single|a single)\\b)(?=[\\s\\S]*\\b(combin\\w*|reason\\w*|synthes\\w*|aggregat\\w*|trac\\w*|connect\\w*|integrat\\w*|multi-?hop|multiple facts|several facts|many facts|two facts|more than one fact|join\\w*|chain\\w*|harder tasks?|complex tasks?|compar\\w*|relat\\w* facts|put\\w* (facts )?together))[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 3: a needle test asks for one planted fact back, which is recall. RULER adds tracing and aggregation, BABILong reasoning over scattered facts, and MRCR disambiguation; on all of them scores fall with length well before the window is full, while needle scores stay near perfect.",
+      "hints": [
+        "Compare what the model has to do in a needle test with what a question that joins two facts asks of it."
+      ]
+    },
+    {
+      "id": "ctx-025-q07",
+      "type": "mcq",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "ruler",
+        "effective-length"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "RULER's Table 3 lists Qwen2 (72B), which claims a 128K window, with 13-task averages of 96.9, 96.1, 94.9, 94.1, 79.8 and 53.7 at 4K, 8K, 16K, 32K, 64K and 128K tokens. RULER's threshold is 85.6%. What is the model's effective length?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "16K",
+          "correct": false,
+          "feedback": "The score is still 94.1 at 32K, above the threshold."
+        },
+        {
+          "key": "b",
+          "text": "32K",
+          "correct": true,
+          "feedback": "Right. 94.1 at 32K passes; 79.8 at 64K does not."
+        },
+        {
+          "key": "c",
+          "text": "64K",
+          "correct": false,
+          "feedback": "64K is the first length that fails (79.8), not the last that passes."
+        },
+        {
+          "key": "d",
+          "text": "128K",
+          "correct": false,
+          "feedback": "128K is the window the model claims; its score there is 53.7."
+        }
+      ],
+      "explanation": "Section 3: the effective length is the longest tested length at which the average stays above 85.6%. Qwen2 passes at 4K to 32K (94.1 at 32K) and falls to 79.8 at 64K, so its effective length is 32K, a quarter of the window it claims.",
+      "hints": [
+        "Walk along the scores from 4K and stop at the first one under 85.6.",
+        "The effective length is the last length that passed, not the first that failed."
+      ]
+    },
+    {
+      "id": "ctx-025-q08",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "cost",
+        "prompt-caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "On Claude Opus 4.6 at 5 dollars per million input tokens (as of early 2026), with a cache read at 0.1 times the base input price, what does a 120,000-token document cost per call, counting the document's input only: sent uncached, and read from the cache?",
+      "answer": {
+        "parts": [
+          {
+            "label": "uncached",
+            "value": 0.6,
+            "tolerance": 0.005,
+            "unit": "dollars"
+          },
+          {
+            "label": "read from the cache",
+            "value": 0.06,
+            "tolerance": 0.0005,
+            "unit": "dollars"
+          }
+        ]
+      },
+      "precision_note": "120,000 × 5 / 10^6 = 0.60; × 0.1 = 0.06, as long_call() in snippets/cost_latency.py prices its corpus. The five-minute write, 1.25 times, would give 0.75.",
+      "explanation": "Section 7: tokens times the rate, $120{,}000 \\times 5 / 10^6 = 0.60$ dollars uncached, and a tenth of that, 0.06, when the prefix is read from the cache.",
+      "hints": [
+        "Multiply the tokens by the rate per million and divide by a million."
+      ]
+    },
+    {
+      "id": "ctx-025-q09",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 8,
+      "tags": [
+        "cost",
+        "prompt-caching",
+        "daily-cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A long-context design on Claude Opus 4.6 (5 dollars per million input tokens and 25 per million output, as of early 2026; cache write 1.25 times and cache read 0.1 times the input price) serves 500 queries a day over an 80,000-token document, with a 200-token question and a 400-token answer per query. The cache is written 5 times a day and read on each of the other 495 queries. Counting the whole call (document, question and answer), what does a day cost with this caching, and with no caching at all?",
+      "answer": {
+        "parts": [
+          {
+            "label": "cached",
+            "value": 27.8,
+            "tolerance": 0.01,
+            "unit": "dollars a day"
+          },
+          {
+            "label": "uncached",
+            "value": 205.5,
+            "tolerance": 0.01,
+            "unit": "dollars a day"
+          }
+        ]
+      },
+      "precision_note": "5 × (0.50 + 0.011) + 495 × (0.04 + 0.011) = 27.80; 500 × (0.40 + 0.011) = 205.50, the arithmetic of day() in snippets/cost_latency.py. Pricing every call as a read gives 25.50.",
+      "explanation": "Section 7's arithmetic. Per call the question and answer cost $200 \\times 5 / 10^6 + 400 \\times 25 / 10^6 = 0.011$ dollars. The document costs 0.50 written, 0.04 read and 0.40 uncached. Cached: $5 \\times 0.511 + 495 \\times 0.051 = 27.80$ dollars a day. Uncached: $500 \\times 0.411 = 205.50$.",
+      "hints": [
+        "Price the document three ways first: written, read, and sent in full.",
+        "Then count how many calls of each kind the day has, and add the question and answer to every call."
+      ]
+    },
+    {
+      "id": "ctx-025-q10",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "latency",
+        "prefill"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "At post 04's illustrative frontier-class rate of 0.4 milliseconds per prefill token, how many seconds of prefill precede the first token of an uncached 300,000-token load, and of a 6,000-token RAG call?",
+      "answer": {
+        "parts": [
+          {
+            "label": "long-context load",
+            "value": 120.0,
+            "tolerance": 0.05,
+            "unit": "seconds"
+          },
+          {
+            "label": "RAG call",
+            "value": 2.4,
+            "tolerance": 0.05,
+            "unit": "seconds"
+          }
+        ]
+      },
+      "precision_note": "300,000 × 0.4 ms = 120 s and 6,000 × 0.4 ms = 2.4 s, the prefill line of snippets/cost_latency.py. Using the 32 ms decode rate instead gives 9,600 s.",
+      "explanation": "Section 7: prefill time is the input tokens times the per-token rate, $300{,}000 \\times 0.4 = 120{,}000$ ms, 120 seconds, against $6{,}000 \\times 0.4 = 2{,}400$ ms, 2.4 seconds. The linear model understates the long call, since attention work grows faster than the token count.",
+      "hints": [
+        "Multiply tokens by milliseconds per token, then convert to seconds."
+      ]
+    },
+    {
+      "id": "ctx-025-q11",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o1",
+        "o4"
+      ],
+      "section": "2",
+      "est_minutes": 12,
+      "tags": [
+        "four-question-test",
+        "router"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "`decide` answers the four questions in order and returns `\"rag\"`, `\"router\"` or `\"long context\"`, by the rules in its docstring. The starter forgets the reserve, so a corpus that fills the window counts as fitting, and it sends every mostly local workload to the router instead of to RAG. Fix it without changing the constants.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "WINDOW = 1_000_000\nRESERVE = 0.30              # share of the window kept for prompt, history and output\nSLICE, WHOLE = 0.10, 0.90   # shares of queries that need most of the corpus\n\n\ndef decide(corpus_tokens, changes_per_day, global_share, usable):\n    \"\"\"Answer the four questions in order; return \"rag\", \"router\" or \"long context\".\n\n    1. The corpus fits if it holds at most WINDOW * (1 - RESERVE) tokens.\n    2. It is stable enough to cache if it changes at most once a day.\n    3. If at most SLICE of the queries are global, \"rag\"; if fewer than WHOLE are, \"router\".\n    4. usable is the verdict of the application's own evaluation at that length.\n    \"\"\"\n    if corpus_tokens > WINDOW:\n        return \"rag\"\n    if changes_per_day > 1:\n        return \"rag\"\n    if global_share < WHOLE:\n        return \"router\"\n    if not usable:\n        return \"rag\"\n    return \"long context\"\n",
+      "solution": "WINDOW = 1_000_000\nRESERVE = 0.30              # share of the window kept for prompt, history and output\nSLICE, WHOLE = 0.10, 0.90   # shares of queries that need most of the corpus\n\n\ndef decide(corpus_tokens, changes_per_day, global_share, usable):\n    \"\"\"Answer the four questions in order; return \"rag\", \"router\" or \"long context\".\n\n    1. The corpus fits if it holds at most WINDOW * (1 - RESERVE) tokens.\n    2. It is stable enough to cache if it changes at most once a day.\n    3. If at most SLICE of the queries are global, \"rag\"; if fewer than WHOLE are, \"router\".\n    4. usable is the verdict of the application's own evaluation at that length.\n    \"\"\"\n    if corpus_tokens > WINDOW * (1 - RESERVE):\n        return \"rag\"\n    if changes_per_day > 1:\n        return \"rag\"\n    if global_share <= SLICE:\n        return \"rag\"\n    if global_share < WHOLE:\n        return \"router\"\n    if not usable:\n        return \"rag\"\n    return \"long context\"\n",
+      "tests": "# Question 1: the reserve counts, and the boundary fits.\nassert decide(800_000, 0, 1.0, True) == \"rag\"\nassert decide(700_000, 0, 1.0, True) == \"long context\"\nassert decide(2_000_000, 0, 0.5, True) == \"rag\"\n\n# Question 2: a corpus that changes all day is not cached.\nassert decide(200_000, 24, 1.0, True) == \"rag\"\nassert decide(200_000, 1, 1.0, True) == \"long context\"\n\n# Question 3: a small slice is RAG, a mix is the router.\nassert decide(200_000, 0, 0.05, True) == \"rag\"\nassert decide(200_000, 0, 0.10, True) == \"rag\"\nassert decide(200_000, 0, 0.11, True) == \"router\"\nassert decide(200_000, 0, 0.5, True) == \"router\"\nassert decide(200_000, 0, 0.90, True) == \"long context\"\n\n# Question 4: the application's own evaluation decides the last step.\nassert decide(200_000, 0, 0.95, False) == \"rag\"\nassert decide(200_000, 0, 0.95, True) == \"long context\"\nassert decide(200_000, 0, 0.5, False) == \"router\"\n\n# The reserve is read from RESERVE, not written into the function.\nsaved = RESERVE\nRESERVE = 0.5\ntry:\n    assert decide(600_000, 0, 1.0, True) == \"rag\"\n    assert decide(500_000, 0, 1.0, True) == \"long context\"\nfinally:\n    RESERVE = saved\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 2: question 1 asks whether the corpus fits with room to spare, so the limit is the window minus the reserve, read from `RESERVE`; question 3 has three outcomes, a small slice to RAG, a mix to the router (section 6), and mostly global queries on to question 4. The tests check both boundaries and change `RESERVE` to catch a hard-coded limit.",
+      "hints": [
+        "Trace the starter on a 800,000-token corpus and on a workload where 5% of the queries are global.",
+        "Question 3 needs two comparisons, and the small-slice one comes before the router one."
+      ]
+    },
+    {
+      "id": "ctx-025-q12",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 20,
+      "tags": [
+        "four-question-test",
+        "router",
+        "design"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A law firm's assistant serves its lawyers over 3,000 contracts (about 60 million tokens, an illustrative size), amended a few times a week. Lawyers ask three kinds of question: \"Summarise the indemnities in the Hartley agreement\", \"Which contracts renew in March?\", and \"What notice period does clause 14 of the Hartley agreement give?\". Apply the four questions to the whole corpus and to a single contract, then design the system: its routes, what is cached, and what each route is evaluated on.",
+      "kind": "design",
+      "answer_length": "half a page",
+      "solution": "**The whole corpus.** Question 1: 60 million tokens fit no window this series cites, let alone with room to spare, so the corpus as a whole is a retrieval corpus.\n\n**One contract.** A single contract fits easily (question 1) and changes a few times a week at most (question 2), so it can be cached while it is being discussed. Question 3 splits the traffic: the indemnity summary needs the whole contract, the notice period one clause, and the renewal question a filter over records. Question 4 is answered on the firm's own questions at the real length.\n\n**Routes.** A router (rules for crisp cues, a small model call otherwise) sends whole-contract questions to a long-context load of that contract, cached at the front of layer 04 for the session; date and count questions to text-to-SQL over a contracts table (renewal dates, parties), not to vector search; and everything else to RAG with reranking and citations, the fall-through. An amendment re-indexes one contract and invalidates only that contract's cache.\n\n**Evaluation.** A labelled routing set with routing accuracy and every misroute read; a golden set per route (summaries judged against reference points, lookups by citation accuracy, SQL by execution accuracy); the ten-question comparison of a whole-contract load against the RAG pipeline to answer question 4.",
+      "rubric": [
+        {
+          "criterion": "Applies question 1 to the whole corpus (fails) and to one contract (passes)",
+          "points": 2
+        },
+        {
+          "criterion": "Uses questions 2 and 3: amendments re-index one contract; the three questions need the whole contract, one clause, and a filter over records",
+          "points": 2
+        },
+        {
+          "criterion": "Designs a router with a cached whole-document route, a structured route for renewals, and RAG as the fall-through",
+          "points": 3
+        },
+        {
+          "criterion": "Evaluates the router on labelled queries and each route on its own golden set, and answers question 4 by measurement",
+          "points": 3
+        }
+      ],
+      "explanation": "Sections 2 and 6: the test is applied per corpus and per kind of query. The whole corpus fails question 1; one contract passes questions 1 and 2, and question 3 splits the traffic, so the answer is a router with a cached whole-document route, a structured route and RAG as the default, each with its own evaluation.",
+      "hints": [
+        "Ask question 1 twice: once for the 3,000 contracts, once for the one contract a lawyer is asking about.",
+        "For question 3, sort the three example questions by how much of the corpus each needs."
+      ]
+    },
+    {
+      "id": "ctx-025-q13",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o3",
+        "o2"
+      ],
+      "section": "7",
+      "est_minutes": 20,
+      "tags": [
+        "cost",
+        "niah",
+        "failure-modes",
+        "diagnosis"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team loads a 400,000-token support knowledge base, marked for caching, into every call on Claude Opus 4.6, with the current date and time and the user's name at the top of the system prompt, and justifies the design with a vendor's needle-in-a-haystack score. The bill is far above their RAG prototype's, and answers to questions that combine two articles are often incomplete. Diagnose both problems in the series' terms and propose fixes.",
+      "kind": "critique",
+      "answer_length": "half a page",
+      "connects": [
+        "ctx-005",
+        "ctx-006"
+      ],
+      "solution": "**The bill.** A cache hit needs a prefix identical up to the breakpoint (post 05). The date, time and name sit in layer 01, the system prompt, ahead of the corpus, so the prefix differs on every call: each call writes the 400,000 tokens at 1.25 times the input price instead of reading them at 0.1 times, $400{,}000 \\times 5 \\times 1.25 / 10^6 = 2.50$ dollars against 0.20 for a read. Fix: move volatile values after the corpus (into layer 06, the user instruction, or a late message), freeze the prefix, and watch the cache-read share.\n\n**The answers.** A needle score shows recall of one planted fact; RULER, BABILong and MRCR show combining facts degrading with length well inside the window. A 400,000-token input also invites distraction and lost-in-the-middle (post 06): the two articles may sit deep in the middle among similar ones. Fix: answer question 4 on the team's own combining questions at that length; if the load fails it, route such questions to RAG with reranking, which packs both articles into a short layer 04, or to retrieve-then-read-long.\n\n**The design.** If most questions need one or two articles (question 3), RAG is the default and a long-context route serves only whole-document questions.",
+      "rubric": [
+        {
+          "criterion": "Explains that the volatile header changes the prefix so every call pays the cache write, with the write and read multipliers",
+          "points": 3
+        },
+        {
+          "criterion": "Fixes the layout: volatile values after the corpus, a frozen prefix, cache reads monitored",
+          "points": 2
+        },
+        {
+          "criterion": "Explains that a needle score measures one-fact recall, citing a benchmark that shows combining facts degrading",
+          "points": 3
+        },
+        {
+          "criterion": "Names distraction or lost-in-the-middle and proposes measurement on the team's own questions and a RAG or hybrid route",
+          "points": 2
+        }
+      ],
+      "explanation": "Sections 3, 7 and 9, with post 05's cache rules and post 06's failure modes: the volatile header breaks the prefix so the corpus is written on every call, and the needle score never measured combining facts.",
+      "hints": [
+        "Where does the first byte that changes between two calls sit, relative to the corpus?",
+        "What does a needle test ask the model to do, and what does a question that combines two articles ask?"
+      ]
+    },
+    {
+      "id": "ctx-025-q14",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "9",
+      "est_minutes": 3,
+      "tags": [
+        "prompt-caching",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In one sentence: why does putting the current date before a cached corpus raise the bill of a long-context design?",
+      "answer": {
+        "model": "Because the date changes the prefix on every call, so the cache never gets a hit and every call pays the cache write for the whole corpus instead of the 0.1-times read.",
+        "accept": [
+          "^(?=(?:\\S+\\s+){5}\\S)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\b(prefix|cache)\\b[^.;]{0,30}\\b(does not|doesn'?t|do not|don'?t|never|won'?t|will not)\\s+(\\w+\\s+){0,1}(chang\\w*|differ\\w*)\\b)(?![\\s\\S]*\\b(prefix|cache)\\b[^.;]{0,30}\\b(stays?|remains?|is still|keeps?)\\s+(\\w+\\s+){0,1}(the same|identical|valid|intact|stable|unchanged)\\b)(?![\\s\\S]*\\b(does not|doesn'?t|do not|don'?t|never|won'?t|will not)\\s+(\\w+\\s+){0,1}(chang\\w*|alter\\w*|affect\\w*|break\\w*|touch\\w*)\\s+(the\\s+)?(cached\\s+)?(prefix|cache)\\b)(?![\\s\\S]*\\b(cheaper|more (cache )?hits|saves? money|lowers? the bill|reduces? the (bill|cost))\\b)(?=[\\s\\S]*(\\b(prefix|cache\\w*|cached part|beginning|start|front)\\b[^.;]{0,60}\\b(chang\\w*|differ\\w*|break\\w*|broke\\w*|invalidat\\w*|not (be )?identical|never (be )?(the same|identical)|no longer (match\\w*|identical)|mismatch\\w*|bust\\w*|new prefix|unique)|\\b(chang\\w*|differ\\w*|break\\w*|broke\\w*|invalidat\\w*|not (be )?identical|never (be )?(the same|identical)|no longer (match\\w*|identical)|mismatch\\w*|bust\\w*|new prefix|unique)\\b[^.;]{0,50}\\b(prefix|every (call|request|time)|each (call|request|time)|cache\\w*)\\b))(?=[\\s\\S]*\\b(miss\\w*|no (cache )?hits?|nothing (is )?(ever )?(read|reused)|never (gets? )?(a )?hits?|never (read|reused)|cannot be (read|reused)|can'?t be (read|reused)|writ\\w*|rewrit\\w*|re-?written|full price|(corpus|document|prefix|input) (is |are )?(paid|billed|charged)|pay\\w* (for )?(the )?(whole |full )?(corpus|document|prefix|input)|re-?process\\w*|recomput\\w*|uncached|not cached|isn'?t cached|invalidat\\w*|1\\.25|premium))[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 9 and post 05: a cache hit needs a prefix identical up to the breakpoint. A date ahead of the corpus differs on every call, so no stored prefix matches and each call writes the corpus at 1.25 times the input price instead of reading it at 0.1 times.",
+      "hints": [
+        "What must be true of a prefix for the cache to be read?",
+        "What does a value that changes on every call do to everything after it?"
+      ]
+    },
+    {
+      "id": "ctx-025-q15",
+      "type": "mcq",
+      "track": "connect",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "router",
+        "text-to-sql"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A hybrid assistant over a contracts database and the contract documents receives \"How many supplier contracts expired in 2025?\". Which route should its router take?",
+      "connects": [
+        "ctx-017"
+      ],
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Text-to-SQL over the contracts database: a count is computed over records.",
+          "correct": true,
+          "feedback": "Right. The route returns rows a query computed, the structured route of post 17."
+        },
+        {
+          "key": "b",
+          "text": "RAG with the top-5 chunks after reranking, since one number is a local lookup in the documents.",
+          "correct": false,
+          "feedback": "Five chunks need not hold every expired contract, and the model counts only what it is shown."
+        },
+        {
+          "key": "c",
+          "text": "A long-context load of every contract so that the model can read and count them all in one call.",
+          "correct": false,
+          "feedback": "It costs the whole corpus per question and asks the model to do a database's job, at a length where combining facts degrades."
+        },
+        {
+          "key": "d",
+          "text": "Retrieve then read long: the top-30 chunks packed into one long-context call for synthesis.",
+          "correct": false,
+          "feedback": "More chunks still need not cover every qualifying record; a count belongs to the database."
+        }
+      ],
+      "explanation": "Section 6, with post 17's router: a count over records is computed by a database query. Vector search returns a confident number from whichever rows were retrieved, and loading every contract asks the model to count what the database already counts exactly.",
+      "hints": [
+        "Is the answer written in any one passage, or computed over many records?"
+      ]
+    },
+    {
+      "id": "ctx-025-q16",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "hybrid",
+        "retrieve-then-read-long"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "What does the hybrid pattern \"retrieve, then read long\" combine?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Retrieval keeps the corpus out of the window, and one long call shows the model every candidate.",
+          "correct": true,
+          "feedback": "Right. It trades a higher cost per query for synthesis across many sources."
+        },
+        {
+          "key": "b",
+          "text": "A long-context load of the whole corpus first, followed by retrieval run over the model's draft answer to check its citations.",
+          "correct": false,
+          "feedback": "The corpus is never loaded whole in this pattern; retrieval comes first and decides what is read."
+        },
+        {
+          "key": "c",
+          "text": "Two separate RAG calls with the top-5 chunks each, whose two answers are then merged by a third, smaller model call.",
+          "correct": false,
+          "feedback": "That is two short calls and a merge; the pattern packs one generous set into a single long call."
+        },
+        {
+          "key": "d",
+          "text": "A cached long-context prefix of the whole corpus that a nightly retrieval job refreshes with new documents.",
+          "correct": false,
+          "feedback": "That is a cached load with a refresh, not retrieval per query followed by a long read."
+        }
+      ],
+      "explanation": "Section 6: a generous candidate set is retrieved and packed into one long-context call. Retrieval keeps the corpus out of the window; the long call lets the model see every candidate together.",
+      "hints": [
+        "Which part of the pattern keeps the corpus small, and which lets the model see the candidates together?"
+      ]
+    }
+  ]
+}

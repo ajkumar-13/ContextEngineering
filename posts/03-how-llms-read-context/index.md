@@ -244,4 +244,4 @@ Full citations are in [REFERENCES.md](../../REFERENCES.md).
 ## What to read next
 
 - **[Post 04 - Tokens, windows, and budgets](../04-tokens-windows-budgets/index.md):** turns tokens and the window into budgets that can be estimated before a call is made.
-- **[Post 25 - Long context vs. RAG: a decision framework](../25-long-context-vs-rag/index.md):** uses the lost-in-the-middle and needle results to decide when to load a whole corpus and when to retrieve.
+- **[Post 25 - Long context vs. RAG: a decision framework](../25-long-context-vs-rag/index.md):** uses the needle results, and the benchmarks that go past them, to decide when to load a whole corpus and when to retrieve.
