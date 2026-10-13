@@ -1,0 +1,847 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-014",
+  "next_ordinal": 19,
+  "questions": [
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 1,
+      "tags": [
+        "five-blocks",
+        "knowledge"
+      ],
+      "prompt": "A support agent's system prompt contains the line \"The fiscal year starts on 1 April.\" In which of the five blocks does it belong?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Rules",
+          "correct": false,
+          "feedback": "Rules constrain what the agent may do. The line constrains nothing; it states a fact the agent may need."
+        },
+        {
+          "key": "b",
+          "text": "Knowledge",
+          "correct": true,
+          "feedback": "Right. It is a small, stable fact needed on many calls, which is what the knowledge block holds."
+        },
+        {
+          "key": "c",
+          "text": "Format",
+          "correct": false,
+          "feedback": "Format constrains the shape of a reply (length, structure, citation style). The line says nothing about how a reply looks."
+        },
+        {
+          "key": "d",
+          "text": "Tool-use guidance",
+          "correct": false,
+          "feedback": "Tool-use guidance says when to reach for which tool. The line names no tool and no situation for calling one."
+        }
+      ],
+      "explanation": "Section 2's placement test: a line that constrains what the agent may do is a rule, a line that constrains what the reply looks like is format, and a line that states a fact is knowledge. The fiscal year is a small, stable fact, so it goes in knowledge.",
+      "hints": [
+        "Ask whether the line constrains behaviour, constrains the reply, or states a fact."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q02",
+      "type": "match",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "five-blocks",
+        "layer-02"
+      ],
+      "prompt": "Match each line from a billing assistant's request to where it belongs. One option on the right matches nothing.",
+      "left": [
+        {
+          "key": "a",
+          "text": "You are the billing assistant for Northwind. You help customers with invoices and payments."
+        },
+        {
+          "key": "b",
+          "text": "- [#219] Ask for the invoice number before discussing a charge."
+        },
+        {
+          "key": "c",
+          "text": "Reply in at most three short paragraphs."
+        },
+        {
+          "key": "d",
+          "text": "Invoices are issued on the first working day of each month."
+        },
+        {
+          "key": "e",
+          "text": "- search_invoices: when the customer cannot give an invoice number."
+        },
+        {
+          "key": "f",
+          "text": "{\"name\": \"search_invoices\", \"input_schema\": {\"type\": \"object\", ...}}"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Identity block"
+        },
+        {
+          "key": "b",
+          "text": "Rules block"
+        },
+        {
+          "key": "c",
+          "text": "Format block"
+        },
+        {
+          "key": "d",
+          "text": "Knowledge block"
+        },
+        {
+          "key": "e",
+          "text": "Tool-use guidance block"
+        },
+        {
+          "key": "f",
+          "text": "Layer 02, tools and MCP descriptions"
+        },
+        {
+          "key": "g",
+          "text": "Layer 04, retrieved chunks"
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "c",
+        "d": "d",
+        "e": "e",
+        "f": "f"
+      },
+      "explanation": "Section 2: identity says who the agent is and whom it serves; a rule constrains behaviour and carries its issue id; format shapes the reply; knowledge states a small stable fact; tool-use guidance says when to call a tool. The JSON schema itself is not part of the system prompt at all: it is layer 02. Nothing here was retrieved for this turn, so layer 04 matches nothing.",
+      "hints": [
+        "One line is a schema, not prose: where do schemas live?",
+        "For the prose lines, apply the placement test of the boundaries paragraph."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q03",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "six-rules",
+        "rewrite"
+      ],
+      "prompt": "A rules block says \"Don't be too wordy.\" Which rewrite follows both the positive-over-negative rule and the specific-over-vague rule?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Never write long replies.",
+          "correct": false,
+          "feedback": "Still a negative form, and \"long\" is as vague as \"wordy\": a reviewer cannot check it."
+        },
+        {
+          "key": "b",
+          "text": "Be concise and clear.",
+          "correct": false,
+          "feedback": "Positive, but vague: it nudges the model without giving anything a test can check."
+        },
+        {
+          "key": "c",
+          "text": "Answer in at most 120 words.",
+          "correct": true,
+          "feedback": "Right. It names a target (positive) and a number a reviewer or a test can check (specific)."
+        },
+        {
+          "key": "d",
+          "text": "Do not exceed 120 words unless asked.",
+          "correct": false,
+          "feedback": "Specific, but still phrased as a prohibition; the positive form names the target directly."
+        }
+      ],
+      "explanation": "Section 3, rules 3 and 4: the positive form names a target instead of leaving a wide space of acceptable replies, and the specific form can be audited. \"At most 120 words\" is both.",
+      "hints": [
+        "Two tests: does it say what to do, and could a script check it?"
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q04",
+      "type": "short",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "six-rules",
+        "one-concept"
+      ],
+      "prompt": "A rules block contains this line: \"[#233] Refunds over 500 dollars need a manager's approval, and every reply cites the order id.\" Which of the six rules does it break, and what is the fix?",
+      "answer": {
+        "model": "One concept per rule: it joins two unrelated constraints with \"and\", so it should be split into two rules on two lines, one for refund approval and one for citing the order id.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(positive over negative|specific over vague|motivated by failure|examples beat|reviewed like code)\\b)(?![\\s\\S]*\\b(not|isn'?t|doesn'?t)\\s+(break|violate)\\w*\\s+(the\\s+)?one[- ]concept)(?![\\s\\S]*\\b(no need to|don'?t|do not|never|shouldn'?t)\\s+split)(?![\\s\\S]*\\b(merge|combine)\\s+(them|it|the two|both|into)\\b|[\\s\\S]*\\bkeep (them|it|both) (together|as (is|one)|in one))(?=[\\s\\S]*\\b(one|single|1)[- ](concept|idea|thing|constraint)|[\\s\\S]*\\btwo\\s+(rules|concepts|constraints|instructions|things|ideas)|[\\s\\S]*\\brule\\s*(1|one|#1)\\b)(?=[\\s\\S]*\\b(split|separate|two (rules|lines)|break (it )?(up|into)|divide|one per line|own line)\\b)[\\s\\S]+"
+        ]
+      },
+      "explanation": "Section 3, rule 1: rules joined by \"and\" hide partial compliance, because a model that follows one half has complied in a way nobody can see. The line is positive, specific and carries its issue id, so the other rules are met; the fix is to split it into two rules.",
+      "hints": [
+        "Count the constraints in the line.",
+        "The line is already positive, specific and traceable."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q05",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "six-rules",
+        "speculation"
+      ],
+      "prompt": "In a planning meeting, a product manager proposes adding \"[#none] Never mention competitors' products\" to the rules block, \"in case a customer asks one day\". No conversation has ever raised it. Which of the six rules argues most directly against adding it now?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Positive over negative",
+          "correct": false,
+          "feedback": "The wording could be made positive, but rewording would not answer the real objection: no failure motivated the rule."
+        },
+        {
+          "key": "b",
+          "text": "Motivated by failure, not by speculation",
+          "correct": true,
+          "feedback": "Right. The rule answers a hypothetical, not an observed failure, and its issue id is empty; speculative rules accumulate and start to contradict each other."
+        },
+        {
+          "key": "c",
+          "text": "Specific over vague",
+          "correct": false,
+          "feedback": "\"Competitors' products\" is reasonably specific. Specificity is not what is missing here."
+        },
+        {
+          "key": "d",
+          "text": "One concept per rule",
+          "correct": false,
+          "feedback": "The line states one concept. It is well formed; the question is whether it should exist at all."
+        }
+      ],
+      "explanation": "Section 3, rule 2: a rule is added when a real interaction went wrong, not because a future one might. The empty issue id is the visible symptom: there is no failure to point to.",
+      "hints": [
+        "What does the issue id in a rule record?",
+        "Has anything gone wrong yet?"
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q06",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "claude-md",
+        "loading"
+      ],
+      "prompt": "According to Claude Code's documentation, as the post quotes it, where in the request does the content of a project's CLAUDE.md arrive?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Inside the system prompt, appended after Claude Code's own instructions",
+          "correct": false,
+          "feedback": "The page says the opposite: the content is not part of the system prompt itself."
+        },
+        {
+          "key": "b",
+          "text": "As a user message after the system prompt",
+          "correct": true,
+          "feedback": "Right. The page states that CLAUDE.md content is delivered as a user message after the system prompt, not as part of it."
+        },
+        {
+          "key": "c",
+          "text": "In the tools field, beside the tool schemas",
+          "correct": false,
+          "feedback": "The tools field carries layer 02, the schemas. CLAUDE.md is instructions, not a tool definition."
+        },
+        {
+          "key": "d",
+          "text": "Only when the user mentions the file in a message",
+          "correct": false,
+          "feedback": "Project CLAUDE.md files above the working directory are loaded at launch, without being mentioned."
+        }
+      ],
+      "explanation": "Section 4 quotes \"How Claude remembers your project\": CLAUDE.md content \"is delivered as a user message after the system prompt, not as part of the system prompt itself.\" It still does the job of layer 01, standing instructions for the session; where a host places that text differs from host to host.",
+      "hints": [
+        "The post quotes the documentation on exactly this point."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q07",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "claude-md",
+        "agents-md",
+        "monorepo"
+      ],
+      "prompt": "A monorepo has a CLAUDE.md at its root that says tests run with `pytest`, and another in `packages/web/` that says tests run with `npm test`. Claude Code is launched at the root and then edits `packages/web/src/app.ts`. What does Claude have in its context about tests?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Only the packages/web file, because the closest file wins",
+          "correct": false,
+          "feedback": "That is the AGENTS.md convention. Claude Code concatenates CLAUDE.md files rather than letting one override another."
+        },
+        {
+          "key": "b",
+          "text": "Only the root file, because subdirectory files are never loaded",
+          "correct": false,
+          "feedback": "Subdirectory CLAUDE.md files are loaded, on demand, once Claude reads, writes or edits a file in that subdirectory."
+        },
+        {
+          "key": "c",
+          "text": "Both instructions, the root one from launch and the web one once work reaches that directory",
+          "correct": true,
+          "feedback": "Right. The root file loads at launch and the subdirectory's loads when Claude touches a file there; neither overrides the other, so the two now conflict."
+        },
+        {
+          "key": "d",
+          "text": "Neither: conflicting files are both dropped and a warning is shown",
+          "correct": false,
+          "feedback": "Nothing in the documentation drops conflicting files; it warns that with contradictory instructions Claude may pick one arbitrarily."
+        }
+      ],
+      "explanation": "Section 4: for AGENTS.md the closest file to the edited file wins, but Claude Code's documentation says CLAUDE.md files are concatenated rather than overriding each other, and a subdirectory's file loads when work reaches it. The team must make the two consistent; the post's section 9 lists the assumption that a nested file overrides as a common mistake.",
+      "hints": [
+        "Two questions: when does each file load, and does one replace the other?",
+        "Do not carry the AGENTS.md rule over to CLAUDE.md."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q08",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 1,
+      "tags": [
+        "skills",
+        "loading"
+      ],
+      "prompt": "In the Agent Skills format, an agent pre-loads only two fields of every installed skill's SKILL.md. When does the full body of a SKILL.md file enter the window?",
+      "answer": {
+        "model": "Only when a task matches the skill, that is, when the agent judges from its description that the skill is relevant.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?!\\W*(always|at (the )?(start|launch|startup|beginning)|on every call|every call|at session start|when installed|at install))(?![\\s\\S]*\\b(always|on every (call|turn|request))\\b)(?![\\s\\S]*(?<!not )(?<!n't )(?<!rather than )(?<!instead of )\\bat (session )?(start(-?up)?|launch)\\b)(?=[\\s\\S]*\\b(relevant|relevance|match(es|ed|ing)?|needs? (it|the skill)|calls? for|requires? it|applies|appl(y|ies) to|judges?|decides?|deems?|on demand|when (it'?s|it is) needed|when needed|task needs?)\\b)[\\s\\S]+"
+        ]
+      },
+      "explanation": "Section 4: the front matter's name and description are pre-loaded for every skill; the full SKILL.md is read into the window only when a task matches, which keeps one file per concern out of the window until it is needed.",
+      "hints": [
+        "What is the description pre-loaded for?"
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q09",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 5,
+      "tags": [
+        "prompt-caching",
+        "cost"
+      ],
+      "prompt": "A request on Claude Sonnet 4.5 (3 dollars per million input tokens, as of early 2026, the rate post 05 quotes) starts with 2,000 tokens of tool schemas, then a 6,000-token system prompt, with a cache breakpoint after each; calls arrive every minute, so the cache is warm. Use the post's multipliers: a write costs 1.25 times and a read 0.1 times the base input price. The rules block is edited. In cents, what does the 8,000-token prefix cost on the first call after the edit, and on the call after that? Ignore everything after the prefix.",
+      "answer": {
+        "parts": [
+          {
+            "label": "prefix on the first call after the edit",
+            "value": 2.31,
+            "tolerance": 0.006,
+            "unit": "cents"
+          },
+          {
+            "label": "prefix on the next call",
+            "value": 0.24,
+            "tolerance": 0.006,
+            "unit": "cents"
+          }
+        ]
+      },
+      "precision_note": "First call: tools read, 2,000 x 3 x 0.1 / 10^6 = 0.0006 dollars; system written, 6,000 x 3 x 1.25 / 10^6 = 0.0225 dollars; total 0.0231 dollars = 2.31 cents. Next call: 8,000 x 3 x 0.1 / 10^6 = 0.0024 dollars = 0.24 cents. Writing the whole 8,000-token prefix again (3.0 cents) is the nearest wrong method.",
+      "explanation": "Section 5: the edit changes the system prompt, so its cache entry no longer matches and is written again at 1.25 times; the tools sit before the first breakpoint, in an entry an earlier request wrote, so they are still read at 0.1 times. On the next call both entries exist and the whole prefix is read.",
+      "hints": [
+        "Anthropic builds the prefix tools first, then system: which part did the edit change?",
+        "Price each part separately: tokens times 3 dollars per million times its multiplier."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q10",
+      "type": "numeric",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o6",
+        "o4"
+      ],
+      "section": "7",
+      "est_minutes": 4,
+      "tags": [
+        "cache-hit-rate",
+        "monitoring"
+      ],
+      "prompt": "Every call of an agent sends 12,000 input tokens; the first 8,000 (layers 01 and 02) are a cached prefix that warm calls read, with one breakpoint after the system prompt. What is the cache-hit rate of a warm call, in percent? A release then formats the current time into the identity block. What is the cache-hit rate of each call after the release, in percent?",
+      "answer": {
+        "parts": [
+          {
+            "label": "warm call before the release",
+            "value": 66.67,
+            "tolerance": 0.5,
+            "unit": "%"
+          },
+          {
+            "label": "each call after the release",
+            "value": 0,
+            "tolerance": 0,
+            "unit": "%"
+          }
+        ]
+      },
+      "precision_note": "Cache-hit rate is cached input tokens over total input tokens: 8,000 / 12,000 = 66.67%. With the time in the system prompt the prefix differs on every call, and with a single breakpoint no earlier entry exists to read: 0%. 66.7% or 67% is also accepted. Answering 33.33% (the uncached share) is the nearest wrong method.",
+      "explanation": "Section 7 defines the cache-hit rate as the share of input tokens read from the cache, and names a drop after a release as the fingerprint of a changed prefix. Section 5 explains why: a per-call value inside the system prompt changes the bytes of the prefix on every call, so nothing is read.",
+      "hints": [
+        "Divide the cached tokens by all input tokens.",
+        "After the release, is any call's prefix identical to an earlier one?"
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q11",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "6",
+      "est_minutes": 10,
+      "tags": [
+        "lint",
+        "contradiction"
+      ],
+      "kind": "fix",
+      "language": "python",
+      "prompt": "`conflicts` is the static check of a prompt's CI gate: it turns refund rules into ranges of amounts and reports every pair that overlaps with different actions. It misses the snippet's own contradiction: a rule \"above 1000\" that sends refunds to a manager and a rule \"up to 2000\" that lets an agent approve them. Fix it.",
+      "starter": "def conflicts(rules):\n    \"\"\"rules: a list of (rule_id, kind, limit, action), kind \"above\" or \"up to\".\n\n    \"above L\" covers amounts greater than L; \"up to L\" covers amounts from 0 to L inclusive.\n    Return the (id_a, id_b) pairs, in input order, whose ranges overlap with different actions.\n    \"\"\"\n    def span(kind, limit):\n        return (limit, float(\"inf\")) if kind == \"above\" else (0, limit)\n\n    found = []\n    for i, (id_a, kind_a, limit_a, action_a) in enumerate(rules):\n        for id_b, kind_b, limit_b, action_b in rules[i + 1:]:\n            if kind_a != kind_b:\n                continue\n            (lo_a, hi_a), (lo_b, hi_b) = span(kind_a, limit_a), span(kind_b, limit_b)\n            if action_a != action_b and max(lo_a, lo_b) < min(hi_a, hi_b):\n                found.append((id_a, id_b))\n    return found\n",
+      "solution": "def conflicts(rules):\n    \"\"\"rules: a list of (rule_id, kind, limit, action), kind \"above\" or \"up to\".\n\n    \"above L\" covers amounts greater than L; \"up to L\" covers amounts from 0 to L inclusive.\n    Return the (id_a, id_b) pairs, in input order, whose ranges overlap with different actions.\n    \"\"\"\n    def span(kind, limit):\n        return (limit, float(\"inf\")) if kind == \"above\" else (0, limit)\n\n    found = []\n    for i, (id_a, kind_a, limit_a, action_a) in enumerate(rules):\n        for id_b, kind_b, limit_b, action_b in rules[i + 1:]:\n            (lo_a, hi_a), (lo_b, hi_b) = span(kind_a, limit_a), span(kind_b, limit_b)\n            if action_a != action_b and max(lo_a, lo_b) < min(hi_a, hi_b):\n                found.append((id_a, id_b))\n    return found\n",
+      "tests": "R412 = (\"412\", \"above\", 1000, \"manager\")\nR481 = (\"481\", \"up to\", 2000, \"agent\")\nassert conflicts([R412, R481]) == [(\"412\", \"481\")]\nassert conflicts([R481, R412]) == [(\"481\", \"412\")]\nassert conflicts([R412, (\"500\", \"up to\", 1000, \"agent\")]) == []\nassert conflicts([R412, (\"501\", \"up to\", 1001, \"agent\")]) == [(\"412\", \"501\")]\nassert conflicts([R412, (\"502\", \"up to\", 5000, \"manager\")]) == []\nassert conflicts([(\"1\", \"above\", 1000, \"manager\"), (\"2\", \"above\", 5000, \"agent\")]) == [(\"1\", \"2\")]\nassert conflicts([(\"1\", \"up to\", 500, \"agent\"), (\"2\", \"up to\", 200, \"manager\")]) == [(\"1\", \"2\")]\nassert conflicts([]) == []\nassert conflicts([R412, (\"600\", \"up to\", 100, \"manager\"), R481]) == [(\"412\", \"481\"), (\"600\", \"481\")]\nassert conflicts([R412, (\"601\", \"up to\", 100, \"agent\"), R481]) == [(\"412\", \"481\")]\n",
+      "explanation": "Section 6: the linter turns each refund rule into a range of amounts and flags two rules whose ranges overlap with different actions. The starter only compares rules of the same kind, so an \"above\" rule is never compared with an \"up to\" rule, which is exactly the shape of the #412 and #481 contradiction. Removing that filter fixes it; the strict comparison keeps rules that only meet at a boundary (above 1000, up to 1000) from being reported.",
+      "hints": [
+        "Which pairs of rules does the loop skip?",
+        "The contradiction in the post pairs an \"above\" rule with an \"up to\" rule."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q12",
+      "type": "short",
+      "track": "run",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "regression",
+        "snippet"
+      ],
+      "prompt": "Under rules 1.3.0, `snippets/prompt_ci.py` reports cases 04 (1,001 dollars) and 05 (1,500 dollars) as failing, but case 06, a refund of 2,500 dollars, still passes. Why does case 06 still pass?",
+      "answer": {
+        "model": "Because 2,500 dollars is outside the range of rule #481, which only reaches up to 2,000 dollars; only #412 matches it, so the case still goes to a manager as expected.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(not|isn'?t|never)\\s+(outside|beyond|above)\\b)(?![\\s\\S]*\\b481\\b[^.]{0,40}\\b(covers|applies to|matches|includes)\\s+(it|2,?500|case 06)\\b)(?![\\s\\S]*\\b(luck|random|noise|lint)\\b)(?=[\\s\\S]*(\\b2,?000\\b|\\b(outside|beyond|above|past|exceeds?|over)\\b[\\s\\S]*\\b(range|limit|cap|481|2,?000)|\\bonly\\s+(rule\\s+)?#?412|#?412\\s+(alone|only)|\\bjust\\s+(rule\\s+)?#?412|\\bno\\s+(other\\s+)?rule\\s+(but|except)\\s+#?412|(does ?n[o']t|doesn't|does not|never)\\s+(cover|apply|match|reach)))[\\s\\S]+"
+        ]
+      },
+      "explanation": "The stand-in follows the last matching rule. Rule #481 covers refunds up to 2,000 dollars, so for 2,500 dollars only #412 matches and the case escalates as expected; the contradiction only bites for amounts above 1,000 and up to 2,000, which is where cases 04 and 05 sit.",
+      "hints": [
+        "Which rules match a refund of 2,500 dollars?",
+        "Compare 2,500 with the limit in rule #481."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q13",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "ci",
+        "pipeline"
+      ],
+      "prompt": "Put the steps of a prompt change through the minimum CI harness in order, from the edit to the release.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Compare the score with the measured noise floor and pass or block the merge"
+        },
+        {
+          "key": "b",
+          "text": "Edit the rules file on a branch, with the issue id in the rule"
+        },
+        {
+          "key": "c",
+          "text": "Run the regression cases against the assembled prompt and score each reply"
+        },
+        {
+          "key": "d",
+          "text": "Merge and release the new prompt version"
+        },
+        {
+          "key": "e",
+          "text": "Open a pull request, which triggers the CI run"
+        },
+        {
+          "key": "f",
+          "text": "Assemble the system prompt from its versioned block files"
+        }
+      ],
+      "answer": [
+        "b",
+        "e",
+        "f",
+        "c",
+        "a",
+        "d"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 6: a change is an edit in a pull request; CI assembles the prompt from its parts (section 4), runs the regression set and scores it, and the gate compares the drop with the noise floor before anything merges. Release comes last.",
+      "hints": [
+        "Each step needs the output of the one before it.",
+        "The gate decides on a score, so scoring comes first."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q14",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o6"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "monitoring",
+        "diagnosis"
+      ],
+      "prompt": "After Tuesday's prompt release, the regression set was green and replies look normal. On the dashboards, refusal rate, tool-call distribution, reply length and citation rate are unchanged, but the cache-hit rate fell from about 60% to 0% and the input bill rose. What is the most likely cause?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A new rule fires too often and refuses valid requests",
+          "correct": false,
+          "feedback": "That would raise the refusal rate, which did not move; it would not touch the cache."
+        },
+        {
+          "key": "b",
+          "text": "A per-call value, such as the time or the user's name, was written into the system prompt",
+          "correct": true,
+          "feedback": "Right. The prefix now differs on every call, so nothing is read from the cache, while the replies themselves are unaffected."
+        },
+        {
+          "key": "c",
+          "text": "An edit broke a tool's description, so the model stopped calling it",
+          "correct": false,
+          "feedback": "That would show in the tool-call distribution, which is unchanged."
+        },
+        {
+          "key": "d",
+          "text": "The format block is being ignored",
+          "correct": false,
+          "feedback": "That would show in reply length or citation rate, both unchanged."
+        }
+      ],
+      "explanation": "Section 7 calls a drop in the cache-hit rate after a release the fingerprint of a changed prefix, and section 9 describes the per-call value in the system prompt: replies look fine while the usage block reports few or no cache reads.",
+      "hints": [
+        "Which signal moved, and which did not?",
+        "What makes a prefix differ on every call?"
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q15",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o6"
+      ],
+      "section": "7",
+      "est_minutes": 1,
+      "tags": [
+        "monitoring",
+        "format"
+      ],
+      "prompt": "The format block says \"Answer in plain prose of at most 150 words.\" Which production signal tests that line most directly?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Refusal rate",
+          "correct": false,
+          "feedback": "Refusals show rules that fire too often; they say nothing about the length of the replies that are given."
+        },
+        {
+          "key": "b",
+          "text": "Reply length, average and 99th percentile",
+          "correct": true,
+          "feedback": "Right. The post names reply length as a direct test of a format rule such as at most 150 words; the 99th percentile catches the long tail the average hides."
+        },
+        {
+          "key": "c",
+          "text": "Cache-hit rate",
+          "correct": false,
+          "feedback": "The cache-hit rate shows whether the prefix is stable, not how the model answers."
+        },
+        {
+          "key": "d",
+          "text": "Tool-call distribution",
+          "correct": false,
+          "feedback": "It shows which tools are called, not how long the replies are."
+        }
+      ],
+      "explanation": "Section 7 lists reply length, average and 99th percentile, as a direct test of a format rule such as \"at most 150 words\".",
+      "hints": [
+        "The rule is about one measurable property of each reply."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q16",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 20,
+      "tags": [
+        "five-blocks",
+        "six-rules",
+        "refactor"
+      ],
+      "kind": "design",
+      "prompt": "Refactor this system prompt into the five blocks and apply the six rules. Give the new prompt, then list each change with the rule or block reason behind it.\n\n\"You are a helpful assistant. Don't be rude and always use the customer's name. We're open 8 to 6. Be concise. If someone wants a refund over 300 dollars, don't do it, a manager has to. Use lookup_order when needed. Never make up tracking numbers, and output JSON.\"",
+      "solution": "**New prompt.**\n\n```text\n## Identity\nYou are the support agent for Northwind's online shop. You help customers with orders,\ndeliveries and refunds, and hand anything else to a human.\n\n## Rules\n- [#101] Address the customer by name.\n- [#102] Send refunds above 300 dollars to a manager for approval.\n- [#103] Quote a tracking number only when it is in the order record.\n\n## Format\nReply in polite, plain prose of at most 100 words.\nExample: \"Hello Priya, your order A-1201 left our warehouse today.\"\n\n## Knowledge\nOpening hours are 08:00 to 18:00.\n\n## Tool-use guidance\n- lookup_order: any question about where an order is or what it contains.\n```\n\n**Changes.** The identity names the agent and its scope instead of \"helpful assistant\". \"Don't be rude and always use the name\" is two concepts (rule 1) and one is negative (rule 3): politeness becomes a format target, the name becomes its own rule. \"Be concise\" becomes \"at most 100 words\" (rule 4). The refund line becomes one positive, specific rule (rules 1, 3, 4). \"Never make up tracking numbers, and output JSON\" is split (rule 1): the tracking rule is rewritten positively, and the JSON demand is dropped as contradicting plain prose; if a parser needs JSON, it goes in format with one example (rule 5) and plain prose is removed instead, never both. \"Open 8 to 6\" becomes a precise fact in knowledge. \"Use lookup_order when needed\" gets a when (tool-use guidance). Every rule carries an issue id (rule 2); the ids here are placeholders for the incidents that motivated them, and a rule with no incident behind it is removed. The refactor ships as a reviewed pull request (rule 6).",
+      "answer_length": "a short prompt and about 150 words",
+      "rubric": [
+        {
+          "criterion": "All five blocks present, each line in the right block, nothing stated in two blocks",
+          "points": 3
+        },
+        {
+          "criterion": "Compound lines split into one concept per rule",
+          "points": 2
+        },
+        {
+          "criterion": "Negative and vague wording rewritten as positive, checkable targets",
+          "points": 2
+        },
+        {
+          "criterion": "The JSON and plain-prose contradiction noticed and resolved one way",
+          "points": 2
+        },
+        {
+          "criterion": "Rules carry issue ids or are justified as motivated by a failure; the change goes through review",
+          "points": 1
+        }
+      ],
+      "explanation": "Sections 2 and 3 together: the placement test puts each line in a block, and the six rules turn compound, negative and vague lines into single, positive, checkable ones. The hidden trap is the contradiction between plain prose and JSON, which a reviewer must resolve rather than keep.",
+      "hints": [
+        "Sort every sentence into a block first.",
+        "Then check each rule line against rules 1, 3 and 4, and look for two lines that cannot both be obeyed."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q17",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o5",
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 20,
+      "tags": [
+        "confusion",
+        "caching",
+        "ci"
+      ],
+      "connects": [
+        "ctx-006",
+        "ctx-005"
+      ],
+      "kind": "connect",
+      "prompt": "A team's system prompt has grown to 40 rules in prose paragraphs; the model follows some and drops others, and two rules disagree about refunds. Using post 06's failure-mode vocabulary, name the failure and its first fix. Then plan the refactor with this post's practices, and say what the refactor release itself will cost in caching terms, using post 05's rules.",
+      "solution": "**The failure.** Post 06 calls this confusion: the information is there, but the rules about what to do with it are unclear (rules buried in prose, two that contradict each other). Its first fix is to make the rules explicit, motivated and exemplified, as numbered constraints, which is what this post's six rules spell out.\n\n**The refactor.** Split the prompt into the five blocks; turn each rule into one numbered line with one concept, positive and specific, carrying the issue id that motivated it, and delete rules no incident supports. Resolve the refund contradiction by deciding one policy. Put the prompt under version control, composed from block files, and add a regression set built from production cases and from the boundaries of each rule (refunds just below, at and just above every limit), plus a static check for overlapping rules; gate merges on a drop greater than the measured noise floor. After release, watch refusal rate, tool-call distribution, reply length, citation rate and the cache-hit rate.\n\n**The cost.** The release changes the system prompt's bytes, so its cache entry stops matching: the next call writes the new prefix at 1.25 times the base input price (five-minute lifetime) and later calls read it at 0.1 times on most models. With a breakpoint after the tools, which Anthropic caches first, the schemas stay readable. So the refactor should ship as one deliberate release, not a stream of edits, each of which would pay the write again.",
+      "answer_length": "three short paragraphs",
+      "rubric": [
+        {
+          "criterion": "Names confusion and post 06's first fix (explicit, motivated, exemplified rules)",
+          "points": 2
+        },
+        {
+          "criterion": "Refactor applies the five blocks and the six rules, and resolves the contradiction",
+          "points": 3
+        },
+        {
+          "criterion": "Adds a regression set with boundary cases, a static conflict check and a gate against the noise floor",
+          "points": 3
+        },
+        {
+          "criterion": "Prices the release with post 05's rules: one write at 1.25 times, reads at 0.1 times, tools kept by their breakpoint, edits batched",
+          "points": 2
+        }
+      ],
+      "explanation": "Post 06 places unclear rules in layers 01 and 02 under confusion; this post's six rules are its first fix, and section 6's gate keeps the fix from regressing. Section 5, with post 05's multipliers, prices the release: one rewrite of the system prompt's cache entry.",
+      "hints": [
+        "Which of post 06's five modes is about rules rather than information?",
+        "For the cost, ask which part of Anthropic's prefix the release changes."
+      ]
+    },
+    {
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "id": "ctx-014-q18",
+      "type": "mcq",
+      "track": "connect",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 2,
+      "tags": [
+        "layers",
+        "caching"
+      ],
+      "connects": [
+        "ctx-002"
+      ],
+      "prompt": "An assistant must know today's date to answer \"is my refund window still open?\". Using post 02's six layers, where should the date go so that the prompt still caches?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "In the knowledge block of the system prompt, since it is a fact the agent needs",
+          "correct": false,
+          "feedback": "It is a fact, but not a stable one: it changes daily, so inside layer 01 it breaks the cached prefix whenever it changes."
+        },
+        {
+          "key": "b",
+          "text": "In the identity block, as \"You are the support agent for Acme, today is ...\"",
+          "correct": false,
+          "feedback": "Same problem, earlier in the prefix: everything from the identity block on is rewritten whenever the date changes."
+        },
+        {
+          "key": "c",
+          "text": "After the stable layers, for example with the user instruction in layer 06 or in layer 03",
+          "correct": true,
+          "feedback": "Right. A per-call or per-day value belongs after layers 01 and 02, so the stable prefix stays byte-identical."
+        },
+        {
+          "key": "d",
+          "text": "In the tool schemas of layer 02, as a default parameter value",
+          "correct": false,
+          "feedback": "Layer 02 is cached first on Anthropic; a changing value there invalidates the whole prefix, tools included."
+        }
+      ],
+      "explanation": "Section 5: stable content first, per-turn content last; a per-call value inside the system prompt ends the reusable prefix there. Post 02 assigns such values to layers 03, 04 or 06, after the stable prefix of layers 01 and 02.",
+      "hints": [
+        "Is the value stable from call to call?",
+        "Which layers form the stable prefix?"
+      ]
+    }
+  ]
+}

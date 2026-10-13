@@ -1,64 +1,28 @@
 id: ctx-014
 slug: 14-system-prompt-as-software
-title: "14 · The System Prompt as Software"
-
-description: >
-  Learn how to treat system prompts as production software rather than
-  static text. Explore prompt architecture, versioning, testing,
-  prompt caching, AGENTS.md, CLAUDE.md, CI pipelines, and monitoring
-  practices for building reliable AI agents.
-
-author: "Ajay"
-
+title: "14 - The system prompt as software"
+summary: "The system prompt treated as software: five named blocks, six rules for writing rules, versioned files such as AGENTS.md, a layout that keeps the prefix cached, and a CI gate that blocks a contradictory rule."
 date: 2026-05-22
-last_modified: 2026-05-22
-
-tags:
-  - context-engineering
-  - system-prompts
-  - prompt-engineering
-  - ai-agents
-  - prompt-caching
-  - testing
-  - ci-cd
-  - agents-md
-
-category: Components
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part III - Layers in depth"
-chapter: "Part III — Components"
-
-hero: diagrams/00-hero-system-prompt-as-software.svg
-hero_alt: "Five-block architecture of a production system prompt: Identity, Rules, Format, Knowledge, and Tools"
-
-reading_time: 16
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - System Prompt
-  - Prompt Engineering
-  - Prompt Architecture
-  - Identity
-  - Rules
-  - Output Format
-  - Prompt Versioning
-  - Prompt Testing
-  - Prompt Evaluation
-  - Prompt Caching
-  - KV Cache
-  - AGENTS.md
-  - CLAUDE.md
-  - System Instructions
-  - AI Agents
-  - CI/CD
-  - Regression Testing
-  - Prompt Monitoring
-  - Production AI
-
-canonical_url: ""
-
-prev: ../13-isolate-strategies/
-next: ../15-tools-and-mcp/
+level: intermediate
+reading_time: 18
+tags: [context-engineering, system-prompt, prompt-versioning, agents-md, prompt-caching, regression-testing, monitoring]
+hero: diagrams/01-five-blocks.svg
+prerequisites: [ctx-002]
+code: optional
+outcomes:
+  - id: o1
+    text: "Decompose a system prompt into the five named blocks (identity, rules, format, knowledge, tool-use guidance) and place a given line in one of them."
+  - id: o2
+    text: "Apply the six rules for writing rules to rewrite a weak or speculative rule into one a model can follow and a reviewer can audit."
+  - id: o3
+    text: "Explain how AGENTS.md, CLAUDE.md and SKILL.md files reach the window, and how nested files are resolved."
+  - id: o4
+    text: "Lay out a prompt so its stable prefix caches, and say which edits invalidate the cached prefix and what that costs."
+  - id: o5
+    text: "Wire the minimum CI harness for a prompt: a regression set, a scoring rule and a gate that blocks a contradictory rule."
+  - id: o6
+    text: "Choose the production signals that show a prompt change has gone wrong after it passed the gate."
+recommended: [ctx-008]
