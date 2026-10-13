@@ -1,179 +1,262 @@
-# 17 · Advanced retrieval
+# 17 - Advanced retrieval
 
-> **TL;DR.** Standard hybrid-RAG (retrieval-augmented generation; see [Post 11](../11-rag-in-depth/index.md)) handles the large majority of production retrieval needs. The remainder, corpora with rich relationships, queries that span multiple documents, structured data, very-long-context single sources, are where the **advanced** techniques earn their cost. This post covers the four that recur in production: **GraphRAG**, **late-interaction retrieval (ColBERT)**, **structured / SQL retrieval**, and **long-context routing**. Each comes with its sweet spot and its overhead. Query-side patterns (query rewriting, HyDE, multi-query) live in [Post 11](../11-rag-in-depth/index.md); this post is the corpus-shape half.
+> **TL;DR.** Hybrid retrieval-augmented generation (RAG), as [post 11](../11-rag-in-depth/index.md) builds it, answers a question from a few passages. Four shapes of question defeat it: multi-hop, whole-document, tabular, and those that hinge on a rare exact term. Each has its own technique (GraphRAG, long-context loading, text-to-SQL, late interaction) and its own cost, and a small router sends each question to the one its shape needs, with hybrid RAG as the default.
 >
-> **After reading this you will be able to:**
-> - Recognise the corpus shapes that defeat vanilla RAG.
-> - Pick the right advanced technique for each shape.
-> - Estimate the engineering and inference-cost overhead before committing.
+> **Prerequisites:** [Post 11](../11-rag-in-depth/index.md).
+> **Safe to skip?** Skip it if failing questions can already be sorted by shape and routed to their technique, with each technique's cost estimated first.
+>
+> **After reading, you will be able to:**
+>
+> - Recognise the four question shapes that defeat hybrid RAG: multi-hop, whole document, structured data and rare exact terms.
+> - Pick GraphRAG, late interaction, text-to-SQL or long-context loading for each shape, and say why hybrid RAG fails there.
+> - Compute a MaxSim score from token similarities and explain why it keeps a rare-term match that one pooled vector loses.
+> - Estimate a technique's overhead before committing to it: offline build calls, index size, and tokens and dollars per question.
+> - Design a router that sends each question to its technique, with hybrid RAG as the default and a labelled set to catch misroutes.
 
-![A router diagram: a query enters a small classifier that branches to text-to-SQL, GraphRAG, late-interaction ColBERT retrieval, long-context load, and standard hybrid RAG, each selected by the shape of the question.](diagrams/00-hero-advanced-retrieval.svg)
-*Advanced retrieval is mostly routing: send each query to the retriever its shape demands.*
+![A router sends multi-hop questions to GraphRAG, whole-document ones to a long-context load, structured ones to text-to-SQL, rare exact identifiers to late interaction, and the rest to hybrid RAG; every route fills layer 04.](diagrams/00-hero-router.svg)
 
----
-
-## 1. When standard RAG hits its ceiling
-
-Vanilla RAG (chunk, embed, hybrid retrieve, rerank, pack) handles factoid questions over collections of independent documents extremely well. As a rule of thumb it covers most production retrieval needs, and the advanced techniques below earn their keep on the residue. (The exact split is illustrative and depends entirely on your corpus and query mix.) ![Four question shapes vanilla RAG cannot serve, each with an example, why it fails, and the technique it needs](diagrams/01-four-ceilings.svg)
-
-*The hero shows the router from the technique side. This is the same picture from the problem side.*
-
-It runs into trouble in four recurring shapes:
-
-1. **Multi-hop questions.** *"Which suppliers are downstream of vendors that failed our 2024 audit?"* The answer requires *joining* facts from multiple documents; no single chunk contains it.
-2. **Long-document questions.** *"Summarise the key risks raised in this 200-page filing."* The answer needs the *whole* document, not the best 5 chunks.
-3. **Structured-data questions.** *"How many tickets did the Bangalore team close last quarter?"* The data is in a table; embeddings are the wrong tool.
-4. **Domain corpora with rare exact terms.** A question about a specific gene, SKU, contract id, or Sanskrit term where the embedding model has never seen the token.
-
-Each of these has a specialised technique. None of them replace vanilla RAG; they augment it. A serious production system has a *router* that picks the technique by query type.
-
-This post deliberately covers *corpus-shape* techniques. The complementary *query-shape* patterns, query rewriting, decomposition, HyDE, and the iterative agentic loops (Self-RAG, Corrective RAG), are covered on the query side of the pipeline in [Post 11](../11-rag-in-depth/index.md); the two halves compose.
+*Advanced retrieval is mostly routing: each question goes to the retriever its shape needs, and everything else stays on hybrid RAG.*
 
 ---
 
-## 2. GraphRAG: when the corpus has structure
+## 1. The question: which questions defeat hybrid RAG?
 
-**The problem.** A corpus of company filings, internal wiki pages, or a research literature where the answer to many questions is a *path* through related entities. Vanilla retrieval pulls the right *nodes* but not the *edges*; the model gets isolated facts and cannot synthesise.
+[Post 11](../11-rag-in-depth/index.md) built the standard pipeline: chunk, add context and index offline; rewrite the query, fuse dense and BM25 (Best Matching 25, a keyword ranking function) candidates by reciprocal rank fusion (RRF), rerank, and pack the top-k into layer 04, retrieved chunks. It answers a question whose answer sits in one or two passages that resemble the question.
 
-**The technique.** Build a knowledge graph from the corpus offline. Entities (companies, people, products, concepts) become nodes; mentions, ownership, references become edges. At retrieval time, the query is parsed for entities; the graph is traversed *N* hops from each entity; the relevant subgraph (plus the source chunks for each edge) is packed into the prompt. Hop depth is the main cost/quality knob: most systems traverse only one or two hops, because each extra hop expands the subgraph roughly by the average node degree, and an unbounded traversal quickly blows the token budget on a densely connected graph.
+This post asks which questions that pipeline cannot answer however well it is tuned, and which technique serves each at what cost. All four techniques are still the select operation of [post 07](../07-write-select-compress-isolate/index.md), filling layer 04 for one call; what changes is the unit retrieved (a path, a row, a document, a token). The figure at the top of the post is the answer in one picture.
 
-**What works in practice.** Microsoft Research's GraphRAG (Edge et al., 2024) is the most widely cited reference implementation. The key engineering choice is the *entity-extraction quality*: the graph is only as good as the upstream entity recognition. Edge et al. report that their graph approach substantially improves the comprehensiveness and diversity of answers to global, query-focused summarisation questions over vanilla vector RAG; treat any specific percentage lift you see quoted as workload-dependent rather than a fixed number.
-
-**Cost.** Significant. The offline graph build is a one-off LLM-heavy pass over the entire corpus, and for that reason it typically costs several times more than plain embedding (illustrative: a small multiple, not a fixed factor). The online retrieval adds a graph traversal step. The win is large where the corpus has real structure; the loss is large where the corpus is just a pile of independent documents, and a month of graph engineering buys nothing.
-
-**When to use.** Multi-hop questions are a meaningful fraction of the traffic; the corpus has named entities the questions reference; the offline build is affordable.
+The query-side patterns (rewriting, HyDE, decomposition) are in [post 09](../09-select-strategies/index.md), section 2. Loops in which the model decides when to retrieve and grades the results, such as Self-RAG (Asai et al., 2023) and Corrective RAG (Yan et al., 2024), are named here, not taught; they wrap any retriever below.
 
 ---
 
-## 3. Late-interaction retrieval: when chunks are not the right unit
+## 2. Four shapes, four ceilings
 
-**The problem.** Bi-encoder retrieval (the standard: one neural encoder embeds the chunk and query independently into single vectors, introduced in [Post 09](../09-select-strategies/index.md)) embeds the entire chunk into one vector. The query also collapses to one vector. The match is a single dot product. Information about *which tokens* in the chunk match *which tokens* in the query is lost. This loses recall on questions where the answer-bearing span is small relative to the chunk.
+A ceiling is a limit no tuning of the default pipeline removes, because the answer is not the kind of thing it returns:
 
-**The technique.** **ColBERT** (Khattab & Zaharia, 2020) and its successors keep one vector *per token* in both the chunk and the query, then score by **sum-of-max similarity** (called MaxSim) at retrieval time. Concretely: for each *query* token, take the maximum similarity against every token in the candidate chunk (the best single match that query token finds anywhere in the chunk), then sum those per-token maxima across the query. A single-vector bi-encoder instead compares one averaged chunk vector to one averaged query vector, so a strong match on one rare term can be washed out by the rest of the chunk; MaxSim rewards it. The newer **ColBERTv2** (Santhanam et al., 2022) and **JaColBERT** variants are practical at scale.
+| Shape | Example question | Why hybrid RAG fails | Technique |
+|---|---|---|---|
+| Multi-hop | "Which suppliers are downstream of vendors that failed our 2024 audit?" | The documents holding the second fact never mention the first | GraphRAG |
+| Whole document | "Summarise the key risks raised in this 200-page filing." | The answer needs all of it, not the best five chunks | Long-context load |
+| Structured data | "How many tickets did the Bangalore team close last quarter?" | A count over rows is computed, not found in a passage | Text-to-SQL |
+| Rare exact term | "What does error E-4012 mean when exporting invoices?" | One pooled vector per chunk washes out a match on one rare token | Late interaction |
 
-**What works in practice.** ColBERT-style retrievers consistently win on benchmarks where the relevant span is short (definitional questions, exact-phrase lookups, technical terminology). Over a well-tuned bi-encoder followed by a cross-encoder rerank (a heavier model that scores each query-chunk *pair* jointly, from [Post 09](../09-select-strategies/index.md)), the marginal lift on general factoid retrieval tends to be modest and can be larger on technical corpora with rare exact terms; measure it on your own gold set rather than trusting a headline number, since results vary widely by domain.
-
-**Cost.** Storing one vector per token rather than one per chunk multiplies index size by roughly the average tokens-per-chunk (illustrative: one to two orders of magnitude, not a fixed factor), and retrieval latency grows with it. Mitigations exist (PLAID, an optimised late-interaction engine; plus vector compression) but the engineering complexity is real. Treat ColBERT as a target for the next iteration, not as the default first build.
-
-**When to use.** Technical or domain-specific corpora; queries with rare exact tokens; a sub-second latency budget that can absorb the extra retrieval cost; a team that has already shipped a vanilla pipeline and is hunting for the next increment of recall.
-
----
-
-## 4. Structured / SQL retrieval: when the data is a table
-
-**The problem.** "How many enterprise customers in EMEA churned last quarter?" The data is in a database. Embedding individual rows and retrieving by similarity is the *wrong tool*; SQL is the right one.
-
-**The technique.** **Text-to-SQL.** A small LLM call translates the user's natural-language question into a SQL query against a known schema; the application executes the query; the result rows are formatted and returned to the user (optionally also packed into the main agent's context).
-
-**What works in practice.** The pattern that consistently outperforms naïve text-to-SQL:
-
-1. **Schema-aware prompt.** The translation prompt includes only the *tables and columns relevant to this query*, retrieved by (yes) RAG over a schema documentation corpus. A schema with 500 tables overwhelms the LLM if all of it goes in the prompt.
-2. **Few-shot examples.** Two or three (question → SQL) pairs that look like this query, retrieved from a curated bank.
-3. **Validation pass.** The generated SQL is parsed (not executed) and checked against the schema; errors are fed back to the LLM for one repair attempt.
-4. **Read-only execution role.** The SQL runs as a database user that *cannot write*. Defence in depth against an injection attack via the model.
-
-**Cost.** Modest. One LLM call for translation, one for any repair. The latency is dominated by the SQL execution. The main risk is *correctness* on complex joins; production systems use a **router** that sends ambiguous or complex queries to a human-curated query template instead of free-form translation.
-
-**When to use.** Any time the underlying answer source is structured. The single most-skipped advanced technique; teams reach for vector RAG over what was always a SQL question.
+None of the four replaces the default, and only a labelled sample of real questions says how much traffic each shape takes. A useful exercise: twelve questions, three per shape, run through hybrid RAG, with the failures routed to their technique; sections 3, 4 and 7 do it at toy scale.
 
 ---
 
-## 5. Long-context routing: when the model can hold the whole document
+## 3. GraphRAG: when the answer is a path
 
-**The problem.** A 50-page contract. The user asks "summarise the risks" and "what is the termination notice period". One question wants *all* the document; the other wants *one paragraph*. Retrieval is wrong for the first; loading the whole document is wasteful for the second.
+**The ceiling.** The multi-hop question needs two facts: which vendors failed the audit, and who buys from them. The second sits in documents that never mention the audit, and each document is scored against the question alone.
 
-**The technique.** **Route by query type.** A small classifier, itself an LLM call with a short rubric, labels the query as `whole_document` or `local_lookup`. Whole-document queries load the full source (within budget) and skip retrieval. Local-lookup queries go through the standard RAG pipeline.
+**The technique.** Offline, a model extracts entities as nodes and relations (supplies, owns, cites) as edges from each chunk, each edge keeping its source chunk. At query time the graph is walked a fixed number of hops from the entities in the question or the first documents retrieved, and the chunks behind the edges walked are packed into layer 04. The snippet `snippets/two_hop.py` runs this on an eight-document toy corpus, with a regular expression standing in for the extraction call:
 
-**What works in practice.** The classifier is the entire engineering surface. A two-shot rubric ("global if the answer requires the entire document; local if a single paragraph would suffice") is usually enough to route the great majority of queries correctly; the exact hit rate depends on your query distribution, so treat any percentage as illustrative and measure it against a gold set. Hybrid handling for the unsure cases: load the document *and* run RAG, pack the top RAG chunks (top-k, the k highest-scoring retrieved chunks) as a "table of contents" before the full document.
-
-The trick that makes this affordable is **prompt caching** ([Post 14](../14-system-prompt-as-software/index.md), §5). A 50-page document loaded into context costs full price on the first (cache-write) call; on subsequent cache hits, an Anthropic cache read is billed at roughly 10 % of the base input price (Anthropic, "Prompt caching"; see [Post 04](../04-tokens-windows-budgets/index.md)). Cache pricing is provider- and time-specific, so check the vendor's page. Many production assistants for long-document review now keep the document cached for the duration of the session and route every query through the same prefix.
-
-**Cost.** Highest *per-call* of the techniques in this post (the long context is paid for in full on the cache miss). Lowest *engineering* overhead: most teams can ship this in a day. Choose when latency budget allows the larger calls and the corpus is genuinely document-shaped.
-
----
-
-## 6. The router
-
-![The four techniques compared on what they fix, offline cost, online cost, engineering overhead, and when to ship](diagrams/02-technique-costs.svg)
-
-*Lined up, three of the four are visibly not first builds, and the cheapest one is the one teams skip.*
-
-The pattern that ties this post together: **a small router in front of the retrieval system** that picks the technique per query.
-
-```
-user turn
-  │
-  ▼
-classify(query)
-  │
-  ├─ is_structured       → text-to-SQL
-  ├─ requires_traversal  → GraphRAG
-  ├─ whole_document      → long-context load
-  └─ default             → standard hybrid-RAG + rerank
+```text
+single hop   packed d1, d2, d7   recall 0.00
+two-step     packed d1, d4, d3   recall 1.00   (second query: Acme Metals Borealis Plastics)
+graph        packed d1, d3, d4   recall 1.00
 ```
 
-The router is two things: a small LLM classifier (or a rules engine, if the categories are clear) and an orchestrator that dispatches to the right pipeline. The end-to-end answer-quality lift from getting routing right is often larger than any single technique improvement, because the *wrong* technique on the *wrong* query is not just suboptimal; it is the difference between an answer and "I could not find that".
+Single-hop BM25 packs the audit report and two documents that share its words, and neither buyer; the graph walks from the two failed vendors to their buyers, as the figure below draws.
+
+![Single hop packs d1, d2 and d7, recall 0.00. The graph starts from the failed vendors named in d1 and walks one hop to Corvid Tools (d3) and Delta Assembly (d4), recall 1.00.](diagrams/01-two-hop.svg)
+
+*The buyer documents never mention the audit, so no score against the question finds them; one hop along an extracted edge does.*
+
+The two-step run is the other fix: read the vendor names from the first document and retrieve again with them (post 09's decomposition). One bridge needs no graph; a graph pays where the same relations are asked repeatedly, or a chain is too long to follow one query at a time.
+
+**Hop depth is the cost dial.** Each hop multiplies what is reached by roughly the links per entity: on a synthetic graph of 2,000 entities with four links each, the snippet reaches 4 entities within one hop, 20 within two, 82 within three and 308 within four, each bringing its source chunks into layer 04. Walking further than the question needs packs relations nobody asked about, the distraction failure mode of [post 06](../06-context-failure-modes/index.md).
+
+**What Edge et al. measured.** Microsoft Research's GraphRAG (Edge et al., "From Local to Global", arXiv v2, February 2025) also groups related entities into communities, pre-writes a summary of each, and answers a global question ("what are the main themes?") by combining partial answers from every summary. On corpora of about 1 million and 1.7 million tokens, in 600-token chunks with 100-token overlap, pairwise comparisons judged by a model gave the global approaches win rates over vector RAG of 72 to 83% (podcast transcripts) and 72 to 80% (news articles) for comprehensiveness, and 75 to 82% and 62 to 71% for diversity. Vector RAG gave the most direct answers, and answering from the top-level summaries took over 97% fewer tokens than summarising the source text. These are numbers for global questions; a factoid lookup stays on the default.
+
+**Cost.** A model call per chunk offline, plus the summaries, repeated as the corpus changes; section 8 prices it. A relation the extraction missed is an edge no walk can take. Memory stores face the same choice: [post 16](../16-memory-systems/index.md) covers Zep's temporal knowledge graph (Rasmussen et al., 2025).
 
 ---
 
-## 7. What *not* to do
+## 4. Late interaction: when one rare token decides
 
-A short, opinionated list.
+**The ceiling.** A bi-encoder, the dense half of hybrid retrieval ([post 09](../09-select-strategies/index.md)), embeds a chunk into one vector and the query into another and scores their similarity. Pooling averages away which token matched which. When the answer turns on one rare token (an error code, a part number, a gene name) inside a chunk about other things, a generic chunk that matches the query's common words can score higher. BM25 helps only when the corpus spells the term exactly as the query does.
 
-- **Replace standard RAG with GraphRAG everywhere.** GraphRAG on a flat corpus is engineering overhead with no payoff.
-- **Reach for ColBERT before fixing chunking.** The extra index and retrieval cost rarely beats a chunker pass that captures the right span in the first place.
-- **Try to text-to-SQL a 500-table warehouse without schema retrieval.** The LLM cannot pick the right tables from a schema dump that is tens of thousands of tokens long.
-- **Load every long document into context.** Cache helps but cannot rescue a workload of 200 different long documents.
-- **Skip the router.** Without it the team builds three pipelines and uses the wrong one half the time.
+**The technique.** ColBERT (Khattab and Zaharia, SIGIR 2020) keeps one vector per token for query and document and scores them with MaxSim: for each query token, its highest similarity to any document token, summed over the query, $s(q, d) = \sum_i \max_j \mathbf{q}_i \cdot \mathbf{d}_j$. A strong match on one rare token counts in full however long the chunk is. The snippet `snippets/maxsim.py` computes it on hand-written token vectors:
+
+```python
+def maxsim(query, doc):
+    """Late interaction: each query token keeps its best match anywhere in the document; the maxima add up."""
+    return sum(max(dot(VEC[q], VEC[d]) for d in doc) for q in query)
+```
+
+For the query "fix error E-4012" against chunk A, an eight-token sentence that holds the answer, and chunk B, a generic page on fixing error messages, it prints:
+
+```text
+score            single vector   MaxSim
+A                         0.51     2.43
+B                         0.55     2.28
+single vector ranks B first; MaxSim ranks A first
+```
+
+The figure below shows where the difference comes from.
+
+![Similarity grids of the query tokens against each chunk, row maxima outlined. Chunk A: maxima 0.45, 0.98, 1.00, MaxSim 2.43, single vector 0.51. Chunk B: maxima 1.00, 1.00, 0.28, MaxSim 2.28, single vector 0.55.](diagrams/02-maxsim.svg)
+
+*Chunk B wins on the two common words; chunk A's exact match on E-4012 counts in full under MaxSim and decides the ranking.*
+
+B matches "fix" and "error" exactly but E-4012 at best 0.28; A matches E-4012 exactly and "error" through "stops" (0.98). Pooling hides that. The vectors are toy ones; on a real corpus the effect is measured on its golden set.
+
+**What the papers measured.** On the MS MARCO passage-ranking development set, ColBERT reranking BM25's top 1,000 scored an MRR@10 (mean reciprocal rank of the first relevant passage in the top 10) of 34.9 against 34.7 and 36.0 for two BERT-base cross-encoders, at 61 milliseconds against 10,700 per query (Khattab and Zaharia, Table 1). The price is storage. ColBERTv2 (Santhanam et al., NAACL 2022) compresses each 256-byte vector to 20 or 36 bytes, shrinking the MS MARCO index from 154 GiB to 16 or 25 GiB, and the PLAID engine (Santhanam et al., CIKM 2022) cuts its search latency by up to 7 times on a GPU and 45 times on a CPU.
+
+**When to use it.** A technical corpus whose rare-term questions still fail after the default is tuned. Fix chunking first: a short chunk around the answer-bearing span removes much of the pooling problem.
 
 ---
 
-## 8. The shape of a production retrieval stack
+## 5. Structured retrieval: when the data is a table
 
-A reference assembly, useful as a sanity check against a real system.
+**The ceiling.** "How many enterprise customers in Europe, the Middle East and Africa (EMEA) churned last quarter?" is answered by counting rows. The nearest few rows need not include every qualifying one, and the model counts what it is shown.
 
-| Stage | Technology | Role |
+**The technique.** Text-to-SQL: a model call translates the question into SQL (Structured Query Language) against a known schema, the application runs it, and the result rows go into layer 04. Four practices make it dependable:
+
+1. **Retrieve the schema.** The prompt holds only the tables relevant to this question, found by retrieval over schema descriptions. A 500-table warehouse at 60 tokens a table (illustrative sizes) is 30,000 tokens of mostly irrelevant schema per call.
+2. **A few worked examples.** Two or three pairs of question and SQL resembling this one, picked as post 09 picks few-shot examples.
+3. **Validate before running.** The SQL is parsed and checked against the schema; an error goes back to the model for one repair.
+4. **Run it read-only.** A database user that cannot write turns an injected `DROP TABLE` into an error ([post 23](../23-security/index.md) covers prompt injection).
+
+**What the paper measured.** DIN-SQL (Pourreza and Rafiei, NeurIPS 2023) splits translation into schema linking, classification by complexity, generation and self-correction. It reports execution accuracy of 85.3% on the Spider holdout test set, against a previous best of 79.9%, and 55.9% on BIRD's, and that decomposition improved few-shot performance by roughly 10%. Schema linking is practice 1 under another name.
+
+**Cost and risk.** One call per question, a second for a repair, and the query's run time. The risk is a wrong query returning a plausible number, so high-stakes questions can go to a human-written template. Its only offline build is the schema descriptions.
+
+---
+
+## 6. Long-context routing: when the question needs the whole document
+
+**The ceiling.** A 50-page contract is asked "summarise the risks" and "what is the termination notice period?". Five chunks give the summary five fragments; loading all 50 pages for the notice period pays for the whole to read one clause.
+
+**The technique.** Route by question type: a rule or a short model call labels each question whole-document or local. Whole-document questions load the full source into layer 04 and skip retrieval; local ones take the default pipeline. Google's "Long context" page for the Gemini API (last updated 22 June 2026, consulted October 2026) notes windows of "1 million or more tokens", advises putting the query at the end, as this series places layer 06, the user instruction, and warns that accuracy is lower when several pieces of information must be found. A window that holds a document does not guarantee the model uses all of it ([post 06](../06-context-failure-modes/index.md)).
+
+**Caching makes it affordable.** A document unchanged across a session goes at the front of layer 04, so the prefix up to and including it is identical on every call and can be cached ([post 05](../05-economics-of-context/index.md)). On Claude Sonnet 4.5 at 3 dollars per million input tokens as of early 2026 (Anthropic, "Pricing" and "Prompt caching", consulted October 2026), a five-minute cache write costs 1.25 times the input price and a read 0.1 times, the rate for most models. For the contract at an illustrative 500 tokens a page, 25,000 tokens, the first call pays $25{,}000 \times 3 \times 1.25 / 10^6 = 0.09375$ dollars for the document and each later read $25{,}000 \times 3 \times 0.1 / 10^6 = 0.0075$, against 0.075 uncached.
+
+**When to use it.** The questions need whole documents, the document fits with room to spare, and it is asked about often enough to stay cached; many documents each asked about once get no cache reads.
+
+---
+
+## 7. The router
+
+The router picks one retriever per question, with hybrid RAG as the fall-through. Its classifier is rules where the shapes are crisp, or a small model call with a rubric (one line and one example per route) where they are not. The snippet `snippets/router.py` is the rule version:
+
+```python
+RULES = [  # (shape, pattern), checked in this order; the first match wins
+    ("rare exact term", r"\b[A-Z]{1,4}-?\d{3,}\b"),
+    ("structured", r"(?i)\b(how many|average|total|count of|per region|per month)\b"),
+    ("multi-hop", r"(?i)\b(downstream|upstream|depend on|maintained by|who manages|managed by)\b"),
+    ("whole document", r"(?i)\b(summari[sz]e|main themes|key risks|whole|from start to end)\b"),
+]
+```
+
+It routes fifteen labelled questions, three per shape and three ordinary lookups, and ends:
+
+```text
+15  local lookup      text-to-SQL        How many days of notice does the termination clause require?   <- misrouted
+
+routed as labelled: 14 of 15
+questions per route: late interaction 3, text-to-SQL 4, GraphRAG 3, long-context load 3, hybrid RAG 2
+```
+
+"How many" signals a count over rows in questions 7 and 9, but in question 15 it asks for one number in one clause, a local lookup. The rules were written with these questions in view, so 14 of 15 overstates their accuracy on new traffic. A router is evaluated like any component ([post 20](../20-evaluation/index.md)): labelled real questions, routing accuracy, and each misroute read.
+
+A wrong route costs more than a weaker answer: a count sent to vector search returns a confident number from whatever rows were retrieved, and a multi-hop question sent to the default returns "I could not find that" with the answer one hop away.
+
+---
+
+## 8. Estimating the overhead before committing
+
+Each cost's order of magnitude can be estimated before anything is built. The snippet `snippets/route_costs.py` uses cited rates (Claude Sonnet 4.5 at 3 dollars per million input tokens and 15 per million output, as of early 2026; section 6's cache multipliers; 256 and 36 bytes per ColBERT and ColBERTv2 vector; GraphRAG's chunking) and the snippet's illustrative sizes, with a 1,000,000-token corpus. It prices only the retrieved material and the calls a route adds:
+
+```text
+dollars per question, retrieved material only (Claude Sonnet 4.5, as of early 2026)
+  hybrid RAG     2,000 tokens        0.00600
+  long context   25,000 tokens       uncached 0.07500, write 0.09375, read 0.00750
+  text-to-SQL    one call 0.00870, with a repair 0.01740; full schema 0.09000
+  10 questions   RAG 0.06000; long context uncached 0.75000, cached 0.16125
+offline, 1,000,000-token corpus
+  GraphRAG       2,000 extraction calls, 18.60 dollars (summaries not included)
+  index          per chunk 7.68 MB; per token: ColBERT 256 MB (33.3 times), ColBERTv2 36 MB (4.7 times)
+```
+
+The figure below lays the routes side by side.
+
+![A table of five routes, offline work and cost per question at illustrative sizes: hybrid RAG 7.68 MB, 0.006 dollars; GraphRAG 18.60 dollars of extraction; late interaction 256 MB or 36 MB; text-to-SQL 0.0087 dollars a call; long context 0.075 dollars uncached, 0.0075 cached.](diagrams/03-route-costs.svg)
+
+*Every number is computed at stated sizes; whether a cost falls offline or on every question is what carries over to a real system.*
+
+Uncached, the long-context route costs most per question; cached, a ten-question session costs 0.16125 dollars against 0.06 for RAG and 0.75 uncached. Text-to-SQL is cheap only with schema retrieval: the full schema alone costs more per call than the uncached contract. And the offline costs differ in kind: GraphRAG's is model calls, repeated as the corpus changes; late interaction's is storage, 33 times the single-vector index, or about 5 times compressed.
+
+---
+
+## 9. The shape of a production retrieval stack
+
+A stack that serves all four shapes, in the order it is built:
+
+| Stage | Built from | Serves |
 |---|---|---|
-| Router | LLM classifier (small) | Picks the pipeline |
-| Standard RAG | Hybrid (dense embeddings + BM25 keyword scoring + metadata filter) → cross-encoder rerank → packed with citations | Default |
+| Default | Hybrid retrieval, RRF, reranking, citations | Every question no route claims |
+| Evaluation | A golden set per route and a routing set | Every change, as a regression gate |
+| Router | Rules or a small model call | Picks the route |
+| Text-to-SQL | Schema retrieval, generation, validation, read-only run | Structured questions |
+| Long-context load | A long-context model and prompt caching | Whole-document questions |
+| GraphRAG | Extraction, a graph, a bounded walk | Multi-hop and global questions |
+| Late interaction | A per-token index (ColBERTv2 with PLAID) | Rare exact terms |
 
-(BM25 is the classic keyword-ranking function that scores documents by term frequency and rarity; it and the dense/cross-encoder terms are introduced in [Post 09](../09-select-strategies/index.md).)
-| GraphRAG | Entity extraction → knowledge graph → traversal | Multi-hop questions |
-| Text-to-SQL | Schema retrieval → SQL generation → validation → read-only execution | Structured queries |
-| Long-context | Long-context model + prompt caching | Whole-document queries |
-| Eval harness | Gold question set per pipeline | Regression gate in CI |
+Routes are added in the order the unanswered questions demand, cheapest first. Every route writes into layer 04, so post 09's packing rules (budget, bookend order, citation headers) apply to rows, subgraphs and documents too.
 
-The total picture is more elaborate than vanilla RAG; the gain over vanilla RAG on a real production workload is usually large. Build it incrementally: vanilla first, eval harness, then add the routes one at a time as the unanswered-questions metric tells you which route is missing.
+---
+
+## 10. Make it run
+
+The four snippets use the standard library only and each runs from the series root in under a second:
+
+```text
+uv run python posts/17-advanced-retrieval/snippets/two_hop.py
+uv run python posts/17-advanced-retrieval/snippets/maxsim.py
+uv run python posts/17-advanced-retrieval/snippets/router.py
+uv run python posts/17-advanced-retrieval/snippets/route_costs.py
+```
+
+Adding a question to `QUESTIONS` in `router.py`, or changing a size in `route_costs.py`, shows which route or cost moves.
+
+---
+
+## 11. What can go wrong?
+
+- **GraphRAG over a flat corpus.** Independent FAQ pages are built into a graph with few relations that questions follow; the answers match the default's.
+- **An unbounded walk.** Hop depth is left open "to be safe"; layer 04 fills with unasked relations and answers drift.
+- **Late interaction before chunking is fixed.** A per-token index is built for questions whose answer was split across two chunks; storage grows by an order of magnitude and the fact is still split.
+- **A schema dump and write access.** The whole schema goes into every prompt, the model picks plausible wrong tables, and the query runs as a user that could drop one.
+- **Long context without a stable prefix.** A timestamp or the question sits before the document, the prefix changes on every call, and every question pays the cache write.
 
 ---
 
 ## Common pitfalls
 
-- **Reaching for advanced techniques before standard RAG is well-tuned.** Most "we need GraphRAG" reflexes come from skipping reranking.
-- **No router.** Each pipeline is built; the wrong one runs half the time.
-- **GraphRAG on a flat corpus.** The graph is a wiring diagram with no signal.
-- **Text-to-SQL with write access.** Defence in depth missing.
-- **Long-context without caching.** Every repeat query re-pays for the full document, so the bill balloons.
-- **No per-pipeline eval set.** There is no way to tell which technique is helping.
+1. **Reaching for an advanced technique before the default is tuned.** A "we need GraphRAG" request can be a missing reranker or a poor chunker.
+2. **No router.** Three pipelines get built and each question still goes to the default.
+3. **Sending table questions to a vector index.** A count needs a database query, not the nearest rows.
+4. **Long context without caching.** Every repeat question pays for the whole document again.
+5. **One score for every route.** A drop cannot be traced to the router or to one route without a labelled set per route.
 
 ---
 
 ## Further reading
 
-- Edge, D. *et al.*, *"From Local to Global: A Graph RAG Approach to Query-Focused Summarization"* (Microsoft Research, 2024): the GraphRAG paper.
-- Khattab, O. & Zaharia, M., *"ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT"* (2020): the late-interaction / MaxSim formulation.
-- Santhanam, K. *et al.*, *"ColBERTv2: Effective and Efficient Retrieval via Lightweight Late Interaction"* (2022): compression plus the PLAID engine.
-- Clavié, B., *"JaColBERT and Hard Negatives"* (2023): a practical ColBERT variant at scale.
-- Pourreza, M. & Rafiei, D., *"DIN-SQL: Decomposed In-Context Learning of Text-to-SQL with Self-Correction"* (2023).
-- Anthropic, *"Prompt caching"* (documentation, 2024–25): the cache-read discount used by the long-context route.
-- Anthropic Engineering, *"Long context prompting for Claude 2.1"* (2023): early long-context routing guidance; the mechanics still apply to current 200k–1M-token models.
+- Edge, D. *et al.*, *"From Local to Global: A Graph RAG Approach to Query-Focused Summarization"* (Microsoft Research, arXiv 2024, v2 2025).
+- Khattab, O. and Zaharia, M., *"ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT"* (SIGIR 2020).
+- Santhanam, K. *et al.*, *"ColBERTv2: Effective and Efficient Retrieval via Lightweight Late Interaction"* (NAACL 2022), and *"PLAID: An Efficient Engine for Late Interaction Retrieval"* (CIKM 2022).
+- Pourreza, M. and Rafiei, D., *"DIN-SQL: Decomposed In-Context Learning of Text-to-SQL with Self-Correction"* (NeurIPS 2023).
+- Google, *"Long context"* (Gemini API documentation, consulted October 2026).
+- Anthropic, *"Long context prompting for Claude 2.1"* (December 2023): one sentence added to the start of the answer raised a needle-in-a-haystack score from 27% to 98%.
+- Asai, A. *et al.*, *"Self-RAG"* (2023), and Yan, S.-Q. *et al.*, *"Corrective Retrieval Augmented Generation"* (2024).
 
-Full citations in [REFERENCES.md](../../REFERENCES.md).
+Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
 ---
 
 ## What to read next
 
-- **[Post 25 — Long context vs RAG](../25-long-context-vs-rag/index.md)**: making the long-context route affordable, when the router gets to choose "just send the whole document", and when to fall back to RAG.
-- **[Post 20 — Evaluation](../20-evaluation/index.md)**: the per-pipeline eval harness.
-- **[Post 11 — RAG in depth](../11-rag-in-depth/index.md)** (back): the vanilla pipeline and the query-side patterns (rewriting, HyDE, multi-query) these techniques build on.
+- **[Post 18 - Context for reasoning models](../18-reasoning-model-context/index.md):** how thinking tokens change the budget that every route here fills.
+- **[Post 25 - Long context vs. RAG: a decision framework](../25-long-context-vs-rag/index.md):** the long-context route of section 6 grown into a full decision, with the benchmarks behind it.

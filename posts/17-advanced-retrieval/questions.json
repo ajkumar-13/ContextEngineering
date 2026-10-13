@@ -1,0 +1,790 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-017",
+  "next_ordinal": 18,
+  "questions": [
+    {
+      "id": "ctx-017-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "question-shapes",
+        "structured-data"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A support analytics assistant is asked: \"What was the average refund amount per region in 2025?\" Which shape of question is this, in the sense of the four ceilings of hybrid RAG?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Multi-hop: the answer joins facts from several documents.",
+          "correct": false,
+          "feedback": "No relation has to be followed from one document to another; the question asks for a number computed over many records."
+        },
+        {
+          "key": "b",
+          "text": "Structured data: the answer is computed over rows in a table.",
+          "correct": true,
+          "feedback": "Right. An average per region is an aggregate over rows; it is computed by a database query, not found in a passage."
+        },
+        {
+          "key": "c",
+          "text": "Whole document: the answer needs every page of one document.",
+          "correct": false,
+          "feedback": "The data is not one document to be read end to end; it is a set of records to be aggregated."
+        },
+        {
+          "key": "d",
+          "text": "Rare exact term: the answer hinges on one identifier the embedding model has not seen.",
+          "correct": false,
+          "feedback": "The question contains no rare identifier; \"refund\", \"region\" and \"2025\" are ordinary words and a year."
+        }
+      ],
+      "explanation": "Section 2: a structured-data question is answered by computing over rows, here an average grouped by region. Retrieving the nearest rows cannot guarantee every qualifying row is included, so the route is text-to-SQL.",
+      "hints": [
+        "Ask whether the answer is written anywhere, or has to be computed."
+      ]
+    },
+    {
+      "id": "ctx-017-q02",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1",
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 4,
+      "tags": [
+        "question-shapes",
+        "techniques"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each question to the technique that serves its shape. One technique on the right matches no question.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Which services depend on libraries maintained by the team that left in March?"
+        },
+        {
+          "key": "b",
+          "text": "Summarise how the tone of this 80-page report changes from start to end."
+        },
+        {
+          "key": "c",
+          "text": "How many enterprise customers in EMEA churned last quarter?"
+        },
+        {
+          "key": "d",
+          "text": "Which firmware fixes the fault on part AX-7731?"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "GraphRAG"
+        },
+        {
+          "key": "b",
+          "text": "Long-context load"
+        },
+        {
+          "key": "c",
+          "text": "Text-to-SQL"
+        },
+        {
+          "key": "d",
+          "text": "Late interaction"
+        },
+        {
+          "key": "e",
+          "text": "HyDE query rewriting"
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "c",
+        "d": "d"
+      },
+      "explanation": "Section 2's table: a chain from team to libraries to services is multi-hop (GraphRAG); a change across a whole report needs the whole document (long-context load); a count over customers is structured (text-to-SQL); a part number the embedding model never learned is a rare exact term (late interaction). HyDE is a query-side pattern from post 09 and serves none of the four ceilings.",
+      "hints": [
+        "For each question, ask what unit the answer is made of: a path, a whole document, rows, or one token."
+      ]
+    },
+    {
+      "id": "ctx-017-q03",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "graphrag",
+        "decomposition",
+        "multi-hop"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A team sees one multi-hop question fail: \"Who buys from the vendors that failed the 2024 audit?\" It is asked a few times a month, the audit report names the vendors, and no other relation questions appear in the logs. What is the cheapest fix that answers it?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Build a knowledge graph of the whole corpus and walk it one hop from the vendors.",
+          "correct": false,
+          "feedback": "It works, but it buys a model call per chunk for one rare question; a graph pays where the same relations are asked about repeatedly."
+        },
+        {
+          "key": "b",
+          "text": "Retrieve once, read the vendor names from the audit report, and retrieve again with them.",
+          "correct": true,
+          "feedback": "Right. One bridge needs no graph: this two-step retrieval, post 09's decomposition, found both buyers in the post's toy run."
+        },
+        {
+          "key": "c",
+          "text": "Raise top-k from 3 to 10 so the buyer documents make it into the window.",
+          "correct": false,
+          "feedback": "The buyer documents share no word with the question, so they score nothing; a larger k packs more unrelated documents, not them."
+        },
+        {
+          "key": "d",
+          "text": "Switch the dense retriever to a late-interaction model.",
+          "correct": false,
+          "feedback": "Late interaction sharpens token matches; the buyer documents still contain none of the question's tokens."
+        }
+      ],
+      "explanation": "Section 3 runs three strategies on the toy corpus: single hop finds neither buyer, while both the two-step run and the graph find both. For one bridge asked rarely, the two-step query is the cheaper fix; the graph earns its build cost when the same kinds of relation are asked about again and again.",
+      "hints": [
+        "Count what each fix costs before the first question and on each question.",
+        "Ask whether the second fact can be reached by a second query built from the first answer."
+      ]
+    },
+    {
+      "id": "ctx-017-q04",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 5,
+      "tags": [
+        "maxsim",
+        "late-interaction"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A two-token query is scored against two documents of three tokens each. The cosine similarities (rows: query tokens 1 and 2; columns: document tokens 1 to 3) are: document X, row 1: 0.2, 0.9, 0.1; row 2: 0.3, 0.4, 0.6. Document Y, row 1: 0.6, 0.6, 0.5; row 2: 0.5, 0.5, 0.4. Compute the MaxSim score of each document.",
+      "answer": {
+        "parts": [
+          {
+            "label": "MaxSim of X",
+            "value": 1.5,
+            "tolerance": 0.005,
+            "unit": ""
+          },
+          {
+            "label": "MaxSim of Y",
+            "value": 1.1,
+            "tolerance": 0.005,
+            "unit": ""
+          }
+        ]
+      },
+      "precision_note": "MaxSim = sum over query tokens of the row maximum: X = 0.9 + 0.6 = 1.5; Y = 0.6 + 0.5 = 1.1, as maxsim() in snippets/maxsim.py computes it. Taking the largest column sum instead gives 1.3 for X.",
+      "explanation": "Section 4: for each query token take its highest similarity to any document token, then add. X wins 1.5 to 1.1 although Y's similarities are higher on average (0.52 against 0.42): MaxSim rewards one strong match per query token, which is how a single exact match on a rare term survives.",
+      "hints": [
+        "Work row by row: one maximum per query token.",
+        "Add the two row maxima for each document."
+      ]
+    },
+    {
+      "id": "ctx-017-q05",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "late-interaction",
+        "pooling"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In one sentence: why can a single-vector retriever rank a generic chunk above a chunk that contains the query's rare identifier?",
+      "answer": {
+        "model": "Because the chunk is pooled into one vector, the strong match on the one rare token is averaged with all the chunk's other tokens and diluted, so a chunk that matches the query's common words scores higher.",
+        "accept": [
+          "^(?=(?:\\S+\\s+){4}\\S)(?![\\s\\S]*\\b(rare|identifier|e-4012)\\b[^.;]{0,30}\\b(dominat\\w*|stands? out|wins?)\\b)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\b(maxsim|late[- ]interaction|colbert)\\b[^.;]{0,40}\\b(averag\\w*|pool\\w*|dilut\\w*|wash\\w*)\\b)(?![\\s\\S]*\\b(does not|doesn'?t|do not|don'?t|never|isn'?t|is not|aren'?t|are not|not|without|cannot|can'?t|won'?t)\\b[^.;]{0,15}\\b(pool\\w*|averag\\w*|dilut\\w*|wash\\w*|los[et]\\w*|mean)\\b)(?![\\s\\S]*\\b(keeps|preserves|retains) (every|each|all)\\b)(?=[\\s\\S]*\\b(pool\\w*|averag\\w*|mean(ed|s)?\\b|one vector|single vector|one embedding|single embedding|compress\\w*|collaps\\w*|squash\\w*|summed)\\b)(?=[\\s\\S]*\\b(dilut\\w*|wash\\w*|drown\\w*|swamp\\w*|outweigh\\w*|lost|loses?|hidden|hides?|hide|blur\\w*|smear\\w*|overwhelm\\w*|outnumber\\w*|small share|counts? (for )?little|other (words|tokens)|rest of the (chunk|tokens|words)|common words|generic words|many other|away)\\b)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 4: a bi-encoder pools the whole chunk into one vector, which averages away which token matched which. In the toy run chunk B, which matches \"fix\" and \"error\", beats chunk A, which holds E-4012, 0.55 to 0.51; MaxSim, which keeps every token's best match, reverses the order.",
+      "hints": [
+        "Think about what happens to one token's contribution when a whole chunk becomes one vector."
+      ]
+    },
+    {
+      "id": "ctx-017-q06",
+      "type": "mcq",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "maxsim",
+        "formula"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "With query token vectors $\\mathbf{q}_i$ and document token vectors $\\mathbf{d}_j$, which expression is ColBERT's MaxSim score?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "$\\sum_i \\max_j \\mathbf{q}_i \\cdot \\mathbf{d}_j$",
+          "correct": true,
+          "feedback": "Right: each query token keeps its best match anywhere in the document, and the maxima are summed over the query."
+        },
+        {
+          "key": "b",
+          "text": "$\\max_j \\sum_i \\mathbf{q}_i \\cdot \\mathbf{d}_j$",
+          "correct": false,
+          "feedback": "This picks the single document token that best matches the whole query; one token cannot match \"fix\", \"error\" and an identifier at once."
+        },
+        {
+          "key": "c",
+          "text": "$\\sum_j \\max_i \\mathbf{q}_i \\cdot \\mathbf{d}_j$",
+          "correct": false,
+          "feedback": "This sums over document tokens, so a long document gains score just by being long, whatever the query asks."
+        },
+        {
+          "key": "d",
+          "text": "$\\bar{\\mathbf{q}} \\cdot \\bar{\\mathbf{d}}$, the product of the two mean vectors",
+          "correct": false,
+          "feedback": "That is the pooled single-vector score that late interaction replaces; it is what washes out a rare-term match."
+        }
+      ],
+      "explanation": "Section 4 and the notation guide: $s(q, d) = \\sum_i \\max_j \\mathbf{q}_i \\cdot \\mathbf{d}_j$. The maximum is taken per query token over the document's tokens, and the sum runs over the query, so the score has one term per query token.",
+      "hints": [
+        "How many terms should the score have: one per query token, or one per document token?"
+      ]
+    },
+    {
+      "id": "ctx-017-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 6,
+      "tags": [
+        "long-context",
+        "prompt-caching",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A 40,000-token contract is loaded whole for a session of 8 questions on Claude Sonnet 4.5 at 3 dollars per million input tokens (as of early 2026). A five-minute cache write costs 1.25 times the input price and a cache read 0.1 times. All 8 questions arrive within the cache lifetime. Counting only the document's tokens, what does the session cost without caching, and with caching (the first call writes, the other 7 read)?",
+      "answer": {
+        "parts": [
+          {
+            "label": "without caching",
+            "value": 0.96,
+            "tolerance": 0.0005,
+            "unit": "dollars"
+          },
+          {
+            "label": "with caching",
+            "value": 0.234,
+            "tolerance": 0.005,
+            "unit": "dollars"
+          }
+        ]
+      },
+      "precision_note": "Uncached: 8 x 40,000 x 3 / 10^6 = 0.96. Cached: 40,000 x 3 x 1.25 / 10^6 = 0.15 for the write, plus 7 x 40,000 x 3 x 0.1 / 10^6 = 0.084 for the reads, 0.234 in all; the arithmetic of dollars() in snippets/route_costs.py. Forgetting the write premium gives 0.204, and eight reads 0.246; 0.23, rounded to cents, is accepted.",
+      "explanation": "Section 6: the first call pays the write premium on the whole document and every later call within the lifetime pays a tenth of the input price for it. Caching cuts this session's document cost by about three quarters, which is what makes the long-context route affordable for a document asked about repeatedly.",
+      "hints": [
+        "Price one uncached call of the document first.",
+        "The cached session is one write at 1.25 times plus seven reads at 0.1 times."
+      ]
+    },
+    {
+      "id": "ctx-017-q08",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "8",
+      "est_minutes": 6,
+      "tags": [
+        "late-interaction",
+        "index-size",
+        "colbert"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A corpus of 2,000,000 tokens is indexed two ways. Single-vector: 500-token chunks, one 768-dimension vector per chunk at 4 bytes per dimension. Late interaction: one vector per token, at 256 bytes per vector (ColBERT) or 36 bytes (ColBERTv2 with 2-bit residuals). Using 1 MB = 1,000,000 bytes, how large is the ColBERT index, the ColBERTv2 index, and how many times larger is the ColBERT index than the single-vector one?",
+      "answer": {
+        "parts": [
+          {
+            "label": "ColBERT index",
+            "value": 512,
+            "tolerance": 0.5,
+            "unit": "MB"
+          },
+          {
+            "label": "ColBERTv2 index",
+            "value": 72,
+            "tolerance": 0.5,
+            "unit": "MB"
+          },
+          {
+            "label": "ColBERT over single-vector",
+            "value": 41.67,
+            "tolerance": 0.4,
+            "unit": "times"
+          }
+        ]
+      },
+      "precision_note": "ColBERT: 2,000,000 x 256 = 512,000,000 bytes, 512 MB. ColBERTv2: 2,000,000 x 36 = 72 MB. Single-vector: 4,000 chunks x 768 x 4 = 12,288,000 bytes, 12.288 MB; 512 / 12.288 = 41.67. The same arithmetic as snippets/route_costs.py with these sizes. Comparing ColBERTv2 instead gives 5.86, and reading 'times larger' as 'larger by' 40.67; 42 is accepted.",
+      "explanation": "Section 8: late interaction stores one vector per token rather than per chunk, so its index grows with the token count; compression narrows the gap (here from about 42 times to about 6) without closing it. The per-vector byte counts are the ones Santhanam et al. (2022) give.",
+      "hints": [
+        "Count vectors first: one per token for late interaction, one per chunk for the single-vector index.",
+        "Multiply by the bytes per vector, then divide the two sizes."
+      ]
+    },
+    {
+      "id": "ctx-017-q09",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 10,
+      "tags": [
+        "router",
+        "rules",
+        "regex"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "`route` should return the technique of the first rule in `RULES` whose pattern matches the question, and `DEFAULT` when none matches. The starter lets a later rule override an earlier one, so \"How many tickets mention error E-4012?\" goes to text-to-SQL instead of late interaction. Fix it without changing `RULES`.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "import re\n\nRULES = [  # (technique, pattern), checked in this order; the first match wins\n    (\"late interaction\", r\"\\b[A-Z]{1,4}-?\\d{3,}\\b\"),\n    (\"text-to-SQL\", r\"(?i)\\b(how many|average|total)\\b\"),\n    (\"GraphRAG\", r\"(?i)\\b(downstream|depend on|managed by)\\b\"),\n    (\"long-context load\", r\"(?i)\\b(summari[sz]e|main themes|whole)\\b\"),\n]\nDEFAULT = \"hybrid RAG\"\n\n\ndef route(question):\n    \"\"\"The technique of the first rule in RULES whose pattern matches the question, or DEFAULT if none does.\"\"\"\n    chosen = DEFAULT\n    for technique, pattern in RULES:\n        if re.search(pattern, question):\n            chosen = technique\n    return chosen\n",
+      "solution": "import re\n\nRULES = [  # (technique, pattern), checked in this order; the first match wins\n    (\"late interaction\", r\"\\b[A-Z]{1,4}-?\\d{3,}\\b\"),\n    (\"text-to-SQL\", r\"(?i)\\b(how many|average|total)\\b\"),\n    (\"GraphRAG\", r\"(?i)\\b(downstream|depend on|managed by)\\b\"),\n    (\"long-context load\", r\"(?i)\\b(summari[sz]e|main themes|whole)\\b\"),\n]\nDEFAULT = \"hybrid RAG\"\n\n\ndef route(question):\n    \"\"\"The technique of the first rule in RULES whose pattern matches the question, or DEFAULT if none does.\"\"\"\n    for technique, pattern in RULES:\n        if re.search(pattern, question):\n            return technique\n    return DEFAULT\n",
+      "tests": "# One rule matches: its technique.\nassert route(\"Which suppliers are downstream of the failed vendors?\") == \"GraphRAG\"\nassert route(\"Summarise the main themes of this filing.\") == \"long-context load\"\nassert route(\"What was the average refund per region?\") == \"text-to-SQL\"\n\n# No rule matches: the default.\nassert route(\"How do I reset my password?\") == \"hybrid RAG\"\n\n# Two rules match: the earlier rule wins.\nassert route(\"How many tickets mention error E-4012?\") == \"late interaction\"\nassert route(\"Summarise the total spend downstream of each vendor.\") == \"text-to-SQL\"\nfor n in range(100, 105):\n    assert route(\"What is the total for order SKU-%d?\" % n) == \"late interaction\", n\n\n# The order comes from RULES, not from the function body.\nRULES.insert(0, (\"GraphRAG\", r\"(?i)\\bhow many\\b\"))\ntry:\n    assert route(\"How many tickets mention error E-4012?\") == \"GraphRAG\"\nfinally:\n    RULES.pop(0)\nassert route(\"How many tickets mention error E-4012?\") == \"late interaction\"\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 7: a rule router checks its rules in a fixed order and the first match wins, with hybrid RAG as the fall-through. The starter keeps overwriting its choice, so the last match wins; returning at the first match restores the order the rules were written in, and the order stays a property of `RULES`, which the tests check by inserting a rule.",
+      "hints": [
+        "Trace the starter on a question that two rules match.",
+        "Stop at the first match instead of remembering the last one."
+      ]
+    },
+    {
+      "id": "ctx-017-q10",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "9",
+      "est_minutes": 3,
+      "tags": [
+        "retrieval-stack",
+        "build-order"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the steps of building a retrieval stack that serves all four shapes in the order the post recommends.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Add, one at a time, the route the unanswered questions most demand"
+        },
+        {
+          "key": "b",
+          "text": "Ship hybrid RAG with reranking and citations as the default"
+        },
+        {
+          "key": "c",
+          "text": "Put a router in front of the retrievers"
+        },
+        {
+          "key": "d",
+          "text": "Build a golden set per route and a labelled routing set"
+        }
+      ],
+      "answer": [
+        "b",
+        "d",
+        "c",
+        "a"
+      ],
+      "explanation": "Section 9: the default and its golden set come first, because nothing can be shown to help without them; then the router; then the routes, added in the order the unanswered questions demand, cheapest first.",
+      "hints": [
+        "Which step makes every later change measurable?"
+      ]
+    },
+    {
+      "id": "ctx-017-q11",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 4,
+      "outcomes": [
+        "o5",
+        "o2"
+      ],
+      "section": "7",
+      "est_minutes": 15,
+      "tags": [
+        "router",
+        "design"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A legal team's assistant has three sources: about 3,000 contracts as text, a matters database (client, matter type, open and close dates, fees), and a clause library where clauses are cited by ids such as CL-2291. Design its router: name the routes, say how each kind of question is recognised and where it goes, what the fall-through is, and how the router itself is evaluated. Give one example question per route.",
+      "kind": "design",
+      "answer_length": "half a page",
+      "solution": "**Routes.** (1) Text-to-SQL over the matters database for counts, sums and filters (\"How many employment matters closed in 2025?\"), with schema retrieval, validation and a read-only user. (2) Late interaction, or at least an exact-match index, for questions that cite a clause id (\"Which contracts use CL-2291?\"), recognised by an identifier pattern. (3) Long-context load for whole-contract questions (\"Summarise the risks in the Hartley supply agreement\"), with the contract cached at the front of layer 04 while it is being discussed. (4) GraphRAG only if relation questions recur (\"Which clients share a guarantor with Hartley?\"); otherwise a two-step query. (5) Hybrid RAG as the fall-through for local lookups (\"What notice period does the Hartley agreement give?\").\n\n**Recognition.** Rules where shapes are crisp (an identifier pattern, aggregate words), a small model call with a rubric of one line and one example per route for the rest; rules first, the model call when no rule fires or two disagree. \"How many days of notice\" is a known trap: a count word in a local lookup.\n\n**Evaluation.** A labelled set of real questions with the route each should take; routing accuracy on it; misroutes read one by one; plus a golden set per route so a drop can be traced to the router or to one route (post 20).",
+      "rubric": [
+        {
+          "criterion": "Routes structured questions to text-to-SQL with schema retrieval and a read-only user",
+          "points": 2
+        },
+        {
+          "criterion": "Routes clause-id questions by an identifier rule to an exact or late-interaction index",
+          "points": 2
+        },
+        {
+          "criterion": "Routes whole-contract questions to a long-context load with caching",
+          "points": 2
+        },
+        {
+          "criterion": "Keeps hybrid RAG as the fall-through and treats GraphRAG as justified only by recurring relation questions",
+          "points": 2
+        },
+        {
+          "criterion": "Evaluates the router on a labelled set, reads misroutes, and keeps a golden set per route",
+          "points": 2
+        }
+      ],
+      "explanation": "Sections 2 to 7: each shape has a technique, the router recognises shapes by rules or a rubric-driven model call with hybrid RAG as the default, and the router is evaluated like any component, on labelled questions with its misroutes read.",
+      "hints": [
+        "Start from the four ceilings and ask which of the three sources each one touches.",
+        "Decide what happens to a question no rule claims, and how a misroute would be noticed."
+      ]
+    },
+    {
+      "id": "ctx-017-q12",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o2",
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 12,
+      "tags": [
+        "long-context",
+        "rag",
+        "cost",
+        "caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Two workloads: (1) analysts ask about 20 questions each about one 30,000-token annual report, within an hour; (2) an assistant answers one question each about 5,000 different 30,000-token reports a day. For each, choose long-context loading or hybrid RAG, and justify the choice with the cache rule of post 05 and the cost arithmetic of this post (Claude Sonnet 4.5, 3 dollars per million input tokens as of early 2026, write 1.25 times, read 0.1 times, five-minute lifetime).",
+      "connects": [
+        "ctx-005",
+        "ctx-025"
+      ],
+      "kind": "compare",
+      "answer_length": "half a page",
+      "solution": "**Workload 1: long-context load, cached.** The report is the same across the analyst's questions, so it goes at the front of layer 04 and the prefix through it can be cached, provided the questions keep arriving within the five-minute lifetime (each read refreshes it). The document costs 30,000 x 3 x 1.25 / 10^6 = 0.1125 dollars on the first call and 30,000 x 3 x 0.1 / 10^6 = 0.009 dollars on each of the other 19, about 0.28 dollars for the session, against 1.80 dollars uncached; and the questions that need the whole report (\"summarise the risks\") get it. A router can still send narrow lookups to RAG, but the cached document is already cheap.\n\n**Workload 2: hybrid RAG.** Each report is asked about once, so no cache read ever happens and every call pays for 30,000 tokens, 0.09 dollars uncached or 0.1125 with a pointless write, against 0.006 dollars for five 400-token chunks; and a question that needs one paragraph does not need 30 pages. Questions that truly need a whole report are the exception and can be routed. Post 25 makes the general case: long context wins when the corpus fits and is stable enough to cache; retrieval wins when documents are many and each is touched rarely.",
+      "rubric": [
+        {
+          "criterion": "Chooses a cached long-context load for workload 1 and explains why the prefix stays cached",
+          "points": 3
+        },
+        {
+          "criterion": "Computes the session cost of workload 1 with the write and the reads (about 0.28 dollars against 1.80 uncached)",
+          "points": 2
+        },
+        {
+          "criterion": "Chooses hybrid RAG for workload 2 because no cache read ever happens",
+          "points": 3
+        },
+        {
+          "criterion": "Notes that question type still matters, so a router can send the exceptions elsewhere",
+          "points": 1
+        }
+      ],
+      "explanation": "Section 6: caching makes the long-context route affordable only when the same document is read repeatedly within the cache lifetime; post 05 states the identical-prefix rule and the multipliers, and post 25 generalises the choice between long context and retrieval.",
+      "hints": [
+        "For each workload, ask how many times the same document is read within five minutes.",
+        "Price one write and the reads that follow it, and compare with five chunks per question."
+      ]
+    },
+    {
+      "id": "ctx-017-q13",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "11",
+      "est_minutes": 4,
+      "tags": [
+        "prompt-caching",
+        "long-context",
+        "debugging"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A long-context route loads a 25,000-token contract per session with prompt caching enabled. The bill matches the cache-write price on every call, never the read price. The request is assembled as: system prompt, then a line \"Current time: 10:42:07\", then the contract, then the question. What is the cause?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The timestamp sits before the contract, so the prefix differs on every call and the cache is never read.",
+          "correct": true,
+          "feedback": "Right. A cache read needs an identical prefix; a value that changes per call placed before the document breaks it, so each call writes again."
+        },
+        {
+          "key": "b",
+          "text": "The contract is too long to cache; prefixes above 20,000 tokens are always billed as writes.",
+          "correct": false,
+          "feedback": "Caching has a minimum length, not a maximum of this kind; a 25,000-token prefix is cacheable."
+        },
+        {
+          "key": "c",
+          "text": "The question comes last; it must come before the contract for the cache to hit.",
+          "correct": false,
+          "feedback": "The question changes every call, so placing it before the contract would break the prefix too; last is the right place for it."
+        },
+        {
+          "key": "d",
+          "text": "The five-minute lifetime is too short for any session.",
+          "correct": false,
+          "feedback": "Questions within the lifetime would read the cache, and each read refreshes it; the symptom is every call writing, which points to a changing prefix."
+        }
+      ],
+      "explanation": "Section 11 (long context without a stable prefix) and post 05's identical-prefix rule: the document must sit at the front of layer 04, unchanged, with nothing that varies per call before it. Moving the timestamp after the document, or into layer 06, restores the reads.",
+      "hints": [
+        "What must be identical between two calls for the second to read the cache?",
+        "Look for anything before the contract that changes from call to call."
+      ]
+    },
+    {
+      "id": "ctx-017-q14",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "router",
+        "misroute"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "The post's rule router sends \"How many days of notice does the termination clause require?\" to text-to-SQL. In one sentence, why is that the wrong route?",
+      "answer": {
+        "model": "The answer is a single number written in one clause of the contract, so it is a local lookup for hybrid RAG, not a count or aggregate computed over rows in a database.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(should|must|belongs?|goes|go|be sent|be routed)( still)? (go )?(to )?(the )?(text[- ]to[- ]sql|sql)\\b)(?![\\s\\S]*\\b(still|stays?|kept|keep)\\b[^.;]{0,30}\\b(text[- ]to[- ]sql|sql)\\b)(?![\\s\\S]*\\b(text[- ]to[- ]sql|sql) is (right|correct|fine)\\b)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\b(should|belongs?|goes|go|route\\w*|sen[dt]\\w*)\\b[^.;]{0,30}\\b(graph\\w*|long[- ]context|late[- ]interaction|whole[- ]document)\\b)(?![\\s\\S]*\\b(it is|it's|this is|that is) (a )?(count|aggregat\\w*|structured|sql)\\b)(?![\\s\\S]*\\b(route|answer|choice) is (right|correct|fine)\\b)(?=[\\s\\S]*\\b(clause|passage|paragraph|sentence|single (number|value|fact)|one (number|value|fact|place|spot)|written|stated|in the (contract|document|text)|local(ly)?( lookup)?|look(ed)?[- ]?up|hybrid rag|retriev\\w*|rag)\\b)(?=[\\s\\S]*\\b(not|no|isn'?t|aren'?t|rather than|instead of|nothing|needs no|without)\\b[^.;]{0,40}\\b(count\\w*|aggregat\\w*|rows?|tables?|databases?|sql|comput\\w*|records?|sum\\w*)\\b|[\\s\\S]*\\b(local lookup|look(ed)?[- ]?up)\\b)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 7: \"how many\" signals a count over rows in the structured questions, but here it asks for one value stated in one clause. The question's shape is a local lookup, which the default pipeline serves; the keyword rule mistakes the wording for the shape.",
+      "hints": [
+        "Ask whether the answer is computed over many records or written down in one place.",
+        "Separate the wording of the question from where its answer lives."
+      ]
+    },
+    {
+      "id": "ctx-017-q15",
+      "type": "mcq",
+      "track": "connect",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "graphrag",
+        "hop-depth",
+        "failure-modes"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A GraphRAG route walks four hops from each entity \"to be safe\". On the post's synthetic graph with four links per entity that reaches 308 entities, and answers start to wander off the question. Which failure mode of post 06 is this?",
+      "connects": [
+        "ctx-006"
+      ],
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Distraction: irrelevant material packed into layer 04 pulls the answer off course.",
+          "correct": true,
+          "feedback": "Right. Every entity reached brings its chunks into layer 04; relations nobody asked about crowd the window."
+        },
+        {
+          "key": "b",
+          "text": "Confusion: the right information handled under unclear rules.",
+          "correct": false,
+          "feedback": "Confusion is about unclear rules in layers 01 and 02; here the rules are fine and the window is full of irrelevant relations."
+        },
+        {
+          "key": "c",
+          "text": "Conflict: two parts of the window disagree.",
+          "correct": false,
+          "feedback": "Nothing in the symptom says two packed facts contradict each other; the problem is volume of irrelevant material."
+        },
+        {
+          "key": "d",
+          "text": "Tool-storm: too many tool calls in one turn.",
+          "correct": false,
+          "feedback": "No tools are involved; the walk is a retrieval step that fills layer 04."
+        }
+      ],
+      "explanation": "Section 3: each hop multiplies the entities reached by roughly the links per entity (4, 20, 82, 308 in the snippet), and every entity's source chunks enter layer 04. Post 06 names irrelevant material that pulls the answer off course distraction; the first fix is to bound the walk by the question's shape.",
+      "hints": [
+        "Ask what the extra hops put into the window, and whether it is relevant.",
+        "Rule out the modes caused by unclear rules, disagreeing facts or tool calls."
+      ]
+    },
+    {
+      "id": "ctx-017-q16",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 5,
+      "outcomes": [
+        "o2",
+        "o4"
+      ],
+      "section": "3",
+      "est_minutes": 15,
+      "tags": [
+        "graphrag",
+        "evidence",
+        "critique"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A proposal reads: \"Microsoft's GraphRAG paper shows graph retrieval beats vector RAG 72 to 83% of the time, so we should replace the vector index behind our FAQ bot, which answers short factual questions, with GraphRAG.\" Critique the argument: what did Edge et al. measure, on what questions and how, what does it imply for this bot, and what would have to be measured before switching?",
+      "kind": "critique",
+      "answer_length": "half a page",
+      "solution": "**What was measured.** Edge et al. (arXiv v2, 2025) compared global approaches built on community summaries with vector RAG on global sensemaking questions (\"what are the main themes?\") over corpora of about 1 million and 1.7 million tokens. 72 to 83% (podcasts) and 72 to 80% (news) are win rates for comprehensiveness in pairwise comparisons judged by a model, not accuracy, and diversity win rates were 75 to 82% and 62 to 71%. The same paper reports that vector RAG gave the most direct answers.\n\n**What it implies here.** An FAQ bot answers local factual questions, the shape vector RAG serves and the paper's metric does not favour; directness is closer to what such a bot needs. The graph also costs a model call per chunk to build (about 18.60 dollars per million tokens in the post's illustrative arithmetic, plus the summaries), repeated as the FAQ changes.\n\n**What to measure first.** Label a sample of real questions by shape; if multi-hop or global questions are a small share, route them (or use a two-step query) rather than replace the index. Then run a golden set per route and compare answer correctness, not a judge's preference on comprehensiveness.",
+      "rubric": [
+        {
+          "criterion": "States that the numbers are win rates on comprehensiveness (and diversity) judged pairwise by a model, on global questions",
+          "points": 3
+        },
+        {
+          "criterion": "Notes the paper's own finding that vector RAG gave the most direct answers",
+          "points": 2
+        },
+        {
+          "criterion": "Explains that an FAQ bot's questions are local lookups, a different shape",
+          "points": 2
+        },
+        {
+          "criterion": "Counts the build cost of extraction and summaries, repeated on change",
+          "points": 1
+        },
+        {
+          "criterion": "Proposes labelling question shapes and measuring per-route correctness before any switch",
+          "points": 2
+        }
+      ],
+      "explanation": "Section 3 quotes Edge et al.'s win rates with what they measure: comprehensiveness and diversity on global sensemaking questions, judged by a model, with vector RAG the most direct. A number measured on one question shape does not transfer to another; the router and per-route golden sets of sections 7 and 9 are how the decision is made.",
+      "hints": [
+        "Read the claim's number for its metric, its question type and its judge.",
+        "Ask which shape of question the FAQ bot actually gets, and what the paper says about directness."
+      ]
+    },
+    {
+      "id": "ctx-017-q17",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 2,
+      "tags": [
+        "text-to-sql",
+        "safety"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Why does the text-to-SQL route run its generated queries as a database user that cannot write?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "So that a query the model was tricked into writing, such as DROP TABLE, fails instead of changing data.",
+          "correct": true,
+          "feedback": "Right. The read-only user is defence in depth against text in the context steering the model to emit a harmful query."
+        },
+        {
+          "key": "b",
+          "text": "Because read-only queries run faster than writes.",
+          "correct": false,
+          "feedback": "Speed is not the reason; the role limits what a wrong or injected query can do."
+        },
+        {
+          "key": "c",
+          "text": "Because text-to-SQL can only generate SELECT statements.",
+          "correct": false,
+          "feedback": "A model can generate any SQL it is steered towards; that is exactly why the database role must forbid writes."
+        },
+        {
+          "key": "d",
+          "text": "So that the query result can be cached by the provider.",
+          "correct": false,
+          "feedback": "Prompt caching applies to the model's input prefix, not to database permissions."
+        }
+      ],
+      "explanation": "Section 5, practice 4: the query runs as a user that cannot write, so an injected `DROP TABLE` becomes an error. Post 23 covers prompt injection; the read-only role is the database half of the defence.",
+      "hints": [
+        "Ask what the worst query a manipulated model could emit would do."
+      ]
+    }
+  ]
+}

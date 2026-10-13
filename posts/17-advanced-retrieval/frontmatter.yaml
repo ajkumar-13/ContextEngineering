@@ -1,80 +1,26 @@
 id: ctx-017
 slug: 17-advanced-retrieval
-title: "17 · Advanced Retrieval"
-
-description: >
-  Go beyond standard RAG with advanced retrieval techniques including
-  GraphRAG, ColBERT late interaction, text-to-SQL, and long-context routing.
-  Learn how to build retrieval routers that select the optimal retrieval
-  strategy based on query type and corpus structure.
-
-author: "Ajay"
-
+title: "17 - Advanced retrieval"
+summary: "Which question shapes defeat hybrid RAG, and how GraphRAG, late interaction with MaxSim, text-to-SQL and long-context loading serve them, at what cost, behind a router."
 date: 2026-05-20
-last_modified: 2026-05-20
-
-tags:
-  - advanced-retrieval
-  - rag
-  - graphrag
-  - colbert
-  - text-to-sql
-  - retrieval-routing
-  - hybrid-rag
-  - vector-search
-  - ai-agents
-  - context-engineering
-
-category: Retrieval Engineering
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part III - Layers in depth"
-chapter: "Part III — Retrieval & Memory"
-
-hero: diagrams/00-hero-advanced-retrieval.svg
-hero_alt: "A query router dispatching requests to GraphRAG, SQL retrieval, ColBERT, long-context loading, and standard hybrid RAG"
-
-reading_time: 22
-
-toc: true
-draft: false
-
-keywords:
-  - Advanced Retrieval
-  - Retrieval Engineering
-  - Retrieval Augmented Generation
-  - RAG
-  - Hybrid RAG
-  - GraphRAG
-  - Microsoft GraphRAG
-  - Knowledge Graph
-  - Entity Extraction
-  - Graph Traversal
-  - Multi-hop Retrieval
-  - Multi-hop Reasoning
-  - ColBERT
-  - ColBERTv2
-  - Late Interaction
-  - MaxSim
-  - PLAID
-  - Dense Retrieval
-  - Cross Encoder
-  - Hybrid Search
-  - BM25
-  - Text-to-SQL
-  - SQL Generation
-  - Schema Retrieval
-  - Query Routing
-  - Retrieval Router
-  - Long Context
-  - Prompt Caching
-  - Whole Document Retrieval
-  - Semantic Search
-  - Vector Database
-  - Context Engineering
-  - AI Agents
-  - Production AI
-
-canonical_url: ""
-
-prev: ../16-memory-systems/
-next: ../18-context-evaluation/
+level: advanced
+reading_time: 15
+tags: [context-engineering, retrieval, graphrag, late-interaction, text-to-sql, long-context, routing]
+hero: diagrams/00-hero-router.svg
+prerequisites: [ctx-011]
+code: optional
+outcomes:
+  - id: o1
+    text: "Recognise the four question shapes that defeat hybrid RAG: multi-hop, whole document, structured data and rare exact terms."
+  - id: o2
+    text: "Pick GraphRAG, late interaction, text-to-SQL or long-context loading for each shape, and say why hybrid RAG fails there."
+  - id: o3
+    text: "Compute a MaxSim score from token similarities and explain why it keeps a rare-term match that one pooled vector loses."
+  - id: o4
+    text: "Estimate a technique's overhead before committing to it: offline build calls, index size, and tokens and dollars per question."
+  - id: o5
+    text: "Design a router that sends each question to its technique, with hybrid RAG as the default and a labelled set to catch misroutes."
+recommended: [ctx-016]
