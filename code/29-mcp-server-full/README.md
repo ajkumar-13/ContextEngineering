@@ -1,6 +1,6 @@
-# 23 · MCP Server — runnable companion
+# 29 - MCP Server: runnable companion
 
-A working Model Context Protocol server in ~150 lines. Exposes three tools (`search_orders`, `issue_refund`, `escalate_to_human`), one resource (`refunds_policy`), and one prompt (`triage_intake`). Implements the iron triangle of tool design and the four security defences from [Post 15](../../posts/15-tools-and-mcp/index.md) and [Post 23](../../posts/23-security/index.md).
+A working Model Context Protocol server in 133 lines. Exposes three tools (`search_orders`, `issue_refund`, `escalate_to_human`), one resource (`refunds_policy`), and one prompt (`triage_intake`). Implements the iron triangle of tool design and the four security defences from [Post 15 - Tools and MCP](../../posts/15-tools-and-mcp/index.md) and [Post 23 - Security and prompt injection](../../posts/23-security/index.md).
 
 ## Quickstart
 
@@ -42,17 +42,17 @@ In the host chat:
 
 Expected: the agent calls `search_orders`, gets back a structured list, summarises.
 
-> Refund $1500 for order ORD-9001.
+> Refund $1500 for order ORD-9004.
 
 Expected: the agent calls `issue_refund`; the tool returns `requires_confirmation=true`; the agent calls `escalate_to_human` with a clear summary.
 
 ## Tests
 
 ```powershell
-uv run pytest -q
+uv run --extra dev pytest -q
 ```
 
-Five tests cover the safety surface (search input validation, refund under threshold, refund over threshold, escalation queue validation, search by email).
+Six tests cover the safety surface (search input validation, refund under threshold, refund over threshold, escalation queue validation, search by email).
 
 ## What this starter is not
 
@@ -60,7 +60,7 @@ Five tests cover the safety surface (search input validation, refund under thres
 - It is not multi-tenant. The server has one identity.
 - It does not log to durable storage. Add an audit table for production.
 
-See [Post 29 §9](../../posts/29-build-mcp-server/index.md) for the full extension list.
+See [Post 29 - Build #2: MCP server from scratch](../../posts/29-build-mcp-server/index.md), section 10, for the full extension list.
 
 ## License
 

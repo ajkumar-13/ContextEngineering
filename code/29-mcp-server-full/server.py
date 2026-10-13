@@ -1,22 +1,23 @@
-"""acme-support — a small MCP server companion to Post 23.
+"""acme-support: a small MCP server, companion to post 29.
 
 Three tools, one resource, one prompt. Permission boundary on issue_refund
 is enforced in code, not in the tool description.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Annotated
 
-from pydantic import BaseModel, Field
-from mcp.server.fastmcp import FastMCP
+from pydantic import BaseModel, Field, validate_call
+from mcp.server.mcpserver import MCPServer
 
 DATA = Path(__file__).parent / "data"
 ORDERS: list[dict] = json.loads((DATA / "orders.json").read_text(encoding="utf-8"))
 REFUND_THRESHOLD = 1000  # dollars; over this, require human confirmation
 
-mcp = FastMCP("acme-support")
+mcp = MCPServer("acme-support")
 
 
 # -- tool 1: search_orders (read) --------------------------------------------
@@ -33,6 +34,7 @@ class SearchOrdersResult(BaseModel):
         "Do NOT use for refunds; use `issue_refund` for refunds."
     ),
 )
+@validate_call
 def search_orders(
     email: Annotated[str | None, Field(description="Customer email")] = None,
     order_id: Annotated[str | None, Field(description="Order id (e.g. ORD-1234)")] = None,
@@ -64,6 +66,7 @@ class IssueRefundResult(BaseModel):
         f"and not actually refund."
     ),
 )
+@validate_call
 def issue_refund(
     order_id: Annotated[str, Field(description="Order id")],
     amount: Annotated[float, Field(gt=0, description="Refund amount in USD")],
@@ -101,11 +104,13 @@ class EscalateResult(BaseModel):
         "returns requires_confirmation=true."
     ),
 )
+@validate_call
 def escalate_to_human(
     summary: Annotated[str, Field(min_length=10)],
     queue: Annotated[str, Field(pattern="^(general|billing|engineering)$")] = "general",
 ) -> EscalateResult:
-    ticket_id = f"TKT-{abs(hash(summary)) % 10_000:04d}"
+    digest = hashlib.sha256(summary.encode("utf-8")).hexdigest()
+    ticket_id = f"TKT-{int(digest, 16) % 10_000:04d}"
     return EscalateResult(ticket_id=ticket_id, queue=queue)
 
 

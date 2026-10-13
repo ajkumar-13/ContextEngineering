@@ -15,11 +15,11 @@ It exposes three tools, one resource, and one prompt template.
 - After every tool call, summarise the structured result in one sentence before continuing.
 
 ## Knowledge
-- Office hours for human handoff are 9:00–18:00 IST.
+- Office hours for human handoff are 9:00 to 18:00 IST.
 - Refunds threshold: $1 000.
 - The `orders.json` data is a demo set; production servers replace it.
 
 ## Tools (summary)
-- `search_orders(email?, order_id?)` — read; safe; idempotent.
-- `issue_refund(order_id, amount, reason)` — write; bounded by threshold.
-- `escalate_to_human(summary, queue?)` — workflow; safe.
+- `search_orders(email?, order_id?)`: read; safe; idempotent.
+- `issue_refund(order_id, amount, reason)`: write; bounded by threshold.
+- `escalate_to_human(summary, queue?)`: workflow; safe.

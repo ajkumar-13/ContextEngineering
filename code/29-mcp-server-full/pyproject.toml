@@ -1,10 +1,10 @@
 [project]
 name = "acme-support-mcp"
 version = "0.1.0"
-description = "Companion code for Post 23 — MCP server from scratch."
+description = "Companion code for post 29: MCP server from scratch."
 requires-python = ">=3.11"
 dependencies = [
-    "mcp>=1.2.0",
+    "mcp==2.3.0",
     "pydantic>=2.7",
 ]
 

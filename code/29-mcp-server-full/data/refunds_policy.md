@@ -17,9 +17,9 @@ queue.
 
 ## Processing time
 
-Auto-approved refunds appear on the customer's statement within 3–5 business
-days. Manager-approved refunds add 1–2 business days for the review step.
+Auto-approved refunds appear on the customer's statement within 3 to 5 business
+days. Manager-approved refunds add 1 to 2 business days for the review step.
 
 ## Office hours
 
-Human review runs 09:00–18:00 IST, Monday through Friday.
+Human review runs 09:00 to 18:00 IST, Monday through Friday.
