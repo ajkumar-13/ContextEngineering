@@ -4,7 +4,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 ---
 
-**Active learning.** In the capstone (post 30), treating every human edit, approval, or rejection of an agent's draft as a training signal, so that the pairs of draft and edited draft can later tune a small model or a routing decision.
+**Active learning.** In the capstone (post 30), treating every human edit, approval, or rejection of an agent's draft as a training signal, so that the pairs of draft and edited draft can later tune the prompt's rules, the retrieval filter or a routing decision.
 
 **Adaptive thinking.** A reasoning-model mode in which the model decides per request how much internal reasoning to spend, steered by an effort setting rather than a fixed token budget (post 18).
 
@@ -108,7 +108,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Hallucination.** A fluent but factually wrong output, often because the needed fact is not in the context.
 
-**Hook.** A script the host runs at a fixed point in the agent loop (before a tool call, after an edit, at session start) to enforce a policy or add behaviour (post 26).
+**Hook.** A script the host runs at a fixed point in the agent loop (before a tool call, after an edit, at session start) to enforce a policy or add behaviour; in Claude Code an exit code of 2 blocks the action where the event allows it (post 26).
 
 **HyDE (Hypothetical Document Embeddings).** A query-construction technique in which the model first writes a hypothetical answer and that text, rather than the question, is embedded for retrieval (Gao et al., 2022; post 09).
 

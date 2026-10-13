@@ -161,9 +161,9 @@ Apply them in order. A no to question 1 settles it for retrieval; the other thre
 
 - [ ] The project has an `AGENTS.md` in the five-block form.
 - [ ] Skills for repeated tasks.
-- [ ] Hooks for dangerous commands and post-edit checks.
+- [ ] Policy hooks exit 2: a guard before dangerous commands, a check after edits.
 - [ ] Auto-compaction on; the team knows `/compact` from `/clear`.
-- [ ] Sub-agent budgets capped.
+- [ ] Sub-agent turns capped (`maxTurns` in Claude Code).
 - [ ] An eval suite gates the deploy.
 - [ ] A trace on every call.
 - [ ] A send gate, or its equivalent, on every outbound action.

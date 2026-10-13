@@ -67,7 +67,7 @@ Confusion differs from what [post 01](../01-why-context-engineering/index.md) ca
 
 "Motivated by failure" is the rule most easily skipped. *"Be careful with refunds"*, rewritten from the failure that produced it, becomes *"Never issue a refund above 50 dollars without a manager approval token; in March the bot refunded 4,000 dollars unprompted"* (an illustrative incident), which names the concept, the threshold and the reason.
 
-**Last resort.** Move the constraint out of the prompt and into code. A send-gate (as in the capstone of [post 30](../30-capstone-email-reply-agent/index.md)) or a validator on the tool side enforces what the model was only asked to respect.
+**Last resort.** Move the constraint out of the prompt and into code. A send gate (as in the capstone of [post 30](../30-capstone-email-reply-agent/index.md)) or a validator on the tool side enforces what the model was only asked to respect.
 
 ---
 

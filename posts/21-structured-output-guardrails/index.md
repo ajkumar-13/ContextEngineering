@@ -196,7 +196,7 @@ fallback  the model refused
 
 Choosing each check's action on failure is the design work: redact and pass when the rest of the reply is useful, block when no part should leave, fall back when there is nothing to parse. Frameworks package the same choice. Guardrails AI gives each validator an `on_fail` action, among them `reask`, `fix`, `filter`, `refrain`, `noop` and `exception` (Guardrails AI documentation, "Validator on-fail actions", consulted October 2026); NVIDIA NeMo Guardrails defines input, retrieval, dialog, execution and output rails in its Colang language (NeMo Guardrails documentation, consulted October 2026).
 
-A guardrail can act before generation (the input layers' job), during it (constrained decoding), or after it (the checks above), which is the last line before an output becomes an action or a stored record. The capstone, [post 30](../30-capstone-email-reply-agent/index.md), puts one such check, a send-gate, in front of `send_email`, and runs it even after the human has approved the draft.
+A guardrail can act before generation (the input layers' job), during it (constrained decoding), or after it (the checks above), which is the last line before an output becomes an action or a stored record. The capstone, [post 30](../30-capstone-email-reply-agent/index.md), puts one such check, a send gate, in front of `send_email`, and runs it even after the human has approved the draft.
 
 ---
 

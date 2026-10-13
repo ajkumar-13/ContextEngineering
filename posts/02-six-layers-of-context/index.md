@@ -102,7 +102,7 @@ Anything that should persist beyond a single call but is not literally part of t
 - **Long-term memory**, in three kinds:
   - **Episodic**: past interactions ("on April 4 the user asked about webhooks"), stored as events and retrieved by similarity.
   - **Semantic**: distilled facts and preferences ("user prefers Python, stack is AWS"), curated and slowly changing.
-  - **Procedural**: reusable skills and routines, often as Markdown skill files or slash commands.
+  - **Procedural**: rules and how-tos learned about one user or account, kept as memory rows; team rules live in `AGENTS.md` and packaged capabilities in a skill's `SKILL.md` (post 16, section 6).
 
 Whatever the store, what reaches the model is text in the request. A common pattern, and the one this post's snippet uses (section 10), replays the selected memories as a synthetic exchange at the start of the message list: a user message the application writes, holding the stored facts, followed by a short assistant acknowledgement. Other applications put the same facts in a block of the system prompt or of the first user message. The model does not "remember" anything; it reads what is put there. [Post 16](../16-memory-systems/index.md) is an entire post on this.
 

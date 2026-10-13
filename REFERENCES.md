@@ -247,34 +247,49 @@ Citation style: author or organisation, title in quotation marks, venue or publi
 
 ## Post 26 - The modern agentic workflow
 
-- **Cursor.** "Rules and Composer." *Documentation*, 2025. https://docs.cursor.com/
-- **Aider.** "Architect mode and conventions." *Documentation*, 2024 to 2025. https://aider.chat/docs/
-- Claude Code documentation: see Post 12. AGENTS.md: see Post 08. Agent Skills: see Post 15. Don't Build Multi-Agents: see Post 13.
+- **Anthropic.** "Hooks reference", "Extend Claude with skills" and "Create custom subagents." *Claude Code documentation*, consulted October 2026. https://code.claude.com/docs/en/hooks, https://code.claude.com/docs/en/skills, https://code.claude.com/docs/en/sub-agents
+- **Cursor.** "Rules." *Documentation*, consulted October 2026. https://cursor.com/docs/context/rules
+- **Aider.** "Specifying coding conventions." *Documentation*, consulted October 2026. https://aider.chat/docs/usage/conventions.html
+- How Claude Code works: see Post 12. How Claude remembers your project, AGENTS.md: see Post 08. Agent Skills: see Post 15. Don't Build Multi-Agents: see Post 13. Pricing: see Post 01. Prompt caching: see Post 02.
 
 ## Post 27 - Remote agentic workflow
 
-- **AWS.** "Connect using EC2 Instance Connect." *EC2 documentation*, 2024 to 2025. https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-connect-methods.html
-- **VS Code.** "Remote Development using SSH." *Documentation* (latest). https://code.visualstudio.com/docs/remote/ssh
-- ***OpenClaude*, *claude-code-remote*** and similar community projects (Telegram and web bridges). GitHub, 2024 to 2025: cited as a class; there is no single canonical repository.
-- Aider documentation: see Post 26.
+- **AWS.** "Connect to your Linux instance using a public IP address and EC2 Instance Connect." *EC2 User Guide*, consulted October 2026. https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-linux-inst-eic.html
+- **AWS.** "Amazon EC2 On-Demand Pricing." Consulted October 2026. https://aws.amazon.com/ec2/pricing/on-demand/
+- **AWS.** "Amazon EC2 security groups for your EC2 instances." Consulted October 2026. https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html
+- **AWS.** "IAM roles for Amazon EC2." Consulted October 2026. https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html
+- **AWS.** "How EC2 instance stop and start works." Consulted October 2026. https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/how-ec2-instance-stop-start-works.html
+- **Hetzner.** "Price adjustment." Consulted October 2026. https://docs.hetzner.com/general/infrastructure-and-availability/price-adjustment/
+- **Anthropic.** "Advanced setup", "CLI reference", "Hooks reference" and "Remote Control." *Claude Code documentation*, consulted October 2026. https://code.claude.com/docs/en/setup, https://code.claude.com/docs/en/cli-reference, https://code.claude.com/docs/en/hooks, https://code.claude.com/docs/en/remote-control
+- **Telegram.** "Bot API." Consulted October 2026. https://core.telegram.org/bots/api
+- **Ubuntu.** "OpenSSH server." Consulted October 2026. https://ubuntu.com/server/docs/how-to/security/openssh-server/
+- **VS Code.** "Remote Development using SSH." *Documentation*, consulted October 2026. https://code.visualstudio.com/docs/remote/ssh
+- **JessyTsui.** "Claude-Code-Remote." GitHub, consulted October 2026. https://github.com/JessyTsui/Claude-Code-Remote
+- **tmux** manual page (`send-keys`, `display-message`). https://man7.org/linux/man-pages/man1/tmux.1.html
 
 ## Post 28 - Build #1: RAG chatbot from scratch
 
-- **LangChain.** "RAG from scratch" cookbook. GitHub, 2024. https://github.com/langchain-ai/rag-from-scratch
-- **Voyage AI.** "voyage-3" model cards. https://docs.voyageai.com/
-- Introducing Contextual Retrieval: see Post 02. Cohere Rerank: see Post 09. RAGAS: see Post 20.
+- **LangChain.** "RAG from scratch" (notebooks and video playlist). GitHub, consulted October 2026. https://github.com/langchain-ai/rag-from-scratch
+- **Voyage AI.** "Text embeddings" (voyage-3-lite listed under "Older models"). *Documentation*, consulted October 2026. https://docs.voyageai.com/docs/embeddings
+- **Cohere.** "Rerank" model list. *Documentation*, consulted October 2026. https://docs.cohere.com/docs/rerank
+- **OpenAI.** "GPT-4o mini" model page and "Prompt caching." *API documentation*, consulted October 2026. https://developers.openai.com/api/docs/models/gpt-4o-mini
+- Introducing Contextual Retrieval: see Post 02. Reciprocal rank fusion (Cormack et al.): see Post 09. Ragas and the regression gate: see Post 20.
 
 ## Post 29 - Build #2: MCP server from scratch
 
-- **Model Context Protocol.** "Python SDK." GitHub, 2024 to 2025. https://github.com/modelcontextprotocol/python-sdk
-- MCP specification: see Post 15. Introducing the Model Context Protocol: see Post 01. AGENTS.md: see Post 08.
+- **Model Context Protocol.** "Python SDK." GitHub, consulted October 2026 (FastMCP in 1.x, MCPServer in 2.x, release 2.3.0). https://github.com/modelcontextprotocol/python-sdk
+- **Model Context Protocol.** "Connect to local MCP servers" and "The MCP Registry." Consulted October 2026. https://modelcontextprotocol.io/docs/develop/connect-local-servers, https://modelcontextprotocol.io/registry/about
+- **FastMCP.** "Running Your Server." *Documentation*, consulted October 2026 (a separate project from the SDK). https://gofastmcp.com/deployment/running-server
+- **Cursor.** "Model Context Protocol." *Documentation*, consulted October 2026. https://cursor.com/docs/context/mcp
+- **Continue.** "MCP." *Documentation*, consulted October 2026. https://docs.continue.dev/customize/deep-dives/mcp
+- MCP specification (revision 2026-07-28): see Post 15. Introducing the Model Context Protocol: see Post 01. AGENTS.md: see Post 08.
 
 ## Post 30 - Capstone: email reply agent
 
-- **Google.** "Gmail API." *Documentation* (latest). https://developers.google.com/gmail/api
-- **Vercel.** "Functions." *Documentation* (latest). https://vercel.com/docs/functions
-- **Railway.** "Cron jobs and workers." *Documentation* (latest). https://docs.railway.app/
-- Everything else in the capstone traces to posts 01 to 29; see those sections.
+- **Google.** "Choose Gmail API scopes", "Configure push notifications with the Gmail API" and "Using OAuth 2.0 for Web Server Applications." *Google for Developers*, consulted October 2026. https://developers.google.com/workspace/gmail/api/auth/scopes, https://developers.google.com/workspace/gmail/api/guides/push, https://developers.google.com/identity/protocols/oauth2/web-server
+- **Railway.** "Cron Jobs." *Documentation*, consulted October 2026. https://docs.railway.com/reference/cron-jobs
+- **Vercel.** "Vercel Functions." *Documentation*, consulted October 2026. https://vercel.com/docs/functions
+- The send gate, memory, retrieval, evaluation and security choices trace to the posts named in the body.
 
 ---
 
