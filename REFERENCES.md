@@ -129,52 +129,58 @@ Citation style: author or organisation, title in quotation marks, venue or publi
 
 ## Post 14 - The system prompt as software
 
-- **Anthropic.** "Giving Claude a role with a system prompt." *Anthropic documentation*, 2024 to 2025. https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/system-prompts
-- **OpenAI.** "Model Spec." May 2024 (living document). https://model-spec.openai.com/
+- **Anthropic.** "Prompting best practices." *Claude documentation*, consulted October 2026. https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
+- **OpenAI.** "Model Spec." Version of 18 August 2026 (living document, first published May 2024), consulted October 2026. https://model-spec.openai.com/
 - **DAIR.AI.** "Prompt Engineering Guide." 2024 edition. https://www.promptingguide.ai/
-- AGENTS.md: see Post 08. Prompt caching: see Post 02.
+- AGENTS.md, How Claude remembers your project: see Post 08. Agent Skills: see Post 15. Prompt caching (Anthropic and OpenAI): see Post 05.
 
 ## Post 15 - Tools and MCP
 
-- **Model Context Protocol.** "Specification" (current revision). https://modelcontextprotocol.io/
+- **Model Context Protocol.** "Specification", revision 2026-07-28, consulted October 2026. https://modelcontextprotocol.io/
+- **Anthropic.** "Define tools", "Tool use with Claude", "Tool search tool" and "Structured outputs." *Claude API documentation*, consulted October 2026. https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview
+- **OpenAI.** "Structured Outputs." *OpenAI API documentation*, consulted October 2026. https://developers.openai.com/api/docs/guides/structured-outputs
 - **Anthropic Engineering.** "Equipping agents for the real world with Agent Skills." *Anthropic blog*, 16 October 2025. https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
-- **Anthropic Engineering.** "Code execution with MCP: building more efficient agents." *Anthropic blog*, November 2025. https://www.anthropic.com/engineering/code-execution-with-mcp
-- Don't Build Multi-Agents (Yan, Cognition): see Post 13.
-- Introducing the Model Context Protocol: see Post 01. Function calling (OpenAI): see Post 02.
+- **Anthropic Engineering.** "Code execution with MCP: building more efficient agents." *Anthropic blog*, 4 November 2025. https://www.anthropic.com/engineering/code-execution-with-mcp
+- Introducing the Model Context Protocol: see Post 01. Function calling (OpenAI): see Post 02. Pydantic, Instructor, Outlines: see Post 21.
 
 ## Post 16 - Memory systems
 
 - **Tulving, E.** "Episodic and semantic memory." In Tulving, E. and Donaldson, W. (eds.), *Organization of Memory*, Academic Press, 1972: the source of the episodic and semantic distinction.
+- **Tulving, E.** "How many memory systems are there?" *American Psychologist* 40(4), 385 to 398, 1985. https://doi.org/10.1037/0003-066X.40.4.385: procedural memory as a third system.
+- **Sumers, T. R., Yao, S., Narasimhan, K., Griffiths, T. L.** "Cognitive Architectures for Language Agents." *arXiv:2309.02427*, 2023 (TMLR 2024). https://arxiv.org/abs/2309.02427: the three kinds as language agents use them.
+- **Chhikara, P. *et al.*** "Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory." *arXiv:2504.19413*, 28 April 2025. https://arxiv.org/abs/2504.19413
 - **Packer, C. *et al.*** "MemGPT: Towards LLMs as Operating Systems." *arXiv:2310.08560*, 2023. https://arxiv.org/abs/2310.08560
 - **Rasmussen, P. *et al.*** "Zep: A Temporal Knowledge Graph Architecture for Agent Memory." *arXiv:2501.13956*, 2025. https://arxiv.org/abs/2501.13956: the Graphiti engine behind graph-based memory.
-- **Letta (formerly MemGPT).** "Building Agents with Long-Term Memory." *Letta documentation*, 2024 to 2025. https://docs.letta.com/
+- **Letta (formerly MemGPT).** "Introduction to stateful agents" and "Archival memory." *Letta documentation*, consulted October 2026. https://docs.letta.com/
 - **Mem0.** "Long-term memory for AI agents." *Mem0 documentation*, 2024 to 2025. https://mem0.ai/
-- **OpenAI.** "Memory and new controls for ChatGPT." *OpenAI blog*, 2024. https://openai.com/index/memory-and-new-controls-for-chatgpt/
-- **LangChain Blog.** "The state of AI agents: memory." 2024.
-- Generative Agents (Park et al.): see Post 08.
+- **OpenAI.** "Memory and new controls for ChatGPT." *OpenAI blog*, 13 February 2024; update of 10 April 2025. https://openai.com/index/memory-and-new-controls-for-chatgpt/
+- Generative Agents (Park et al.), Memory for Agents (Chase): see Post 08.
 
 ## Post 17 - Advanced retrieval
 
-- **Edge, D. *et al.*** "From Local to Global: A Graph RAG Approach to Query-Focused Summarization." *Microsoft Research, arXiv:2404.16130*, 2024. https://arxiv.org/abs/2404.16130
+- **Edge, D. *et al.*** "From Local to Global: A Graph RAG Approach to Query-Focused Summarization." *Microsoft Research, arXiv:2404.16130*, 2024 (v2, February 2025: the version post 17 quotes). https://arxiv.org/abs/2404.16130
 - **Santhanam, K. *et al.*** "ColBERTv2: Effective and Efficient Retrieval via Lightweight Late Interaction." *NAACL 2022* (arXiv:2112.01488). https://arxiv.org/abs/2112.01488
-- **Clavié, B.** "JaColBERT and Hard Negatives, Towards Better Japanese-First Embeddings for Retrieval." *arXiv:2312.16144*, 2023. https://arxiv.org/abs/2312.16144
+- **Santhanam, K., Khattab, O., Potts, C., Zaharia, M.** "PLAID: An Efficient Engine for Late Interaction Retrieval." *CIKM 2022* (arXiv:2205.09707). https://arxiv.org/abs/2205.09707
+- **Asai, A. *et al.*** "Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection." *ICLR 2024* (arXiv:2310.11511). https://arxiv.org/abs/2310.11511
+- **Yan, S.-Q., Gu, J.-C., Zhu, Y., Ling, Z.-H.** "Corrective Retrieval Augmented Generation." *arXiv:2401.15884*, 2024. https://arxiv.org/abs/2401.15884
 - **Pourreza, M., Rafiei, D.** "DIN-SQL: Decomposed In-Context Learning of Text-to-SQL with Self-Correction." *NeurIPS 2023* (arXiv:2304.11015). https://arxiv.org/abs/2304.11015
-- **Anthropic.** "Long context prompting for Claude 2.1." *Anthropic blog*, December 2023. https://www.anthropic.com/news/claude-2-1-prompting
-- ColBERT: see Post 11. Prompt caching: see Post 02.
+- **Anthropic.** "Long context prompting for Claude 2.1." *Anthropic blog*, 6 December 2023. https://www.anthropic.com/news/claude-2-1-prompting (now served at https://claude.com/blog/claude-2-1-prompting)
+- ColBERT: see Post 11. Prompt caching: see Post 02. Pricing: see Post 01. Long context (Gemini API): see Post 04. Zep: see Post 16.
 
 ## Post 18 - Context for reasoning models
 
-- **Anthropic.** "Extended thinking" and "Adaptive thinking." *Anthropic documentation*, 2024 to 2025. https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking
+- **Anthropic.** "Thinking", "Extended thinking", "Steering thinking", "Effort" and "Context editing." *Claude Platform documentation*, consulted October 2026. https://platform.claude.com/docs/en/build-with-claude/thinking
 - **Wei, J. *et al.*** "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models." *NeurIPS 2022* (arXiv:2201.11903). https://arxiv.org/abs/2201.11903
 - **DeepSeek-AI.** "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." *arXiv:2501.12948*, 2025. https://arxiv.org/abs/2501.12948
-- Prompt caching: see Post 02. Building Effective AI Agents: see Post 08.
+- Prompt caching: see Post 02. Building Effective AI Agents: see Post 08. Pricing: see Post 01. Context windows: see Post 04. Lost in the Middle: see Post 01. RULER: see Post 03.
 
 ## Post 19 - Multimodal context: images, PDF pages, and audio
 
-- **Faysse, M. *et al.*** "ColPali: Efficient Document Retrieval with Vision Language Models." *arXiv:2407.01449*, 2024. https://arxiv.org/abs/2407.01449: and the ViDoRe benchmark.
-- **OpenAI.** "Vision" and "Computer use." *OpenAI documentation*, 2024 to 2025. https://platform.openai.com/docs/guides/vision
-- **Anthropic.** "Vision" and "Computer use." *Anthropic documentation*, 2024 to 2025. https://docs.anthropic.com/en/docs/build-with-claude/vision
-- ColBERT (late interaction): see Post 11.
+- **Faysse, M. *et al.*** "ColPali: Efficient Document Retrieval with Vision Language Models." *ICLR 2025* (arXiv:2407.01449, 2024). https://arxiv.org/abs/2407.01449: and the ViDoRe benchmark.
+- **OpenAI.** "Images and vision" and "Computer use." *OpenAI API documentation*, consulted October 2026. https://developers.openai.com/api/docs/guides/images-vision
+- **Anthropic.** "Vision", "Coordinates and bounding boxes", "PDF support" and "Computer use tool." *Claude API documentation*, consulted October 2026. https://platform.claude.com/docs/en/build-with-claude/vision
+- **Google.** "Document understanding" (page updated 8 October 2026) and "Audio understanding" (page updated 23 September 2026). *Gemini API documentation*, consulted October 2026. https://ai.google.dev/gemini-api/docs/document-processing
+- ColBERT (late interaction): see Posts 11 and 17. Prompt caching: see Post 02. Pricing: see Post 01.
 
 ## Post 20 - Evaluation
 

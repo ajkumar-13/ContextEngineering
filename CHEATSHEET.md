@@ -60,8 +60,8 @@ A bug report that fits none of the five is a model problem, not a context proble
 # Identity     who the model is
 # Rules        one concept per rule, each motivated by a real failure
 # Format       output shape; examples beat instructions
-# Knowledge    facts the model needs on every call
-# Tools        when to reach for which tool (the schemas are layer 02)
+# Knowledge    small, stable facts needed on almost every call
+# Tool-use     when to reach for which tool (the schemas are layer 02)
 ```
 
 Six rules for rules: one concept per rule; motivated by a real failure; positive over negative; specific over vague; examples beat instructions; reviewed like code.
@@ -70,7 +70,7 @@ Six rules for rules: one concept per rule; motivated by a real failure; positive
 
 ## Tool design
 
-**Iron triangle:** catalogue size, per-tool description quality, runtime selection. A design can keep any two.
+**Iron triangle:** catalogue size, per-tool description quality, runtime selection. A design gets any two of a large catalogue, rich descriptions and no selection step; keeping both of the first two means paying for runtime selection.
 
 **One tool description has six parts:** a `verb_object` name; a one-line summary; when to use it; when not to use it; parameters with types and descriptions; one worked example.
 
@@ -80,9 +80,9 @@ Six rules for rules: one concept per rule; motivated by a real failure; positive
 
 | Kind | Holds | Key fields | Retrieval | Ageing |
 |---|---|---|---|---|
-| Episodic | past events | `subject`, `event_type`, `summary`, `source`, `timestamp`, `confidence` | reference recall or recent episodes | confidence decays without confirmation |
-| Semantic | facts and preferences | as episodic, with `kind` in place of `event_type` | top-k background facts on each turn | confirm or decay; never overwrite silently |
-| Procedural | rules and routines | `trigger`, `rule`, `scope` | trigger matching, not similarity | edited by hand, reviewed like code |
+| Episodic | past events | post 08's nine fields (`content` is the event) | reference recall when the turn refers to the past | confidence decays on read without confirmation |
+| Semantic | facts and preferences | the same nine fields | top-k background facts on each turn | decays on read; ask below the cutoff; never overwrite in place |
+| Procedural | rules learned for one user, account or project | the nine fields plus `trigger` (`subject` is the scope, `content` the rule) | trigger matching, not similarity | no decay; removed by a person; written after confirmation |
 
 ---
 
@@ -105,7 +105,7 @@ Figures from Anthropic's "Pricing" and "Prompt caching" pages: rates as of early
 - **Freeze the prefix:** layers 01 and 02 first and byte-identical; every volatile byte last.
 - **Watch the cache-hit rate:** a drop means the prefix is churning; find what moved.
 
-**Reasoning models:** thinking tokens are billed as output and count against the budget; keep raw traces out of later prompts, the cached prefix, and memory ([post 18](posts/18-reasoning-model-context/index.md)).
+**Reasoning models:** thinking tokens are billed as output and count against the budget; pass thinking blocks back unchanged, but keep the trace text out of the layers the application writes, the cached prefix and memory; changing the effort level restarts the cache ([post 18](posts/18-reasoning-model-context/index.md)).
 
 ---
 

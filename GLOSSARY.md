@@ -42,9 +42,9 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Citation accuracy.** The fraction of citations in a generated answer that point to a chunk which supports the cited claim.
 
-**CLAUDE.md.** Claude Code's repository-level instruction file; the equivalent of `AGENTS.md`.
+**CLAUDE.md.** Claude Code's repository-level instruction file; unlike `AGENTS.md`, nested files are concatenated root first rather than the closest winning, and the content arrives as a user message after the system prompt (post 14).
 
-**ColBERT.** A late-interaction retrieval model that keeps one embedding per token and scores a query against a document with MaxSim, trading a larger index for higher accuracy (Khattab and Zaharia, 2020; post 17).
+**ColBERT.** A late-interaction retrieval model that keeps one embedding per token and scores a query against a document with MaxSim, trading a larger index for token-level matching (Khattab and Zaharia, 2020; post 17).
 
 **ColPali.** A late-interaction retrieval model that embeds images of document pages directly, so a page-image corpus can be searched without a separate OCR step (Faysse et al., 2024; post 19).
 
@@ -56,7 +56,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Conflict.** The failure mode in which the window holds contradictory information (an old memory and a new document, two retrieved chunks) and the model picks the wrong one. The first fix is a provenance and recency stamp with an explicit precedence rule (post 06).
 
-**Constrained decoding.** Restricting the model's token sampling at generation time to the tokens a grammar or schema allows, so the output is syntactically valid by construction (post 21).
+**Constrained decoding.** Restricting the model's token sampling at generation time to the tokens a grammar or schema allows, so the output follows the schema, apart from exceptions the provider documents (Anthropic lists refusals, a `max_tokens` cut-off and enum capitalisation) (post 21).
 
 **Context engineering.** The discipline of deciding what enters an LLM's context window on every call, across all six layers, so that the model has the right information, in the right place, at the right cost (post 01).
 
@@ -76,7 +76,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Data residency.** A requirement that data be stored and processed only within a given geographic or legal jurisdiction (post 24).
 
-**Decay.** A periodic job that lowers the confidence of memory cells that have not been confirmed recently, so stale facts stop dominating recall (post 16).
+**Decay.** Lowering a memory row's confidence for each day it goes unread, computed when the row is read, so stale facts and events stop dominating recall; learned rules do not decay (posts 08 and 16).
 
 **Decode.** The phase of a call that generates output one token per forward pass, each depending on the previous one (post 05).
 
@@ -84,7 +84,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Dual LLM pattern.** A security pattern in which a quarantined model processes untrusted content into structured output and a privileged model, which never sees the raw content, acts on that output (Willison, 2023; post 23).
 
-**Effort (reasoning).** A provider parameter that sets how much reasoning a reasoning model spends, trading answer quality against latency and cost (post 18).
+**Effort (reasoning).** A provider parameter that sets how many output tokens a model spends, thinking included, trading answer quality against latency and cost; soft guidance, not a limit (post 18).
 
 **Embedding.** A dense vector representation of a piece of text or an image, used for similarity search.
 
@@ -122,7 +122,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Ingestion pipeline.** The offline sequence (source, parse, clean, enrich, chunk, index) that turns raw files into a retrievable corpus (post 10).
 
-**Iron triangle (of tools).** The trade-off between catalogue size, per-tool description quality, and runtime selection: a design can keep any two of the three (post 15).
+**Iron triangle (of tools).** The trade-off between catalogue size, per-tool description quality, and runtime selection: a design gets any two of a large catalogue, rich descriptions, and no selection step; keeping the first two means paying for runtime selection (post 15).
 
 **Isolate.** The fourth of the four operations (WSCI): splitting work across separate context windows (sub-agents, sandboxes) so that one task's noise, errors, and tool output do not enter another's window (post 13).
 
@@ -142,9 +142,9 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **MaxSim.** The late-interaction score of ColBERT: for each query token, the highest similarity to any document token, summed over the query tokens (post 17).
 
-**MCP (Model Context Protocol).** An open protocol, introduced by Anthropic in 2024, through which a host connects to servers that expose tools, resources, and prompts. Its descriptions enter the window as layer 02 (post 15).
+**MCP (Model Context Protocol).** An open protocol, introduced by Anthropic in 2024, through which a host connects to servers that expose tools, resources, and prompts. Its tool descriptions enter the window as layer 02; a resource enters where the host attaches it, a prompt as the user instruction (post 15).
 
-**Memory.** Any state that outlives a single model call. Short-term memory lives in the window; long-term memory is stored outside it and is episodic, semantic, or procedural (post 16). Recalled memory enters the window as layer 03, memory and state.
+**Memory.** Any state that outlives a single model call. Short-term memory is the working set of the current task, the conversation history in the window and scratchpad files outside it; long-term memory is stored outside the window and is episodic, semantic, or procedural (post 16). Recalled memory enters the window as layer 03, memory and state.
 
 **Memory poisoning.** An attack in which adversarial content is written into an agent's memory store and steers later sessions. A security term, covered in post 23, not one of the five failure modes.
 
@@ -168,7 +168,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Priority pruning.** A compress technique that drops entries by priority class (P0 never trimmed to P3 trimmed first), lowest class first, rather than by age (post 12).
 
-**Procedural memory.** Long-term memory of how to do things: rules, skills, and routines, each with a trigger, the rule it injects, and its scope (post 16).
+**Procedural memory.** Long-term memory of rules and how-tos learned for one user, account or project: a memory row whose `trigger` says when it fires, with the rule in `content` and its scope in `subject`; team rules belong in the system prompt or `AGENTS.md`, packaged capabilities in a skill's `SKILL.md` (post 16).
 
 **Prompt cache.** A provider-side cache that stores the computed state of a stable prompt prefix and reuses it on later calls with the same prefix; the reason the stable prefix (layers 01 and 02) comes first (post 05).
 
@@ -228,7 +228,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Text-to-SQL.** A retrieval pattern in which the model writes a SQL query against a structured database instead of fetching unstructured chunks (post 17).
 
-**Thinking tokens.** The intermediate reasoning tokens a reasoning model generates before its answer. They are billed as output and are usually hidden or summarised in the response (post 18).
+**Thinking tokens.** The intermediate reasoning tokens a reasoning model generates before its answer. They are billed as output in full; Anthropic returns a summary or nothing in place of the raw text, and on some models earlier turns' thinking stays in context as input (post 18).
 
 **Time to first token (TTFT).** The wait before the first output token appears; it is set mainly by prefill, which streaming cannot hide (post 05).
 
