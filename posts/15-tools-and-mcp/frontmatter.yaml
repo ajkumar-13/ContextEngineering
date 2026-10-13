@@ -1,67 +1,26 @@
 id: ctx-015
 slug: 15-tools-and-mcp
-title: "15 · Tools and MCP"
-
-description: >
-  Learn how LLMs use tools to interact with the real world and how the
-  Model Context Protocol (MCP) standardizes tool integration. Explore
-  tool design, runtime tool selection, structured outputs, permissions,
-  sandboxing, and production-scale tool orchestration.
-
-author: "Ajay"
-
+title: "15 - Tools and MCP"
+summary: "Tools as schema text in layer 02: the iron triangle of catalogue size, description quality and runtime selection, the six parts of a tool description, MCP's host, client and server, permissions, and structured output."
 date: 2026-05-23
-last_modified: 2026-05-23
-
-tags:
-  - context-engineering
-  - tools
-  - mcp
-  - tool-calling
-  - function-calling
-  - structured-output
-  - ai-agents
-  - orchestration
-
-category: Components
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part III - Layers in depth"
-chapter: "Part III — Components"
-
-hero: diagrams/05-mcp-triangle.svg
-hero_alt: "Model Context Protocol architecture showing a host application, MCP client, and multiple MCP servers exposing tools, resources, and prompts"
-
-reading_time: 18
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - Model Context Protocol
-  - MCP
-  - Tool Calling
-  - Function Calling
-  - Structured Output
-  - JSON Schema
-  - Pydantic
-  - Instructor
-  - Outlines
-  - Constrained Decoding
-  - Tool Selection
-  - Hybrid Retrieval
-  - Cross-Encoder Re-ranking
-  - Tool Catalog
-  - AI Agents
-  - Agent Skills
-  - OpenAI Function Calling
-  - Anthropic MCP
-  - Prompt Engineering
-  - Tool Permissions
-  - Sandboxing
-  - Runtime Orchestration
-
-canonical_url: ""
-
-prev: ../14-system-prompt-as-software/
-next: ../16-memory-systems/
+level: intermediate
+reading_time: 16
+tags: [context-engineering, tools, mcp, tool-calling, tool-selection, structured-output, json-schema]
+hero: diagrams/00-hero-mcp-roles.svg
+prerequisites: [ctx-009, ctx-014]
+code: included
+outcomes:
+  - id: o1
+    text: "Design a tool description with a name, a summary, when to use it, when not to, typed parameters and an example, so the model calls it correctly."
+  - id: o2
+    text: "Price a tool catalogue in tokens per call, cut it with a runtime selection step, and say what selection does to the prompt cache."
+  - id: o3
+    text: "Name what MCP's host, client and server each own, and decide when MCP is the right integration and when bespoke glue still wins."
+  - id: o4
+    text: "Choose between a tool call and a structured response format for a task, and say what a strict schema does and does not guarantee."
+  - id: o5
+    text: "Enforce a tool's permissions and output size in code, with confirmations, capability scoping, an audit log and a sandbox, rather than in the prompt."
+recommended: [ctx-013, mcp-001]

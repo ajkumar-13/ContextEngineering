@@ -1,0 +1,215 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="ctx-00-hero-mcp-roles-title" aria-describedby="ctx-00-hero-mcp-roles-desc">
+<title id="ctx-00-hero-mcp-roles-title">Three primitives reach the window by three hands</title>
+<desc id="ctx-00-hero-mcp-roles-desc">A host application, drawn as a large card, holds the model's window as a stack of six layers, 01 System prompt to 06 User instruction, and two MCP clients, one per server. Client 1 talks to the refunds-demo server over stdio; client 2 talks to a remote server over Streamable HTTP. The refunds-demo server exposes the tool check_refund, the resource refunds://policy and the prompt draft_refund_reply. From client 1, three arrows enter the window: the tool's schema into 02 Tools and MCP descriptions, decided by the model; the resource into 04 Retrieved chunks when the application attaches it; the prompt into 06 User instruction when the user picks it. The second server's primitives take the same three paths.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-blue { fill: var(--ctx-blue); }
+  .f-blue-ink { fill: var(--ctx-blue-ink); }
+  .f-blue-soft { fill: var(--ctx-blue-soft); }
+  .f-green-soft { fill: var(--ctx-green-soft); }
+  .f-neutral-soft { fill: var(--ctx-neutral-soft); }
+  .f-orange { fill: var(--ctx-orange); }
+  .f-orange-ink { fill: var(--ctx-orange-ink); }
+  .f-orange-soft { fill: var(--ctx-orange-soft); }
+  .f-purple { fill: var(--ctx-purple); }
+  .f-purple-ink { fill: var(--ctx-purple-ink); }
+  .f-purple-soft { fill: var(--ctx-purple-soft); }
+  .f-surface { fill: var(--ctx-surface); }
+  .s-blue { stroke: var(--ctx-blue); }
+  .s-blue-line { stroke: var(--ctx-blue-line); }
+  .s-border { stroke: var(--ctx-border); }
+  .s-green-line { stroke: var(--ctx-green-line); }
+  .s-orange { stroke: var(--ctx-orange); }
+  .s-orange-line { stroke: var(--ctx-orange-line); }
+  .s-purple { stroke: var(--ctx-purple); }
+  .s-purple-line { stroke: var(--ctx-purple-line); }
+  .s-rule { stroke: var(--ctx-rule); }
+</style>
+<defs>
+<marker id="ctx-00-hero-mcp-roles-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+<marker id="ctx-00-hero-mcp-roles-arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="f-blue"/></marker>
+<marker id="ctx-00-hero-mcp-roles-arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="f-orange"/></marker>
+<marker id="ctx-00-hero-mcp-roles-arrow-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="f-purple"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="720"/>
+<text x="40" y="48" class="t-title" data-w="608">Three primitives reach the window by three hands</text>
+<text x="40" y="76" class="t-subtitle" data-w="640">MCP roles, specification revision 2026-07-28; the server is the companion refunds-demo.</text>
+<rect x="40" y="112" width="544" height="536" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="40" y="112" width="544" height="536" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="56" y="144" class="t-head" data-w="134">Host application</text>
+<text x="56" y="168" class="t-note" data-w="313">owns the model, the conversation and consent</text>
+<text x="64" y="204" class="t-head" data-w="167">The model's window</text>
+<rect x="64" y="220" width="248" height="44" rx="4" class="f-blue-soft" data-fit="skip"/>
+<rect x="64" y="220" width="248" height="44" rx="4" class="w1 nofill s-blue-line" data-fit="skip"/>
+<text x="76" y="248" class="t-label" data-w="124">01 System prompt</text>
+<rect x="64" y="276" width="248" height="44" rx="4" class="f-blue-soft" data-fit="skip"/>
+<rect x="64" y="276" width="248" height="44" rx="4" class="w1 nofill s-blue-line" data-fit="skip"/>
+<text x="76" y="304" class="t-label" data-w="211">02 Tools and MCP descriptions</text>
+<rect x="64" y="332" width="248" height="44" rx="4" class="f-orange-soft" data-fit="skip"/>
+<rect x="64" y="332" width="248" height="44" rx="4" class="w1 nofill s-orange-line" data-fit="skip"/>
+<text x="76" y="360" class="t-label" data-w="143">03 Memory and state</text>
+<rect x="64" y="388" width="248" height="44" rx="4" class="f-orange-soft" data-fit="skip"/>
+<rect x="64" y="388" width="248" height="44" rx="4" class="w1 nofill s-orange-line" data-fit="skip"/>
+<text x="76" y="416" class="t-label" data-w="137">04 Retrieved chunks</text>
+<rect x="64" y="444" width="248" height="44" rx="4" class="f-green-soft" data-fit="skip"/>
+<rect x="64" y="444" width="248" height="44" rx="4" class="w1 nofill s-green-line" data-fit="skip"/>
+<text x="76" y="472" class="t-label" data-w="159">05 Conversation history</text>
+<rect x="64" y="500" width="248" height="44" rx="4" class="f-purple-soft" data-fit="skip"/>
+<rect x="64" y="500" width="248" height="44" rx="4" class="w1 nofill s-purple-line" data-fit="skip"/>
+<text x="76" y="528" class="t-label" data-w="127">06 User instruction</text>
+<rect x="432" y="220" width="136" height="324" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="432" y="220" width="136" height="324" rx="8" class="w1 nofill s-rule" data-fit="skip"/>
+<rect x="432" y="564" width="136" height="72" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="432" y="564" width="136" height="72" rx="8" class="w1 nofill s-rule" data-fit="skip"/>
+<text x="448" y="248" class="t-head" data-w="104">MCP client 1</text>
+<text x="448" y="592" class="t-head" data-w="104">MCP client 2</text>
+<text x="448" y="616" class="t-note" data-w="117">same three paths</text>
+<path d="M432,296 L315,296" class="s-blue w15 nofill" marker-end="url(#ctx-00-hero-mcp-roles-arrow-blue)"/>
+<text x="372" y="284" text-anchor="middle" class="t-note f-blue-ink" data-w="26">tool</text>
+<text x="448" y="304" class="t-note" data-w="102">the model calls</text>
+<path d="M432,408 L315,408" class="s-orange w15 nofill" marker-end="url(#ctx-00-hero-mcp-roles-arrow-orange)"/>
+<text x="372" y="396" text-anchor="middle" class="t-note f-orange-ink" data-w="59">resource</text>
+<text x="448" y="416" class="t-note" data-w="117">the host attaches</text>
+<path d="M432,520 L315,520" class="s-purple w15 nofill" marker-end="url(#ctx-00-hero-mcp-roles-arrow-purple)"/>
+<text x="372" y="508" text-anchor="middle" class="t-note f-purple-ink" data-w="49">prompt</text>
+<text x="448" y="528" class="t-note" data-w="93">the user picks</text>
+<rect x="664" y="220" width="256" height="140" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="664" y="220" width="256" height="140" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="680" y="252" class="t-head" data-w="178">Server: refunds-demo</text>
+<text x="680" y="288" class="t-note" data-w="26">tool</text>
+<text x="752" y="288" class="t-code" data-w="103">check_refund</text>
+<text x="680" y="312" class="t-note" data-w="59">resource</text>
+<text x="752" y="312" class="t-code" data-w="137">refunds://policy</text>
+<text x="680" y="336" class="t-note" data-w="49">prompt</text>
+<text x="752" y="336" class="t-code" data-w="154">draft_refund_reply</text>
+<rect x="664" y="564" width="256" height="72" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="664" y="564" width="256" height="72" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="680" y="592" class="t-head" data-w="169">Server: a remote one</text>
+<text x="680" y="616" class="t-note" data-w="172">tools, resources, prompts</text>
+<path d="M568,288 L661,288" class="flow" marker-end="url(#ctx-00-hero-mcp-roles-arrow)"/>
+<text x="616" y="276" text-anchor="middle" class="t-note" data-w="34">stdio</text>
+<path d="M568,600 L661,600" class="flow" marker-end="url(#ctx-00-hero-mcp-roles-arrow)"/>
+<text x="616" y="588" text-anchor="middle" class="t-note" data-w="39">HTTP</text>
+<text x="40" y="684" class="t-note" data-w="627">Tools are the model's to call, resources the application's to attach, prompts the user's to pick.</text>
+</svg>

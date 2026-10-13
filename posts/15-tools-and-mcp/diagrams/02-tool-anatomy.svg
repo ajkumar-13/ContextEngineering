@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="ctx-02-tool-anatomy-title" aria-describedby="ctx-02-tool-anatomy-desc">
+<title id="ctx-02-tool-anatomy-title">Six parts of one tool description</title>
+<desc id="ctx-02-tool-anatomy-desc">The JSON definition of the tool search_shipments from the post's toy catalogue, with six numbered markers in the left margin. 1, name: search_shipments. 2, summary: Find shipments that match a customer email, a start date or a status. 3, when to use: Use it when the user describes shipments but gives no shipment id. 4, when not to: Do not use it when a shipment id is known; use get_shipment instead. 5, parameters: email and since as strings with descriptions, and status as an enum of in_transit, delivered, delivery_failed, with additionalProperties false. 6, example: an input_examples entry with an email, a start date and the status delivered.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-surface { fill: var(--ctx-surface); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+</style>
+<defs>
+<marker id="ctx-02-tool-anatomy-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="720"/>
+<text x="40" y="48" class="t-title" data-w="393">Six parts of one tool description</text>
+<text x="40" y="76" class="t-subtitle" data-w="642">search_shipments as the post's snippet builds it; the model reads every line on every call.</text>
+<text x="184" y="128" class="t-code" data-w="9">{</text>
+<text x="200" y="152" class="t-code" data-w="231">"name": "search_shipments",</text>
+<circle cx="56" cy="148" r="12" class="f-surface s-ink-muted w15"/>
+<g data-grid="skip">
+<text x="56" y="153" text-anchor="middle" class="t-label" data-w="9">1</text>
+</g>
+<text x="76" y="152" class="t-note" data-w="38">name</text>
+<text x="200" y="176" class="t-code" data-w="120">"description":</text>
+<text x="220" y="200" class="t-code" data-w="598">"Find shipments that match a customer email, a start date or a status.</text>
+<circle cx="56" cy="196" r="12" class="f-surface s-ink-muted w15"/>
+<g data-grid="skip">
+<text x="56" y="201" text-anchor="middle" class="t-label" data-w="9">2</text>
+</g>
+<text x="76" y="200" class="t-note" data-w="62">summary</text>
+<text x="228" y="224" class="t-code" data-w="564">Use it when the user describes shipments but gives no shipment id.</text>
+<circle cx="56" cy="220" r="12" class="f-surface s-ink-muted w15"/>
+<g data-grid="skip">
+<text x="56" y="225" text-anchor="middle" class="t-label" data-w="9">3</text>
+</g>
+<text x="76" y="224" class="t-note" data-w="82">when to use</text>
+<text x="228" y="248" class="t-code" data-w="598">Do not use it when a shipment id is known; use get_shipment instead.",</text>
+<circle cx="56" cy="244" r="12" class="f-surface s-ink-muted w15"/>
+<g data-grid="skip">
+<text x="56" y="249" text-anchor="middle" class="t-label" data-w="9">4</text>
+</g>
+<text x="76" y="248" class="t-note" data-w="80">when not to</text>
+<text x="200" y="272" class="t-code" data-w="146">"input_schema": {</text>
+<text x="220" y="296" class="t-code" data-w="146">"type": "object",</text>
+<text x="220" y="320" class="t-code" data-w="129">"properties": {</text>
+<circle cx="56" cy="316" r="12" class="f-surface s-ink-muted w15"/>
+<g data-grid="skip">
+<text x="56" y="321" text-anchor="middle" class="t-label" data-w="9">5</text>
+</g>
+<text x="76" y="320" class="t-note" data-w="77">parameters</text>
+<text x="236" y="344" class="t-code" data-w="650">"email": {"type": "string", "description": "The customer's email address."},</text>
+<text x="236" y="368" class="t-code" data-w="650">"since": {"type": "string", "description": "Earliest date, as YYYY-MM-DD."},</text>
+<text x="236" y="392" class="t-code" data-w="240">"status": {"type": "string",</text>
+<text x="328" y="416" class="t-code" data-w="470">"enum": ["in_transit", "delivered", "delivery_failed"],</text>
+<text x="328" y="440" class="t-code" data-w="402">"description": "Only shipments in this state."}</text>
+<text x="220" y="464" class="t-code" data-w="18">},</text>
+<text x="220" y="488" class="t-code" data-w="129">"required": [],</text>
+<text x="220" y="512" class="t-code" data-w="248">"additionalProperties": false</text>
+<text x="200" y="536" class="t-code" data-w="18">},</text>
+<text x="200" y="560" class="t-code" data-w="163">"input_examples": [</text>
+<circle cx="56" cy="556" r="12" class="f-surface s-ink-muted w15"/>
+<g data-grid="skip">
+<text x="56" y="561" text-anchor="middle" class="t-label" data-w="9">6</text>
+</g>
+<text x="76" y="560" class="t-note" data-w="57">example</text>
+<text x="220" y="584" class="t-code" data-w="632">{"email": "ana@example.com", "since": "2026-09-01", "status": "delivered"}</text>
+<text x="200" y="608" class="t-code" data-w="9">]</text>
+<text x="184" y="632" class="t-code" data-w="9">}</text>
+<path d="M168,304 H160 V518 H168" class="brace"/>
+<path d="M168,544 H160 V614 H168" class="brace"/>
+<text x="40" y="684" class="t-note" data-w="578">Parts 2 to 4 are sentences of one description; part 5 is the schema; part 6 an example.</text>
+</svg>

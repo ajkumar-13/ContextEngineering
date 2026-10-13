@@ -1,0 +1,770 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-015",
+  "next_ordinal": 18,
+  "questions": [
+    {
+      "id": "ctx-015-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "tool-description",
+        "confusion"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Two tools in one catalogue, `search_shipments` and `get_shipment`, keep being called in each other's place. Which single line added to each description targets this miscall most directly?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A sentence on when not to use it, naming the other tool to use instead.",
+          "correct": true,
+          "feedback": "Right. Naming the neighbour to use instead is what tells the model where one tool's job ends and the other's begins."
+        },
+        {
+          "key": "b",
+          "text": "A longer list of disclaimers about edge cases the tool does not handle.",
+          "correct": false,
+          "feedback": "Disclaimers belong in code, where the tool can refuse a bad input; they do not tell the model which neighbour to pick."
+        },
+        {
+          "key": "c",
+          "text": "A shorter name, such as `ship`, for both tools.",
+          "correct": false,
+          "feedback": "Shorter, shared names make the two tools harder to tell apart, not easier."
+        },
+        {
+          "key": "d",
+          "text": "The tool's price per call in tokens.",
+          "correct": false,
+          "feedback": "The model does not choose tools by their token cost; the line has no bearing on which tool fits the request."
+        }
+      ],
+      "explanation": "Section 3 lists six parts of a description; part 4, when not to use the tool, names the tool to use instead. It is post 06's first fix for confusion between near neighbours.",
+      "hints": [
+        "Think about which part of a description draws the boundary between two similar tools."
+      ]
+    },
+    {
+      "id": "ctx-015-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 2,
+      "tags": [
+        "mcp",
+        "primitives"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An MCP server exposes a read-only document, `refunds://policy`. According to the MCP specification's control hierarchy, who decides whether its content enters the model's window, and where does it usually land?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The model, which calls it like a tool; it lands in layer 02, tools and MCP descriptions.",
+          "correct": false,
+          "feedback": "That is the control of a tool. A resource is not called by the model; and layer 02 holds schemas, not fetched content."
+        },
+        {
+          "key": "b",
+          "text": "The application, which attaches it as content, for example in layer 04, retrieved chunks.",
+          "correct": true,
+          "feedback": "Right. Resources are application-controlled: the host decides whether to attach them, and attached content is evidence for this call."
+        },
+        {
+          "key": "c",
+          "text": "The user, who picks it from a menu; it becomes layer 06, the user instruction.",
+          "correct": false,
+          "feedback": "That is the control of a prompt. A resource is attached by the application, not picked as a command."
+        },
+        {
+          "key": "d",
+          "text": "The server, which pushes it into layer 01, the system prompt, on every call.",
+          "correct": false,
+          "feedback": "A server cannot write into the host's window; the host owns the conversation and decides what is attached."
+        }
+      ],
+      "explanation": "Section 5's table follows the specification: tools are model-controlled and enter layer 02; resources are application-controlled, attached by the host, for example in layer 04; prompts are user-controlled and become layer 06.",
+      "hints": [
+        "The specification names one controller per primitive: the model, the application or the user."
+      ]
+    },
+    {
+      "id": "ctx-015-q03",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "selection",
+        "prompt-cache"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A team caches its fifty-tool catalogue (6,348 estimated tokens) in the stable prefix. It then adds a selection step that writes the five chosen schemas (681 tokens) into layer 02 on every call. Cache reads cost 0.1 times the 3-dollar-per-million input rate. What happens to the input bill for the tool definitions?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "It falls by about 90 percent, in line with the share of tokens that the selection step removes.",
+          "correct": false,
+          "feedback": "That holds only if both versions are paid at the same rate. The full catalogue was read from cache at a tenth of the rate."
+        },
+        {
+          "key": "b",
+          "text": "It rises slightly, because a layer 02 that changes on every call is no longer read from cache.",
+          "correct": true,
+          "feedback": "Right. Fifty schemas from cache cost 0.001904 dollars per call; five uncached cost 0.002043, so the bill rises slightly."
+        },
+        {
+          "key": "c",
+          "text": "It stays the same, because the prompt cache stores whatever layer 02 holds on each call.",
+          "correct": false,
+          "feedback": "A cache hit needs an identical prefix; per-call selection changes the prefix, so the selected schemas are paid at the full rate."
+        },
+        {
+          "key": "d",
+          "text": "It falls to zero, because tools chosen at run time are not billed as input.",
+          "correct": false,
+          "feedback": "Every token in layer 02 is input and is billed; selection reduces the count, it does not make tokens free."
+        }
+      ],
+      "explanation": "Section 4: layer 02 is part of the stable prefix, so per-turn selection breaks the cache. 6,348 tokens at 0.30 dollars per million is 0.001904 dollars; 681 at 3 dollars per million is 0.002043. Selection then buys attention and window space, not money, unless selected tools are added after the prefix, as Anthropic's tool search tool does.",
+      "hints": [
+        "Price each version at the rate it is actually billed at.",
+        "Which version can still be read from the cache?"
+      ]
+    },
+    {
+      "id": "ctx-015-q04",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "8",
+      "est_minutes": 3,
+      "tags": [
+        "structured-output",
+        "strict-mode"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A handler parses tool arguments from OpenAI's Chat Completions API without validating them, because the function definition carries a JSON Schema. `strict` is not set. What does the schema guarantee?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "That the arguments always validate, because the provider checks every call against the schema.",
+          "correct": false,
+          "feedback": "Without strict mode the provider treats the schema as guidance; its guide calls non-strict adherence best effort."
+        },
+        {
+          "key": "b",
+          "text": "Nothing firm: adherence is best effort, so invalid arguments can still reach the handler.",
+          "correct": true,
+          "feedback": "Right. OpenAI's guide says strict mode makes calls reliably adhere instead of being best effort, and Chat Completions stays non-strict by default."
+        },
+        {
+          "key": "c",
+          "text": "That the arguments are valid JSON but may break the schema only in their types.",
+          "correct": false,
+          "feedback": "Without strict mode no part of the schema is guaranteed; any field can be missing or wrong."
+        },
+        {
+          "key": "d",
+          "text": "That the model calls the function on every turn of the conversation.",
+          "correct": false,
+          "feedback": "The schema constrains the arguments of a call, not whether a call happens."
+        }
+      ],
+      "explanation": "Section 8: the guarantee comes from strict mode (or constrained decoding), not from the schema alone. Without it, the arguments are validated at the boundary, as the companion's `validate` does, and errors go back to the model in a retry.",
+      "hints": [
+        "Ask what the provider's guide says about calls when strict mode is off.",
+        "Then ask which API keeps strict mode off unless it is requested."
+      ]
+    },
+    {
+      "id": "ctx-015-q05",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "permissions",
+        "capability-scoping"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent can call `issue_refund`. Refunds over 1,000 dollars must have a manager's sign-off. Which design enforces that limit?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A numbered rule in the system prompt: \"Never refund more than 1,000 dollars without a manager.\"",
+          "correct": false,
+          "feedback": "A prompt rule is followed most of the time and missed some of the time; nothing stops a call that ignores it."
+        },
+        {
+          "key": "b",
+          "text": "The refund tool's own code checks the amount and refuses anything over 1,000 dollars.",
+          "correct": true,
+          "feedback": "Right. Capability scoping puts the limit where the model cannot bypass it, as the quickstart's refund rules do."
+        },
+        {
+          "key": "c",
+          "text": "A worked example in the tool description showing a 500-dollar refund.",
+          "correct": false,
+          "feedback": "An example shows a well-formed call; it does not stop a 5,000-dollar one."
+        },
+        {
+          "key": "d",
+          "text": "An `enum` of allowed amounts in the input schema, without strict mode.",
+          "correct": false,
+          "feedback": "Without strict mode the schema is guidance, and an enum of amounts is no substitute for a check in code."
+        }
+      ],
+      "explanation": "Section 6: the prompt is not a permission system. A limit is enforced by capability scoping in the tool or host, with confirmation for irreversible actions and an audit log behind both.",
+      "hints": [
+        "Which of these still holds if the model ignores an instruction?"
+      ]
+    },
+    {
+      "id": "ctx-015-q06",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "budget",
+        "pricing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A fifty-tool catalogue is estimated at 6,348 tokens per call. At an input rate of 3 dollars per million tokens, with no caching, what does the catalogue cost per call, and over 10,000 calls?",
+      "answer": {
+        "parts": [
+          {
+            "label": "per call",
+            "value": 0.019044,
+            "tolerance": 5e-05,
+            "unit": "dollars"
+          },
+          {
+            "label": "over 10,000 calls",
+            "value": 190.44,
+            "tolerance": 0.5,
+            "unit": "dollars"
+          }
+        ]
+      },
+      "precision_note": "6,348 x 3 / 1,000,000 = 0.019044 dollars, the snippet's catalog_cost_usd line; times 10,000 = 190.44. Roundings such as 0.019 and 190 are accepted. Pricing per thousand tokens instead gives a figure 1,000 times too large; the o200k_base count, 5,680, gives 0.01704.",
+      "explanation": "Section 4 quotes the run: 6,348 estimated tokens at 3 dollars per million cost 0.019044 dollars per call, and the catalogue is paid again on every call, so 10,000 calls cost 190.44 dollars before any user text.",
+      "hints": [
+        "Convert the rate to dollars per token first.",
+        "Multiply the per-call cost by the number of calls."
+      ]
+    },
+    {
+      "id": "ctx-015-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "1",
+      "est_minutes": 5,
+      "tags": [
+        "budget",
+        "tool-use-system-prompt"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A selection step leaves five tool schemas of 681 estimated tokens in layer 02. Anthropic's API also adds a tool-use system prompt of 496 tokens whenever tools are present (Claude Sonnet 4.5, automatic tool choice). At 3 dollars per million input tokens, uncached, what do the tool-related tokens cost per call, and what percentage of them is the tool-use system prompt?",
+      "answer": {
+        "parts": [
+          {
+            "label": "cost per call",
+            "value": 0.003531,
+            "tolerance": 5e-05,
+            "unit": "dollars"
+          },
+          {
+            "label": "share of the tool-use system prompt",
+            "value": 42.1,
+            "tolerance": 0.5,
+            "unit": "percent"
+          }
+        ]
+      },
+      "precision_note": "(681 + 496) = 1,177 tokens; 1,177 x 3 / 1,000,000 = 0.003531 dollars; 496 / 1,177 = 42.1 percent; 0.0035 and 42 are accepted. Dividing 496 by 681 instead gives 72.8.",
+      "explanation": "Section 1 quotes the 496-token tool-use system prompt from Anthropic's page; section 4's run gives 681 tokens for the five selected schemas. Once a catalogue is cut to a handful, the fixed overhead becomes a large share of what tools cost.",
+      "hints": [
+        "Add the two token counts before pricing.",
+        "The share is the system prompt over the total, not over the schemas."
+      ]
+    },
+    {
+      "id": "ctx-015-q08",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 5,
+      "tags": [
+        "iron-triangle",
+        "budget"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In the post's toy catalogue a rich tool averages 126.96 estimated tokens and a thin one 48.6. With no selection step and a layer 02 budget of 1,500 tokens, how many whole tools fit of each kind?",
+      "answer": {
+        "parts": [
+          {
+            "label": "rich tools",
+            "value": 11,
+            "tolerance": 0,
+            "unit": "tools"
+          },
+          {
+            "label": "thin tools",
+            "value": 30,
+            "tolerance": 0,
+            "unit": "tools"
+          }
+        ]
+      },
+      "precision_note": "6,348 / 50 = 126.96 and 2,430 / 50 = 48.6 (the snippet's totals); floor(1,500 / 126.96) = 11 and floor(1,500 / 48.6) = 30. Rounding to nearest gives 12 and 31, which overrun the budget.",
+      "explanation": "Section 2: without selection, catalogue size times tokens per tool must fit the budget, so a design keeps rich descriptions with about 11 tools or a larger catalogue of about 30 thin ones. Keeping both size and quality needs runtime selection.",
+      "hints": [
+        "Divide the budget by the tokens per tool.",
+        "A tool that does not fit whole does not fit: round down."
+      ]
+    },
+    {
+      "id": "ctx-015-q09",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "mcp",
+        "context-cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In one sentence: an application moves its 40 inline tool definitions behind a local MCP server and connects to it as a host. Why does the number of tokens the model reads per call not fall?",
+      "answer": {
+        "model": "Because the host still passes every tool's name, description and input schema to the model in layer 02, so the same definition text is sent either way; MCP changes how the tools are connected, not what the model reads.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?=[\\s\\S]*\\b(the|a|an|is|are|was|be|it|its|they|them|their|this|because|so|since|each|every|all|of|to|in|by|for|from|into|on|with|what|how|whether|whatever)\\b)(?![\\s\\S]*\\b(no longer|not|never|n't|nor)\\s+(be\\s+|get\\s+|are\\s+|is\\s+)?(sent|passed|included|loaded|read|shown|listed|seen|in the (prompt|window|context))\\b)(?![\\s\\S]*\\b(mcp|the protocol|the server)\\s+(compress\\w*|shrink\\w*|shorten\\w*|summari[sz]\\w*|cache\\w*)\\b)(?=[\\s\\S]*\\b(definitions?|schemas?|descriptions?|tools?|tool list|text|names?)\\b)(?=[\\s\\S]*\\b(same|still|either way|regardless|anyway|as before|unchanged|identical|whichever|whether|both ways|in both cases|no matter)\\b)(?=[\\s\\S]*\\b(sent|send|sends|passed|passes|pass|included|includes|loaded|loads|read|reads|sees|see|shown|go|goes|reach|reaches|land|lands|enter|enters|prompt|window|context|layer 02|input)\\b)[\\s\\S]{25,}"
+        ]
+      },
+      "explanation": "Section 5: the client lists the server's tools and the host passes them on as layer 02 text, so MCP changes the integration cost, never the context cost. A large server needs runtime selection just as a large inline catalogue does.",
+      "hints": [
+        "Follow a tool definition from the server to the model's window."
+      ]
+    },
+    {
+      "id": "ctx-015-q10",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "selection",
+        "trim"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In one sentence, why does the companion's `trim(tools, keep=5)` not count as a selection step, even though it cuts layer 02 to five tools?",
+      "answer": {
+        "model": "Because it keeps the first five tools in catalogue order without looking at the turn, so the tools kept are not chosen for their relevance to the request.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?=[\\s\\S]*\\b(the|a|an|is|are|was|be|it|its|they|them|their|this|because|so|since|each|every|all|of|to|in|by|for|from|into|on|with|what|how|whether|whatever)\\b)(?![\\s\\S]*\\b(it|trim)\\s+(ranks|scores|rates|sorts|selects|chooses|picks|keeps|finds|returns|takes)\\b(?:(?!\\bnot\\b|n't\\b|\\bwithout\\b|\\bregardless\\b|\\bignor)[^.;\\n])*?\\b(relevan\\w*|match\\w*\\s+(the\\s+)?(request|turn|query|user|question)|by\\s+(its\\s+|their\\s+)?score|against\\s+the\\s+(request|turn|query|user|question|message))\\b)(?![\\s\\S]*\\b(always|guaranteed to be)\\s+(the\\s+)?(right|correct|best|relevant)\\b)(?=[\\s\\S]*\\b(first|order|place|places|rather than|not by|position|positions|catalogue order|catalog order|list order|arbitrar\\w*|blind\\w*|ignor\\w*|regardless|without (looking|considering|regard|reading|checking|using|scoring)|not based on|does ?n[o']t (look|consider|read|check|use|score|depend)|no (regard|reference|scoring|ranking)|whatever|irrespective|independent\\w*)\\b)(?=[\\s\\S]*\\b(turn|request|query|relevan\\w*|user|question|task|message|asked|asks|needs?|conversation)\\b)[\\s\\S]{25,}"
+        ]
+      },
+      "explanation": "Section 4's run shows it: for a turn about a missing shipment, trim keeps five order tools (644 tokens) and no shipment tool, while the scored selection keeps four tools that fit the turn. A cut lowers the bill; only a selection keeps the right tools.",
+      "hints": [
+        "Ask what information trim uses to decide which tools stay."
+      ]
+    },
+    {
+      "id": "ctx-015-q11",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o1",
+        "o4"
+      ],
+      "section": "3",
+      "est_minutes": 12,
+      "tags": [
+        "validation",
+        "json-schema",
+        "enum"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "`check_args` validates a tool call's arguments against the subset of JSON Schema a tool uses. It misses two things section 3 relies on: an argument the schema does not declare passes even when `additionalProperties` is false, and `True` passes as a number or an integer (in Python, `bool` is a subclass of `int`). Fix both without changing the other checks or the error strings.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "def check_args(args, schema):\n    \"\"\"Return a list of error strings for a tool call's arguments; an empty list means they are valid.\n\n    Checks the subset a tool schema uses: required properties, a type per property (\"string\", \"integer\",\n    \"number\", \"boolean\"), enum values, and additionalProperties: false.\n    \"\"\"\n    types = {\"string\": str, \"integer\": int, \"number\": (int, float), \"boolean\": bool}\n    errors = []\n    props = schema.get(\"properties\", {})\n    for name in schema.get(\"required\", []):\n        if name not in args:\n            errors.append(f\"missing {name}\")\n    for name, value in args.items():\n        spec = props.get(name)\n        if spec is None:\n            continue\n        if not isinstance(value, types[spec[\"type\"]]):\n            errors.append(f\"{name}: wrong type\")\n        elif \"enum\" in spec and value not in spec[\"enum\"]:\n            errors.append(f\"{name}: not in enum\")\n    return errors\n",
+      "solution": "def check_args(args, schema):\n    \"\"\"Return a list of error strings for a tool call's arguments; an empty list means they are valid.\n\n    Checks the subset a tool schema uses: required properties, a type per property (\"string\", \"integer\",\n    \"number\", \"boolean\"), enum values, and additionalProperties: false.\n    \"\"\"\n    types = {\"string\": str, \"integer\": int, \"number\": (int, float), \"boolean\": bool}\n    errors = []\n    props = schema.get(\"properties\", {})\n    for name in schema.get(\"required\", []):\n        if name not in args:\n            errors.append(f\"missing {name}\")\n    for name, value in args.items():\n        spec = props.get(name)\n        if spec is None:\n            if schema.get(\"additionalProperties\") is False:\n                errors.append(f\"{name}: not allowed\")\n            continue\n        if isinstance(value, bool) and spec[\"type\"] != \"boolean\":\n            errors.append(f\"{name}: wrong type\")\n        elif not isinstance(value, types[spec[\"type\"]]):\n            errors.append(f\"{name}: wrong type\")\n        elif \"enum\" in spec and value not in spec[\"enum\"]:\n            errors.append(f\"{name}: not in enum\")\n    return errors\n",
+      "tests": "SCHEMA = {\n    \"type\": \"object\",\n    \"properties\": {\n        \"order_id\": {\"type\": \"string\"},\n        \"amount\": {\"type\": \"number\"},\n        \"status\": {\"type\": \"string\", \"enum\": [\"open\", \"shipped\", \"closed\"]},\n        \"notify\": {\"type\": \"boolean\"},\n    },\n    \"required\": [\"order_id\"],\n    \"additionalProperties\": False,\n}\n\nassert check_args({\"order_id\": \"A-4821\", \"amount\": 19.5, \"status\": \"open\", \"notify\": True}, SCHEMA) == []\nassert check_args({\"order_id\": \"A-4821\", \"amount\": 20}, SCHEMA) == []          # an integer is a number\n\n# An invented argument is rejected when additionalProperties is false ...\nassert check_args({\"order_id\": \"A-4821\", \"refund_all\": True}, SCHEMA) == [\"refund_all: not allowed\"]\nassert check_args({\"order_id\": \"A-4821\", \"orderId\": \"x\", \"note\": \"y\"}, SCHEMA) == [\n    \"orderId: not allowed\", \"note: not allowed\"]\n# ... and allowed when the schema does not forbid it.\nOPEN = dict(SCHEMA, additionalProperties=True)\nassert check_args({\"order_id\": \"A-4821\", \"note\": \"gift\"}, OPEN) == []\nassert check_args({\"order_id\": \"A-4821\", \"note\": \"gift\"}, {k: v for k, v in SCHEMA.items() if k != \"additionalProperties\"}) == []\n\n# A boolean is not a number, as in JSON Schema.\nassert check_args({\"order_id\": \"A-4821\", \"amount\": True}, SCHEMA) == [\"amount: wrong type\"]\nassert check_args({\"order_id\": \"A-4821\", \"notify\": 1}, SCHEMA) == [\"notify: wrong type\"]\nINT = {\"type\": \"object\", \"properties\": {\"qty\": {\"type\": \"integer\"}}}\nassert check_args({\"qty\": 3}, INT) == []\nassert check_args({\"qty\": True}, INT) == [\"qty: wrong type\"]   # nor an integer\nassert check_args({\"qty\": False}, INT) == [\"qty: wrong type\"]\nassert check_args({\"order_id\": \"B-1177\", \"coupon\": \"X\"}, SCHEMA) == [\"coupon: not allowed\"]\n\n# The checks that already worked still work.\nassert check_args({}, SCHEMA) == [\"missing order_id\"]\nassert check_args({\"order_id\": \"A-4821\", \"status\": \"Shipped\"}, SCHEMA) == [\"status: not in enum\"]\nassert check_args({\"order_id\": 4821}, SCHEMA) == [\"order_id: wrong type\"]\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 3 sets `additionalProperties` to false so an invented argument fails, and section 4's last run line shows the companion's validator rejecting one. The rejection must depend on the flag (an open schema allows extra properties), and a boolean must not satisfy a number type, as in JSON Schema. Errors from such a check go back to the model in a retry (section 8).",
+      "hints": [
+        "An argument whose name is not in `properties` reaches `continue` without any check.",
+        "Test the schema's `additionalProperties` value there, and add a boolean test before the general type test."
+      ]
+    },
+    {
+      "id": "ctx-015-q12",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "selection",
+        "pipeline"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the steps of runtime tool selection in order, from preparing a large catalogue to the model's call.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Re-rank the candidates against the turn and keep the top few"
+        },
+        {
+          "key": "b",
+          "text": "Index every schema offline: name, description and parameter descriptions"
+        },
+        {
+          "key": "c",
+          "text": "Pack the kept schemas, plus a few essential tools, into the request"
+        },
+        {
+          "key": "d",
+          "text": "Rewrite the user turn into a self-contained query"
+        },
+        {
+          "key": "e",
+          "text": "Retrieve candidate schemas for the query"
+        },
+        {
+          "key": "f",
+          "text": "Send the request and log the selection with its scores in the trace"
+        }
+      ],
+      "answer": [
+        "b",
+        "d",
+        "e",
+        "a",
+        "c",
+        "f"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 4 runs the select pipeline of post 09 over tool schemas: an offline index, then per turn a rewritten query, candidates, re-ranking and packing, with essential tools always included and every selection logged for later debugging.",
+      "hints": [
+        "Only one step happens before any user turn arrives.",
+        "Nothing can be re-ranked before candidates exist, and nothing is logged before it is chosen."
+      ]
+    },
+    {
+      "id": "ctx-015-q13",
+      "type": "match",
+      "track": "connect",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 4,
+      "tags": [
+        "mcp",
+        "layers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each item a host handles to the layer of the six where it enters the model's window. One layer matches nothing.",
+      "connects": [
+        "ctx-002",
+        "ctx-012"
+      ],
+      "left": [
+        {
+          "key": "a",
+          "text": "The input schemas a server's tools/list returns"
+        },
+        {
+          "key": "b",
+          "text": "A resource the host attaches as evidence for this call"
+        },
+        {
+          "key": "c",
+          "text": "A prompt template the user picks from a slash-command menu"
+        },
+        {
+          "key": "d",
+          "text": "The result of a tool call made earlier in the session"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "02 Tools and MCP descriptions"
+        },
+        {
+          "key": "b",
+          "text": "04 Retrieved chunks"
+        },
+        {
+          "key": "c",
+          "text": "06 User instruction"
+        },
+        {
+          "key": "d",
+          "text": "05 Conversation history"
+        },
+        {
+          "key": "e",
+          "text": "01 System prompt"
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "c",
+        "d": "d"
+      },
+      "explanation": "Section 5 places the three primitives: tools are model-controlled and their schemas are layer 02; resources are attached by the application, for example as layer 04; prompts are picked by the user and become layer 06. A tool result is appended to the conversation and travels with layer 05, which is why post 12 clears old tool results from it. The system prompt holds rules, not server content.",
+      "hints": [
+        "For each item, ask who put it there and when: before the session, for this call, or earlier in the session."
+      ]
+    },
+    {
+      "id": "ctx-015-q14",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o1",
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 15,
+      "tags": [
+        "catalogue",
+        "design",
+        "selection"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A support agent is connected to nine MCP servers exposing 180 tools in total, all sent on every call; the tool definitions are cached in the prefix. Users report wrong tools being called and long, looping tool sequences. Many descriptions are one line, and several servers each have a `search` tool. Propose the changes in the order to make them, say which symptom each addresses, and say what each does to the token bill and to the prompt cache.",
+      "kind": "design",
+      "answer_length": "half a page",
+      "solution": "1. **Rewrite the descriptions first** (section 3): verb_object names with a service prefix so the `search` tools differ, a summary, when to use, when not to (naming the neighbour), typed parameters with enums and `additionalProperties: false`, an example. This addresses wrong-tool calls (confusion) and makes any later retrieval over the schemas work. It raises the tokens per tool.\n2. **Add runtime selection** (section 4): index each schema (name, description, parameter descriptions) offline; per turn, rewrite the query, retrieve candidates, re-rank, and pack a handful plus a few essential tools. This addresses the loops (tool-storm) by shrinking the choice, and cuts layer 02 by roughly the share of tools dropped.\n3. **Protect the cache**: selection that rewrites layer 02 every call breaks the cached prefix, and the full catalogue was cheap to read from cache. Keep a fixed core of frequent tools in the prefix and add selected tools after it, for example with deferred loading as in Anthropic's tool search tool.\n4. **Add a stop budget and log selections** (post 06, section 6): a cap on tool calls per turn, and each turn's selection with scores in the trace, so a missing tool can be diagnosed.\n5. Measure tool-call accuracy and calls per turn before and after each change.",
+      "rubric": [
+        {
+          "criterion": "Rewrites descriptions with the six parts, distinct prefixed names and enums, tied to the wrong-tool symptom",
+          "points": 2
+        },
+        {
+          "criterion": "Adds a selection pipeline (index of full schemas, query, candidates, re-rank, pack, essential tools) tied to the looping symptom",
+          "points": 2
+        },
+        {
+          "criterion": "States that per-call selection in layer 02 breaks the cached prefix and proposes a fixed core or adding selected tools after the prefix",
+          "points": 2
+        },
+        {
+          "criterion": "Says what each change does to the token bill (richer descriptions cost more per tool; selection cuts the count)",
+          "points": 2
+        },
+        {
+          "criterion": "Adds logging or a stop budget and a measurement of the result",
+          "points": 2
+        }
+      ],
+      "explanation": "Sections 2 to 4: with a large catalogue, rich descriptions and no selection, layer 02 overflows into tool-storm; thin descriptions cause confusion. Fixing descriptions first makes selection reliable; selection must then be designed around the prompt cache.",
+      "hints": [
+        "Separate the two symptoms and map each to one of post 06's failure modes.",
+        "Remember that the catalogue is in the cached prefix today."
+      ]
+    },
+    {
+      "id": "ctx-015-q15",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o3",
+        "o5"
+      ],
+      "section": "5",
+      "est_minutes": 15,
+      "tags": [
+        "mcp",
+        "permissions",
+        "critique"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Critique the companion quickstart's `check_refund` tool as a production design: it takes `order_id` and `amount_usd` from the model and looks the order up server-side, has a one-sentence docstring, and returns `eligible`, `requires_manager_approval` and `reason`. Name each weakness, the attack or mistake it allows, and the redesign, drawing on post 23's view of tools as an attack surface and post 13's sandboxing where they apply.",
+      "connects": [
+        "ctx-023",
+        "ctx-013"
+      ],
+      "kind": "critique",
+      "answer_length": "half a page",
+      "solution": "- **Facts looked up, not taken.** The tool takes only the id and the amount and reads the order's total, age and refund status from its own store, so the rule is capability scoping in code (section 6). Had it taken those facts from the model, as its first version did, a wrong or injected argument (post 23) would pass the check: a `total_usd` of 5,000 makes a 1,500-dollar refund eligible. Keep the lookup; never add the facts as parameters.\n- **The description.** One sentence with no when-to-use or when-not-to-use line (section 3); next to an `issue_refund` tool the model will confuse checking with issuing. Redesign: the six parts, naming the issuing tool as the one not to use.\n- **Checking is not acting.** The tool only advises; the boundary must also sit in the tool that moves money, with a confirmation from the user for an irreversible refund and a manager approval path, enforced by the host (section 6; the MCP specification asks hosts for consent before invoking a tool).\n- **Audit.** Log every call with arguments, result and session, so a misuse can be traced.\n- **Output.** The structured three-field result is already the sandboxing shape post 13 recommends; keep it small and never return raw order records.\n- **Trust of the server.** A host should treat descriptions from an untrusted server as untrusted; pin and review this server's version.",
+      "rubric": [
+        {
+          "criterion": "Identifies that looking the order up by id keeps model-supplied facts out of the rule, and names what a caller-supplied total would let through",
+          "points": 3
+        },
+        {
+          "criterion": "Identifies the incomplete description and its confusion risk next to a refund-issuing tool",
+          "points": 2
+        },
+        {
+          "criterion": "Places enforcement in the acting tool and host: confirmation, approval path, audit log",
+          "points": 2
+        },
+        {
+          "criterion": "Connects to post 13 (small structured output) and post 23 (tools as attack surface, untrusted descriptions)",
+          "points": 2
+        }
+      ],
+      "explanation": "Section 5 notes the two shortcuts the quickstart takes; section 6 says limits are enforced in code and the prompt is not a permission system; posts 13 and 23 supply the output-scoping and attack-surface views.",
+      "hints": [
+        "Ask which argument values the model could get wrong or be told to get wrong.",
+        "Then ask where the rule is enforced if the model never calls `check_refund` at all."
+      ]
+    },
+    {
+      "id": "ctx-015-q16",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "8",
+      "est_minutes": 3,
+      "tags": [
+        "structured-output",
+        "tools"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Which task is the clearest case for a structured response field (`response_format`, `text.format` or `output_config.format`) rather than a tool?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Label every incoming ticket with one of five categories, always as one object.",
+          "correct": true,
+          "feedback": "Right. There is exactly one shape the answer must take on every call, which is what the structured-response field is for."
+        },
+        {
+          "key": "b",
+          "text": "Answer a customer, and look up an order or open a ticket only when the conversation needs it.",
+          "correct": false,
+          "feedback": "Here the model chooses whether and which action to take, possibly none: that is a menu of tools."
+        },
+        {
+          "key": "c",
+          "text": "Decide among refunding, escalating or replying, and carry out the chosen action.",
+          "correct": false,
+          "feedback": "Choosing among actions and executing one is what tool calling is for."
+        },
+        {
+          "key": "d",
+          "text": "Fetch the current weather whenever the user happens to ask about it.",
+          "correct": false,
+          "feedback": "Fetching live data is an action the model triggers when needed: a tool."
+        }
+      ],
+      "explanation": "Section 8's rule: one always-required shape (a label, an extraction, a filled form) goes through the structured-response field; a choice among optional actions goes through tools. Forcing the single answer through a dummy tool works but muddies the trace.",
+      "hints": [
+        "Ask whether the model is choosing an action, or only shaping its answer.",
+        "Look for the task where the same single shape is returned on every call."
+      ]
+    },
+    {
+      "id": "ctx-015-q17",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "permissions",
+        "prompt"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "In one sentence, why is the line \"Never refund more than 1,000 dollars without a manager\" in the system prompt not a permission boundary?",
+      "answer": {
+        "model": "Because the model follows an instruction only most of the time and can be tricked or simply miss it, while nothing stops the call, so the limit has to be enforced in code by the tool or the host.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?=[\\s\\S]*\\b(the|a|an|is|are|was|be|it|its|they|them|their|this|because|so|since|each|every|all|of|to|in|by|for|from|into|on|with|what|how|whether|whatever)\\b)(?![\\s\\S]*\\b(model|it|claude|llm)\\s+(always|will always|reliably)\\s+(obey|follow|respect)\\w*)(?![\\s\\S]*\\b(1,?000|the limit|the amount)\\s+(is|are)\\s+(too|wrong)\\b)(?![\\s\\S]*\\b(it|the line|this|that|the rule|the prompt)\\s+(is|works as|acts as)\\s+a\\s+(real\\s+)?(permission\\s+)?boundary\\b)(?=[\\s\\S]*\\b(ignor\\w*|miss\\w*|skip\\w*|disobey\\w*|overrid\\w*|break\\w*|broken|forget\\w*|forgot|trick\\w*|manipulat\\w*|inject\\w*|not always|sometimes|most of the time|can fail|may fail|might fail|fails|not (guaranteed|enforced|binding)|no guarantee|nothing (enforces|stops|prevents|checks)|request|suggestion|only (asks|a request|text|words|guidance)|just (text|words|a request|guidance|an instruction)|enforc\\w*|in code|code (check|enforces|path)|the (host|tool|server) (check|enforce)\\w*|probabilistic)\\b)[\\s\\S]{25,}"
+        ]
+      },
+      "explanation": "Section 6: a prompt rule is followed most of the time and missed some of the time, and an injected message can override it; the host or tool enforces the limit every time. The quickstart's refund rules show the code version.",
+      "hints": [
+        "Ask what happens on the one call where the model does not follow the line.",
+        "Then ask what would stop that call."
+      ]
+    }
+  ]
+}
