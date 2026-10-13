@@ -4,13 +4,21 @@ from __future__ import annotations
 import os
 from openai import OpenAI
 
-_oai = OpenAI()
+_client: OpenAI | None = None
+
+
+def _oai() -> OpenAI:
+    """Build the client on first use, so importing this module needs no API key."""
+    global _client
+    if _client is None:
+        _client = OpenAI()
+    return _client
 
 
 def small_llm(prompt: str, *, model: str | None = None) -> str:
     """Cheap, deterministic completion. Used for chunk-header generation."""
     model = model or os.environ.get("RAG_HEADER_MODEL", "gpt-4o-mini")
-    resp = _oai.chat.completions.create(
+    resp = _oai().chat.completions.create(
         model=model,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.0,
@@ -22,7 +30,7 @@ def small_llm(prompt: str, *, model: str | None = None) -> str:
 def chat_llm(messages: list[dict], *, model: str | None = None) -> dict:
     """Main generation call. Returns answer + token usage."""
     model = model or os.environ.get("RAG_GENERATION_MODEL", "gpt-4o-mini")
-    resp = _oai.chat.completions.create(
+    resp = _oai().chat.completions.create(
         model=model,
         messages=messages,
         temperature=0.0,

@@ -5,7 +5,7 @@ def test_rrf_merge_prefers_consistently_top_items():
     a = ["x", "y", "z"]
     b = ["y", "x", "z"]
     merged = rrf_merge([a, b])
-    # 'y' appears at rank 0 and 0; 'x' at 0 and 1; both should beat 'z'.
+    # 'x' is at ranks 0 and 1, 'y' at 1 and 0: they tie, and both beat 'z'.
     assert merged[-1] == "z"
     assert set(merged[:2]) == {"x", "y"}
 

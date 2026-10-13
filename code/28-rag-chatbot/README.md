@@ -1,8 +1,8 @@
-# 22 · RAG Chatbot — runnable companion
+# 28 - RAG Chatbot: runnable companion
 
-A small, framework-light RAG chatbot in Python. Implements every step from [Post 28](../../posts/28-build-rag-chatbot/index.md): chunking with overlap, contextual headers, hybrid retrieval (dense + BM25) with reciprocal rank fusion, cross-encoder reranking, bookend packing with citations, and a four-metric eval harness.
+A small, framework-light RAG chatbot in Python. Implements every step from [Post 28 - Build #1: RAG chatbot from scratch](../../posts/28-build-rag-chatbot/index.md): chunking with overlap, contextual headers, hybrid retrieval (dense + BM25) with reciprocal rank fusion, cross-encoder reranking, bookend packing with citations, and a four-metric eval harness.
 
-Designed to be readable end-to-end in one sitting (~350 lines total).
+Designed to be readable end-to-end in one sitting (329 lines in src/rag).
 
 ## Quickstart
 
@@ -20,9 +20,9 @@ Then ask a question at the `>` prompt.
 
 The starter uses three providers by default; swap freely.
 
-- `OPENAI_API_KEY` — generation (`gpt-4o-mini`).
-- `VOYAGE_API_KEY` — embeddings (`voyage-3-lite`).
-- `COHERE_API_KEY` — reranking (`rerank-english-v3.0`).
+- `OPENAI_API_KEY`: generation (`gpt-4o-mini`).
+- `VOYAGE_API_KEY`: embeddings (`voyage-3-lite`).
+- `COHERE_API_KEY`: reranking (`rerank-english-v3.0`).
 
 Cheaper / local alternatives:
 
@@ -70,7 +70,7 @@ Prints the four Ragas metrics (faithfulness, answer relevancy, context precision
 - It is not multi-turn. Append last-N turns + a query rewriter at the top
   of `answer()` for conversation memory; the post explains the shape.
 
-See [Post 28 §8](../../posts/28-build-rag-chatbot/index.md) for the full list of extensions and where each principle in this code traces back to.
+See [Post 28 - Build #1: RAG chatbot from scratch](../../posts/28-build-rag-chatbot/index.md), section 9, for the full list of extensions and where each principle in this code traces back to.
 
 ## License
 

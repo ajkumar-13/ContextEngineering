@@ -1,6 +1,6 @@
 """Hybrid retrieval (dense + BM25) -> RRF -> cross-encoder rerank.
 
-The four-stage pipeline from Post 08, §1.
+The four-stage pipeline from post 09, section 1.
 """
 from __future__ import annotations
 
@@ -15,8 +15,24 @@ from rank_bm25 import BM25Okapi
 
 from .ingest import COLL
 
-_vo = voyageai.Client()
-_co = cohere.Client()
+_voyage = None
+_cohere = None
+
+
+def _vo():
+    """The Voyage client, built on first use so importing needs no API key."""
+    global _voyage
+    if _voyage is None:
+        _voyage = voyageai.Client()
+    return _voyage
+
+
+def _co():
+    """The Cohere client, built on first use so importing needs no API key."""
+    global _cohere
+    if _cohere is None:
+        _cohere = cohere.Client()
+    return _cohere
 _TOKEN_RE = re.compile(r"[A-Za-z0-9_]+")
 
 
@@ -26,7 +42,7 @@ def _tokenize(text: str) -> list[str]:
 
 @lru_cache(maxsize=1)
 def _all_docs() -> tuple[list[str], list[str], list[dict]]:
-    got = COLL.get(include=["documents", "metadatas"])
+    got = COLL().get(include=["documents", "metadatas"])
     return got["ids"], got["documents"], got["metadatas"]
 
 
@@ -50,8 +66,8 @@ def rrf_merge(rankings: list[list[str]], *, k: int = 60) -> list[str]:
 
 
 def hybrid(query: str, *, top_n: int = 50) -> list[dict]:
-    q_emb = _vo.embed([query], model=os.environ.get("RAG_EMBED_MODEL", "voyage-3-lite")).embeddings[0]
-    dense = COLL.query(query_embeddings=[q_emb], n_results=top_n)
+    q_emb = _vo().embed([query], model=os.environ.get("RAG_EMBED_MODEL", "voyage-3-lite")).embeddings[0]
+    dense = COLL().query(query_embeddings=[q_emb], n_results=top_n)
     dense_ids = dense["ids"][0]
     ids, docs, metas = _all_docs()
     bm25 = _bm25()
@@ -68,7 +84,7 @@ def rerank(query: str, candidates: list[dict], *, k: int = 5) -> list[dict]:
         return []
     if not os.environ.get("COHERE_API_KEY"):
         return candidates[:k]
-    resp = _co.rerank(
+    resp = _co().rerank(
         model=os.environ.get("RAG_RERANK_MODEL", "rerank-english-v3.0"),
         query=query,
         documents=[c["text"] for c in candidates],

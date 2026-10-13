@@ -7,5 +7,5 @@ approval and are routed to the billing queue.
 Refunds for annual plans are pro-rated. Refunds for monthly plans are
 all-or-nothing for the current period.
 
-Office hours for human review are 09:00–18:00 IST, weekdays. Out-of-hours
+Office hours for human review are 09:00 to 18:00 IST, weekdays. Out-of-hours
 requests are processed the next business day.

@@ -18,7 +18,7 @@ def answer(query: str, *, k: int = 5) -> dict:
 
 
 def main() -> None:
-    print("rag chatbot — empty line to quit")
+    print("rag chatbot: empty line to quit")
     while True:
         try:
             q = input("> ").strip()

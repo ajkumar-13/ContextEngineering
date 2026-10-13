@@ -1,4 +1,4 @@
-"""RAG chatbot package — companion to Post 22."""
+"""RAG chatbot package: companion to post 28."""
 from dotenv import load_dotenv
 
 load_dotenv()
