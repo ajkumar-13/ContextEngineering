@@ -1,77 +1,25 @@
 id: ctx-021
-slug: 21-structured-output-and-guardrails
-title: "21 · Structured Output and Guardrails"
-
-description: >
-  Learn how to make LLM responses reliable, typed, and production-ready using
-  JSON Schema, response_format, tool calling, constrained decoding, validation,
-  retry loops, and runtime guardrails. Explore schema enforcement, moderation,
-  PII filtering, and output safety for AI applications.
-
-author: "Ajay"
-
+slug: 21-structured-output-guardrails
+title: "21 - Structured output and guardrails"
+summary: "How to make model output typed and valid: the ladder from a prompt instruction up to constrained decoding, a capped validate-and-retry loop, and an output guardrail layer that enforces rules on every live response."
 date: 2026-05-20
-last_modified: 2026-05-20
-
-tags:
-  - structured-output
-  - guardrails
-  - json-schema
-  - response-format
-  - tool-calling
-  - constrained-decoding
-  - validation
-  - ai-agents
-  - llm-engineering
-  - production-ai
-
-category: Production Systems
-series: Context Engineering
+updated: 2026-10-13
+status: complete
 part: "Part IV - Production-grade practice"
-chapter: "Part IV — Production & Deployment"
-
-hero: diagrams/00-hero-structured-output-guardrails.svg
-hero_alt: "Response validation pipeline showing schema validation, retry loop, moderation, PII filtering, and safe structured output"
-
-reading_time: 20
-
-toc: true
-draft: false
-
-keywords:
-  - Structured Output
-  - Guardrails
-  - JSON Schema
-  - response_format
-  - Tool Calling
-  - Tool Choice
-  - Function Calling
-  - Grammar Constrained Decoding
-  - Constrained Decoding
-  - JSON Mode
-  - Strict Mode
-  - Schema Validation
-  - Output Validation
-  - Validate and Retry
-  - Retry Loop
-  - Pydantic
-  - Instructor
-  - Outlines
-  - Structured Responses
-  - AI Safety
-  - Content Moderation
-  - PII Filtering
-  - Personally Identifiable Information
-  - Refusal Handling
-  - Runtime Validation
-  - Runtime Guardrails
-  - Guardrails AI
-  - NVIDIA NeMo Guardrails
-  - Production AI
-  - LLM Engineering
-  - AI Agents
-
-canonical_url: ""
-
-prev: ../20-evaluation/
-next: ../22-observability/
+level: intermediate
+reading_time: 17
+tags: [context-engineering, structured-output, guardrails, json-schema, constrained-decoding, tool-calling, validation]
+hero: diagrams/00-hero-response-control-loop.svg
+prerequisites: [ctx-015, ctx-020]
+code: optional
+outcomes:
+  - id: o1
+    text: "Choose an output mechanism (prompt instruction, JSON mode, a schema with or without strict mode) and name what each leaves to the application."
+  - id: o2
+    text: "Explain how constrained decoding masks tokens so the output parses, and name the failures it still lets through."
+  - id: o3
+    text: "Decide between a structured response format and a tool call steered by tool_choice by asking whether the answer is the payload or an action."
+  - id: o4
+    text: "Wire a validate-and-retry loop that feeds each validation error back, caps the attempts, and routes refusals and cut-off replies elsewhere."
+  - id: o5
+    text: "Assemble an output guardrail layer of schema, moderation, PII and refusal checks, and place it against offline evaluation and security."

@@ -1,0 +1,751 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-021",
+  "next_ordinal": 17,
+  "questions": [
+    {
+      "id": "ctx-021-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "json-mode",
+        "structured-output"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "An application turns on JSON mode (`response_format: {\"type\": \"json_object\"}`) and asks for an object with the fields `label` and `priority`. What does JSON mode guarantee about a reply that finishes normally?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The reply is valid JSON, but its fields and types are not checked against any schema.",
+          "correct": true,
+          "feedback": "Right: OpenAI's guide says both JSON mode and Structured Outputs produce valid JSON, and only Structured Outputs ensure schema adherence."
+        },
+        {
+          "key": "b",
+          "text": "The reply is valid JSON that carries exactly the two requested fields, `label` and `priority`, and no others.",
+          "correct": false,
+          "feedback": "JSON mode receives no schema, so nothing makes the reply carry those two fields; a strict schema is the rung that guarantees the shape."
+        },
+        {
+          "key": "c",
+          "text": "Nothing at all: JSON mode is only an instruction in the prompt.",
+          "correct": false,
+          "feedback": "That is the prompt-instruction rung. JSON mode is a request setting that does make a finished reply parse as JSON."
+        },
+        {
+          "key": "d",
+          "text": "The reply is valid JSON and its values are correct for the input.",
+          "correct": false,
+          "feedback": "No rung guarantees meaning; even a strict schema leaves the correctness of the values to the application."
+        }
+      ],
+      "explanation": "Section 2 places JSON mode on the second rung: the reply parses, but its shape (which fields, which types) and its meaning are still the application's to check, which is why a validator follows it.",
+      "hints": [
+        "Ask what JSON mode is told about the fields: does it ever see a schema?"
+      ]
+    },
+    {
+      "id": "ctx-021-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "strict-mode",
+        "tool-calling"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team defines a tool with a JSON Schema for its parameters and calls OpenAI's Chat Completions API without setting `strict`. Its handler reads the arguments without validating them, on the grounds that the provider checks them against the schema. Which statement is right?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Without strict mode the schema is followed on a best-effort basis, so the handler should still validate the arguments.",
+          "correct": true,
+          "feedback": "Right: OpenAI's guide says strict mode makes calls adhere to the schema instead of being best effort, and Chat Completions is non-strict by default."
+        },
+        {
+          "key": "b",
+          "text": "A tool's parameters are always validated by the provider, so validation in the handler is redundant.",
+          "correct": false,
+          "feedback": "That was the old belief the post corrects: arguments match the schema only when strict mode is on."
+        },
+        {
+          "key": "c",
+          "text": "The schema is ignored entirely unless the tool is also forced with `tool_choice`, so none of its fields or types is ever applied.",
+          "correct": false,
+          "feedback": "The schema still guides the model without strict mode; forcing a tool decides whether a call happens, not how strictly its arguments follow the schema."
+        },
+        {
+          "key": "d",
+          "text": "Chat Completions normalises every schema into strict mode, so the arguments are guaranteed.",
+          "correct": false,
+          "feedback": "That describes the Responses API, which tries to normalise a schema into strict mode; Chat Completions stays non-strict by default."
+        }
+      ],
+      "explanation": "Section 2: a schema without strict mode is the third rung, guidance rather than a guarantee. OpenAI's \"Function calling\" guide says `strict: true` makes calls reliably adhere to the schema instead of being best effort, and Chat Completions is non-strict unless it is set.",
+      "hints": [
+        "Ask which rung a schema sent without `strict` sits on.",
+        "Compare what the post says about Chat Completions and the Responses API by default."
+      ]
+    },
+    {
+      "id": "ctx-021-q03",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 4,
+      "tags": [
+        "constrained-decoding",
+        "exceptions"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "An extraction runs on Anthropic's API with `output_config.format`, a strict schema compiled into a grammar. The schema declares a string `enum` of lower-case labels and a `priority` integer, and its author also wrote `minimum: 1` and `maximum: 5`, which an SDK helper moved into the field description because the provider does not support them. Which replies can still fail the application's own validator? Select all that apply.",
+      "select": "multiple",
+      "options": [
+        {
+          "key": "a",
+          "text": "A reply whose `stop_reason` is `\"refusal\"`.",
+          "correct": true,
+          "feedback": "Yes: Anthropic's page says the refusal message takes precedence over schema constraints, so the output may not match."
+        },
+        {
+          "key": "b",
+          "text": "A reply cut off at `max_tokens` in the middle of the object.",
+          "correct": true,
+          "feedback": "Yes: the mask decides which token comes next, not how many fit; a cut-off object does not parse on any rung."
+        },
+        {
+          "key": "c",
+          "text": "A reply whose label differs from an enum value only in capitalisation.",
+          "correct": true,
+          "feedback": "Yes: Anthropic's page says structured outputs do not guarantee the capitalisation of string enum and const values."
+        },
+        {
+          "key": "d",
+          "text": "A reply with a priority of 7.",
+          "correct": true,
+          "feedback": "Yes: the range is no longer in the grammar once the unsupported keywords are dropped, so only the validator can reject 7."
+        },
+        {
+          "key": "e",
+          "text": "A complete reply with a trailing comma after the last field.",
+          "correct": false,
+          "feedback": "No: a trailing comma breaks the JSON grammar, and constrained decoding never lets a token through that leaves the grammar."
+        }
+      ],
+      "explanation": "Section 3 lists what the strict rung still lets through: the provider's documented exceptions (a refusal, a cut-off at `max_tokens`, enum capitalisation on Anthropic's page) and every rule the grammar does not contain, including keywords the provider drops. Syntax errors such as a trailing comma are exactly what the mask removes.",
+      "hints": [
+        "Separate failures of syntax from failures the grammar never encoded.",
+        "Check each option against Anthropic's three named exceptions and against the dropped keywords."
+      ]
+    },
+    {
+      "id": "ctx-021-q04",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "constrained-decoding",
+        "semantics"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In a toy constrained decoder, the model ranked a priority of 7 first, the grammar allowed only the digits 1 to 5, and the reply came out as `{\"category\": \"refund\", \"priority\": 5}`, which parses. Why is the fact that it parses no evidence that 5 is the right priority?",
+      "answer": {
+        "model": "The grammar masked 7 and the decoder took the model's best remaining allowed token, 5; constrained decoding guarantees that the reply parses (its syntax and shape), not that its values are correct.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be|unsure)\\b)(?![\\s\\S]*\\b(grammar|mask|decoder|decoding|schema|constrain\\w*)\\b[^.]{0,40}\\b(confirm|prove|guarantee|ensure|check|verif|validat)\\w*\\b(?![^.]{0,30}\\b(only|just|syntax|shape|format|structure|pars)\\w*)[^.]{0,30}\\b(5|five|value|priority|meaning|correct\\w*|right|semantic\\w*|true)\\b)(?![\\s\\S]*(?<!not that )(?<!not )(?<!whether )(?<!if )\\b(5|five) (is|was) (the )?(right|correct|true|accurate)\\b(?![^.]{0,20}\\b(not|isn'?t|unclear|unknown)\\b))(?=(?:\\S+\\s+){5}\\S)(?=[\\s\\S]*\\b(because|so|since|which|only|but|then|after|once|when|means?|guarantee\\w*|ensure\\w*|took|takes|picked|chose|chosen|fell|forced|left|is|was|are|were|came)\\b)(?![\\s\\S]*(?<!not because )(?<!not because the )(?<!not since )(?<!not since the )\\b(the )?ticket (said|says|asked for|wanted|specified) (5|five)\\b)(?=[\\s\\S]*\\b(mask\\w*|grammar|constrain\\w*|allow\\w*|forbid\\w*|filter\\w*|ruled out|exclud\\w*|block\\w*|invalid|out of range|outside|disallow\\w*|only (1|one) to (5|five))\\b)(?=[\\s\\S]*\\b(meaning|semantic\\w*|correct\\w*|right|wrong|true|truth|accura\\w*|ticket|content|second|next[- ]?(best|highest|choice|most)|best (remaining|allowed|surviving|valid|left)|surviv\\w*|left over|remain\\w*|fallback|fall back|only (valid|legal|allowed|remaining)|syntax|syntactic\\w*|shape|form|structure|pars\\w*|valid)\\b)[\\s\\S]*\\s\\S"
+        ]
+      },
+      "explanation": "Section 3: at each step the mask zeroes every token that would leave the grammar and the decoder takes the best survivor. Here 5 survived because 7 was masked, so the reply is valid by construction and may still be wrong: the residual risk moves from syntactic to semantic validity.",
+      "hints": [
+        "Ask what the decoder does when the model's first choice is not allowed.",
+        "Separate what the grammar can guarantee from what only the input can tell."
+      ]
+    },
+    {
+      "id": "ctx-021-q05",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 5,
+      "tags": [
+        "retry-loop",
+        "calls"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A capped validate-and-retry loop (at most 3 attempts; refusals and cut-off replies leave at once) handles 100 inputs. 80 replies validate first time, 12 validate on the second attempt, 4 on the third, 2 never validate, 1 is a refusal and 1 is cut off at `max_tokens` (illustrative counts). How many model calls does the loop make in all, and how many of the 100 inputs end without a valid record?",
+      "answer": {
+        "parts": [
+          {
+            "label": "model calls",
+            "value": 124,
+            "tolerance": 0,
+            "unit": "calls"
+          },
+          {
+            "label": "inputs without a valid record",
+            "value": 4,
+            "tolerance": 0,
+            "unit": "inputs"
+          }
+        ]
+      },
+      "precision_note": "80 x 1 + 12 x 2 + 4 x 3 + 2 x 3 + 1 + 1 = 124 calls, the count parse_with_retry in snippets/validate_retry.py makes; 2 exhausted + 1 refused + 1 cut off = 4. Retrying the refusal and the cut-off three times each gives 128, and counting only the exhausted inputs gives 2, the nearest wrong methods.",
+      "explanation": "Section 5: every attempt is a full call, an exhausted input spends all 3, and a refusal or a cut-off reply leaves the loop after its first call because rewording cannot fix it. Four inputs end without a record: two counted as exhausted, one routed to the refusal path and one to a larger output budget.",
+      "hints": [
+        "Count the calls per group: an input that validates on attempt n made n calls.",
+        "Refusals and cut-off replies are not retried."
+      ]
+    },
+    {
+      "id": "ctx-021-q06",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 6,
+      "tags": [
+        "retry-loop",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "On Claude Opus 4.6 (5 dollars per million input tokens, 25 per million output tokens, as of early 2026), an extraction call sends 1,200 input tokens and gets a 150-token reply. Each retry re-sends everything before it plus the failed reply (150 tokens) and the error message (50 tokens), and gets another 150-token reply (illustrative sizes, no caching). What does an input that validates on the third attempt cost, and what does one that validates first time cost? Give both in dollars to four decimal places.",
+      "answer": {
+        "parts": [
+          {
+            "label": "validates on attempt 3",
+            "value": 0.03225,
+            "tolerance": 0.0001,
+            "unit": "USD"
+          },
+          {
+            "label": "validates on attempt 1",
+            "value": 0.00975,
+            "tolerance": 0.0001,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "Inputs 1,200, 1,400 and 1,600 tokens: 4,200 x 5 / 1,000,000 = 0.021; outputs 3 x 150 x 25 / 1,000,000 = 0.01125; total 0.03225 dollars. First time: 1,200 x 5 / 1,000,000 + 150 x 25 / 1,000,000 = 0.00975. Tripling the first-time cost, ignoring the growing input, gives 0.02925, the nearest wrong method. The tolerance of 0.0001 accepts either rounding to four decimal places (0.0322 or 0.0323; 0.0097 or 0.0098) and rejects 0.02925 and 0.0315 (the error message left out of each retry).",
+      "explanation": "Section 5: a retry is a full call that carries the failed reply and the error, so each attempt's input grows by 200 tokens and each attempt is billed its own output. The third-attempt input costs 3.3 times the first-time one, which is why the rung that removes faults also lowers the bill.",
+      "hints": [
+        "List the input tokens of the three calls before pricing them.",
+        "Each call's input is the previous call's input plus 200 tokens; every call returns 150 output tokens."
+      ]
+    },
+    {
+      "id": "ctx-021-q07",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 12,
+      "tags": [
+        "retry-loop",
+        "refusals"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "`parse_with_retry` retries a reply that fails validation, but the model never learns what was wrong, and a refusal or a reply cut off at `max_tokens` is treated as a parse error and retried. Fix it so that it behaves as its docstring says.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "class Refused(Exception):\n    \"\"\"The model declined.\"\"\"\n\n\nclass CutOff(Exception):\n    \"\"\"The reply hit max_tokens.\"\"\"\n\n\nclass Exhausted(Exception):\n    \"\"\"Every attempt failed validation.\"\"\"\n\n\ndef parse_with_retry(call, messages, check, max_attempts=3):\n    \"\"\"Call the model until check(reply) returns no errors.\n\n    call(messages) returns (reply, stop) where stop is \"end\", \"refusal\" or \"max_tokens\".\n    check(reply) returns (record, errors), errors being a list of strings.\n    Return (record, attempt). A refusal raises Refused and a cut-off reply raises CutOff at once;\n    a failed reply goes back to the model with its errors; after max_attempts, raise Exhausted.\n    The caller's messages list is not modified.\n    \"\"\"\n    messages = list(messages)\n    for attempt in range(1, max_attempts + 1):\n        reply, stop = call(messages)\n        record, errors = check(reply)\n        if not errors:\n            return record, attempt\n    raise Exhausted(errors)\n",
+      "solution": "class Refused(Exception):\n    \"\"\"The model declined.\"\"\"\n\n\nclass CutOff(Exception):\n    \"\"\"The reply hit max_tokens.\"\"\"\n\n\nclass Exhausted(Exception):\n    \"\"\"Every attempt failed validation.\"\"\"\n\n\ndef parse_with_retry(call, messages, check, max_attempts=3):\n    \"\"\"Call the model until check(reply) returns no errors.\n\n    call(messages) returns (reply, stop) where stop is \"end\", \"refusal\" or \"max_tokens\".\n    check(reply) returns (record, errors), errors being a list of strings.\n    Return (record, attempt). A refusal raises Refused and a cut-off reply raises CutOff at once;\n    a failed reply goes back to the model with its errors; after max_attempts, raise Exhausted.\n    The caller's messages list is not modified.\n    \"\"\"\n    messages = list(messages)\n    for attempt in range(1, max_attempts + 1):\n        reply, stop = call(messages)\n        if stop == \"refusal\":\n            raise Refused(reply)\n        if stop == \"max_tokens\":\n            raise CutOff(reply)\n        record, errors = check(reply)\n        if not errors:\n            return record, attempt\n        messages += [\n            {\"role\": \"assistant\", \"content\": reply},\n            {\"role\": \"user\", \"content\": \"That reply did not validate: \"\n             + \"; \".join(errors) + \". Return the corrected JSON object only.\"},\n        ]\n    raise Exhausted(errors)\n",
+      "tests": "import json\n\n\ndef check(reply):\n    try:\n        record = json.loads(reply)\n    except json.JSONDecodeError as e:\n        return None, [\"not valid JSON: \" + e.msg]\n    if not isinstance(record, dict) or \"label\" not in record:\n        return None, [\"missing required field 'label'\"]\n    return record, []\n\n\nclass Stub:\n    \"\"\"Replies from a script; a reply after feedback is the fixed one only if the feedback names the error.\"\"\"\n    def __init__(self, first, fixed='{\"label\": \"refund\"}', stop=\"end\", repairs=True):\n        self.first, self.fixed, self.stop, self.repairs = first, fixed, stop, repairs\n        self.seen = []\n\n    def __call__(self, messages):\n        self.seen.append([dict(m) for m in messages])\n        last = messages[-1][\"content\"]\n        if self.repairs and len(messages) > 1 and \"missing required field 'label'\" in last:\n            return self.fixed, \"end\"\n        return self.first, self.stop\n\n\nask = [{\"role\": \"user\", \"content\": \"Classify the ticket.\"}]\n\n# a reply that validates first time: one call, attempt 1\ns = Stub('{\"label\": \"shipping\"}')\nassert parse_with_retry(s, ask, check) == ({\"label\": \"shipping\"}, 1)\nassert len(s.seen) == 1\n\n# a fixable reply: the second call carries the failed reply and its error, then validates\ns = Stub('{\"tag\": \"refund\"}')\nrecord, attempt = parse_with_retry(s, ask, check)\nassert (record, attempt) == ({\"label\": \"refund\"}, 2), (record, attempt)\nsecond = s.seen[1]\nassert len(second) == 3, second\nassert second[1] == {\"role\": \"assistant\", \"content\": '{\"tag\": \"refund\"}'}, second[1]\nassert second[2][\"role\"] == \"user\" and \"missing required field 'label'\" in second[2][\"content\"]\nassert ask == [{\"role\": \"user\", \"content\": \"Classify the ticket.\"}], \"the caller's list was modified\"\n\n# a refusal and a cut-off reply leave at once, after one call\ns = Stub(\"I can't help with that.\", stop=\"refusal\")\ntry:\n    parse_with_retry(s, ask, check)\n    raise AssertionError(\"a refusal must raise Refused\")\nexcept Refused:\n    pass\nassert len(s.seen) == 1, len(s.seen)\ns = Stub('{\"label\": \"ref', stop=\"max_tokens\")\ntry:\n    parse_with_retry(s, ask, check)\n    raise AssertionError(\"a cut-off reply must raise CutOff\")\nexcept CutOff:\n    pass\nassert len(s.seen) == 1, len(s.seen)\n\n# a fault that never gets fixed: exactly max_attempts calls, then Exhausted\nfor cap in (3, 2):\n    s = Stub('{\"tag\": \"refund\"}', repairs=False)\n    try:\n        parse_with_retry(s, ask, check, max_attempts=cap)\n        raise AssertionError(\"an unfixable reply must raise Exhausted\")\n    except Exhausted:\n        pass\n    assert len(s.seen) == cap, (cap, len(s.seen))\n\n# a cut-off or a refusal whose text happens to parse still leaves at once\nfor stop, exc in ((\"max_tokens\", CutOff), (\"refusal\", Refused)):\n    s = Stub('{\"label\": \"refund\"}', stop=stop)\n    try:\n        parse_with_retry(s, ask, check)\n        raise AssertionError(\"the stop reason is checked before the reply is parsed\")\n    except exc:\n        pass\n    assert len(s.seen) == 1, len(s.seen)\nprint(\"ok\")\n",
+      "expected_output": "ok\n",
+      "explanation": "Section 5: the validation error is the repair instruction, so the failed reply and its errors are appended before the next call; a refusal is a guardrail decision and a cut-off needs a larger budget, so both leave at once; the cap ends the loop with an exception that the dashboard counts.",
+      "hints": [
+        "Look at what the second call receives: is it any different from the first?",
+        "Check `stop` before parsing, and append the failed reply as an assistant message and the errors as a user message.",
+        "Copy the caller's list once and keep the attempt cap at `max_attempts` calls."
+      ]
+    },
+    {
+      "id": "ctx-021-q08",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "retry-loop"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Put the steps of one attempt of a capped validate-and-retry loop in the order the loop runs them, for a reply that fails validation.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Validate the parsed object against the schema and the cross-field rules."
+        },
+        {
+          "key": "b",
+          "text": "Send the messages to the model."
+        },
+        {
+          "key": "c",
+          "text": "Append the failed reply and the validation errors to the messages."
+        },
+        {
+          "key": "d",
+          "text": "Leave the loop if the stop reason is a refusal or `max_tokens`."
+        },
+        {
+          "key": "e",
+          "text": "Parse the reply as JSON."
+        }
+      ],
+      "answer": [
+        "b",
+        "d",
+        "e",
+        "a",
+        "c"
+      ],
+      "explanation": "Section 5: the loop calls the model, routes a refusal or a cut-off reply out before parsing (neither is a parse error), parses, validates the shape and then the rules, and only on failure appends the reply and its errors for the next attempt.",
+      "hints": [
+        "A refusal is not JSON; decide whether it should reach the parser."
+      ]
+    },
+    {
+      "id": "ctx-021-q09",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "6",
+      "est_minutes": 4,
+      "tags": [
+        "guardrails",
+        "decisions"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Match each reply that reaches the output layer to the action an output guardrail layer takes on it.",
+      "left": [
+        {
+          "key": "a",
+          "text": "A support reply that repeats the customer's full card number"
+        },
+        {
+          "key": "b",
+          "text": "A reply that quotes a line of the system prompt"
+        },
+        {
+          "key": "c",
+          "text": "A reply with `stop_reason: \"refusal\"`"
+        },
+        {
+          "key": "d",
+          "text": "A reply that is missing a required field"
+        },
+        {
+          "key": "e",
+          "text": "A valid reply that no check flags"
+        }
+      ],
+      "right": [
+        {
+          "key": "p",
+          "text": "Redact the sensitive part and send the rest"
+        },
+        {
+          "key": "q",
+          "text": "Block it and hand the draft to a human"
+        },
+        {
+          "key": "r",
+          "text": "Send a canned fallback message"
+        },
+        {
+          "key": "s",
+          "text": "Re-ask with the validation error"
+        },
+        {
+          "key": "t",
+          "text": "Send it as it is"
+        },
+        {
+          "key": "u",
+          "text": "Raise `max_tokens` and call again"
+        }
+      ],
+      "answer": {
+        "a": "p",
+        "b": "q",
+        "c": "r",
+        "d": "s",
+        "e": "t"
+      },
+      "explanation": "Section 6: a card number is PII that can be removed while the rest stays useful, so it is redacted; leaked system detail means no part should leave; a refusal has nothing to parse and goes to the fallback; a schema failure goes back to the model with its error (section 5); a clean reply passes. Raising `max_tokens` is the fix for a cut-off reply, which none of these is.",
+      "hints": [
+        "For each reply, ask whether part of it is still usable, none of it, or whether the model can repair it."
+      ]
+    },
+    {
+      "id": "ctx-021-q10",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "response-format",
+        "tool-calling"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A router asks the model to classify every incoming ticket into one of four labels and branches on the label. Which output mechanism fits?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A structured response format with a strict schema whose label field is an enum.",
+          "correct": true,
+          "feedback": "Right: there is exactly one shape to return every time, so the answer is the payload."
+        },
+        {
+          "key": "b",
+          "text": "One tool per label, with `tool_choice` set to `auto` so the model calls the tool that matches.",
+          "correct": false,
+          "feedback": "With `auto` the model may call nothing, and the labels are not actions; a menu of tools fits a choice of action, not a classification."
+        },
+        {
+          "key": "c",
+          "text": "A tool per label with `tool_choice` set to `none`.",
+          "correct": false,
+          "feedback": "`none` prevents any tool call, so the tools would never be used."
+        },
+        {
+          "key": "d",
+          "text": "A prompt instruction in the system prompt to reply with the label as a one-field JSON object.",
+          "correct": false,
+          "feedback": "That works only on the weakest rung; a strict schema with an enum removes the malformed and misspelt labels it allows."
+        }
+      ],
+      "explanation": "Section 4: one always-required shape means a structured response format (`response_format`, `text.format` or `output_config.format`), and an enum makes the label a choice instead of a free string.",
+      "hints": [
+        "Ask whether the model is returning data or choosing an action."
+      ]
+    },
+    {
+      "id": "ctx-021-q11",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "tool-choice"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "An agent has three tools (look up an order, issue a refund, escalate to a human). For most messages it should call one of them, but a greeting or a thank-you should get a plain reply. Which `tool_choice` setting fits?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "`auto`",
+          "correct": true,
+          "feedback": "Right: the model decides whether to call a tool at all, which is the option to call nothing that a greeting needs."
+        },
+        {
+          "key": "b",
+          "text": "`required` (OpenAI) or `any` (Anthropic)",
+          "correct": false,
+          "feedback": "These force a call on every turn, so a greeting would trigger a lookup, a refund or an escalation."
+        },
+        {
+          "key": "c",
+          "text": "A named tool, such as `{\"type\": \"tool\", \"name\": \"lookup_order\"}`",
+          "correct": false,
+          "feedback": "That forces the same tool on every turn, including greetings and refunds."
+        },
+        {
+          "key": "d",
+          "text": "`none`",
+          "correct": false,
+          "feedback": "That prevents every tool call, so the agent could never look up an order."
+        }
+      ],
+      "explanation": "Section 4: a menu of optional capabilities, including the option to call nothing, is the signal for tools with `auto`, the default on both providers when tools are present.",
+      "hints": [
+        "Which setting keeps both possibilities open: a tool call or a plain reply?",
+        "Check each forcing setting against the greeting: what would it make the agent do?"
+      ]
+    },
+    {
+      "id": "ctx-021-q12",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "tool-calling",
+        "tracing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A provider offers a structured response format, but a team forces every structured answer through a dummy tool instead. It works. What does it cost the team when it reads its traces?",
+      "answer": {
+        "model": "It muddies the trace: each answer is recorded as a tool call, so the span reads as though the model acted when it only answered.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be|unsure)\\b)(?![\\s\\S]*\\b(does not|doesn'?t|do not|don'?t|never|won'?t|will not|cannot|can'?t|no) (affect|change|touch|matter for|show (up )?in|appear in|effect on|impact on|muddy|muddies|confuse|confuses)\\w*( the)? (trace|span|log|dashboard|observability)\\b)(?![\\s\\S]*\\b(trace|span|log)s? (is|are|stays?|remains?) (clean|clear|unaffected|accurate|correct|fine)\\b)(?=[\\s\\S]*\\b(trace\\w*|span\\w*|log\\w*|observab\\w*|dashboard\\w*|telemetry|monitor\\w*|record\\w*|audit\\w*)\\b)(?=[\\s\\S]*\\b(call\\w*|action\\w*|act\\w*|acted|tool[- ](use|call)|invok\\w*|invoc\\w*|execut\\w*|ran|run|did something)\\b)(?=[\\s\\S]*\\b(look\\w*|read\\w*|appear\\w*|seem\\w*|mislead\\w*|as if|as though|pretend\\w*|mislabel\\w*|confus\\w*|muddi\\w*|muddy|wrong\\w*|false\\w*|fake|misrepresent\\w*|ambigu\\w*|cannot tell|can'?t tell|hard to tell|indistinguishable|instead of|when it (only|just|merely)|only answered|merely answered|just answered|not (really )?(a|an) (call|action))\\b)[\\s\\S]*\\s\\S"
+        ]
+      },
+      "explanation": "Section 4: a dummy tool returns the same schema-shaped object, but the trace records a tool call, so answers and real actions look alike when the team debugs or counts tool use.",
+      "hints": [
+        "Think about what the span records when the model emits a tool call."
+      ]
+    },
+    {
+      "id": "ctx-021-q13",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 15,
+      "tags": [
+        "evaluation",
+        "guardrails"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team has an offline evaluation suite (`ctx-020`) whose deterministic metrics include schema validity on a golden set, and a dashboard (`ctx-022`) that tracks errors by kind. It is about to ship an extraction feature with the validate-and-retry loop and an output guardrail layer. Explain what the evaluation suite and the guardrail layer each do, what they share, and which runtime counts should flow from the guardrails to the dashboard and the online evaluation.",
+      "kind": "compare",
+      "connects": [
+        "ctx-020",
+        "ctx-022"
+      ],
+      "solution": "Evaluation measures and guardrails enforce. The suite runs offline in continuous integration on a fixed golden set and produces numbers, such as a schema-validity rate, that decide whether a change ships; it does nothing to a live response. The guardrail layer runs on every live response and produces a decision for that response: pass, fix (redact), block, re-ask or fall back.\n\nThey share fixtures: the same schema and the same cross-field rules that score the golden set offline validate real traffic online, so a rule added to one belongs in the other, and a failure seen online becomes a new golden-set case.\n\nThe guardrails feed the observability side: schema-validation failures per attempt, exhausted retries (the loop raises after its cap rather than swallowing the failure), refusals as their own kind, cut-off replies, blocks and redactions by check, and the extra calls retries cost. The dashboard tracks them as error rates by kind; the online evaluation reads a sudden jump, for example in refusals after a prompt change, as a regression the offline suite missed.",
+      "rubric": [
+        {
+          "criterion": "States that evaluation runs offline and produces a number, while a guardrail runs online on each response and produces a decision.",
+          "points": 3
+        },
+        {
+          "criterion": "Names the shared fixtures: one schema and rule set used both to score the golden set and to gate live traffic.",
+          "points": 2
+        },
+        {
+          "criterion": "Lists runtime counts by kind (validation failures, exhausted retries, refusals, cut-offs, blocks or redactions, retry calls) feeding the dashboard and online evaluation.",
+          "points": 3
+        },
+        {
+          "criterion": "Notes that exhausted retries and refusals must be counted separately rather than swallowed or merged into parse errors.",
+          "points": 2
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Section 7 draws the line: evaluation is the test suite and guardrails are the runtime assertions. Section 5 makes exhaustion an error kind, and section 6 separates refusals from parse errors, which is what lets the dashboard and online evaluation read them.",
+      "hints": [
+        "Ask when each one runs and what it produces: a number or a decision.",
+        "List every exception and decision the loop and the guardrails can produce, and ask which of them a dashboard should count."
+      ]
+    },
+    {
+      "id": "ctx-021-q14",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 12,
+      "tags": [
+        "constrained-decoding",
+        "validation",
+        "critique"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team moves its ticket extraction from a prompt instruction to Anthropic's strict structured outputs. Its schema has a `priority` integer with `minimum: 1` and `maximum: 5`, a `category` enum of lower-case labels, and a `refund_amount` that must be a number exactly when the category is `refund`. The team then deletes its validator and its retry loop, arguing that constrained decoding guarantees the schema. Critique the decision and say what should stay.",
+      "kind": "critique",
+      "solution": "Constrained decoding does guarantee that a finished reply follows the grammar it compiled, so the syntax faults of the prompt-instruction rung (preambles, code fences, trailing commas, missing fields, invented keys) are gone. But the guarantee is narrower than the schema the team wrote.\n\nFirst, Anthropic does not support numerical constraints, so `minimum` and `maximum` are rejected or moved into the description by an SDK helper; the grammar then allows any integer, and a priority of 7 can come back. Second, the page names exceptions: a refusal (`stop_reason: \"refusal\"`), whose message takes precedence over the schema; a reply cut off at `max_tokens`, which is incomplete; and enum values whose capitalisation is not guaranteed. Third, the cross-field rule about `refund_amount` is not in the schema as written (encoding it would mean restructuring the schema as an `anyOf` of two object shapes), so the grammar does not enforce it. Fourth, the mask guarantees validity, not meaning: a value that parses can still be wrong for the ticket.\n\nSo the validator stays, checking the dropped range, the enum case-insensitively or by normalising it, and the cross-field rule. The retry loop stays for the semantic faults the model can repair, capped and counted. Refusals and cut-off replies are routed out of the loop: the first to a fallback, the second to a larger output reserve. What can go is the defensive parsing of malformed JSON.",
+      "rubric": [
+        {
+          "criterion": "Acknowledges what constrained decoding does remove: syntax faults, missing or extra fields.",
+          "points": 1
+        },
+        {
+          "criterion": "Points out that minimum and maximum are unsupported on Anthropic's strict mode, so the range is not enforced by the grammar.",
+          "points": 2
+        },
+        {
+          "criterion": "Names the documented exceptions: refusal, cut-off at max_tokens, enum capitalisation.",
+          "points": 3
+        },
+        {
+          "criterion": "Notes that the cross-field rule (absent from the schema as written) and the correctness of values are outside what the grammar enforces.",
+          "points": 2
+        },
+        {
+          "criterion": "Keeps a validator and a capped retry loop, and routes refusals and cut-offs out of the loop.",
+          "points": 2
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Sections 2 and 3: each provider supports a subset of JSON Schema, Anthropic's page lists its exceptions, and the mask leaves meaning to the application; section 5 keeps the validator and the loop on every rung.",
+      "hints": [
+        "List what the grammar actually contains once unsupported keywords are dropped.",
+        "Then list what Anthropic's page says the guarantee does not cover, and what no schema can state."
+      ]
+    },
+    {
+      "id": "ctx-021-q15",
+      "type": "mcq",
+      "track": "connect",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "security",
+        "guardrails"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Which of these output checks is both a guardrail and a security control in the sense of `ctx-023`, the post on prompt injection and its defences?",
+      "connects": [
+        "ctx-023"
+      ],
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "An allow-list of recipients checked in code before an outbound email is sent.",
+          "correct": true,
+          "feedback": "Right: it catches accidental mistakes and also stops an injected instruction from sending data to an attacker's address."
+        },
+        {
+          "key": "b",
+          "text": "A moderation pass that screens each generated paragraph for harassment before the user sees it.",
+          "correct": false,
+          "feedback": "That is a guardrail against the model's accidental output; it is only incidentally a defence against an adversary."
+        },
+        {
+          "key": "c",
+          "text": "A JSON Schema check on an extraction result before the record is stored in the database.",
+          "correct": false,
+          "feedback": "Schema validation guards against malformed output, not against an attacker steering the model to a forbidden action."
+        },
+        {
+          "key": "d",
+          "text": "An offline evaluation of refusal rate on a golden set.",
+          "correct": false,
+          "feedback": "That measures, offline; it is neither a runtime guardrail nor a control on a live action."
+        }
+      ],
+      "explanation": "Section 7: output guardrails mostly catch the model's accidental failures, while security assumes an adversary; validating output before it drives an action is part of filtering at trust boundaries, so a check that limits where an action can send data serves both.",
+      "hints": [
+        "Ask which check would still matter if an attacker had planted instructions in a retrieved document.",
+        "Separate checks on what the text says from checks on what an action is allowed to do."
+      ]
+    },
+    {
+      "id": "ctx-021-q16",
+      "type": "numeric",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 6,
+      "tags": [
+        "constrained-decoding",
+        "snippet"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In `snippets/constrained_decoding.py`, the model's ranking after `\"priority\": ` is changed as the stimulus shows, and nothing else. The grammar still allows only the digits 1 to 5 there. Run the constrained decoder (or trace it by hand): which priority does it emit, and at how many of its 8 steps does the mask override the model's first choice?",
+      "stimulus": {
+        "kind": "code",
+        "language": "python",
+        "content": "RANK = {\n    ...\n    ('\"priority\": ',): ['8', '6', '2'],     # was ['7', '5', '4']\n    ('2',): [', ', '}'],                     # added\n    ...\n}",
+        "caption": "The two changed entries of RANK in snippets/constrained_decoding.py."
+      },
+      "answer": {
+        "parts": [
+          {
+            "label": "emitted priority",
+            "value": 2,
+            "tolerance": 0,
+            "unit": ""
+          },
+          {
+            "label": "steps where the mask overrides",
+            "value": 5,
+            "tolerance": 0,
+            "unit": "steps"
+          }
+        ]
+      },
+      "precision_note": "Running the edited snippet prints {\"category\": \"refund\", \"priority\": 2} and \"the mask overrode the model at 5 of 8 steps\" (steps 1, 3, 6, 7 and 8). Taking the model's second choice, 6, without applying the mask, or its first, 8, are the nearest wrong answers for the priority; forgetting the final step, where the code fence is masked for the end, gives 4.",
+      "explanation": "Section 3: the decoder takes the model's best token among those the grammar allows. 8 and 6 are outside 1 to 5, so 2 is emitted; the overrides are the preamble, the capitalised label, the priority, the comma before the extra field and the closing fence, as in the original run.",
+      "hints": [
+        "At step 6, walk down the model's ranking until a token is in the allowed set.",
+        "The other steps do not depend on the priority; compare them with the post's printed trace."
+      ]
+    }
+  ]
+}

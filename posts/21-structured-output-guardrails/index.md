@@ -1,164 +1,262 @@
-# 21 · Structured output and guardrails
+# 21 - Structured output and guardrails
 
-> **TL;DR.** Everything before this post shapes the model's *input*; structured output and guardrails are the control surface on its *response*. A fluent answer that will not parse is a production incident, so this post covers the mechanisms that make output typed and valid (JSON Schema and `response_format`, tool-call arguments, Pydantic / Instructor / Outlines, and grammar-constrained decoding), the reliability loop that recovers from the failures that remain (validate, feed the error back, retry), and the guardrail layer that enforces content, safety, and privacy rules at runtime. Where evaluation ([Post 20](../20-evaluation/index.md)) *measures* quality offline, guardrails *enforce* it on every live response.
+> **TL;DR.** Everything before this post shapes the model's input; structured output and guardrails control its response. A ladder of mechanisms, from a prompt instruction up to constrained decoding, makes output typed JavaScript Object Notation (JSON), and each rung leaves something to the application. A capped validate-and-retry loop recovers the failures a rewording can fix, and an output guardrail layer of schema, moderation, personally identifiable information (PII) and refusal checks enforces the rules on every live response, where evaluation only measures them offline.
 >
-> **After reading this you will be able to:**
-> - Choose the right output mechanism (`response_format`, tool call, or constrained decoding) for a given task.
-> - Wire a validate-and-retry loop that turns a malformed response into a valid one instead of an exception.
-> - Assemble an output-side guardrail layer (schema, moderation, PII filtering, refusal handling) that complements the input-side six layers.
+> **Prerequisites:** [Post 15](../15-tools-and-mcp/index.md), [Post 20](../20-evaluation/index.md).
+> **Safe to skip?** Skip it if every model output already passes a strict schema and a validator before code consumes it, retries are capped and counted, and the checks that run after the parser are chosen.
+>
+> **After reading, you will be able to:**
+>
+> - Choose an output mechanism (prompt instruction, JSON mode, a schema with or without strict mode) and name what each leaves to the application.
+> - Explain how constrained decoding masks tokens so the output parses, and name the failures it still lets through.
+> - Decide between a structured response format and a tool call steered by tool_choice by asking whether the answer is the payload or an action.
+> - Wire a validate-and-retry loop that feeds each validation error back, caps the attempts, and routes refusals and cut-off replies elsewhere.
+> - Assemble an output guardrail layer of schema, moderation, PII and refusal checks, and place it against offline evaluation and security.
 
-![Response control loop: model output enters a validate-against-schema gate; valid output passes through a moderation and redaction gate and is returned, while invalid output loops back with the error appended for a capped retry.](diagrams/00-hero-structured-output-guardrails.svg)
-*Guardrails are the control surface on the response: validate against a schema, retry on failure, moderate before returning.*
+![The response control loop: an invalid reply goes back to the model with its validation error, at most 3 attempts; a refusal or a cut-off reply leaves the loop; a valid record passes moderation, leak and PII checks and is sent, redacted or blocked.](diagrams/00-hero-response-control-loop.svg)
 
----
-
-## 1. A fluent answer that will not parse is an incident
-
-The six layers of context ([Post 02](../02-six-layers-of-context/index.md)) are all input-side: they decide what the model sees. But a system in production is judged on what the model *returns*, and the rest of the pipeline almost never wants prose. It wants a record: a classification label a router will branch on, an extraction result a database will store, a set of arguments a function will execute. When the model returns a paragraph where a JSON object was expected, a JSON object with a trailing comma, or a plausible answer wrapped in an apologetic preamble, the downstream service does not degrade gracefully. It throws.
-
-This is the failure the input layers cannot prevent. A prompt can be perfectly assembled and the model perfectly capable, and the call still fails because the *shape* of the response was never constrained. In a chat window a stray sentence is harmless; in an automated pipeline it is a `JSONDecodeError` at 3 a.m., a dropped order, or a silent fallback that ships wrong data. For any programmatic consumer, an unparseable response is not a quality problem to be nudged with better wording. It is a control problem to be solved with a mechanism.
-
-[Post 15](../15-tools-and-mcp/index.md), §9 gave the primer: tool calling and structured output are two views of the same machinery. This post is the deep treatment of the output side, from the wire format up through the guardrail layer that sits around it.
+*The parser decides whether the reply is a record; the guardrails decide whether that record may leave.*
 
 ---
 
-## 2. The mechanisms that make output typed
+## 1. The question: what happens when a fluent answer will not parse?
 
-![Four rungs of output guarantee, from a prompt instruction up to grammar-constrained decoding, each with what it still leaves to you](diagrams/01-guarantee-ladder.svg)
+The six layers of context ([post 02](../02-six-layers-of-context/index.md)) decide what the model sees. A system in production is judged on what the model returns, and the code after the model rarely wants prose; it wants a record: a label a router branches on, an extraction a database stores, the arguments a function will execute. When the model returns a paragraph where an object was expected, an object with a trailing comma, or a correct object behind "Sure, here is the JSON:", the code downstream does not degrade gracefully. It throws.
 
-*The last column is the one that matters at design time: which rung you are on decides how much defensive code you still owe.*
+No input layer prevents this: a well-assembled prompt to a capable model still fails when nothing constrains the shape of the response. An unparseable response is not a quality problem to fix with better wording; it is a control problem to fix with a mechanism.
 
-There is a ladder of guarantees here, from "asked nicely" at the bottom to "valid by construction" at the top. Knowing which rung a given technique sits on tells you exactly how much defensive code you still need downstream.
+[Post 15](../15-tools-and-mcp/index.md), section 8, gave the primer: a tool call and a structured answer are the same machinery, a JSON object that conforms to a schema, parsed to act in one case and to store in the other. This post asks which mechanisms make output typed and valid, which loop recovers from the failures that remain, and where a runtime guardrail layer sits relative to offline evaluation. The figure at the top of the post is the answer in one picture.
 
-**JSON Schema and `response_format`.** Every major provider now accepts a schema alongside the prompt and a flag that says "return an object matching this". OpenAI exposes it as `response_format` with a JSON Schema (OpenAI, "Structured Outputs" docs); Anthropic supports the same intent through its tool-use and structured-output paths (Anthropic, "Tool use" docs). The schema is the contract: field names, types, which keys are required, which values are drawn from an enum. The wire format underneath is always JSON Schema, whatever SDK sugar sits on top.
+---
 
-**Tool-call arguments.** When you define a tool, its `parameters` field *is* a JSON Schema, and the arguments the model emits for that tool are validated against it by the provider. This is why a tool call and a structured answer are the same object with different intent: one is parsed to *act*, the other to *store*. §3 draws the line between them.
+## 2. The ladder of guarantees
 
-**Schema-authoring libraries.** In Python the schema is rarely hand-written. Three framework-agnostic tools dominate, each cited briefly:
+![Four rungs, weakest at the bottom: a prompt instruction guarantees nothing; JSON mode guarantees valid JSON; a schema without strict mode is best effort; a strict schema guarantees the shape, apart from documented exceptions, and leaves the meaning.](diagrams/01-guarantee-ladder.svg)
 
-- **Pydantic** lets you declare the schema as a class and get runtime validation plus `.model_json_schema()` for free; most SDKs accept a Pydantic model directly (Pydantic project docs).
-- **Instructor** patches the provider client so a call returns an already-validated Pydantic object, retrying automatically when validation fails (Instructor project docs).
-- **Outlines** enforces the schema *during* generation rather than after, using constrained decoding (Outlines project docs).
+*Each rung removes a class of failure; none of them removes the validator.*
 
-**Grammar-constrained decoding.** This is the top rung, and the only one that offers a hard guarantee. Instead of asking for JSON and hoping, the decoder compiles the schema to a state machine (a grammar) and, at every generation step, masks the token distribution so that only tokens which keep the output valid can be sampled. A closing brace cannot be omitted because the grammar will not permit the sequence to end without it; a field typed as an integer cannot receive a letter because letter tokens are masked out at that position. The output is valid JSON *by construction*, not by luck. This is the mechanism behind provider "strict" and "JSON mode" flags and behind Outlines. The consequence for a system designer: with genuine constrained decoding, `json.loads` on the response cannot fail, so the residual risk moves from *syntactic* validity (guaranteed) to *semantic* validity (still your job), which §4 addresses.
+Output mechanisms form a ladder from asking politely to valid by construction. The figure above lists the four rungs and what each leaves to the application.
 
+**A prompt instruction.** "Reply in JSON" in the system prompt or the user turn. Nothing enforces it, so every failure shape of section 5 can occur.
+
+**JSON mode.** OpenAI's `response_format: {"type": "json_object"}` makes the reply valid JSON, and its "Structured Outputs" guide (consulted October 2026) states the limit: "While both ensure valid JSON is produced, only Structured Outputs ensure schema adherence." The string "JSON" must also appear somewhere in the context, or the application programming interface (API) returns an error.
+
+**A schema without strict mode.** A JSON Schema sent as a tool's parameters or a response format names the fields, their types, the `required` keys and the `enum` values. By default it is guidance. OpenAI's "Function calling" guide (consulted October 2026) says `strict: true` makes calls "reliably adhere to the function schema, instead of being best effort"; Chat Completions stays non-strict by default, while the Responses API normalises a schema into strict mode when it can. A tool's arguments are therefore guaranteed to match its schema only on the next rung.
+
+**A strict schema, enforced by constrained decoding.** With `strict: true` on a tool, a `json_schema` response format with `strict: true` (OpenAI), or `output_config.format` (Anthropic), the provider compiles the schema into a grammar and samples only tokens it allows. OpenAI's launch post ("Introducing Structured Outputs in the API", August 2024) calls this constrained decoding over a context-free grammar, and Anthropic's "Structured outputs" page (consulted October 2026) says these features "guarantee schema-compliant responses through constrained decoding", with the exceptions section 3 lists. Outlines, an open-source library, applies the same mechanism to open-weight models whose decoder the application runs itself (Willard and Louf, "Efficient Guided Generation for Large Language Models", 2023).
+
+Strict mode has conditions. Both providers require `additionalProperties: false` on every object, and OpenAI requires every field in `required` (an optional field becomes a union with `null`). Each supports a subset of JSON Schema: OpenAI's guide lists `allOf`, `not`, `if`, `then` and `else` among the unsupported keywords and caps a schema at 5,000 object properties and 10 levels of nesting; Anthropic's page lists recursive schemas, numerical constraints (`minimum`, `maximum`, `multipleOf`) and string-length constraints. An unsupported keyword is rejected with an error, so on Anthropic a rule such as "priority from 1 to 5" moves into a validator.
+
+**Pydantic and Instructor wrap any rung.** Pydantic declares the schema as a Python class, emits it with `model_json_schema()`, and checks a reply with `model_validate_json`, which raises a `ValidationError` naming each bad field; both providers' Python software development kits (SDKs) accept such a model (`client.responses.parse` in OpenAI's guide, `client.messages.parse` in Anthropic's). Instructor adds the loop of section 5: its `max_retries` setting re-asks the model after a failed validation (Instructor documentation, "Retrying", consulted October 2026).
+
+---
+
+## 3. Constrained decoding, step by step
+
+![Eight steps of a toy constrained decoder: at five of them the grammar masks the model's first choice (a preamble, Refund, 7, the comma before an extra field, a code fence), and the output parses as category refund, priority 5.](diagrams/02-token-mask.svg)
+
+*The mask makes the reply parse; it chose priority 5 because 7 was masked, not because the ticket said 5.*
+
+The top rung's mechanism explains both its guarantee and its gaps. At each step a language model scores every token in its vocabulary. A constrained decoder holds the schema as a finite-state machine and, before sampling, sets to zero the probability of every token that would leave the grammar. A closing brace cannot be omitted, because the machine has no path to the end without it; an integer field cannot receive a letter, because letters are masked at that position. Willard and Louf (2023) describe generation as transitions between the states of such a machine, with an index over the vocabulary that makes each mask cheap.
+
+`snippets/constrained_decoding.py` runs the mechanism at toy scale. Its "model" is a fixed ranking of next tokens, not a language model: left alone, it writes a preamble, a code fence, a capitalised label, a priority of 7 and an extra field. The grammar accepts exactly `{"category": <one of four labels>, "priority": <1 to 5>}`. Run from the series root as `uv run python posts/21-structured-output-guardrails/snippets/constrained_decoding.py`, it prints:
+
+```text
+unconstrained, the model's first choice at every step:
+  Sure, here is the JSON:\n~~~json\n{"category": "Refund", "priority": 7, "note": "urgent"}\n~~~
+  json.loads fails: Expecting value: line 1 column 1 (char 0)
+
+constrained, the grammar masks every token that would break the shape:
+step  allowed  model's first choice      emitted
+   1        1  Sure, here is the JSON:   {  (first choice masked)
+   2        1  "category":               "category":
+   3        4  "Refund"                  "refund"  (first choice masked)
+   4        1  ,                         ,
+   5        1  "priority":               "priority":
+   6        5  7                         5  (first choice masked)
+   7        1  ,                         }  (first choice masked)
+   8        1  \n~~~                     <end>  (first choice masked)
+  {"category": "refund", "priority": 5}
+  parses: {"category": "refund", "priority": 5}
+  the mask overrode the model at 5 of 8 steps
+
+constrained, but max_tokens = 5:
+  {"category": "refund", "priority":
+  json.loads fails: Expecting value: line 1 column 36 (char 35)
 ```
-   ┌─────────────────────────────────────────────┐
-   │  grammar-constrained decoding               │  valid JSON by construction
-   ├─────────────────────────────────────────────┤
-   │  strict response_format / JSON Schema       │  provider-enforced shape
-   ├─────────────────────────────────────────────┤
-   │  tool-call arguments (schema-validated)     │  provider-enforced shape
-   ├─────────────────────────────────────────────┤
-   │  "please reply in JSON" in the prompt       │  best-effort, must validate
-   └─────────────────────────────────────────────┘
-```
 
-*The ladder of output guarantees: each rung down needs more defensive parsing than the one above it.*
+The figure above draws the eight steps. Three lessons follow.
+
+**Syntax is guaranteed; meaning is not.** The constrained reply parses, but at step 6 the model wanted 7, the mask allowed only 1 to 5, and the decoder took the best survivor, 5. The reply is valid and may be wrong: the risk moves from syntactic to semantic validity, which stays the application's job.
+
+**A cut-off reply is still broken.** The mask controls which token comes next, not how many the model may spend; with `max_tokens` at 5 the decoder stops mid-object. Anthropic's page lists this case (`stop_reason: "max_tokens"`, output possibly incomplete); OpenAI reports an incomplete response. The output reserve of [post 04](../04-tokens-windows-budgets/index.md) has to hold the whole object.
+
+**The provider's guarantee has documented holes.** Anthropic's page names three: a refusal (`stop_reason: "refusal"`, where "the refusal message takes precedence over schema constraints"), a cut-off at `max_tokens`, and the capitalisation of string `enum` and `const` values, which it does not guarantee. OpenAI returns a refusal in a separate `refusal` field. With the keywords each provider drops (section 2) and the rules no schema expresses, the validator of section 5 stays on every rung.
+
+Two costs remain. The first request with a new schema waits while the grammar compiles (Anthropic caches compiled grammars for 24 hours from last use). And on Anthropic's API, changing `output_config.format` invalidates the prompt cache for the conversation, so the schema is chosen once per workflow, like the stable prefix of [post 05](../05-economics-of-context/index.md).
 
 ---
 
-## 3. `response_format` versus `tool_choice`: is the answer the payload?
+## 4. A structured response or a tool call: is the answer the payload?
 
-![response_format beside tools and tool_choice, with the three tool_choice settings and the test that picks between them](diagrams/02-payload-or-action.svg)
+![Two cards: a structured response format, where the answer is the payload in one shape every time, beside tools steered by tool_choice, where the model chooses an action among several or none.](diagrams/03-payload-or-action.svg)
 
-*The presence of a menu, and of the option to call nothing, is the whole test.*
+*A menu, and the option to call nothing, is the whole test.*
 
-The single most useful distinction on the output side is whether the model's job is to *return data* or to *choose an action*. Both produce a schema-conforming JSON object; the intent, and therefore the right mechanism, differs.
+Both mechanisms produce a schema-conforming object; what differs is whether the model's job is to return data or to choose an action. The figure above sets them side by side.
 
-Use **`response_format`** (a strict schema on the response) when there is exactly one shape you want back and you want it every time: a classification label, an extraction result, a filled form, a graded rubric. The answer *is* the payload. There is no decision about *whether* to respond in this shape, only *what* to put in the fields.
+**A structured response format** fits when there is exactly one shape to return, every time: a label, an extraction, a filled form, a grade. The answer is the payload. The field is `response_format` in OpenAI's Chat Completions, `text.format` in its Responses API and `output_config.format` in Anthropic's Messages API, as [post 15](../15-tools-and-mcp/index.md) lists them. OpenAI's guide draws the same line: function calling when the model connects to "tools, functions, data, etc." in the system, a structured format when it responds to the user.
 
-Use a **tool** (optionally pinned with `tool_choice`) when the model is deciding *whether and which* action to take, possibly among several, possibly none. `tool_choice` has three common settings across providers: `auto` (the model decides whether to call a tool at all), `required` / `any` (it must call one of them), and a named tool (it must call this specific one). The presence of a menu, and of the option to call nothing, is the signal that you want tools rather than a single response schema.
+**Tools, steered by `tool_choice`,** fit when the model decides whether to act and which action to take, among several or none. OpenAI's "Function calling" guide lists `auto` (the default: "Call zero, one, or multiple functions"), `required` ("Call one or more functions"), a forced function, an allowed-tools subset and `none`; Anthropic's "Define tools" page (consulted October 2026) lists `auto`, `any`, `tool` (one named tool) and `none`.
 
-The rule of thumb from [Post 15](../15-tools-and-mcp/index.md) holds: one always-required shape means `response_format`; a menu of optional capabilities the model selects among means tools. Forcing a single structured answer through a dummy tool works, but it muddies the trace ([Post 22](../22-observability/index.md)), because the span looks like the model *called* something when it merely answered. One related trick: setting `tool_choice` to a specific tool forces structured output on providers whose `response_format` support is thinner than their tool support, since a forced named tool call is a schema-constrained object by another name.
+One always-required shape means a response format; a menu of optional capabilities means tools. Forcing a single answer through a dummy tool works, but muddies the trace ([post 22](../22-observability/index.md)): the span reads as though the model called something when it only answered. Anthropic's page adds caveats to forcing a tool (`any` or a named `tool`): forced tool use fails with manual extended thinking, some newer models reject it altogether (the page points to strict tools or structured outputs instead), and changing `tool_choice` invalidates the cached message blocks.
 
 ---
 
-## 4. Reliability: the failures that remain, and the retry loop
+## 5. The failures that remain, and the retry loop
 
-Constrained decoding removes syntactic failures. Everything softer than that leaves a residue, and even the strong path leaves *semantic* gaps. A robust system plans for both.
+The rung decides which failures can still occur. Below a strict schema the classic shapes recur: a preamble before the object, a Markdown code fence around it, a trailing comma, single quotes, an unescaped newline in a string, an extra or missing field, a label in the wrong case. On every rung a reply can be cut off at `max_tokens`, can be a refusal, and can break a rule the schema does not express: a range the provider stripped, or a cross-field invariant such as "a refund carries an amount, nothing else does".
 
-**JSON-mode failure modes.** When you rely on a plain "reply in JSON" instruction or a loose JSON mode rather than a strict schema, the classic failure shapes recur: a prose preamble before the object ("Sure, here is the JSON:"), Markdown code fences around it (` ```json `), a trailing comma, single quotes, an unescaped newline inside a string, or the object truncated because the response hit the `max_tokens` ceiling mid-structure. Truncation is the sneaky one, and a context-budget interaction ([Post 04](../04-tokens-windows-budgets/index.md)): a large output schema needs enough output-token headroom to finish, or it produces broken JSON no prompting can fix.
+**Make the schema strict where the provider allows it.** With `additionalProperties: false` an invented key is an error caught at once; with every field in `required` a missing one is too; with an `enum` wherever the value space is closed, a free string becomes a choice.
 
-**Schema strictness.** A schema that lists the fields you want is not the same as a schema that *forbids* the fields you do not. Setting `additionalProperties: false` on every object is the difference: without it, the model can invent extra keys that pass validation and then confuse the consumer; with it, an unexpected key is a validation error you catch immediately. Mark genuinely required fields in `required`, constrain string fields to enums wherever the value space is closed, and prefer a strict schema (which the provider compiles into the decoder) over a lenient one you validate after the fact. Strictness at the schema is cheaper than defensiveness at every call site.
-
-**The validate-and-retry loop.** The pattern that turns a flaky output into a reliable one is small and worth memorising: validate the response against the schema; on success, return it; on failure, feed the *validation error itself* back to the model as a follow-up message and ask it to correct the output, then re-validate. The error message is the repair instruction, because it names exactly which field was wrong and why.
+**Then validate, feed the error back, and retry with a cap.** This is the left half of the figure at the top of the post. On failure, the validation error itself goes back to the model as a follow-up message: it names the field that was wrong and why, so the error is the repair instruction. `snippets/validate_retry.py` holds a small validator (a subset of JSON Schema plus the cross-field rule) and the loop:
 
 ```python
-from pydantic import ValidationError
-
-def parse_with_retry(client, messages, schema, max_attempts=3):
-    for attempt in range(max_attempts):
-        resp = client.call(messages, response_schema=schema)
-        try:
-            return schema.model_validate_json(resp.text)   # Pydantic
-        except ValidationError as e:
-            messages += [
-                {"role": "assistant", "content": resp.text},
-                {"role": "user",
-                 "content": f"That did not validate: {e}. Return corrected JSON only."},
-            ]
-    raise RuntimeError("schema validation failed after retries")
+def parse_with_retry(call, messages, max_attempts=3):
+    """Call the model until its reply validates, feeding each error back as the repair instruction."""
+    messages = list(messages)
+    for attempt in range(1, max_attempts + 1):
+        reply, stop = call(messages)
+        if stop == "refusal":
+            raise Refused(reply)
+        if stop == "max_tokens":
+            raise CutOff(reply)
+        record, errors = check(reply)
+        if not errors:
+            return record, attempt
+        messages += [
+            {"role": "assistant", "content": reply},
+            {"role": "user", "content": "That reply did not validate: "
+             + "; ".join(errors) + ". Return the corrected JSON object only."},
+        ]
+    raise Exhausted(errors)
 ```
 
-*The validate-and-retry loop: the validation error becomes the model's repair instruction on the next attempt.*
+Three choices matter. A refusal leaves the loop at once: it is a guardrail decision (section 6), not a parse error. A reply cut off at `max_tokens` leaves too, because a retry at the same budget is cut off again; the fix is a larger output reserve. And after three attempts (a common ceiling, illustrative) the loop raises, so an exhausted retry is counted as an error kind on the dashboard of [post 22](../22-observability/index.md) rather than swallowed.
 
-Two operational notes. This is exactly what Instructor does under the hood, so on Python you often get the loop for free. And cap the attempts (three is a common ceiling, illustrative) while counting exhaustions as a hard error the dashboard tracks ([Post 22](../22-observability/index.md), §4 lists schema-validation errors as a first-class error kind), because a loop that silently swallows failures hides a real regression. Constrained decoding removes the *syntactic* retry, but a *semantic* retry (valid JSON that violates a required cross-field invariant) still earns its place.
+The snippet also runs one extraction task three ways over a hundred inputs, before and after the capped loop, against a stub model: each first reply carries a scripted fault, and on a retry the stub follows the repair instruction, except for one fault scripted to persist. The fault counts are illustrative inputs, not measurements of any model. `uv run python posts/21-structured-output-guardrails/snippets/validate_retry.py` prints:
+
+```text
+one input whose first reply has two faults, capped at 3 attempts:
+  rejected: unexpected field 'note'; 'category' must be one of refund, shipping, account, other, not 'Refund'
+  rejected: 'category' must be one of refund, shipping, account, other, not 'Refund'
+  valid on attempt 3: {"order_id": "A-1043", "category": "refund", "priority": 4, "refund_amount": 59.0}
+
+100 inputs per mechanism, stub model, illustrative fault counts
+first reply                valid  not JSON    schema      rule   cut off   refused
+prompt instruction            66        17        11         4         1         1
+schema, not strict            86         1         7         4         1         1
+strict (constrained)          91         0         3         4         1         1
+after the capped loop      valid   cut off   refused exhausted     calls
+prompt instruction            97         1         1         1       135
+schema, not strict            97         1         1         1       114
+strict (constrained)          97         1         1         1       108
+```
+
+Read the columns, not the totals, which are scripted. The strict rung empties the "not JSON" column; its three schema failures are faults its grammar lets through (a capitalised label, two priorities outside a range the provider dropped), and its four rule failures are the invariant this schema does not state. The loop clears every fault a rewording can repair, on every rung; it never clears the cut-off reply or the refusal, and the persistent fault exhausts its attempts and is counted. What the rung changes is the bill: 135 calls for the prompt instruction against 108 for the strict schema, each retry a full call carrying the failed reply and the error.
 
 ---
 
-## 5. Output guardrails as a defence layer
+## 6. Output guardrails as a defence layer
 
-Schema validation is the first guardrail, not the only one. A guardrail is any programmatic check between the model's raw output and the consumer, with the authority to pass, block, rewrite, or re-ask. Where the six input layers govern what goes *in*, guardrails govern what is allowed *out*, and they form a defence layer with several distinct jobs.
+Schema validation is the first guardrail, not the only one. A **guardrail** is a check placed around a model call that can pass, fix, block or re-ask; on the output side it sits between the parsed reply and whatever consumes it, the right half of the figure at the top of the post. Four jobs recur.
 
-- **Schema enforcement.** Everything in §2 to §4: the output has the right shape and types. The floor, not the ceiling.
-- **Content moderation.** Screen the output for disallowed content (hate, self-harm instructions, and similar categories) using a moderation classifier, either the provider's or a dedicated model. This is a second pass over the *response*, distinct from moderating the input.
-- **PII and output filtering.** Detect and redact personally identifiable information (PII: names, emails, payment details) that should not leave the boundary, and strip system-internal details the model may have leaked into its answer. The capstone ([Post 30](../30-capstone-email-reply-agent/index.md)) applies output filtering to an outbound email, where the guardrail is the last check before text reaches a real recipient.
-- **Refusal and safety handling.** When the model refuses, or when a guardrail blocks, the system needs a defined behaviour: return a safe canned message, escalate to a human, or re-ask with a narrowed instruction. A refusal that surfaces as a schema-validation crash is a bug; a refusal that is caught and handled is a feature. Track refusal rate on the dashboard, because a sudden jump usually means a recent prompt or rule change is over-firing ([Post 20](../20-evaluation/index.md), §7).
+- **Schema enforcement.** Sections 2 to 5: the floor, not the ceiling.
+- **Content moderation.** The response, not only the input, is screened with a moderation classifier. OpenAI's "Moderation" guide (consulted October 2026) offers `omni-moderation-latest`, free to use, with thirteen categories from harassment to violence.
+- **PII and leak filtering.** PII (names, email addresses, payment details) that should not leave is redacted, and system-internal details the model repeated (a line of the system prompt, an internal hostname) are caught.
+- **Refusal handling.** A refusal, or a reply a guardrail blocks, needs a defined behaviour: a canned message, a hand-off to a human, or a narrower re-ask. The online evaluation of [post 20](../20-evaluation/index.md) tracks the refusal rate, where a sudden jump can mean a prompt or rule change is over-firing.
 
-**Guardrails frameworks as a class.** Rather than hand-roll each check, several open frameworks package the pattern: a declarative set of validators (schema, regex, moderation, PII, topical rails) that run on every response and can block or fix it. Guardrails AI and NVIDIA NeMo Guardrails are two widely used examples (project docs for each). Their value is the value of any policy layer: one place to declare the rules, one place to test them, one place to change them. The framework is replaceable; the discipline of running output through an enforcement layer is not.
+`snippets/output_guard.py` runs the other three on six drafted support replies, refusal first, then moderation, the leak check and PII. Its moderation check is a word list standing in for a moderation model, and its PII check is two regular expressions (email addresses, and card numbers that pass the Luhn checksum): enough to show the decisions, not a PII detector. It prints:
 
-A guardrail can act at three points, and mature systems use all three: *before* generation (validate the input, though that is the input layers' job), *during* generation (constrained decoding, §2), and *after* generation (the moderation, PII, and refusal checks above). The after-generation checks are the ones this section is about: the last line before an output becomes an action or a stored record.
+```text
+decision  reason
+pass      no check fired
+          sent: Your refund of 59 dollars for order A-1043 was issued today.
+fix       redacted a card number
+          sent: Refund issued to the card [card number removed] for order A-1043.
+fix       redacted another person's email
+          sent: I have copied [email removed], who reported the same fault.
+block     moderation flagged the reply
+          sent: (nothing; the draft goes to a human)
+block     the reply leaks system detail
+          sent: (nothing; the draft goes to a human)
+fallback  the model refused
+          sent: Thanks for your message. A member of the support team will reply within one working day.
+```
+
+Choosing each check's action on failure is the design work: redact and pass when the rest of the reply is useful, block when no part should leave, fall back when there is nothing to parse. Frameworks package the same choice. Guardrails AI gives each validator an `on_fail` action, among them `reask`, `fix`, `filter`, `refrain`, `noop` and `exception` (Guardrails AI documentation, "Validator on-fail actions", consulted October 2026); NVIDIA NeMo Guardrails defines input, retrieval, dialog, execution and output rails in its Colang language (NeMo Guardrails documentation, consulted October 2026).
+
+A guardrail can act before generation (the input layers' job), during it (constrained decoding), or after it (the checks above), which is the last line before an output becomes an action or a stored record. The capstone, [post 30](../30-capstone-email-reply-agent/index.md), puts one such check, a send-gate, in front of `send_email`, and runs it even after the human has approved the draft.
 
 ---
 
-## 6. Where guardrails sit: measure versus enforce
+## 7. Where guardrails sit: measure against enforce
 
-Guardrails are easy to confuse with the two neighbouring disciplines. Drawing the lines precisely keeps a system from either duplicating work or leaving a gap.
+**Evaluation measures; guardrails enforce.** Evaluation ([post 20](../20-evaluation/index.md)) runs offline, on a golden set, in continuous integration (CI), and produces a number, such as a schema-validity rate, that says whether the system is good enough to ship. It does nothing at runtime. A guardrail runs on every live response and produces a decision: pass this one, block that one. Evaluation catches a regression before it ships; a guardrail catches the bad response that slips through anyway. They share fixtures: the schema that scores the golden set offline gates real traffic online.
 
-**Evaluation measures; guardrails enforce.** Evaluation ([Post 20](../20-evaluation/index.md)) runs offline, on a golden set, in CI, and produces a *number* (a schema-validity rate, for example) that tells you whether the system is good enough to ship. It does nothing at runtime. A guardrail runs *online*, on every live response, and produces a *decision*: pass this one, block that one. Evaluation catches a regression before it ships; a guardrail catches the one bad response that slips through anyway. They are complements, and they share fixtures: schema validity is both an eval metric and a runtime guardrail, so the same schema tests the golden set offline and gates real traffic online.
+**Security is the adversarial case.** Guardrails and security ([post 23](../23-security/index.md), prompt injection and its defences) overlap at the output boundary, but the threat models differ. Output guardrails mostly catch the model's accidental failures: a malformed object, an inadvertent PII leak. Security assumes an adversary trying to make the model leak data or take a forbidden action, often through instructions hidden in retrieved or tool-returned content. In post 23's account, validating model output before it reaches a shell, a query or a browser is part of filtering at trust boundaries: an output guardrail is a layer within security, not a substitute for it. A recipient allow-list on an outbound action is both; a moderation pass on a paragraph is a guardrail that is only incidentally a security control.
 
-**Security is the adversarial case.** Guardrails and security ([Post 23](../23-security/index.md)) overlap on the output boundary, but the threat models differ. Output guardrails mostly guard against the model's *accidental* failures: a malformed object, an inadvertent PII leak, an off-topic answer. Security guards against an *adversary* actively trying to make the model exfiltrate data or take a forbidden action, often via prompt injection arriving through retrieved or tool-returned content. An output guardrail is a real part of the security stack, because filtering at the output boundary is one of the architectural defences ([Post 23](../23-security/index.md)), but it is a layer within security, not a substitute for it. A recipient allow-list on an outbound action is a guardrail *and* a security control; a moderation pass on a generated paragraph is a guardrail that is only incidentally one.
+Evaluation is the test suite, guardrails are the runtime assertions, and security is the threat model.
 
-The clean mental model: evaluation is the *test suite*, guardrails are the *runtime asserts*, and security is the *threat model*. All three touch the output; only guardrails act on it, in production, one response at a time.
+---
+
+## 8. Make it run
+
+The three snippets run from the series root with the standard library only and no network call:
+
+```text
+uv run python posts/21-structured-output-guardrails/snippets/constrained_decoding.py
+uv run python posts/21-structured-output-guardrails/snippets/validate_retry.py
+uv run python posts/21-structured-output-guardrails/snippets/output_guard.py
+```
+
+A measurement would send the same extraction task a hundred times on each rung with a key, through `check` and `parse_with_retry`, and count the same columns.
+
+---
+
+## 9. What can go wrong?
+
+- **A parser that assumes the fields.** `json.loads` succeeds on JSON mode output, the key is missing, and a `KeyError` appears far from the model call.
+- **A strict schema trusted with the meaning.** The reply parses, so it is stored, and a refund with no amount reaches the database.
+- **An unsupported keyword.** A `minimum` the provider does not support returns an error, or an SDK helper moves it into the description, and the range is enforced nowhere unless the validator checks it.
+- **Retrying a cut-off reply.** The loop re-sends at the same `max_tokens` and spends three calls to report the same failure.
+- **A refusal counted as a parse error.** "I can't help with that" fails `json.loads`, the loop asks for corrected JSON, and the dashboard counts a schema error instead of a refusal.
+- **A schema changed per turn.** A new `output_config.format` or `tool_choice` on each turn invalidates Anthropic's cache, and the input bill rises with no change in the prompt.
 
 ---
 
 ## Common pitfalls
 
-- **Parsing without validating.** Calling `json.loads` and assuming the fields are present. Loose JSON mode guarantees syntax at best, never semantics; validate against a schema, always.
-- **A lenient schema.** Omitting `additionalProperties: false` and `required`, so the model can add or drop fields and still "pass". A schema that forbids nothing enforces nothing.
-- **No retry loop.** Treating the first malformed response as a fatal error when feeding the validation message back would have fixed it on the second attempt.
-- **A retry loop with no ceiling.** Retrying forever (or silently) hides a real regression and burns tokens; cap the attempts and count exhaustions as a tracked error.
-- **`max_tokens` too low for the schema.** A large output object truncated mid-structure produces broken JSON that no prompt wording can repair; size the output budget to the schema ([Post 04](../04-tokens-windows-budgets/index.md)).
-- **Guardrails only on the input.** Moderating what goes in but not what comes out leaves the PII leak, the off-topic answer, and the leaked system detail unguarded.
-- **Confusing eval with guardrails.** Assuming an offline eval score protects production; the score measures, only a runtime guardrail enforces.
+1. **Parsing without validating.** JSON mode guarantees syntax at best; validate every reply against a schema and the rules the schema cannot state.
+2. **A lenient schema.** Without `additionalProperties: false` and `required`, the model adds or drops fields and still passes.
+3. **A retry with no ceiling.** An uncapped or silent loop hides a regression; cap the attempts and count exhaustions.
+4. **Guardrails only on the input, or only offline.** An input filter and an evaluation score leave the live reply unchecked; only a runtime output guardrail enforces.
 
 ---
 
 ## Further reading
 
-- OpenAI, *"Structured Outputs"* docs: `response_format` with JSON Schema and strict mode.
-- Anthropic, *"Tool use"* docs: schema-validated tool arguments and the structured-output path.
-- Outlines (project docs): grammar-constrained decoding that guarantees valid JSON at generation time.
-- Instructor and Pydantic (project docs): the validate-and-retry pattern and schema authoring in Python.
-- Guardrails AI and NVIDIA NeMo Guardrails (project docs): output-guardrail frameworks referenced in §5.
+- OpenAI, *"Structured Outputs"*, *"Function calling"* and *"Moderation"* documentation (consulted October 2026): JSON mode, strict mode and its schema subset, `tool_choice`, the moderation model.
+- Anthropic, *"Structured outputs"* and *"Define tools"* documentation (consulted October 2026): `output_config.format`, strict tool use, the documented exceptions, `tool_choice`.
+- Willard, B. T. and Louf, R., *"Efficient Guided Generation for Large Language Models"* (2023), and the Outlines documentation: constrained decoding as a finite-state machine.
+- Pydantic and Instructor documentation: schemas as Python classes, validation, and retries.
+- Guardrails AI and NVIDIA NeMo Guardrails documentation (consulted October 2026): on-fail actions, and rails at five points of a conversation.
 
-Full citations in [REFERENCES.md](../../REFERENCES.md).
+Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
 ---
 
 ## What to read next
 
-- **[Post 22 — Observability, tracing, and cost](../22-observability/index.md)**: how schema-validation errors, refusal rate, and retry counts show up in the trace and on the dashboard.
-- **[Post 20 — Evaluation](../20-evaluation/index.md)**: the offline discipline that measures what guardrails enforce at runtime.
+- **[Post 22 - Observability, tracing, and cost](../22-observability/index.md):** how schema-validation errors, exhausted retries and refusals show up in the trace and on the dashboard.
+- **[Post 23 - Security and prompt injection](../23-security/index.md):** the adversarial case, where output filtering is one of the defences at a trust boundary.
