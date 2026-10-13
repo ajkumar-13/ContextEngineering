@@ -1,67 +1,26 @@
 id: ctx-024
-slug: 24-privacy-pii-data-governance
-title: "24 · Privacy, PII, and Data Governance"
-
-description: >
-  Learn how to build privacy-preserving LLM applications by governing
-  personal data across prompts, RAG, memory, tools, and observability.
-  Explore PII detection, redaction, retention policies, tenant isolation,
-  consent management, and regulatory compliance for production AI systems.
-
-author: "Ajay"
-
+slug: 24-privacy-and-governance
+title: "24 - Privacy, PII, and data governance"
+summary: "Where regulated personal data enters the context and its copies, the trace store first, and where detection, redaction, retention, consent and tenant isolation must sit to govern it without gutting answer quality."
 date: 2026-06-03
-last_modified: 2026-06-03
-
-tags:
-  - context-engineering
-  - privacy
-  - pii
-  - data-governance
-  - compliance
-  - gdpr
-  - observability
-  - ai-agents
-
-category: Production Concerns
-series: Context Engineering
+updated: 2026-10-13
+status: complete
 part: "Part IV - Production-grade practice"
-chapter: "Part IV — Production Concerns"
-
-hero: diagrams/00-hero-privacy-and-governance.svg
-hero_alt: "Data flow showing user input, RAG, memory, and tools passing through a trust boundary with PII detection, redaction, and governance before entering the model and trace store"
-
-reading_time: 17
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - AI Privacy
-  - Data Governance
-  - Personally Identifiable Information
-  - PII
-  - GDPR
-  - CCPA
-  - Data Residency
-  - Zero Data Retention
-  - ZDR
-  - Trace Store
-  - Observability
-  - Data Retention
-  - Data Redaction
-  - Microsoft Presidio
-  - Named Entity Recognition
-  - NER
-  - Memory Governance
-  - Right to be Forgotten
-  - Tenant Isolation
-  - Multi-Tenant RAG
-  - Data Compliance
-  - AI Governance
-
-canonical_url: ""
-
-prev: ../23-security-and-guardrails/
-next: ../25-long-context-vs-rag/
+level: intermediate
+reading_time: 19
+tags: [context-engineering, privacy, pii, data-governance, redaction, data-retention, tenant-isolation, gdpr]
+hero: diagrams/01-one-gate-two-copies.svg
+prerequisites: [ctx-022, ctx-023]
+code: optional
+outcomes:
+  - id: o1
+    text: "Trace where personally identifiable information enters the context, layer by layer, and every store that keeps a copy of it, the trace store first."
+  - id: o2
+    text: "Place a detect-and-redact gate at the trust boundary, and decide separately for the window and the trace store whether a value is redacted or kept."
+  - id: o3
+    text: "Set retention and residency for logged prompts, and say what a provider's zero-data-retention terms cover and what they leave to the application."
+  - id: o4
+    text: "Gate memory writes on sensitivity and a recorded lawful basis, and fan one erasure request out to every store that holds the person's data."
+  - id: o5
+    text: "Enforce tenant isolation in retrieval and memory with a scope filter that fails closed, and test it with a cross-tenant leak test."
+recommended: [ctx-016]

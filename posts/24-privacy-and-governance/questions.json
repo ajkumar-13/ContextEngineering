@@ -1,0 +1,734 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-024",
+  "next_ordinal": 17,
+  "questions": [
+    {
+      "id": "ctx-024-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 2,
+      "tags": [
+        "trace-store"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A support agent never writes personal data to a log on purpose, yet a privacy review finds customers' card numbers in its trace store. Which explanation fits?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The model memorised the card numbers during training and repeats them in its responses, which the logger then records.",
+          "correct": false,
+          "feedback": "Training plays no part here: the numbers arrived in this application's own prompts, through a tool result or a user message, and the trace copied them."
+        },
+        {
+          "key": "b",
+          "text": "An attacker injected the card numbers into the trace store through a prompt injection hidden in a customer email.",
+          "correct": false,
+          "feedback": "No adversary is needed. Data that entered the context legitimately is copied into the trace by construction; that is the governance case, not the security one."
+        },
+        {
+          "key": "c",
+          "text": "Each trace keeps the full prompt, so a card number a tool returned into the context is copied into the trace store.",
+          "correct": true,
+          "feedback": "Right. The trace store keeps a copy of the full prompt and response of every call, so it inherits every value that entered the context."
+        },
+        {
+          "key": "d",
+          "text": "The provider sends its own request logs back to the application, and those logs carry the card numbers.",
+          "correct": false,
+          "feedback": "The provider's logs are a separate copy under its own retention terms; the application's trace store is filled by the application's own logging of each prompt."
+        }
+      ],
+      "explanation": "Section 1: a trace store keeps each captured trace, a copy of the full prompt and the full response. Everything the assembler packed into a call, including tool results and pasted user text, is therefore in the trace.",
+      "hints": [
+        "Ask what a single trace contains."
+      ]
+    },
+    {
+      "id": "ctx-024-q02",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 4,
+      "tags": [
+        "data-map",
+        "layers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Five pieces of personal data are found in one prompt of a support agent. Match each to the layer it sits in.",
+      "left": [
+        {
+          "key": "a",
+          "text": "The address the user typed in the message being answered now"
+        },
+        {
+          "key": "b",
+          "text": "The plan and address a `lookup_account` call returned two turns ago"
+        },
+        {
+          "key": "c",
+          "text": "A support ticket naming the customer, fetched from the indexed corpus for this question"
+        },
+        {
+          "key": "d",
+          "text": "A stored row: \"the user mentioned a diabetes diagnosis\""
+        },
+        {
+          "key": "e",
+          "text": "A real customer's name used as a worked example in the agent's standing instructions"
+        }
+      ],
+      "right": [
+        {
+          "key": "p",
+          "text": "01 System prompt"
+        },
+        {
+          "key": "q",
+          "text": "02 Tools and MCP descriptions"
+        },
+        {
+          "key": "r",
+          "text": "03 Memory and state"
+        },
+        {
+          "key": "s",
+          "text": "04 Retrieved chunks"
+        },
+        {
+          "key": "t",
+          "text": "05 Conversation history"
+        },
+        {
+          "key": "u",
+          "text": "06 User instruction"
+        }
+      ],
+      "answer": {
+        "a": "u",
+        "b": "t",
+        "c": "s",
+        "d": "r",
+        "e": "p"
+      },
+      "explanation": "Section 2: the message being answered is layer 06; earlier messages and every tool result sit in layer 05; retrieved chunks are layer 04; memory rows are layer 03. Layers 01 and 02 are written by the team and should hold no personal data, so a real customer used as an example in the system prompt is removed.",
+      "hints": [
+        "Tool results stay in the session's history once they are returned.",
+        "Only two layers are written by the team; one of them holds the standing instructions."
+      ]
+    },
+    {
+      "id": "ctx-024-q03",
+      "type": "mcq",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "redaction-policy"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A prompt reads \"Email Tom Okafor at tom.okafor@example.org to confirm the refund.\" Under the post's two-copy policy, what do the model and the trace store each receive?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Both receive placeholders, because redaction at the trust boundary applies to every copy of the prompt alike.",
+          "correct": false,
+          "feedback": "Redacting the window here breaks the task: the model cannot email `<PERSON_1>` at `<EMAIL_1>`. The window is redacted only when the model does not need the values."
+        },
+        {
+          "key": "b",
+          "text": "The model gets the name and address; the trace store gets placeholders, with the values in a separate vault.",
+          "correct": true,
+          "feedback": "Right. The task is the PII, so the window keeps the values; the copy that outlives the call holds placeholders, reversible only through the vault."
+        },
+        {
+          "key": "c",
+          "text": "Both receive the raw text, because the user supplied the name and address willingly in the request.",
+          "correct": false,
+          "feedback": "Willing supply does not govern the copy kept after the call. The trace store still receives placeholders for every field the policy names."
+        },
+        {
+          "key": "d",
+          "text": "The model receives placeholders and the trace store receives the raw text, so debugging keeps full fidelity.",
+          "correct": false,
+          "feedback": "That inverts the policy: the model cannot do the job, and the long-lived copy holds the raw values. This is the logger-before-the-gate mistake."
+        }
+      ],
+      "explanation": "Section 3: the window is redacted only when the model does not need the values, while the trace store receives redacted text for every field the policy names, with the mapping kept in a vault.",
+      "hints": [
+        "Ask whether the task can be done without the values.",
+        "The two copies get two different policies."
+      ]
+    },
+    {
+      "id": "ctx-024-q04",
+      "type": "mcq",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 4,
+      "tags": [
+        "detection",
+        "snippet"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In the run of `snippets/pii_gate.py`, the order number 1234 5678 9012 3456 stays in the text while the card 4111 1111 1111 1111 is replaced, and \"the patient in bed 4 has a penicillin allergy\" reaches the trace store unchanged. Which reading of the run is right?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The order number is too short to be a card number, and the health detail is not personal data in any context, so nothing was missed.",
+          "correct": false,
+          "feedback": "Both are 16 digits; the difference is the checksum. And a health detail about a patient can be personal data in context, which is why it is flagged as missed."
+        },
+        {
+          "key": "b",
+          "text": "The run shows the detectors are complete: zero misses among the 42 seeded values means nothing personal can reach the trace store at all.",
+          "correct": false,
+          "feedback": "The prompts were written for these detectors, so zero misses tests the plumbing, not the detection rate; the health detail shows a real miss."
+        },
+        {
+          "key": "c",
+          "text": "The name list should have caught the health detail, because a patient is a person, so the gate's NER stand-in has a bug that drops matches.",
+          "correct": false,
+          "feedback": "The name list matches names of people; \"the patient in bed 4\" names nobody. No pattern or name list catches it; only a classifier that reads context can."
+        },
+        {
+          "key": "d",
+          "text": "The order number fails the Luhn check, so it is not a card; the health detail matches no pattern or listed name: a classifier's case.",
+          "correct": true,
+          "feedback": "Right. A checksum gives the pattern layer its precision, and context-dependent PII is what the cheaper layers miss."
+        }
+      ],
+      "explanation": "Section 3: patterns with a check are precise where a checksum exists (the order number fails Luhn), and context-dependent cases fall to the LLM classifier layer. The clean count is about plumbing, since the prompts were written for the detectors.",
+      "hints": [
+        "What does a card number satisfy that an arbitrary 16-digit number need not?",
+        "Which detection layer reads meaning rather than format?"
+      ]
+    },
+    {
+      "id": "ctx-024-q05",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 1,
+      "tags": [
+        "redaction"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "When the gate redacts a detected value, what does it put in the text in place of the value?",
+      "answer": {
+        "model": "A typed placeholder such as `<PERSON_1>` or `<EMAIL_1>`; the value itself goes to a separate vault.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?!\\s*[\\w'-]+(\\s*,\\s*[\\w'-]+){2,}\\s*\\.?\\s*$)(?!\\s*(it\\s+)?(is\\s+|puts\\s+|keeps\\s+)?(the\\s+)?(raw\\s+|original\\s+|actual\\s+|real\\s+)?value\\s+itself\\b)(?![\\s\\S]*\\bleaves?\\s+(the\\s+)?(raw\\s+|original\\s+|actual\\s+|real\\s+)?values?\\b)(?![\\s\\S]*\\bplaceholders?\\s+(goes|go|is\\s+sent|are\\s+sent|is\\s+stored|are\\s+stored|is\\s+kept|are\\s+kept)\\s+(in|to|into)\\s+(the\\s+|a\\s+)?vault\\b)(?![\\s\\S]*\\b(not|never|no|instead of|rather than)\\s+(with\\s+)?(a\\s+|an\\s+)?(typed\\s+)?(placeholder|token)s?\\b)(?![\\s\\S]*\\b(deletes?|removes?|drops?|blanks?|erases?)\\s+(it|them|the\\s+(value|span|text))\\s*(entirely|completely)?\\s*\\.?\\s*$)[\\s\\S]*(\\bplaceholders?\\b|\\btokens?\\b|<\\s*[A-Z]+_\\d+\\s*>|\\b(typed|type)\\s+(labels?|tags?|markers?)\\b|\\blabels?\\s+(of|naming|for)\\s+(its|the)\\s+type\\b)"
+        ]
+      },
+      "explanation": "Section 3: redaction replaces each detected span with a typed placeholder rather than deleting it, so the text still reads, and the placeholder-to-value map goes to a vault with tighter access.",
+      "hints": [
+        "The surrounding sentence must still read, and the model must still be able to say \"the person\"."
+      ]
+    },
+    {
+      "id": "ctx-024-q06",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "retention"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A trace store applies the post's illustrative lifecycle rule: a trace keeps its prompt while it is at most 30 days old, keeps the rest of the record while it is at most 180 days old, and is deleted after that. On one day the store holds eight traces aged 3, 29, 30, 31, 90, 180, 181 and 400 days. How many keep their prompt, how many are kept without it, and how many are deleted?",
+      "answer": {
+        "parts": [
+          {
+            "label": "kept with the prompt",
+            "value": 3,
+            "tolerance": 0,
+            "unit": "traces"
+          },
+          {
+            "label": "kept without the prompt",
+            "value": 3,
+            "tolerance": 0,
+            "unit": "traces"
+          },
+          {
+            "label": "deleted",
+            "value": 2,
+            "tolerance": 0,
+            "unit": "traces"
+          }
+        ]
+      },
+      "precision_note": "apply_retention in snippets/governed_stores.py: deleted when age > 180, prompt dropped when age > 30. With prompt: 3, 29, 30. Without: 31, 90, 180. Deleted: 181, 400. Treating day 30 or day 180 as already past the window (4, 2, 2 or 3, 2, 3) is the nearest wrong method.",
+      "explanation": "Section 4: the rule keeps the full record for the debugging window, then the record without the prompt for the analytics window, then deletes it with an audit record. The boundaries are inclusive: a trace exactly 30 days old keeps its prompt, and one exactly 180 days old is kept.",
+      "hints": [
+        "Sort the ages into three bins by the two boundaries.",
+        "Check the two ages that sit exactly on a boundary."
+      ]
+    },
+    {
+      "id": "ctx-024-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "residency",
+        "pricing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "An agent on Claude Opus 4.6 costs 2,400 US dollars a month at standard global rates (an illustrative figure: input, output, cache writes and cache reads together). For residency, the team sets `inference_geo` to `\"us\"` on every request. Using the multiplier Anthropic's \"Data residency\" page states (consulted October 2026), what is the new monthly cost, and how much more is it per month?",
+      "answer": {
+        "parts": [
+          {
+            "label": "new monthly cost",
+            "value": 2640,
+            "tolerance": 0.5,
+            "unit": "USD"
+          },
+          {
+            "label": "extra per month",
+            "value": 240,
+            "tolerance": 0.5,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "US-only inference is priced at 1.1 times the standard rate across all token categories on Claude 4.6 and later models: 2,400 x 1.1 = 2,640; 2,640 - 2,400 = 240. Applying the multiplier to input tokens only, or reading it as 10 times, is the nearest wrong method.",
+      "explanation": "Section 4: the page prices US-only inference at 1.1 times the standard rate for every token category (input, output, cache writes and cache reads) on Claude 4.6 and later models, so the whole bill scales by 1.1.",
+      "hints": [
+        "Find the multiplier the post quotes for US-only inference.",
+        "It applies to every token category, so it applies to the whole bill."
+      ]
+    },
+    {
+      "id": "ctx-024-q08",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "zdr"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team has a zero-data-retention (ZDR) arrangement with Anthropic. It uploads customer contracts through the Files API, answers questions about them through the Messages API, and logs every full prompt in its own trace store. Which statement is right?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Everything is covered, because ZDR applies to the whole organisation and to every endpoint and feature once granted.",
+          "correct": false,
+          "feedback": "ZDR is granted per organisation but covers only eligible endpoints and features; the Files API is listed as not covered, and the team's trace store is its own copy."
+        },
+        {
+          "key": "b",
+          "text": "Only the eligible Messages traffic is covered; the uploaded files and the team's own trace store are outside it.",
+          "correct": true,
+          "feedback": "Right. Anthropic lists the Files API among the features ZDR does not cover, and ZDR never covers the application's own copies."
+        },
+        {
+          "key": "c",
+          "text": "The trace store is covered too, because every prompt in it came from an API call made under the arrangement.",
+          "correct": false,
+          "feedback": "ZDR governs what the provider keeps. A prompt logged by the application stays in the application's store, under the application's retention rule."
+        },
+        {
+          "key": "d",
+          "text": "Nothing is covered until the team also sets `inference_geo` to `\"us\"` on every request it sends.",
+          "correct": false,
+          "feedback": "`inference_geo` controls where inference runs; it is a residency setting, separate from retention, and ZDR does not depend on it."
+        }
+      ],
+      "explanation": "Section 4: ZDR is granted per organisation and covers some features and not others (Anthropic lists the Batch API and the Files API as not covered), and it does nothing for the application's own copies, such as its trace store.",
+      "hints": [
+        "Check which features the provider lists as outside ZDR.",
+        "Whose store is the trace store?"
+      ]
+    },
+    {
+      "id": "ctx-024-q09",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "retention",
+        "gdpr"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "How many days of retention does the GDPR's storage-limitation principle set for logged prompts that contain personal data?",
+      "answer": {
+        "model": "None: it names no number. Personal data may be kept in identifying form only as long as the purposes of the processing need, so the window is a policy choice made with counsel.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)\\W*(none|zero|nothing|no\\s+(fixed\\s+|specific\\s+)?(number|period|days|limit))\\b",
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?!\\s*[\\w'-]+(\\s*,\\s*[\\w'-]+){2,}\\s*\\.?\\s*$)[\\s\\S]*\\b(doesn'?t|does\\s+not|never|won'?t)\\s+(specify|set|name|give|fix|state|prescribe)\\s+(one|any|a\\s+(number|period|limit))\\b",
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?!\\s*[\\w'-]+(\\s*,\\s*[\\w'-]+){2,}\\s*\\.?\\s*$)(?![\\s\\S]*\\b(sets|specifies|names|fixes|requires|mandates|is)\\s+(a\\s+|an\\s+)?(fixed\\s+|specific\\s+)?\\d+)[\\s\\S]*\\b(no|none|not|doesn'?t|does\\s+not|never|nothing|neither|isn'?t)\\b[\\s\\S]*\\b(numbers?|periods?|windows?|figures?|specific|fixed|durations?|limits?|deadlines?|set\\s+time|lengths?|amount\\s+of\\s+time)\\b",
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?!\\s*[\\w'-]+(\\s*,\\s*[\\w'-]+){2,}\\s*\\.?\\s*$)(?![\\s\\S]*\\b(sets|specifies|names|fixes|requires|mandates)\\s+(a\\s+|an\\s+)?(fixed\\s+|specific\\s+)?\\d+)[\\s\\S]*\\b(as\\s+long\\s+as|no\\s+longer\\s+than|only\\s+(for\\s+)?as\\s+long\\s+as|until)\\s+(is\\s+|it\\s+is\\s+|they\\s+are\\s+|the\\s+data\\s+is\\s+)?(strictly\\s+)?(necessary|needed|required)\\b"
+        ]
+      },
+      "explanation": "Section 4: Article 5(1)(e) requires personal data to be kept in a form that identifies the person for no longer than the purposes of the processing need. It names no number, so 30 or 180 days are policy values, not legal ones.",
+      "hints": [
+        "Recall the wording of the principle: it ties the period to something other than a count of days."
+      ]
+    },
+    {
+      "id": "ctx-024-q10",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "retention",
+        "lifecycle"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Put the life of one trace under the post's three-tier retention rule in order.",
+      "items": [
+        {
+          "key": "a",
+          "text": "The gate writes the call's prompt, with placeholders, to the trace store"
+        },
+        {
+          "key": "b",
+          "text": "The full record is kept and readable for the short debugging window"
+        },
+        {
+          "key": "c",
+          "text": "The prompt is dropped; tokens, cost, latency and outcome stay for analytics"
+        },
+        {
+          "key": "d",
+          "text": "The record is deleted and an audit line records the deletion"
+        }
+      ],
+      "answer": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "explanation": "Section 4: the full record for a short debugging window, then the record without the prompt for a longer analytics window, then deletion with an audit record. The trace exists only once the gate has written it.",
+      "hints": [
+        "The tiers lose detail as the trace ages."
+      ]
+    },
+    {
+      "id": "ctx-024-q11",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 12,
+      "tags": [
+        "erasure",
+        "fan-out"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "This `erase` answers an erasure request by deleting the person's memory rows and nothing else, so their documents, chunks, index entries and traces survive. Fix it so that one call removes every copy: the memory rows about the subject, the source documents about them, every chunk of those documents with its index entries (found through the manifest), and the traces of the subject's calls, leaving every other person's data untouched. Return the count removed from each store.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "def erase(subject, stores):\n    \"\"\"Erase every copy of one person's data, in place.\n\n    stores holds:\n      memory    list of rows, each a dict with \"subject\"\n      docs      list of source documents, each a dict with \"id\" and \"about\" (a list of subject ids)\n      chunks    list of chunks, each a dict with \"id\" and \"doc\" (the id of its source document)\n      manifest  dict: document id -> list of that document's chunk ids\n      index     dict: word -> set of chunk ids\n      traces    list of traces, each a dict with \"user\"\n    Return the number of items removed from each store, as a dict.\n    \"\"\"\n    before = len(stores[\"memory\"])\n    stores[\"memory\"] = [r for r in stores[\"memory\"] if r[\"subject\"] != subject]\n    return {\"memory\": before - len(stores[\"memory\"])}\n",
+      "solution": "def erase(subject, stores):\n    \"\"\"Erase every copy of one person's data, in place.\n\n    stores holds:\n      memory    list of rows, each a dict with \"subject\"\n      docs      list of source documents, each a dict with \"id\" and \"about\" (a list of subject ids)\n      chunks    list of chunks, each a dict with \"id\" and \"doc\" (the id of its source document)\n      manifest  dict: document id -> list of that document's chunk ids\n      index     dict: word -> set of chunk ids\n      traces    list of traces, each a dict with \"user\"\n    Return the number of items removed from each store, as a dict.\n    \"\"\"\n    counts = {}\n    before = len(stores[\"memory\"])\n    stores[\"memory\"] = [r for r in stores[\"memory\"] if r[\"subject\"] != subject]\n    counts[\"memory\"] = before - len(stores[\"memory\"])\n    gone_docs = {d[\"id\"] for d in stores[\"docs\"] if subject in d[\"about\"]}\n    stores[\"docs\"] = [d for d in stores[\"docs\"] if d[\"id\"] not in gone_docs]\n    counts[\"docs\"] = len(gone_docs)\n    gone_chunks = set()\n    for doc in gone_docs:\n        gone_chunks |= set(stores[\"manifest\"].pop(doc, []))\n    stores[\"chunks\"] = [c for c in stores[\"chunks\"] if c[\"id\"] not in gone_chunks]\n    counts[\"chunks\"] = len(gone_chunks)\n    for word in list(stores[\"index\"]):\n        stores[\"index\"][word] = stores[\"index\"][word] - gone_chunks\n        if not stores[\"index\"][word]:\n            del stores[\"index\"][word]\n    before = len(stores[\"traces\"])\n    stores[\"traces\"] = [t for t in stores[\"traces\"] if t[\"user\"] != subject]\n    counts[\"traces\"] = before - len(stores[\"traces\"])\n    return counts\n",
+      "tests": "def make():\n    return {\n        \"memory\": [{\"subject\": \"u-1\", \"content\": \"prefers formal English\"}, {\"subject\": \"u-2\", \"content\": \"on the enterprise tier\"},\n                   {\"subject\": \"u-1\", \"content\": \"reported a double charge\"}],\n        \"docs\": [{\"id\": \"d1\", \"about\": [\"u-1\"]}, {\"id\": \"d2\", \"about\": []}, {\"id\": \"d10\", \"about\": [\"u-2\"]}],\n        \"chunks\": [{\"id\": \"d1-c1\", \"doc\": \"d1\"}, {\"id\": \"d1-c2\", \"doc\": \"d1\"}, {\"id\": \"d2-c1\", \"doc\": \"d2\"},\n                   {\"id\": \"d10-c1\", \"doc\": \"d10\"}],\n        \"manifest\": {\"d1\": [\"d1-c1\", \"d1-c2\"], \"d2\": [\"d2-c1\"], \"d10\": [\"d10-c1\"]},\n        \"index\": {\"refund\": {\"d1-c1\", \"d2-c1\"}, \"charge\": {\"d1-c2\", \"d10-c1\"}, \"priya\": {\"d1-c1\"}},\n        \"traces\": [{\"user\": \"u-1\", \"prompt\": \"refund the duplicate charge\"}, {\"user\": \"u-2\", \"prompt\": \"u-1 is my colleague\"},\n                   {\"user\": \"u-1\", \"prompt\": None}],\n    }\n\ns = make()\ncounts = erase(\"u-1\", s)\nassert counts == {\"memory\": 2, \"docs\": 1, \"chunks\": 2, \"traces\": 2}, counts\nassert [r[\"subject\"] for r in s[\"memory\"]] == [\"u-2\"]\nassert [d[\"id\"] for d in s[\"docs\"]] == [\"d2\", \"d10\"]\nassert sorted(c[\"id\"] for c in s[\"chunks\"]) == [\"d10-c1\", \"d2-c1\"]\nassert \"d1\" not in s[\"manifest\"] and s[\"manifest\"][\"d10\"] == [\"d10-c1\"]\nassert s[\"index\"].get(\"refund\") == {\"d2-c1\"} and s[\"index\"].get(\"charge\") == {\"d10-c1\"}\nassert not any(\"d1-c1\" in ids or \"d1-c2\" in ids for ids in s[\"index\"].values())\nassert [t[\"user\"] for t in s[\"traces\"]] == [\"u-2\"]\ns = make()\nassert erase(\"u-9\", s) == {\"memory\": 0, \"docs\": 0, \"chunks\": 0, \"traces\": 0}\nassert s == make()\nprint(\"all tests pass\")\n",
+      "entry": "python -c \"exec(open('solution.py').read()); exec(open('tests.py').read())\"",
+      "expected_output": "all tests pass\n",
+      "explanation": "Section 5: an erasure fans out to every store that holds a copy. The manifest names the chunks of each source document, so removing a document removes its chunks and their index entries; traces are found by the user field, not by searching the prompt text.",
+      "hints": [
+        "List the stores the docstring names and ask, for each, how the subject's items are found.",
+        "Chunks are found through the manifest, not by matching id prefixes, and the index must lose them too.",
+        "A trace may hold no prompt at all; find traces by their user field."
+      ]
+    },
+    {
+      "id": "ctx-024-q12",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 12,
+      "tags": [
+        "erasure",
+        "derived-copies"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A user asks a support product to erase their data. The team deletes the user's memory rows, confirms the memory store returns nothing for them, and closes the request. Critique the response: what copies are likely to remain in an LLM stack like the one this post describes, how would each be found, and what should the procedure look like?",
+      "kind": "critique",
+      "solution": "The response stops at one store of several.\n\n1. **Source documents, chunks and index entries.** Tickets and call notes about the person are in the corpus; their chunks and index entries still retrieve them. They are found through the documents' subject metadata and the manifest that lists each document's chunks; deleting the documents must remove the chunks and the index entries too, or a query for the person still returns their ticket.\n2. **The trace store.** Every call's prompt was copied there, with the person's messages, retrieved chunks and tool results. Traces are found by the user field (not only by searching text, since a trace may hold placeholders or no prompt), and purged, with the vault entries that map their placeholders.\n3. **Derived copies.** Answer caches, cold tiers kept as never deleted, and evaluation or replay sets harvested from traces keep the details and bring them back in a replayed test.\n4. **The provider's copy.** The application cannot delete it; it is governed by the provider's terms (for example, deletion within 30 days on Anthropic's API without ZDR, nothing at rest under ZDR, longer for flagged content or where the law requires), which should be stated in the reply.\n\nThe procedure: an erasure fan-out written and tested before it is needed, which finds items by subject, source and content pattern in every store, deletes with an audit record per store, re-validates anything that depended on the deleted data (indexes, caches), and reports the provider's terms. A memory-only deletion leaves the person in every other copy.",
+      "rubric": [
+        {
+          "criterion": "Names documents, chunks and index entries as surviving copies and the manifest as the way to find chunks",
+          "points": 2
+        },
+        {
+          "criterion": "Names the trace store, found by the user field, including traces whose prompt is redacted or dropped",
+          "points": 2
+        },
+        {
+          "criterion": "Names at least one derived copy: a cache, a cold tier, or an evaluation or replay set built from traces",
+          "points": 2
+        },
+        {
+          "criterion": "Explains that the provider's copy is governed by its retention terms, not deleted by the application",
+          "points": 1
+        },
+        {
+          "criterion": "Proposes a tested fan-out procedure with an audit record and re-validation of dependent indexes or caches",
+          "points": 2
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Section 5: an erasure is a fan-out to memory rows, source documents with their chunks and index entries, traces and the provider's copy; What can go wrong adds derived copies such as caches, cold tiers and test sets harvested from traces.",
+      "hints": [
+        "List every store a prompt's contents are copied into.",
+        "Some copies are not stores the team thinks of as data: caches and test sets.",
+        "One copy is outside the application altogether."
+      ]
+    },
+    {
+      "id": "ctx-024-q13",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "memory",
+        "consent"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The memory write gate of `snippets/governed_stores.py` sees a candidate row: \"mentioned a diabetes diagnosis\", marked special-category, with a lawful basis of consent recorded on the row, for a user who has no recorded opt-in for health data. What does the gate do?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "It writes the row, because the row itself names consent, one of the six lawful bases, as its basis.",
+          "correct": false,
+          "feedback": "Naming consent on the row does not record it. The gate looks up the subject's opt-in for health data, and there is none."
+        },
+        {
+          "key": "b",
+          "text": "It writes the row with its sensitivity downgraded to personal, so the special-category check no longer applies.",
+          "correct": false,
+          "feedback": "Relabelling to get past a check defeats the gate: the label exists so that the gate can refuse exactly this content."
+        },
+        {
+          "key": "c",
+          "text": "It writes the row but strips the word \"diabetes\", keeping the rest of the fact about the user.",
+          "correct": false,
+          "feedback": "The gate does not edit content; it decides whether the row may be held at all. A partial fact about a diagnosis is still health data."
+        },
+        {
+          "key": "d",
+          "text": "It refuses the row: special-category content needs a recorded opt-in for that category, and none exists.",
+          "correct": true,
+          "feedback": "Right. A basis written on the row is not a recorded opt-in; the gate checks the consent record for the subject and the category."
+        }
+      ],
+      "explanation": "Section 5: special-category content (health among it) is refused unless the person has opted in, and the gate checks the recorded opt-in for the subject and category, not a basis typed onto the row.",
+      "hints": [
+        "Look at which record the special-category check consults."
+      ]
+    },
+    {
+      "id": "ctx-024-q14",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "9",
+      "est_minutes": 4,
+      "tags": [
+        "tenant-isolation",
+        "ranking"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A shared index ranks the top 3 chunks over every tenant and then drops any chunk that is not the caller's tenant. In the post's toy store, tenant B asks \"How do I get a refund for a duplicate card charge?\". What does tenant B receive?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Tenant B's own two chunks, returns and account, exactly as if the filter had run first.",
+          "correct": false,
+          "feedback": "Filtering after ranking only removes; it cannot bring back chunks that were cut at the top 3. Tenant B's chunks ranked sixth and seventh."
+        },
+        {
+          "key": "b",
+          "text": "Tenant A's three chunks, because a filter that runs after ranking runs too late to stop them.",
+          "correct": false,
+          "feedback": "The filter does run, and removes them; the defect is the empty pack, not a leak."
+        },
+        {
+          "key": "c",
+          "text": "Nothing: the whole-store top 3 are all tenant A's, and the filter then removes all three.",
+          "correct": true,
+          "feedback": "Right. Nothing leaks, but tenant B's own chunks scored below tenant A's and never made the top 3, so the pack comes back empty."
+        },
+        {
+          "key": "d",
+          "text": "The top 3 chunks of tenant B, because the index ranks a second time after the filter.",
+          "correct": false,
+          "feedback": "No second ranking happens in this design; the pack is the filtered remainder of one top 3 over the whole store."
+        }
+      ],
+      "explanation": "What can go wrong (section 9): a tenant filter applied after ranking avoids the leak but returns a short or empty pack whenever another tenant's chunks rank higher. Section 6's fix is to filter first, so the ranking runs only over the caller's scope.",
+      "hints": [
+        "Rank all seven scoring chunks first and keep the top 3.",
+        "Then remove every chunk that is not tenant B's, and count what is left."
+      ]
+    },
+    {
+      "id": "ctx-024-q15",
+      "type": "short",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "tenant-isolation",
+        "fail-closed"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Why does the snippet's `retrieve` take `tenant_id` as a keyword argument with no default value?",
+      "answer": {
+        "model": "So that a call which forgets the tenant fails closed: it raises an error instead of searching every tenant's chunks.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?!\\s*[\\w'-]+(\\s*,\\s*[\\w'-]+){2,}\\s*\\.?\\s*$)(?![\\s\\S]*\\bfails?\\s+open\\b)(?![\\s\\S]*\\b(not|never|doesn'?t|does\\s+not|won'?t|wouldn'?t)\\s+(to\\s+)?(fail|raise|error|refuse|crash|throw|break)s?\\b)[\\s\\S]*\\b(fails?\\s+closed|failing\\s+closed|closed\\s+on|raises?|throws?|errors?\\b|exceptions?|typeerror|refused?|refuses|rejected|rejects|cannot\\s+be\\s+(called|made|run)|can'?t\\s+be\\s+(called|made|run)|won'?t\\s+run|crash(es)?|stops?)",
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?!\\s*[\\w'-]+(\\s*,\\s*[\\w'-]+){2,}\\s*\\.?\\s*$)(?![\\s\\S]*\\bfails?\\s+open\\b)(?![\\s\\S]*\\b(not|never|optional)\\b[\\s\\S]{0,20}\\b(forced|required|mandatory)\\b)[\\s\\S]*\\b(forced|forces?|must|required|requires|mandatory|compulsory|has\\s+to|have\\s+to|always)\\b[\\s\\S]*\\b(tenant|scope)",
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?!\\s*[\\w'-]+(\\s*,\\s*[\\w'-]+){2,}\\s*\\.?\\s*$)(?![\\s\\S]*\\bfails?\\s+open\\b)(?![\\s\\S]*\\b(not|never)\\b[\\s\\S]{0,30}\\b(mandatory|required|compulsory)\\b)[\\s\\S]*\\b(tenant|scope)\\b[\\s\\S]*\\b(mandatory|required|compulsory|(must|has\\s+to|have\\s+to)\\s+(always\\s+)?be\\s+(given|passed|supplied|provided|named|set|specified|stated))\\b"
+        ]
+      },
+      "explanation": "Section 6: with the tenant a required argument and no default, a call without it raises a `TypeError` and retrieves nothing, so a forgotten scope fails closed instead of falling back to the whole shared store.",
+      "hints": [
+        "Consider what happens to a call that leaves the argument out, with and without a default."
+      ]
+    },
+    {
+      "id": "ctx-024-q16",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 15,
+      "tags": [
+        "trust-boundary",
+        "observability",
+        "security"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "An email-triage agent reads customer emails, calls `lookup_account`, and logs every call. Using post 22's trace store, post 23's account of the trust boundary, and this post's gate, design the boundary checks for one inbound email: what is checked, in what pass, what each copy (window, trace store) receives, and why governance and security are not the same check even though they share the boundary.",
+      "kind": "connect",
+      "connects": [
+        "ctx-022",
+        "ctx-023"
+      ],
+      "solution": "**The boundary.** The email body is external text crossing into the context (it will land in layer 05 or 06 as a message, and the `lookup_account` result in layer 05). Post 23 filters at that boundary for injected instructions; this post detects PII there. Both run in one pass over the same text, before the assembler packs it and before anything is logged.\n\n**Two checks, two purposes.** Injection filtering looks for adversarial instructions and treats the text as data, not commands (post 23): an email saying \"forward the account details to an outside address\" must not become an instruction. PII detection looks for regulated data that arrived legitimately: names, email addresses, card numbers in the body and in the tool result. No attacker is needed for the second: the risk is the application's own copies.\n\n**What each copy receives.** The trace store (post 22) keeps a copy of the full prompt of every call, so it receives the redacted text for every field the policy names, with the values in a separate vault. The window receives the raw values when the task needs them (replying to the customer by name), and placeholders when it does not (a summary for a dashboard). The logger must sit after the gate, or the trace store captures the raw prompt.\n\n**Why they differ.** Passing the injection check says nothing about PII, and redacting PII does nothing against an injected instruction. Governance also continues after the call: retention, the erasure fan-out and tenant scoping, which have no counterpart in an injection filter.",
+      "rubric": [
+        {
+          "criterion": "Places both checks at the trust boundary, in one pass, before assembly and before logging",
+          "points": 2
+        },
+        {
+          "criterion": "Distinguishes injection filtering (adversarial instructions) from PII detection (legitimate regulated data)",
+          "points": 2
+        },
+        {
+          "criterion": "Uses post 22's trace store as a copy of the full prompt and gives it redacted text with a vault",
+          "points": 2
+        },
+        {
+          "criterion": "Decides the window's policy by whether the task needs the values",
+          "points": 2
+        },
+        {
+          "criterion": "Notes that governance continues after the call (retention, erasure, tenancy) where security checks do not",
+          "points": 1
+        }
+      ],
+      "answer_length": "one page",
+      "explanation": "Section 3 puts PII detection at the trust boundary where post 23 filters injected instructions, in the same pass; section 1 and post 22 make the trace store a copy of every prompt, which is why it receives redacted text by policy.",
+      "hints": [
+        "Start from where the email text crosses into the context.",
+        "Ask what each check looks for, and whether an attacker is needed for it to matter.",
+        "Decide separately for the window and for the trace store."
+      ]
+    }
+  ]
+}

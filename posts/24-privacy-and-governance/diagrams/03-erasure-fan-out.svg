@@ -1,0 +1,203 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="ctx-03-erasure-fan-out-title" aria-describedby="ctx-03-erasure-fan-out-desc">
+<title id="ctx-03-erasure-fan-out-title">An erasure has to reach every copy</title>
+<desc id="ctx-03-erasure-fan-out-desc">One erasure request for u-017 (Priya Raman, tenant-a) fans out to five stores. Counts are before, after a deletion that stops at the memory store, and after the fan-out: Memory rows, found by subject = u-017: 2, 0, 0; Source documents, found by about u-017: 2, 2, 0; Chunks and index, found by listed in the manifest: 3, 3, 0; Trace store, found by user = u-017: 2, 2, 0. The provider's copy is drawn dashed: its retention terms apply. A memory-only deletion leaves 7 copies. The query "Priya Raman duplicate card charge refund" retrieves doc-a2-c1, doc-a3-c1, doc-a1-c2 before and doc-a1-c2, doc-a4-c1, doc-a1-c1 after, so doc-a2-c1 and doc-a3-c1 are gone from the index.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-neutral-soft { fill: var(--ctx-neutral-soft); }
+  .f-red-ink { fill: var(--ctx-red-ink); }
+  .f-surface { fill: var(--ctx-surface); }
+  .s-border { stroke: var(--ctx-border); }
+  .s-ink { stroke: var(--ctx-ink); }
+  .s-rule { stroke: var(--ctx-rule); }
+</style>
+<defs>
+<marker id="ctx-03-erasure-fan-out-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="720"/>
+<text x="40" y="48" class="t-title" data-w="429">An erasure has to reach every copy</text>
+<text x="40" y="76" class="t-subtitle" data-w="724">One request for u-017 in snippets/governed_stores.py; the provider's copy is outside the application.</text>
+<rect x="40" y="248" width="168" height="104" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="40" y="248" width="168" height="104" rx="8" class="emph s-ink" data-fit="skip"/>
+<text x="56" y="284" class="t-head" data-w="130">Erasure request</text>
+<text x="56" y="308" class="t-code" data-w="43">u-017</text>
+<text x="56" y="332" class="t-note" data-w="87">Priya Raman</text>
+<text x="264" y="128" class="t-note" data-w="35">store</text>
+<text x="464" y="128" class="t-note" data-w="59">found by</text>
+<text x="696" y="128" text-anchor="end" class="t-note" data-w="44">before</text>
+<text x="800" y="128" text-anchor="end" class="t-note" data-w="87">memory only</text>
+<text x="904" y="128" text-anchor="end" class="t-note" data-w="49">fan-out</text>
+<rect x="248" y="144" width="672" height="56" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="248" y="144" width="672" height="56" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="264" y="176" class="t-label" data-w="91">Memory rows</text>
+<text x="464" y="176" class="t-code" data-w="129">subject = u-017</text>
+<text x="696" y="176" text-anchor="end" class="t-label" data-w="9">2</text>
+<text x="800" y="176" text-anchor="end" class="t-value" data-w="9">0</text>
+<text x="904" y="176" text-anchor="end" class="t-value" data-w="9">0</text>
+<path d="M208,300 L247.11,174.86" class="flow" marker-end="url(#ctx-03-erasure-fan-out-arrow)"/>
+<rect x="248" y="212" width="672" height="56" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="248" y="212" width="672" height="56" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="264" y="248" class="t-label" data-w="126">Source documents</text>
+<text x="464" y="248" class="t-label" data-w="82">about u-017</text>
+<text x="696" y="248" text-anchor="end" class="t-label" data-w="9">2</text>
+<text x="800" y="248" text-anchor="end" class="t-value f-red-ink" data-w="9">2</text>
+<text x="904" y="248" text-anchor="end" class="t-value" data-w="9">0</text>
+<path d="M208,300 L246.34,242.5" class="flow" marker-end="url(#ctx-03-erasure-fan-out-arrow)"/>
+<rect x="248" y="280" width="672" height="56" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="248" y="280" width="672" height="56" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="264" y="312" class="t-label" data-w="120">Chunks and index</text>
+<text x="464" y="312" class="t-label" data-w="140">listed in the manifest</text>
+<text x="696" y="312" text-anchor="end" class="t-label" data-w="9">3</text>
+<text x="800" y="312" text-anchor="end" class="t-value f-red-ink" data-w="9">3</text>
+<text x="904" y="312" text-anchor="end" class="t-value" data-w="9">0</text>
+<path d="M208,300 L245.06,307.41" class="flow" marker-end="url(#ctx-03-erasure-fan-out-arrow)"/>
+<rect x="248" y="348" width="672" height="56" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="248" y="348" width="672" height="56" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="264" y="384" class="t-label" data-w="77">Trace store</text>
+<text x="464" y="384" class="t-code" data-w="103">user = u-017</text>
+<text x="696" y="384" text-anchor="end" class="t-label" data-w="9">2</text>
+<text x="800" y="384" text-anchor="end" class="t-value f-red-ink" data-w="9">2</text>
+<text x="904" y="384" text-anchor="end" class="t-value" data-w="9">0</text>
+<path d="M208,300 L246.6,373.35" class="flow" marker-end="url(#ctx-03-erasure-fan-out-arrow)"/>
+<rect x="248" y="416" width="672" height="56" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="248" y="416" width="672" height="56" rx="8" class="w1 nofill s-rule d-proj" data-fit="skip"/>
+<text x="264" y="448" class="t-label" data-w="104">Provider's copy</text>
+<text x="464" y="448" class="t-note" data-w="192">its retention terms, section 4</text>
+<path d="M208,300 L247.2,441.11" class="flow d-proj" marker-end="url(#ctx-03-erasure-fan-out-arrow)"/>
+<text x="800" y="504" text-anchor="end" class="t-label f-red-ink" data-w="82">7 copies left</text>
+<text x="904" y="504" text-anchor="end" class="t-label" data-w="34">none</text>
+<rect x="40" y="552" width="880" height="96" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="40" y="552" width="880" height="96" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="56" y="584" class="t-label" data-w="446">Query “Priya Raman duplicate card charge refund”, tenant-a, top 3</text>
+<text x="56" y="616" class="t-note" data-w="44">before</text>
+<text x="56" y="636" class="t-note" data-w="32">after</text>
+<text x="136" y="616" class="t-code f-red-ink" data-w="77">doc-a2-c1</text>
+<text x="248" y="616" class="t-code f-red-ink" data-w="77">doc-a3-c1</text>
+<text x="360" y="616" class="t-code" data-w="77">doc-a1-c2</text>
+<text x="136" y="636" class="t-code" data-w="77">doc-a1-c2</text>
+<text x="248" y="636" class="t-code" data-w="77">doc-a4-c1</text>
+<text x="360" y="636" class="t-code" data-w="77">doc-a1-c1</text>
+<text x="904" y="616" text-anchor="end" class="t-note" data-w="214">the person's ticket and call note</text>
+<text x="904" y="636" text-anchor="end" class="t-note" data-w="220">general policy, another customer</text>
+<text x="40" y="684" class="t-note" data-w="524">A deletion that stops at memory leaves the person in the index and the traces.</text>
+</svg>
