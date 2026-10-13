@@ -2,7 +2,7 @@
 
 A small, framework-light RAG chatbot in Python. Implements every step from [Post 28 - Build #1: RAG chatbot from scratch](../../posts/28-build-rag-chatbot/index.md): chunking with overlap, contextual headers, hybrid retrieval (dense + BM25) with reciprocal rank fusion, cross-encoder reranking, bookend packing with citations, and a four-metric eval harness.
 
-Designed to be readable end-to-end in one sitting (329 lines in src/rag).
+Designed to be readable end-to-end in one sitting (369 lines in src/rag).
 
 ## Quickstart
 
@@ -46,7 +46,7 @@ Cheaper / local alternatives:
 │   ├── llm.py                   # thin LLM wrappers
 │   ├── ingest.py                # chunk + header + embed + index
 │   ├── retrieve.py              # hybrid + RRF + rerank
-│   ├── prompt.py                # five-block system prompt + bookend pack
+│   ├── prompt.py                # loads prompts/system.md (four blocks) + bookend pack
 │   ├── chat.py                  # the chat loop
 │   └── eval.py                  # the four Ragas metrics
 └── tests/
