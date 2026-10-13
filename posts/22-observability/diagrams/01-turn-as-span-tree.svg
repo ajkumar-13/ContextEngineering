@@ -1,0 +1,234 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="ctx-01-turn-as-span-tree-title" aria-describedby="ctx-01-turn-as-span-tree-desc">
+<title id="ctx-01-turn-as-span-tree-title">One turn is a tree of timed, priced spans</title>
+<desc id="ctx-01-turn-as-span-tree-desc">Left: one support-agent turn as a span tree, one row per span, indented by depth, with a dashed bar on a time axis from 0 to 4,500 milliseconds and its duration and cost at the right. turn 4,500 ms, 0.02558 dollars; assemble_context 40 ms; load_memory 30; select_tools 10; retrieve 560; query_rewrite 350 ms, 0.00050 dollars; hybrid_search 90; rerank 120; llm_call 3,800 ms, 0.02508 dollars; tool_call issue_refund 100; db_query 60. Right: four dashboard cards fed by every trace: cost per session at the median and p95, latency at p95, quality as the evaluation score of sampled traffic, and errors by kind.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-neutral-soft { fill: var(--ctx-neutral-soft); }
+  .s-ink { stroke: var(--ctx-ink); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+  .t-code13 { font-size: 13px; font-weight: 400; font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+</style>
+<defs>
+<marker id="ctx-01-turn-as-span-tree-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="720"/>
+<text x="40" y="48" class="t-title" data-w="490">One turn is a tree of timed, priced spans</text>
+<text x="40" y="76" class="t-subtitle" data-w="636">A support-agent turn from snippets/trace_store.py; timings and token counts illustrative.</text>
+<text x="40" y="120" class="t-head" data-w="161">One trace, 11 spans</text>
+<text x="600" y="148" text-anchor="end" class="t-note" data-w="21">ms</text>
+<text x="680" y="148" text-anchor="end" class="t-note" data-w="46">dollars</text>
+<text x="40" y="176" class="t-code13" data-w="32">turn</text>
+<g data-grid="skip">
+<rect x="224" y="160" width="304" height="24" class="f-neutral-soft" data-fit="skip"/>
+<rect x="224" y="160" width="304" height="24" class="w1 nofill s-ink d-proj" data-fit="skip"/>
+</g>
+<text x="600" y="176" text-anchor="end" class="t-label" data-w="37">4,500</text>
+<text x="680" y="176" text-anchor="end" class="t-value" data-w="55">0.02558</text>
+<text x="56" y="216" class="t-code13" data-w="127">assemble_context</text>
+<g data-grid="skip">
+<rect x="224" y="200" width="4" height="24" class="f-neutral-soft" data-fit="skip"/>
+<rect x="224" y="200" width="4" height="24" class="w1 nofill s-ink d-proj" data-fit="skip"/>
+</g>
+<text x="600" y="216" text-anchor="end" class="t-label" data-w="17">40</text>
+<text x="72" y="256" class="t-code13" data-w="88">load_memory</text>
+<g data-grid="skip">
+<rect x="224" y="240" width="4" height="24" class="f-neutral-soft" data-fit="skip"/>
+<rect x="224" y="240" width="4" height="24" class="w1 nofill s-ink d-proj" data-fit="skip"/>
+</g>
+<text x="600" y="256" text-anchor="end" class="t-label" data-w="17">30</text>
+<text x="72" y="296" class="t-code13" data-w="96">select_tools</text>
+<g data-grid="skip">
+<rect x="226.03" y="280" width="4" height="24" class="f-neutral-soft" data-fit="skip"/>
+<rect x="226.03" y="280" width="4" height="24" class="w1 nofill s-ink d-proj" data-fit="skip"/>
+</g>
+<text x="600" y="296" text-anchor="end" class="t-label" data-w="17">10</text>
+<text x="56" y="336" class="t-code13" data-w="64">retrieve</text>
+<g data-grid="skip">
+<rect x="226.7" y="320" width="37.83" height="24" class="f-neutral-soft" data-fit="skip"/>
+<rect x="226.7" y="320" width="37.83" height="24" class="w1 nofill s-ink d-proj" data-fit="skip"/>
+</g>
+<text x="600" y="336" text-anchor="end" class="t-label" data-w="25">560</text>
+<text x="72" y="376" class="t-code13" data-w="104">query_rewrite</text>
+<g data-grid="skip">
+<rect x="226.7" y="360" width="23.64" height="24" class="f-neutral-soft" data-fit="skip"/>
+<rect x="226.7" y="360" width="23.64" height="24" class="w1 nofill s-ink d-proj" data-fit="skip"/>
+</g>
+<text x="600" y="376" text-anchor="end" class="t-label" data-w="25">350</text>
+<text x="680" y="376" text-anchor="end" class="t-label" data-w="54">0.00050</text>
+<text x="72" y="416" class="t-code13" data-w="104">hybrid_search</text>
+<g data-grid="skip">
+<rect x="250.35" y="400" width="6.08" height="24" class="f-neutral-soft" data-fit="skip"/>
+<rect x="250.35" y="400" width="6.08" height="24" class="w1 nofill s-ink d-proj" data-fit="skip"/>
+</g>
+<text x="600" y="416" text-anchor="end" class="t-label" data-w="17">90</text>
+<text x="72" y="456" class="t-code13" data-w="48">rerank</text>
+<g data-grid="skip">
+<rect x="256.43" y="440" width="8.11" height="24" class="f-neutral-soft" data-fit="skip"/>
+<rect x="256.43" y="440" width="8.11" height="24" class="w1 nofill s-ink d-proj" data-fit="skip"/>
+</g>
+<text x="600" y="456" text-anchor="end" class="t-label" data-w="25">120</text>
+<text x="56" y="496" class="t-code13" data-w="64">llm_call</text>
+<g data-grid="skip">
+<rect x="264.53" y="480" width="256.71" height="24" class="f-neutral-soft" data-fit="skip"/>
+<rect x="264.53" y="480" width="256.71" height="24" class="w1 nofill s-ink d-proj" data-fit="skip"/>
+</g>
+<text x="600" y="496" text-anchor="end" class="t-label" data-w="37">3,800</text>
+<text x="680" y="496" text-anchor="end" class="t-label" data-w="54">0.02508</text>
+<text x="56" y="536" class="t-code13" data-w="175">tool_call issue_refund</text>
+<g data-grid="skip">
+<rect x="521.24" y="520" width="6.76" height="24" class="f-neutral-soft" data-fit="skip"/>
+<rect x="521.24" y="520" width="6.76" height="24" class="w1 nofill s-ink d-proj" data-fit="skip"/>
+</g>
+<text x="600" y="536" text-anchor="end" class="t-label" data-w="25">100</text>
+<text x="72" y="576" class="t-code13" data-w="64">db_query</text>
+<g data-grid="skip">
+<rect x="523.95" y="560" width="4.05" height="24" class="f-neutral-soft" data-fit="skip"/>
+<rect x="523.95" y="560" width="4.05" height="24" class="w1 nofill s-ink d-proj" data-fit="skip"/>
+</g>
+<text x="600" y="576" text-anchor="end" class="t-label" data-w="17">60</text>
+<path d="M224,600 L528,600" class="s-ink-muted w1 nofill"/>
+<path d="M224,600 L224,608" class="s-ink-muted w1 nofill"/>
+<text x="224" y="628" text-anchor="middle" class="t-tick" data-w="8">0</text>
+<path d="M324,600 L324,608" class="s-ink-muted w1 nofill"/>
+<text x="324" y="628" text-anchor="middle" class="t-tick" data-w="35">1,500</text>
+<path d="M428,600 L428,608" class="s-ink-muted w1 nofill"/>
+<text x="428" y="628" text-anchor="middle" class="t-tick" data-w="35">3,000</text>
+<path d="M528,600 L528,608" class="s-ink-muted w1 nofill"/>
+<text x="528" y="628" text-anchor="middle" class="t-tick" data-w="35">4,500</text>
+<text x="376" y="652" text-anchor="middle" class="t-note" data-w="227">time from the start of the turn, ms</text>
+<text x="712" y="120" class="t-head" data-w="188">Dashboard, every trace</text>
+<rect x="712" y="160" width="208" height="92" rx="8" class="card"/>
+<text x="728" y="192" class="t-head" data-w="137">Cost per session</text>
+<text x="728" y="224" class="t-note" data-w="108">median and p95</text>
+<rect x="712" y="276" width="208" height="92" rx="8" class="card"/>
+<text x="728" y="308" class="t-head" data-w="65">Latency</text>
+<text x="728" y="340" class="t-note" data-w="123">p95, not the mean</text>
+<rect x="712" y="392" width="208" height="92" rx="8" class="card"/>
+<text x="728" y="424" class="t-head" data-w="59">Quality</text>
+<text x="728" y="456" class="t-note" data-w="176">eval score, sampled traffic</text>
+<rect x="712" y="508" width="208" height="92" rx="8" class="card"/>
+<text x="728" y="540" class="t-head" data-w="51">Errors</text>
+<text x="728" y="572" class="t-note" data-w="83">rate, by kind</text>
+<text x="40" y="684" class="t-note" data-w="502">The model call is 3,800 of the 4,500 ms and 0.02508 of the 0.02558 dollars.</text>
+</svg>

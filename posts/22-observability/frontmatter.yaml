@@ -1,83 +1,25 @@
 id: ctx-022
-slug: 22-observability-tracing-and-cost
-title: "22 · Observability, Tracing, and Cost"
-
-description: >
-  Learn how to make LLM systems observable and debuggable using traces,
-  spans, dashboards, and production monitoring. Explore instrumentation,
-  cost engineering, replay-based regression detection, privacy, and modern
-  observability platforms for AI agents.
-
-author: "Ajay"
-
+slug: 22-observability
+title: "22 - Observability, tracing, and cost"
+summary: "Every model, retrieval and tool call is recorded as a span in a trace store. This post reads four bug shapes off a trace, builds the four dashboard numbers, monitors the cache-hit rate and replays traces to block a regression."
 date: 2026-05-20
-last_modified: 2026-05-20
-
-tags:
-  - observability
-  - tracing
-  - llm-observability
-  - ai-agents
-  - telemetry
-  - opentelemetry
-  - langsmith
-  - langfuse
-  - phoenix
-  - braintrust
-  - helicone
-  - dashboards
-  - cost-engineering
-  - monitoring
-  - evaluation
-
-category: Production Systems
-series: Context Engineering
+updated: 2026-10-13
+status: complete
 part: "Part IV - Production-grade practice"
-chapter: "Part IV — Production & Deployment"
-
-hero: diagrams/00-hero-observability.svg
-hero_alt: "Trace tree showing an AI agent workflow with spans for retrieval, model calls, tool execution, and dashboard metrics for cost, latency, quality, and error rate"
-
-reading_time: 22
-
-toc: true
-draft: false
-
-keywords:
-  - LLM Observability
-  - AI Observability
-  - Tracing
-  - Distributed Tracing
-  - Trace
-  - Span
-  - OpenTelemetry
-  - OTel
-  - LangSmith
-  - Langfuse
-  - Phoenix
-  - Braintrust
-  - Helicone
-  - Agent Monitoring
-  - Prompt Monitoring
-  - Token Usage
-  - Cost Tracking
-  - Latency Monitoring
-  - Error Rate
-  - Dashboard
-  - Cost Engineering
-  - Prompt Caching
-  - Replay Testing
-  - Regression Detection
-  - Evaluation
-  - Production AI
-  - AI Agents
-  - RAG Monitoring
-  - Tool Calls
-  - Privacy
-  - PII
-  - GenAI Semantic Conventions
-
-canonical_url: ""
-
-prev: ../21-deployment-patterns/
-next: ../23-security/
+level: intermediate
+reading_time: 17
+tags: [context-engineering, observability, tracing, opentelemetry, cost-engineering, prompt-caching, regression-testing]
+hero: diagrams/01-turn-as-span-tree.svg
+prerequisites: [ctx-005, ctx-020]
+code: optional
+outcomes:
+  - id: o1
+    text: "Wire trace and span instrumentation into an LLM application so that every model, retrieval and tool call is recorded with its prompt, tokens, cost and latency."
+  - id: o2
+    text: "Read a trace and identify the four common bug shapes: context bloat, buried evidence, tool-storm and silent regression."
+  - id: o3
+    text: "Set up a dashboard that surfaces cost, quality, latency and error trends, reading the 95th percentile rather than the mean."
+  - id: o4
+    text: "Replay captured traces against a changed prompt or model and block the change when the diff shows a regression."
+  - id: o5
+    text: "Compute a call's cost and cache-hit rate from its usage fields, and trace a falling hit rate to the change that broke the prefix."

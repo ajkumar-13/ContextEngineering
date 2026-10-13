@@ -1,0 +1,745 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-022",
+  "next_ordinal": 17,
+  "questions": [
+    {
+      "id": "ctx-022-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "trace-store",
+        "tracing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Which description fits the trace store of an LLM application?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A rolling summary of each session that replaces the history in layer 05.",
+          "correct": false,
+          "feedback": "That is a compress technique acting on the window. The trace store sits outside the window and keeps the record of what was sent, not a replacement for it."
+        },
+        {
+          "key": "b",
+          "text": "A table of aggregate metrics, such as cost per session and p95 latency, kept without the prompts.",
+          "correct": false,
+          "feedback": "Those aggregates are the dashboard, computed from the trace store. Without the prompts none of the bug shapes could be confirmed."
+        },
+        {
+          "key": "c",
+          "text": "The store of captured traces, each a copy of the full prompt and response of every call in it.",
+          "correct": true,
+          "feedback": "Right: every later use (the dashboard, a bug report, a replay) reads these copies, and because it copies every prompt it also copies any personal data in them."
+        },
+        {
+          "key": "d",
+          "text": "The provider's prompt cache, which keeps the processed prefix of recent requests.",
+          "correct": false,
+          "feedback": "The prompt cache holds the provider's processed prefix for reuse and expires after minutes. The trace store is the application's own record of what each call contained."
+        }
+      ],
+      "explanation": "Section 2 defines the trace store as the store of captured traces, each a copy of the full prompt and response of every model call in it. The dashboard aggregates it, a bug report opens one trace in it, and a replay re-runs inputs frozen from it.",
+      "hints": [
+        "Ask what a replay needs in order to re-run a past interaction."
+      ]
+    },
+    {
+      "id": "ctx-022-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "opentelemetry",
+        "content-capture"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team instruments its agent with a library that follows the OpenTelemetry GenAI semantic conventions and keeps the defaults. A month later a user reports a wrong answer. What will the team most likely find in the trace of that turn?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The full prompt and the full response, because a trace always records the content of every model call.",
+          "correct": false,
+          "feedback": "The conventions mark the content attributes opt-in. A trace records the text only when capture is switched on deliberately."
+        },
+        {
+          "key": "b",
+          "text": "Nothing at all, because GenAI spans are recorded only when a call fails.",
+          "correct": false,
+          "feedback": "Spans are recorded for every call; the default simply leaves out the message content."
+        },
+        {
+          "key": "c",
+          "text": "Spans with the model, token counts and timings, but no prompt or response text.",
+          "correct": true,
+          "feedback": "Right: `gen_ai.input.messages`, `gen_ai.output.messages` and `gen_ai.system_instructions` are opt-in, so the defaults record the shape of the call but not what the model saw."
+        },
+        {
+          "key": "d",
+          "text": "Only the response text, since the prompt is redacted by the conventions for privacy.",
+          "correct": false,
+          "feedback": "The conventions do not redact; prompt and response are both opt-in, and redaction is a separate control the team chooses."
+        }
+      ],
+      "explanation": "Section 3: the GenAI conventions list the prompt, the response and the system instructions as opt-in attributes. Without switching capture on, the trace shows that a call happened and what it cost, not what the model saw, so the bug cannot be confirmed.",
+      "hints": [
+        "Which attributes of a model-call span does the convention mark as opt-in?",
+        "Think about what a debugging session needs to see first."
+      ]
+    },
+    {
+      "id": "ctx-022-q03",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 4,
+      "tags": [
+        "cache-hit-rate",
+        "pricing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A call on Claude Sonnet 4.5 (3 dollars per million input tokens, 15 per million output tokens, cache read at 0.1 times the input price) returns this Anthropic usage block: `input_tokens` 6,000, `cache_read_input_tokens` 2,000, `cache_creation_input_tokens` 0, `output_tokens` 500 (illustrative numbers). What is the call's cache-hit rate, in percent, and its cost, in dollars?",
+      "answer": {
+        "parts": [
+          {
+            "label": "cache-hit rate",
+            "value": 25.0,
+            "tolerance": 0.05,
+            "unit": "%"
+          },
+          {
+            "label": "cost of the call",
+            "value": 0.0261,
+            "tolerance": 0.0002,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "Total input = 6,000 + 2,000 + 0 = 8,000 tokens; hit rate = 2,000 / 8,000 = 25%. Cost = (6,000 x 3 + 2,000 x 0.3 + 500 x 15) / 1,000,000 = (18,000 + 600 + 7,500) / 1,000,000 = 0.0261 dollars, as record_usage in snippets/trace_store.py prices it. Dividing by input_tokens alone gives 33.3%; pricing the cached tokens at the full rate gives 0.0315.",
+      "explanation": "Section 3: Anthropic's `input_tokens` counts only the tokens after the last cache breakpoint, so the total input is the sum of the three fields, and the hit rate of section 7 divides the cache reads by that total. The cached tokens are billed at 0.1 times the input rate.",
+      "hints": [
+        "First add up the total input from the three input fields.",
+        "Price the fresh tokens at 3, the cached ones at 0.3 and the output at 15 dollars per million."
+      ]
+    },
+    {
+      "id": "ctx-022-q04",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o5",
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 5,
+      "tags": [
+        "opentelemetry",
+        "pricing",
+        "prompt-caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The first call of the day writes a 4,600-token prefix to a five-minute cache on Claude Sonnet 4.5 (3 dollars per million input tokens, 15 per million output tokens; a five-minute write costs 1.25 times the input price). Its usage block reads `input_tokens` 900, `cache_read_input_tokens` 0, `cache_creation_input_tokens` 4,600, `output_tokens` 400. What value belongs in the span's `gen_ai.usage.input_tokens`, and what does the call cost in dollars?",
+      "answer": {
+        "parts": [
+          {
+            "label": "gen_ai.usage.input_tokens",
+            "value": 5500,
+            "tolerance": 0,
+            "unit": "tokens"
+          },
+          {
+            "label": "cost of the call",
+            "value": 0.02595,
+            "tolerance": 0.0002,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "The GenAI conventions add the cache fields to Anthropic's input_tokens: 900 + 0 + 4,600 = 5,500. Cost = (900 x 3 + 4,600 x 3.75 + 400 x 15) / 1,000,000 = (2,700 + 17,250 + 6,000) / 1,000,000 = 0.02595 dollars, as record_usage computes it. Recording 900 is the field-copy mistake; pricing the write at the base rate gives 0.02220.",
+      "explanation": "Section 3: Anthropic reports cache writes separately from `input_tokens`, and the OpenTelemetry GenAI conventions say the cache fields must be added to it to compute `gen_ai.usage.input_tokens`. The write is billed at 1.25 times the input rate, so the first call costs more than an uncached one would.",
+      "hints": [
+        "Which fields does the convention add together for the total input?",
+        "Price 900 tokens at 3, 4,600 at 3.75 and 400 output tokens at 15 dollars per million."
+      ]
+    },
+    {
+      "id": "ctx-022-q05",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 5,
+      "tags": [
+        "p95",
+        "latency",
+        "dashboards"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Twenty sessions from one hour have these latencies, in seconds: 2.1, 2.3, 2.0, 2.4, 2.2, 2.5, 2.1, 2.3, 2.2, 2.0, 2.4, 2.6, 2.1, 2.2, 2.3, 2.5, 2.4, 2.2, 9.0, 12.0. Using the nearest-rank percentile (the smallest value at or above 95% of the sample), what are the mean and the p95, in seconds?",
+      "answer": {
+        "parts": [
+          {
+            "label": "mean",
+            "value": 3.09,
+            "tolerance": 0.02,
+            "unit": "s"
+          },
+          {
+            "label": "p95",
+            "value": 9.0,
+            "tolerance": 0.05,
+            "unit": "s"
+          }
+        ]
+      },
+      "precision_note": "Sum = 61.8, mean = 61.8 / 20 = 3.09 s. Nearest rank: ceil(0.95 x 20) = 19, and the 19th smallest value is 9.0 s, the p95 function of snippets/dashboard.py. Taking the maximum gives 12.0, and linear interpolation gives 9.15, both outside the tolerance.",
+      "explanation": "Section 4: the p95 is the value that 95% of sessions stay at or below, and the nearest-rank rule takes the 19th of 20 sorted values. The mean of 3.09 seconds describes no real session: eighteen took under 2.7 seconds and two took 9 or more, which is why the headline panel reads the tail.",
+      "hints": [
+        "Sort the values; the nearest rank is ceil(0.95 times 20).",
+        "The mean is the sum, 61.8, divided by 20."
+      ]
+    },
+    {
+      "id": "ctx-022-q06",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 4,
+      "tags": [
+        "bug-shapes",
+        "diagnosis"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Match each trace to the fix that addresses it first.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Input tokens climb every turn; the history holds tens of thousands of tokens of tool results read once and kept."
+        },
+        {
+          "key": "b",
+          "text": "The retrieval span ranks the right chunk second, yet the answer is wrong; the chunk was packed seventh of twelve."
+        },
+        {
+          "key": "c",
+          "text": "Fifteen calls in one turn to the same `search_*` tool with slightly different arguments."
+        },
+        {
+          "key": "d",
+          "text": "Cost per session fell and quality fell in the same week; traces grouped by release show a system-prompt line removed."
+        }
+      ],
+      "right": [
+        {
+          "key": "p",
+          "text": "Clear tool results that have been read and acted on"
+        },
+        {
+          "key": "q",
+          "text": "Pack the best chunks at the start and the end"
+        },
+        {
+          "key": "r",
+          "text": "Trim the catalogue, say when not to call each tool, add a stop rule"
+        },
+        {
+          "key": "s",
+          "text": "Restore the line and add a replay fixture that gates the next change"
+        },
+        {
+          "key": "t",
+          "text": "Switch the agent to a larger model"
+        }
+      ],
+      "answer": {
+        "a": "p",
+        "b": "q",
+        "c": "r",
+        "d": "s"
+      },
+      "explanation": "Section 5: context bloat is compressed by clearing tool results, buried evidence is a packing problem fixed by bookend packing, tool-storm is fixed first by select and isolate on the catalogue, and a silent regression is reverted and then guarded by a replay fixture. None of the four is fixed by a larger model.",
+      "hints": [
+        "For each trace, name the layer the problem sits in before choosing the fix."
+      ]
+    },
+    {
+      "id": "ctx-022-q07",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 4,
+      "tags": [
+        "bug-shapes",
+        "lost-in-the-middle"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A RAG agent answers a policy question wrongly. Its trace shows the query rewritten sensibly, the correct policy chunk ranked first with a high reranker score among twelve packed chunks, and the prompt holding the chunks in an order that puts the policy chunk sixth. The input is about 9,000 tokens. Which reading and first fix fit the trace?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A retrieval miss: switch to a stronger embedding model so that the policy chunk ranks higher.",
+          "correct": false,
+          "feedback": "The chunk already ranked first. The trace shows the failure after retrieval, in how the chunks were packed."
+        },
+        {
+          "key": "b",
+          "text": "Context bloat: the window is too full, so clear the old tool results from layer 05.",
+          "correct": false,
+          "feedback": "There are no tool results here and 9,000 tokens is modest. The relevant chunk is present but badly placed."
+        },
+        {
+          "key": "c",
+          "text": "Tool-storm: the agent called the retriever too often, so add a stop rule to the system prompt.",
+          "correct": false,
+          "feedback": "The trace shows one retrieval, not repeated calls. Tool-storm is many calls that make no progress."
+        },
+        {
+          "key": "d",
+          "text": "Buried evidence in layer 04: pack the best chunks at the start and the end.",
+          "correct": true,
+          "feedback": "Right: retrieval did its job and the placement did not. Bookend packing, the packing lever of select, moves the best chunk out of the middle."
+        }
+      ],
+      "explanation": "Section 5, shape 2: when the retrieval span shows the right chunk with a high score but the answer is wrong, the prompt shows where the chunk landed. Packed mid-list, it falls where models use information least reliably, so the first fix is bookend packing.",
+      "hints": [
+        "Separate what retrieval returned from where the chunk ended up in the prompt.",
+        "Which lever of the select pipeline decides order inside layer 04?"
+      ]
+    },
+    {
+      "id": "ctx-022-q08",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "p95",
+        "dashboards"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "After a deploy, an agent's mean latency rose by 9% and its median by 1%, while its 95th-percentile latency doubled. In one or two sentences, explain why the headline latency panel tracks the p95 and not the mean.",
+      "answer": {
+        "model": "Because a slow path hit by a small share of sessions moves the tail a lot but the mean only a little: averaging over every session hides the slow ones, while the p95 shows what the slowest users actually wait.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(p95|95th|percentile|tail)\\b(?:(?!\\b(mean|average)\\b|n[o']t\\b|never\\b)[^.;])*\\b(hides?|hid|masks?|dilutes?|smooths?|obscures?)\\b)(?![\\s\\S]*\\b(mean|average)\\b(\\s+(latency|value|number))?\\s+(better\\s+|more\\s+(clearly|accurately)\\s+)?(shows?|reveals?|captures?|reflects?|exposes?|catches)\\b)(?![\\s\\S]*\\bmean\\b[^.;]*\\bmore (accurate|precise|reliable|representative)\\b)(?![\\s\\S]*\\b(mean|average|averag\\w*)\\b(\\s+\\w+){0,2}?\\s+(does ?n[o']t|doesn'?t|do not|don'?t|never|cannot|can'?t|won'?t|will not)\\s+(hide|mask|dilute|bury|obscure|smooth|blur|swamp|drown|wash)\\w*)(?![\\s\\S]*\\b(hides?|masks?|obscures?|buries|dilutes?)\\s+nothing\\b)(?=[\\s\\S]*\\b(tail|slow\\w*|minority|few|small (share|fraction|number|percentage|group)|outliers?|worst|fraction of|some (sessions|users|requests))\\b)(?=[\\s\\S]*\\b(mean|averag)\\w*\\b)(?=[\\s\\S]*(\\b(hides?|hid|hidden|masks?|masked|dilut\\w*|smooth\\w*|barely|hardly|little|slightly|averag\\w* (it|them|out|away)|away|wash\\w*|swamp\\w*|drown\\w*|bur(y|ies|ied)|obscur\\w*|insensitive|blurs?|spreads?|pulled|moves? (only )?(a )?little)\\b|does ?n[o']t (move|change|show|reflect|capture|reveal)|doesn'?t (move|change|show|reflect|capture|reveal)))[\\s\\S]*\\S\\s+\\S[\\s\\S]*\\S\\s+\\S"
+        ]
+      },
+      "explanation": "Section 4: a slow path taken by a minority of sessions barely moves the mean or the median, because the fast sessions dominate the average, but it moves the tail. Users remember the slow sessions, so the headline panel reads the p95.",
+      "hints": [
+        "Ask how many sessions changed, and what averaging does to a small group.",
+        "Compare what happened to the fast majority with what happened to the slow minority."
+      ]
+    },
+    {
+      "id": "ctx-022-q09",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 4,
+      "tags": [
+        "cache-hit-rate",
+        "prompt-caching",
+        "diagnosis"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A support agent's cache-hit rate held steady near 44% for weeks and fell to 0% within an hour of a deploy, with traffic unchanged. Name the most likely cause, and say what in the traces confirms it.",
+      "answer": {
+        "model": "The deploy changed something in the cached prefix (a timestamp or edit in the system prompt, a reordered tool list, a non-deterministic serialisation), so no call matches the stored prefix any more; the first trace after the deploy shows a cache write (cache_creation_input_tokens) where a read was expected, and diffing its prompt against a pre-deploy trace shows the change.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(traffic|load|volume)\\b[^.;]*\\b(dropped|fell|fall|decreased|lower|too low|sparse)\\b)(?![\\s\\S]*\\b(provider|api|anthropic)\\b[^.;]*\\b(outage|down|bug|disabled|broke)\\b)(?![\\s\\S]*\\bprefix\\b[^.;]*\\b((did not|didn'?t|has not|hasn'?t|never|is not|isn'?t|was not|wasn'?t) chang\\w*|unchanged|stayed the same|remained the same)\\b)(?=[\\s\\S]*\\b(prefix|system prompt|tools?( list| order| definitions?| catalogue| schemas?)?|timestamp|date|time ?string|serial\\w*|layer 0?[12]|key order|breakpoint)\\b)(?=[\\s\\S]*\\b(chang\\w*|edit\\w*|differ\\w*|moved?|reorder\\w*|broke\\w*|break\\w*|invalidat\\w*|added|adds?|insert\\w*|modif\\w*|altered|new|bust\\w*|mutat\\w*|no longer (match|identical|the same))\\b)(?=[\\s\\S]*(\\bwrit\\w*|creation|cache_creation|\\bdiff\\w*|compar\\w*|no (cache )?reads?|zero (cache )?reads?|cache_read\\w*\\s*(is|=|of|at)?\\s*0\\b|reads? (drop|fell|fall)\\w*( to)? (0|zero)|\\bmiss\\w*))[\\s\\S]*\\S\\s+\\S[\\s\\S]*\\S\\s+\\S[\\s\\S]*\\S\\s+\\S"
+        ]
+      },
+      "explanation": "Section 7: a hit rate that drops after a deploy is the fingerprint of a prefix change. The first trace after the deploy reports a cache write instead of a read, and comparing its captured prompt with the last good one finds what moved.",
+      "hints": [
+        "Traffic did not change, so ask what the deploy could have changed at the front of the prompt.",
+        "Which usage field would show a write where a read was expected?"
+      ]
+    },
+    {
+      "id": "ctx-022-q10",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "replay",
+        "regression-testing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Put the steps of a replay check for a prompt change in the order they happen.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Run the frozen inputs through the configuration with the new prompt."
+        },
+        {
+          "key": "b",
+          "text": "Sample traces that span the common intents from the trace store."
+        },
+        {
+          "key": "c",
+          "text": "Block or pass the change at the review gate."
+        },
+        {
+          "key": "d",
+          "text": "Freeze the sampled inputs, with their recorded outputs, as fixtures."
+        },
+        {
+          "key": "e",
+          "text": "Compare the new outputs with the recorded baseline: exact for deterministic steps, a rubric or judge for generative ones."
+        }
+      ],
+      "answer": [
+        "b",
+        "d",
+        "a",
+        "e",
+        "c"
+      ],
+      "explanation": "Section 6: capture (sample and freeze), re-run on the new configuration, diff against the baseline, and let a failing fixture block the change as CI blocks failing code.",
+      "hints": [
+        "The loop starts in the trace store and ends at the review gate."
+      ]
+    },
+    {
+      "id": "ctx-022-q11",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "replay",
+        "regression-testing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team's replay gate compares every replayed model answer with the recorded answer character by character and blocks the change on any difference. What happens, and what is the better comparison?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The gate works well, because a correct prompt change leaves every replayed answer byte-identical to the recorded one, so any difference is a regression.",
+          "correct": false,
+          "feedback": "Generated text varies in wording between runs and across prompt edits even when every answer is correct, so byte equality fails constantly."
+        },
+        {
+          "key": "b",
+          "text": "Correct answers vary in wording, so the gate blocks nearly every change and gets switched off; generative steps need a rubric or a judge.",
+          "correct": true,
+          "feedback": "Right: exact comparison suits parsing, routing and tool selection; a generated answer differs in wording from run to run even when it is correct."
+        },
+        {
+          "key": "c",
+          "text": "The gate passes everything, because the replay reuses the recorded answers.",
+          "correct": false,
+          "feedback": "A replay runs the frozen inputs through the new configuration; the recorded answers are only the baseline it compares against."
+        },
+        {
+          "key": "d",
+          "text": "Nothing goes wrong with the comparison, but replays cost more than a curated evaluation set, so they should be dropped in favour of it.",
+          "correct": false,
+          "feedback": "Cost is not the failure here. The problem is a comparison that flags correct answers as regressions."
+        }
+      ],
+      "explanation": "Section 6 checks deterministic steps exactly and sends generative steps through the rubric or judge of post 20; section 11 names the byte-for-byte comparison as a way the gate gets switched off and the next regression ships.",
+      "hints": [
+        "Ask whether a correct answer is reproduced word for word on a second run.",
+        "Which steps of an agent are deterministic?"
+      ]
+    },
+    {
+      "id": "ctx-022-q12",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o5",
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 10,
+      "tags": [
+        "usage-fields",
+        "pricing",
+        "cache-hit-rate"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "`usage_summary` turns an Anthropic usage block into the three numbers a model-call span needs: the total input, the cache-hit rate and the cost. On any call that reads or writes the cache, all three come out wrong. Fix it.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "def usage_summary(usage, rate_in, rate_out, write_mult=1.25, read_mult=0.1):\n    \"\"\"Return (total_input, hit_rate, dollars) for one call from Anthropic's usage fields.\n\n    usage: dict with input_tokens and output_tokens, and optionally\n           cache_read_input_tokens and cache_creation_input_tokens.\n    rate_in, rate_out: dollars per million tokens.\n    hit_rate: cache-read tokens over all input tokens (0.0 when there is no input).\n    \"\"\"\n    total_input = usage[\"input_tokens\"]\n    read = usage.get(\"cache_read_input_tokens\", 0)\n    hit_rate = read / total_input if total_input else 0.0\n    dollars = total_input * rate_in / 1e6 + usage[\"output_tokens\"] * rate_out / 1e6\n    return total_input, hit_rate, dollars\n",
+      "solution": "def usage_summary(usage, rate_in, rate_out, write_mult=1.25, read_mult=0.1):\n    \"\"\"Return (total_input, hit_rate, dollars) for one call from Anthropic's usage fields.\n\n    usage: dict with input_tokens and output_tokens, and optionally\n           cache_read_input_tokens and cache_creation_input_tokens.\n    rate_in, rate_out: dollars per million tokens.\n    hit_rate: cache-read tokens over all input tokens (0.0 when there is no input).\n    \"\"\"\n    fresh = usage[\"input_tokens\"]\n    read = usage.get(\"cache_read_input_tokens\", 0)\n    write = usage.get(\"cache_creation_input_tokens\", 0)\n    total_input = fresh + read + write\n    hit_rate = read / total_input if total_input else 0.0\n    dollars = (fresh * rate_in + write * rate_in * write_mult + read * rate_in * read_mult\n               + usage[\"output_tokens\"] * rate_out) / 1e6\n    return total_input, hit_rate, dollars\n",
+      "tests": "import math\n\ndef close(a, b):\n    return math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-12)\n\n# The warm call of section 2 on Claude Sonnet 4.5: 5,900 fresh, 4,600 read, 400 out.\nt, h, d = usage_summary({\"input_tokens\": 5900, \"cache_read_input_tokens\": 4600,\n                         \"cache_creation_input_tokens\": 0, \"output_tokens\": 400}, 3.0, 15.0)\nassert t == 10500, t\nassert close(h, 4600 / 10500), h\nassert close(d, 0.02508), d\n# The first call of the day: the prefix is written, not read.\nt, h, d = usage_summary({\"input_tokens\": 900, \"cache_read_input_tokens\": 0,\n                         \"cache_creation_input_tokens\": 4600, \"output_tokens\": 400}, 3.0, 15.0)\nassert t == 5500 and h == 0.0, (t, h)\nassert close(d, 0.02595), d\n# A one-hour write uses the multiplier it is given.\n_, _, d = usage_summary({\"input_tokens\": 0, \"cache_creation_input_tokens\": 1000, \"output_tokens\": 0},\n                        5.0, 25.0, write_mult=2.0)\nassert close(d, 0.01), d\n# Rates come from the arguments: Claude Haiku 4.5 at 1 and 5 dollars per million.\n_, _, d = usage_summary({\"input_tokens\": 1000, \"cache_read_input_tokens\": 3000, \"output_tokens\": 200}, 1.0, 5.0)\nassert close(d, 0.0023), d\n# No cache fields at all, and no input at all.\nt, h, d = usage_summary({\"input_tokens\": 1000, \"output_tokens\": 100}, 3.0, 15.0)\nassert (t, h) == (1000, 0.0) and close(d, 0.0045), (t, h, d)\nassert usage_summary({\"input_tokens\": 0, \"output_tokens\": 0}, 3.0, 15.0) == (0, 0.0, 0.0)\n# A call that reads one cached prefix and writes a longer one: both cache fields at once.\nt, h, d = usage_summary({\"input_tokens\": 500, \"cache_read_input_tokens\": 4000,\n                         \"cache_creation_input_tokens\": 1500, \"output_tokens\": 100}, 3.0, 15.0)\nassert t == 6000 and close(h, 4000 / 6000), (t, h)\nassert close(d, 0.009825), d\nprint(\"ok\")\n",
+      "expected_output": "ok\n",
+      "explanation": "Section 3: Anthropic's `input_tokens` counts only the tokens after the last cache breakpoint, so the total input adds the cache-read and cache-write fields, the hit rate divides reads by that total, and the cost prices fresh tokens at the input rate, writes at the write multiplier and reads at the read multiplier.",
+      "hints": [
+        "Look up what Anthropic's `input_tokens` field counts and what it leaves out.",
+        "Add the three input fields for the total, then price each of them at its own multiplier of `rate_in`."
+      ]
+    },
+    {
+      "id": "ctx-022-q13",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o3",
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 15,
+      "tags": [
+        "dashboards",
+        "failure-modes",
+        "alerts"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "connects": [
+        "ctx-006",
+        "ctx-005"
+      ],
+      "prompt": "Post 06 says three of its five failure modes leave numbers an application can alert on (precision@k for distraction, tool calls and tokens per turn for tool-storm, accuracy against input length for lost-in-the-middle), and post 05 adds the cache-hit rate. Design the alerts a dashboard for a RAG support agent should carry beyond the four headline numbers: for each, the spans and attributes it is computed from, the statistic, and what a firing alert sends someone to look at in a trace. Mark any threshold as illustrative.",
+      "kind": "design",
+      "solution": "Each alert is a statistic over span attributes, read per release so a change can be blamed.\n\n- **Tool-storm.** From the tool-call spans under each turn: the count per turn and the model span's input tokens per turn. Watch the p95 per release; an illustrative alert fires when p95 tool calls per turn exceeds twice last week's. A firing alert sends the reader to a trace with many calls to one tool and to layer 02: overlapping descriptions, no stop rule, oversized results.\n- **Distraction.** precision@k needs relevance labels, so it is computed on a sampled, judged subset: the retrieval span's packed chunk ids against the judge's relevance verdicts. Alert on a fall (illustratively, five points week over week); the trace shows which irrelevant chunks were packed and the query that fetched them.\n- **Lost-in-the-middle.** Bucket the model span's total input tokens and plot the sampled quality score per bucket. An alert fires when quality in the longest bucket drops below the shortest by a set margin; the trace to open is a long, failed one, checking where the relevant chunk sat in layer 04 (buried evidence).\n- **Cache-hit rate.** Cache-read input tokens over total input tokens (the sum of Anthropic's three input fields), per release. An alert fires on a step drop after a deploy; the first trace after the deploy shows a cache write where a read was expected, and its prompt is diffed against the last good one.\n\nConflict and confusion have no clean counter (post 06); they stay on the sampled judge behind the quality panel. Every alert links to example traces, because the alert says that something changed and the trace says what.",
+      "rubric": [
+        {
+          "criterion": "Computes the tool-storm signal from tool-call spans and token counts per turn, and points to layer 02 in the trace",
+          "points": 2
+        },
+        {
+          "criterion": "Computes precision@k on a judged sample from the retrieval span's packed chunks, recognising it needs relevance labels",
+          "points": 2
+        },
+        {
+          "criterion": "Relates quality to input length from the model span's input tokens and links the alert to buried evidence in layer 04",
+          "points": 2
+        },
+        {
+          "criterion": "Defines the cache-hit rate over the total of the three input fields and ties a drop to a prefix change found by diffing prompts",
+          "points": 2
+        },
+        {
+          "criterion": "Labels thresholds as illustrative, groups by release, and says conflict and confusion stay with the sampled judge",
+          "points": 2
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Sections 4, 5 and 7 build the dashboard, the bug shapes and the cache-hit rate from span attributes; post 06 supplies the signals each failure mode leaves and post 05 the cache rule. An alert is only useful when it leads to the trace that explains it.",
+      "hints": [
+        "For each signal, name the span it lives on before choosing a statistic.",
+        "Ask what a reader opens after the alert fires: which trace, which layer."
+      ]
+    },
+    {
+      "id": "ctx-022-q14",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 4,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 15,
+      "tags": [
+        "instrumentation",
+        "content-capture",
+        "privacy"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team is about to instrument a RAG chatbot whose users sometimes paste account numbers and home addresses into the chat. The lead proposes recording only token counts, timings and costs, never the text, to stay safe. Critique the proposal and design the instrumentation instead: the traces and spans, what each carries, how content capture is handled, and the controls around the trace store.",
+      "kind": "design",
+      "solution": "The proposal trades away the artefact most worth keeping. With tokens and timings alone, a wrong answer cannot be diagnosed: buried evidence, context bloat and a silent regression are confirmed only by reading the prompt the model saw, and a replay needs the frozen inputs. It is safe and useless for debugging.\n\nDesign: one trace per user turn, tagged with session, user and release. Spans: context assembly (memory reads with row ids); retrieval (the query, top-N candidates with ids and scores, the top-k packed); one span per model call with the model, the token counts split into fresh, cache-read and cache-write (total input is their sum), output tokens, cost and latency; one per tool call with name, arguments, status, latency and the result or its size.\n\nContent capture is switched on deliberately for the model spans (the GenAI content attributes are opt-in), with controls in place first: selective redaction of the fields a rule names (account numbers, addresses) on the way into the store, not of the whole prompt; a retention period set by the regulatory and contractual environment; access limited to people allowed to read transcripts; an opt-out recorded in the trace. The placement of the redaction gate and deletion across every copy follow post 24.",
+      "rubric": [
+        {
+          "criterion": "Explains why tokens and timings alone cannot confirm the bug shapes or support replays",
+          "points": 2
+        },
+        {
+          "criterion": "Lists one trace per turn with release tags and the retrieval, model-call and tool spans with their attributes",
+          "points": 2
+        },
+        {
+          "criterion": "Records input tokens split by cache status with the correct total",
+          "points": 1
+        },
+        {
+          "criterion": "Treats content capture as an explicit opt-in decision for model spans",
+          "points": 2
+        },
+        {
+          "criterion": "Names selective redaction, retention, access control and opt-out as the controls before capture",
+          "points": 3
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Section 3 sets the starter set of spans and the content-capture decision; section 8 names the four controls that must be in place before the text is stored; section 5 shows why the prompt is needed to confirm any bug shape.",
+      "hints": [
+        "Start from what a debugging session or a replay needs to read.",
+        "Then ask which controls make storing that text acceptable."
+      ]
+    },
+    {
+      "id": "ctx-022-q15",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "dashboards",
+        "errors"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Why does the headline dashboard report the error rate by kind (tool errors, schema-validation failures, refusals, timeouts) rather than as one number?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Because providers bill each kind of error at a different rate, so the cost panel needs them apart.",
+          "correct": false,
+          "feedback": "Errors are not billed by kind; the reason is diagnostic, not financial."
+        },
+        {
+          "key": "b",
+          "text": "Because a single error rate cannot be computed from traces without the prompt text.",
+          "correct": false,
+          "feedback": "It can; a total is easy to compute. It is just less useful than the breakdown."
+        },
+        {
+          "key": "c",
+          "text": "Because only timeouts matter to users, and the other kinds are for compliance.",
+          "correct": false,
+          "feedback": "Every kind can hurt users: a failed tool call or an unparseable answer is as visible as a timeout."
+        },
+        {
+          "key": "d",
+          "text": "Each kind has its own cause, and in a total a rise in one is hidden by noise in the others.",
+          "correct": true,
+          "feedback": "Right: a timeout surge from a slow path and a schema failure from a prompt change need different fixes, and one total blurs both."
+        }
+      ],
+      "explanation": "Section 4: tool errors, schema-validation failures, refusals, timeouts and retries each have a different cause, so summed into one number they hide each other. In section 4's two weeks, timeouts rose from 5 to 19 while the other kinds moved by chance.",
+      "hints": [
+        "Ask whether one fix would address every kind of error."
+      ]
+    },
+    {
+      "id": "ctx-022-q16",
+      "type": "mcq",
+      "track": "workout",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "instrumentation",
+        "spans"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Which of these belong on the span of a model call, in the starter set of what to instrument? Select all that apply.",
+      "select": "multiple",
+      "options": [
+        {
+          "key": "a",
+          "text": "The full prompt as sent and the full response.",
+          "correct": true,
+          "feedback": "Yes: without them no bug shape can be confirmed and no replay can be built."
+        },
+        {
+          "key": "b",
+          "text": "Input tokens split into fresh, cache-read and cache-write, and the output tokens.",
+          "correct": true,
+          "feedback": "Yes: the split is what the cost and the cache-hit rate are computed from."
+        },
+        {
+          "key": "c",
+          "text": "The cost of the call and its latency.",
+          "correct": true,
+          "feedback": "Yes: these are what the dashboard aggregates into cost per session and p95 latency."
+        },
+        {
+          "key": "d",
+          "text": "The provider API key used for the call, so that the call can be replayed exactly.",
+          "correct": false,
+          "feedback": "A key is a secret and must never be stored in traces; a replay needs the inputs, not the credential."
+        },
+        {
+          "key": "e",
+          "text": "Only the response, since the prompt can be rebuilt from the code at any time.",
+          "correct": false,
+          "feedback": "The prompt depends on memory, retrieval and history at that moment; it cannot be rebuilt from the code later."
+        }
+      ],
+      "explanation": "Section 3: one span per model call carries the model, the full prompt, the full response, the input tokens by cache status, the output tokens, the cost and the latency.",
+      "hints": [
+        "Ask what a debugging session and the dashboard each read from the span."
+      ]
+    }
+  ]
+}
