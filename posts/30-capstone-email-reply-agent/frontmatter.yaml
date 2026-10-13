@@ -1,93 +1,26 @@
 id: ctx-030
 slug: 30-capstone-email-reply-agent
-title: "30 · Capstone — Email Reply Agent"
-
-description: >
-  Build a production-ready AI email reply agent that combines every major
-  concept from Context Engineering: system prompts, RAG, memory, MCP tools,
-  sub-agents, compression, evaluation, observability, guardrails, and secure
-  deployment. Learn how to architect, deploy, and monitor a real-world LLM
-  application end to end.
-
-author: "Ajay"
-
+title: "30 - Capstone: email reply agent"
+summary: "A triager, a drafter fed by memory and prior replies, and a send gate in code compose every earlier post into one email reply agent; offline tests prove the gate, and the deployment is a set of live steps."
 date: 2026-05-20
-last_modified: 2026-05-20
-
-tags:
-  - capstone
-  - email-agent
-  - ai-agents
-  - rag
-  - memory
-  - gmail
-  - mcp
-  - observability
-  - evaluation
-  - guardrails
-  - production-ai
-  - context-engineering
-
-category: Capstone Projects
-series: Context Engineering
+updated: 2026-10-13
+status: complete
 part: "Part V - Workflow and builds"
-chapter: "Part V — End-to-End Applications"
-
+level: advanced
+reading_time: 21
+tags: [context-engineering, capstone, email-agent, send-gate, memory, rag, evaluation, security]
 hero: diagrams/00-hero-capstone-email-reply-agent.svg
-hero_alt: "Architecture of an AI email reply agent showing Gmail integration, RAG, memory, sub-agents, human approval, and secure send gate"
-
-reading_time: 30
-
-toc: true
-draft: false
-
-keywords:
-  - Email Reply Agent
-  - AI Email Assistant
-  - Context Engineering
-  - Capstone Project
-  - AI Agents
-  - Gmail API
-  - Gmail Agent
-  - Email Automation
-  - Email Drafting
-  - Human in the Loop
-  - HITL
-  - Retrieval Augmented Generation
-  - RAG
-  - Memory Systems
-  - Episodic Memory
-  - Semantic Memory
-  - Procedural Memory
-  - MCP
-  - Model Context Protocol
-  - Tool Calling
-  - Sub Agents
-  - Agent Isolation
-  - Context Compression
-  - Thread Summarization
-  - Evaluation
-  - LLM as Judge
-  - Observability
-  - Tracing
-  - Cost Monitoring
-  - Guardrails
-  - Send Gate
-  - Security
-  - OAuth
-  - Gmail OAuth
-  - FastAPI
-  - Next.js
-  - Vercel
-  - Railway
-  - PostgreSQL
-  - pgvector
-  - ChromaDB
-  - Claude
-  - Production AI
-  - Agent Architecture
-
-canonical_url: ""
-
-prev: ../29-multimodal-agent/
-next: ""
+prerequisites: [ctx-014, ctx-016, ctx-020, ctx-022, ctx-023, ctx-028, ctx-029]
+code: required
+outcomes:
+  - id: o1
+    text: "Trace each part of the email reply agent to the layer it fills, the operation it performs and the earlier post that teaches it."
+  - id: o2
+    text: "Assemble the drafter's request in layer order from the five-block system prompt, recipient memory, bookend-packed prior replies and the thread."
+  - id: o3
+    text: "Justify the triager as an isolated sub-agent and compute its saving for a stated inbox mix and per-call costs."
+  - id: o4
+    text: "Predict which drafts the send gate's three checks block or let through, and explain why the gate runs in code after a human approves."
+  - id: o5
+    text: "Separate what the companion's offline tests prove from what needs keys and live services when presenting or adapting the build."
+recommended: [ctx-012, ctx-013]

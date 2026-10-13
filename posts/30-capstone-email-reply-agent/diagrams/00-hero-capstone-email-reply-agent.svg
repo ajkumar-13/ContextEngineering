@@ -1,137 +1,219 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
-  <title id="t">Capstone email-reply agent architecture</title>
-  <desc id="d">A left-to-right product pipeline. The Gmail API feeds a triager sub-agent that decides whether a thread deserves a reply. Qualifying threads pass to a drafter agent, which pulls RAG over the user's prior replies and a per-recipient memory store to compose a draft in the user's voice. The draft crosses a deterministic send-gate and then a human review UI before any email is sent back to Gmail. An eval and trace store sits underneath, reading from every stage.</desc>
-
-  <style><![CDATA[
-    :root{
-      --ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;
-      --ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;
-      --ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;
-      --ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-neutral-1:#EAEAE4;--ctx-neutral-3:#8E8E88;
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="ctx-00-hero-capstone-email-reply-agent-title" aria-describedby="ctx-00-hero-capstone-email-reply-agent-desc">
+<title id="ctx-00-hero-capstone-email-reply-agent-title">The agent drafts; a person and a gate decide what is sent</title>
+<desc id="ctx-00-hero-capstone-email-reply-agent-desc">A pipeline. A mailbox, the fake mailbox on disk in the companion or the Gmail driver as a live step, feeds the triager, which sorts each thread into four buckets with no tools; info_only, promotional and automated threads get no draft. reply_needed threads go to the drafter, which reads three stores: the system prompt file for layer 01, the memory store for layer 03 and the prior replies index for layer 04, and writes a draft. The draft goes to human review, a live step; approved drafts go to the send gate in code and then to send, a live step; a blocked draft goes back to review with its reason. Solid outlines are in the companion, dashed outlines are live steps.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
     }
-    @media (prefers-color-scheme:dark){
-      :root{
-        --ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;
-        --ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;
-        --ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;
-        --ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-neutral-1:#1F2229;--ctx-neutral-3:#6E6E68;
-      }
-    }
-    .bg{fill:var(--ctx-bg);}
-    .card{fill:var(--ctx-surface);stroke:var(--ctx-ink);stroke-width:1.5;}
-    .store{fill:var(--ctx-surface);stroke:var(--ctx-border);stroke-width:1;}
-    .flow{stroke:var(--ctx-ink);stroke-width:1.5;fill:none;}
-    .feed{stroke:var(--ctx-ink-muted);stroke-width:1;fill:none;stroke-dasharray:4 3;}
-    .tap{stroke:var(--ctx-ink-subtle);stroke-width:1;fill:none;stroke-dasharray:2 3;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ctx-ink);}
-    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ctx-ink-muted);}
-    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ctx-ink);}
-    .role{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:10.5px;fill:var(--ctx-ink-muted);}
-    .lab{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:var(--ctx-ink);}
-    .pill{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;fill:#FFFFFF;}
-    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:10px;fill:var(--ctx-ink-muted);}
-  ]]></style>
-
-  <rect class="bg" width="960" height="360"/>
-  <text class="title" x="48" y="44">Capstone: the email-reply agent, end to end</text>
-  <text class="sub" x="48" y="64">Gmail feeds a triager and a drafter; every draft crosses a deterministic send-gate and a human before it ships.</text>
-
-  <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="var(--ctx-ink)"/>
-    </marker>
-    <marker id="arrowMuted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="var(--ctx-ink-muted)"/>
-    </marker>
-  </defs>
-
-  <!-- ============ MAIN PIPELINE ROW (y ~ 98..168) ============ -->
-
-  <!-- Gmail API (source) -->
-  <rect class="card" x="48" y="98" width="118" height="70" rx="8"/>
-  <rect x="48" y="98" width="118" height="22" rx="8" fill="var(--ctx-neutral-3)"/>
-  <rect x="48" y="110" width="118" height="10" fill="var(--ctx-neutral-3)"/>
-  <text class="pill" x="107" y="113" text-anchor="middle">Gmail API</text>
-  <text class="role" x="107" y="140" text-anchor="middle">read · draft · send</text>
-  <text class="mono" x="107" y="157" text-anchor="middle">scoped OAuth</text>
-
-  <!-- Triager (sub-agent) -->
-  <rect class="card" x="204" y="98" width="130" height="70" rx="8"/>
-  <rect x="204" y="98" width="130" height="22" rx="8" fill="var(--ctx-primary)"/>
-  <rect x="204" y="110" width="130" height="10" fill="var(--ctx-primary)"/>
-  <text class="pill" x="269" y="113" text-anchor="middle">Triager</text>
-  <text class="role" x="269" y="140" text-anchor="middle">sub-agent · small model</text>
-  <text class="mono" x="269" y="157" text-anchor="middle">reply? / skip</text>
-
-  <!-- Drafter (main agent) -->
-  <rect class="card" x="372" y="98" width="150" height="70" rx="8"/>
-  <rect x="372" y="98" width="150" height="22" rx="8" fill="var(--ctx-accent)"/>
-  <rect x="372" y="110" width="150" height="10" fill="var(--ctx-accent)"/>
-  <text class="pill" x="447" y="113" text-anchor="middle">Drafter</text>
-  <text class="role" x="447" y="140" text-anchor="middle">main agent · frontier model</text>
-  <text class="mono" x="447" y="157" text-anchor="middle">composes in user's voice</text>
-
-  <!-- Send-gate (deterministic) -->
-  <rect class="card" x="560" y="98" width="132" height="70" rx="8"/>
-  <rect x="560" y="98" width="132" height="22" rx="8" fill="var(--ctx-warn)"/>
-  <rect x="560" y="110" width="132" height="10" fill="var(--ctx-warn)"/>
-  <text class="pill" x="626" y="113" text-anchor="middle">Send-gate</text>
-  <text class="role" x="626" y="140" text-anchor="middle">deterministic checks</text>
-  <text class="mono" x="626" y="157" text-anchor="middle">block / allow</text>
-
-  <!-- Human review UI -->
-  <rect class="card" x="730" y="98" width="132" height="70" rx="8"/>
-  <rect x="730" y="98" width="132" height="22" rx="8" fill="var(--ctx-success)"/>
-  <rect x="730" y="110" width="132" height="10" fill="var(--ctx-success)"/>
-  <text class="pill" x="796" y="113" text-anchor="middle">Human review UI</text>
-  <text class="role" x="796" y="140" text-anchor="middle">approve · edit · reject</text>
-  <text class="mono" x="796" y="157" text-anchor="middle">the human ships</text>
-
-  <!-- forward flow arrows between the five stages -->
-  <line class="flow" x1="166" y1="133" x2="202" y2="133" marker-end="url(#arrow)"/>
-  <line class="flow" x1="334" y1="133" x2="370" y2="133" marker-end="url(#arrow)"/>
-  <line class="flow" x1="522" y1="133" x2="558" y2="133" marker-end="url(#arrow)"/>
-  <line class="flow" x1="692" y1="133" x2="728" y2="133" marker-end="url(#arrow)"/>
-
-  <!-- draft label over drafter->gate arrow -->
-  <text class="lab" x="541" y="126" text-anchor="middle">draft</text>
-
-  <!-- SEND return path: review UI back to Gmail send -->
-  <path class="flow" d="M796,168 L796,196 L107,196 L107,170" marker-end="url(#arrow)"/>
-  <text class="lab" x="452" y="211" text-anchor="middle">approved reply sent back to Gmail</text>
-
-  <!-- ============ CONTEXT SOURCES for the drafter (top) ============ -->
-  <!-- RAG over prior replies -->
-  <rect class="store" x="392" y="34" width="112" height="40" rx="8"/>
-  <text class="h" x="448" y="52" text-anchor="middle">RAG</text>
-  <text class="role" x="448" y="66" text-anchor="middle">prior replies · tone</text>
-  <line class="feed" x1="425" y1="74" x2="430" y2="96" marker-end="url(#arrowMuted)"/>
-
-  <!-- Memory store -->
-  <rect class="store" x="520" y="34" width="112" height="40" rx="8"/>
-  <text class="h" x="576" y="52" text-anchor="middle">Memory</text>
-  <text class="role" x="576" y="66" text-anchor="middle">per-recipient facts</text>
-  <path class="feed" d="M540,74 L500,90 L470,96" marker-end="url(#arrowMuted)"/>
-
-  <!-- ============ EVAL + TRACE STORE (bottom) ============ -->
-  <rect class="store" x="48" y="256" width="814" height="72" rx="10"/>
-  <text class="h" x="72" y="284">Eval &amp; trace store</text>
-  <text class="sub" x="72" y="303">One trace per thread; approve / reject labels feed nightly eval.</text>
-  <text class="mono" x="72" y="320">tone fidelity · faithfulness · decision accuracy · cost · p95 latency · approval rate</text>
-
-  <!-- Postgres / vector store chip on the right of the eval bar -->
-  <rect class="card" x="700" y="270" width="146" height="44" rx="8"/>
-  <text class="lab" x="773" y="290" text-anchor="middle">Postgres + vector</text>
-  <text class="role" x="773" y="305" text-anchor="middle">audit · fixtures · index</text>
-
-  <!-- taps from each pipeline stage down into the trace store -->
-  <line class="tap" x1="107" y1="196" x2="107" y2="254" marker-end="url(#arrowMuted)"/>
-  <line class="tap" x1="269" y1="168" x2="269" y2="254" marker-end="url(#arrowMuted)"/>
-  <line class="tap" x1="447" y1="168" x2="447" y2="254" marker-end="url(#arrowMuted)"/>
-  <line class="tap" x1="626" y1="168" x2="626" y2="254" marker-end="url(#arrowMuted)"/>
-  <line class="tap" x1="796" y1="196" x2="796" y2="254" marker-end="url(#arrowMuted)"/>
-
-  <!-- deploy footnote -->
-  <text class="mono" x="862" y="240" text-anchor="end">worker on Railway · review UI on Vercel</text>
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-blue { fill: var(--ctx-blue); }
+  .f-neutral-soft { fill: var(--ctx-neutral-soft); }
+  .f-orange { fill: var(--ctx-orange); }
+  .f-red { fill: var(--ctx-red); }
+  .f-red-ink { fill: var(--ctx-red-ink); }
+  .f-surface { fill: var(--ctx-surface); }
+  .s-border { stroke: var(--ctx-border); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+  .s-red { stroke: var(--ctx-red); }
+  .s-rule { stroke: var(--ctx-rule); }
+</style>
+<defs>
+<marker id="ctx-00-hero-capstone-email-reply-agent-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+<marker id="ctx-00-hero-capstone-email-reply-agent-arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="f-red"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="720"/>
+<text x="40" y="48" class="t-title" data-w="698">The agent drafts; a person and a gate decide what is sent</text>
+<text x="40" y="76" class="t-subtitle" data-w="670">Only reply_needed threads reach the drafter, and nothing leaves without review and the gate.</text>
+<rect x="40" y="128" width="152" height="88" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="40" y="128" width="152" height="88" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="56" y="160" class="t-head" data-w="65">Mailbox</text>
+<text x="56" y="184" class="t-label" data-w="85">fake, on disk</text>
+<rect x="40" y="264" width="152" height="88" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="40" y="264" width="152" height="88" rx="8" class="w15 nofill s-rule d-proj" data-fit="skip"/>
+<text x="56" y="296" class="t-head" data-w="100">Gmail driver</text>
+<text x="56" y="320" class="t-label" data-w="94">stub; live step</text>
+<rect x="240" y="128" width="152" height="88" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="240" y="128" width="152" height="88" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="256" y="160" class="t-head" data-w="58">Triager</text>
+<text x="256" y="184" class="t-label" data-w="83">four buckets</text>
+<text x="256" y="208" class="t-note" data-w="55">no tools</text>
+<rect x="504" y="128" width="176" height="88" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="504" y="128" width="176" height="88" rx="8" class="emph s-ink-muted" data-fit="skip"/>
+<text x="520" y="160" class="t-head" data-w="58">Drafter</text>
+<text x="520" y="184" class="t-label" data-w="99">layers 01 to 06</text>
+<text x="520" y="208" class="t-note" data-w="80">one request</text>
+<rect x="728" y="128" width="192" height="88" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="728" y="128" width="192" height="88" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="744" y="160" class="t-head" data-w="42">Draft</text>
+<text x="744" y="184" class="t-label" data-w="114">JSON, for review</text>
+<path d="M192,172 L237,172" class="flow" marker-end="url(#ctx-00-hero-capstone-email-reply-agent-arrow)"/>
+<path d="M192,308 L238.74,206.72" class="flow d-proj" marker-end="url(#ctx-00-hero-capstone-email-reply-agent-arrow)"/>
+<path d="M392,172 L501,172" class="flow" marker-end="url(#ctx-00-hero-capstone-email-reply-agent-arrow)"/>
+<text x="448" y="160" text-anchor="middle" class="t-note" data-w="92">reply_needed</text>
+<path d="M680,172 L725,172" class="flow" marker-end="url(#ctx-00-hero-capstone-email-reply-agent-arrow)"/>
+<text x="240" y="244" class="t-note" data-w="135">other three buckets:</text>
+<text x="240" y="268" class="t-note" data-w="53">no draft</text>
+<rect x="240" y="440" width="136" height="112" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="240" y="440" width="136" height="112" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<rect x="248" y="448" width="120" height="8" rx="4" class="f-blue" data-fit="skip"/>
+<text x="256" y="480" class="t-head" data-w="61">Prompt</text>
+<text x="256" y="504" class="t-label" data-w="53">layer 01</text>
+<text x="256" y="528" class="t-note" data-w="71">five blocks</text>
+<rect x="392" y="440" width="136" height="112" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="392" y="440" width="136" height="112" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<rect x="400" y="448" width="120" height="8" rx="4" class="f-orange" data-fit="skip"/>
+<text x="408" y="480" class="t-head" data-w="68">Memory</text>
+<text x="408" y="504" class="t-label" data-w="53">layer 03</text>
+<text x="408" y="528" class="t-note" data-w="92">SQLite tables</text>
+<rect x="544" y="440" width="136" height="112" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="544" y="440" width="136" height="112" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<rect x="552" y="448" width="120" height="8" rx="4" class="f-orange" data-fit="skip"/>
+<text x="560" y="480" class="t-head" data-w="61">Replies</text>
+<text x="560" y="504" class="t-label" data-w="53">layer 04</text>
+<text x="560" y="528" class="t-note" data-w="94">Chroma index</text>
+<path d="M308,440 L533.86,218.1" class="flow" marker-end="url(#ctx-00-hero-capstone-email-reply-agent-arrow)"/>
+<path d="M460,440 L590.48,218.58" class="flow" marker-end="url(#ctx-00-hero-capstone-email-reply-agent-arrow)"/>
+<path d="M612,440 L647.52,218.96" class="flow" marker-end="url(#ctx-00-hero-capstone-email-reply-agent-arrow)"/>
+<rect x="728" y="288" width="192" height="88" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="728" y="288" width="192" height="88" rx="8" class="w15 nofill s-rule d-proj" data-fit="skip"/>
+<text x="744" y="320" class="t-head" data-w="116">Human review</text>
+<text x="744" y="344" class="t-label" data-w="134">approve, edit, reject</text>
+<rect x="728" y="448" width="192" height="88" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="728" y="448" width="192" height="88" rx="8" class="emph s-ink-muted" data-fit="skip"/>
+<text x="744" y="480" class="t-head" data-w="82">Send gate</text>
+<text x="744" y="504" class="t-label" data-w="138">three checks in code</text>
+<rect x="728" y="592" width="192" height="56" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="728" y="592" width="192" height="56" rx="8" class="w15 nofill s-rule d-proj" data-fit="skip"/>
+<text x="744" y="624" class="t-head" data-w="42">Send</text>
+<text x="800" y="624" class="t-note" data-w="104">Gmail; live step</text>
+<path d="M824,216 L824,285" class="flow d-proj" marker-end="url(#ctx-00-hero-capstone-email-reply-agent-arrow)"/>
+<path d="M824,376 L824,445" class="flow d-proj" marker-end="url(#ctx-00-hero-capstone-email-reply-agent-arrow)"/>
+<text x="836" y="416" class="t-note" data-w="64">approved</text>
+<path d="M728,492 L696,492 L696,332 L725,332" class="s-red w15 nofill" marker-end="url(#ctx-00-hero-capstone-email-reply-agent-arrow-red)"/>
+<text x="688" y="416" text-anchor="end" class="t-note f-red-ink" data-w="53">blocked</text>
+<path d="M824,536 L824,589" class="flow d-proj" marker-end="url(#ctx-00-hero-capstone-email-reply-agent-arrow)"/>
+<text x="836" y="568" class="t-note" data-w="48">passes</text>
+<rect x="40" y="596" width="16" height="16" class="s-border w15 nofill"/>
+<text x="72" y="608" class="t-label" data-w="116">in the companion</text>
+<rect x="216" y="596" width="16" height="16" class="s-rule w15 nofill d-lead"/>
+<text x="248" y="608" class="t-label" data-w="56">live step</text>
+<text x="40" y="684" class="t-note" data-w="597">The model only writes drafts; review and the gate sit between every draft and the outbox.</text>
 </svg>

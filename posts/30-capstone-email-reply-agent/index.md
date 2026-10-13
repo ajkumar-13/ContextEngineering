@@ -1,336 +1,372 @@
-# 30 · Capstone — Email reply agent
+# 30 - Capstone: email reply agent
 
-> **TL;DR.** A complete, deployable email-reply agent that combines **everything in this series**: a five-block system prompt, RAG (retrieval-augmented generation) over the user's prior emails for tone and context, an MCP-style (Model Context Protocol) tool layer for Gmail (read, draft, send), per-user memory of recipients and styles, sub-agent isolation for "draft a reply" vs. "decide whether to reply", auto-compaction on long threads, an eval harness with held-out replies, and observability with cost/latency/quality dashboards. The stack is Vercel plus Railway, and personal-use cost lands in the low tens of dollars a month (illustrative; verify against each provider's current pricing). This post is the integration story, how the principles compose; the companion code is the working application.
+> **TL;DR.** An email reply agent touches every part of this series at once: a triager sub-agent decides whether a thread needs a reply, a drafter reads a five-block system prompt, recipient memory, bookend-packed prior replies and the thread, and a send gate in code checks every draft before it can leave. The companion runs that pipeline against a fake mailbox and its offline tests prove the gate's checks; Gmail, the approval interface, compression, tracing and the evaluation gate are live steps described from their documentation. Nine drafts through the gate show what a deterministic check buys and what it misses, which is why a person stays in the loop.
 >
-> **After reading this you will be able to:**
-> - See how every earlier post applies in a single working system.
-> - Adapt the architecture to your own production agent project.
-> - Take this as a credible portfolio piece.
+> **Prerequisites:** [Post 14](../14-system-prompt-as-software/index.md), [Post 16](../16-memory-systems/index.md), [Post 20](../20-evaluation/index.md), [Post 22](../22-observability/index.md), [Post 23](../23-security/index.md), [Post 28](../28-build-rag-chatbot/index.md), [Post 29](../29-build-mcp-server/index.md).
+> **Safe to skip?** Skip it if an agent of one's own already traces every component to the layer it fills, gates every outbound action in code, and separates what its offline tests prove from what only a live deployment shows.
 >
-> **Companion code:** `code/30-email-reply-agent/`. Full sources, infra-as-code, deployment guide.
+> **After reading, you will be able to:**
+>
+> - Trace each part of the email reply agent to the layer it fills, the operation it performs and the earlier post that teaches it.
+> - Assemble the drafter's request in layer order from the five-block system prompt, recipient memory, bookend-packed prior replies and the thread.
+> - Justify the triager as an isolated sub-agent and compute its saving for a stated inbox mix and per-call costs.
+> - Predict which drafts the send gate's three checks block or let through, and explain why the gate runs in code after a human approves.
+> - Separate what the companion's offline tests prove from what needs keys and live services when presenting or adapting the build.
 
-![Product architecture: Gmail feeds a triager and a drafter that draw on RAG over past replies and memory, producing a draft that passes a send-gate and human review before sending.](diagrams/00-hero-capstone-email-reply-agent.svg)
-*The capstone wires all six layers and all four WSCI operations into one product, with a send-gate before any email leaves.*
+![A mailbox feeds a triager; threads it marks reply_needed go to a drafter that reads the system prompt, a memory store and an index of prior replies, and writes a draft. The draft goes to human review, then a send gate in code, then send; a blocked draft goes back. The Gmail driver, review and send are dashed: live steps the companion does not include.](diagrams/00-hero-capstone-email-reply-agent.svg)
+
+*The model only ever writes a draft; what leaves the mailbox passes a person and a check in code.*
 
 ---
 
-## 1. The problem
+## 1. The question: how does one agent use every earlier post?
 
-Inbox triage is a knowledge-worker tax. A draft-reply agent that actually understands your tone and context (not a generic "thank you for your email" generator) saves hours per week. It is also one of the best test-beds for context engineering because it touches every layer:
+A drafting agent that knows the user's tone and history, not a generic "thank you for your email" generator, saves real time on a full inbox. It is also a test bed for context engineering, because it touches all six layers of [post 02](../02-six-layers-of-context/index.md): layer 01, the system prompt, holds the user's identity and inbox rules; layer 02, tools and MCP (Model Context Protocol) descriptions, the mailbox actions; layer 03, memory and state, what the user knows about this sender; layer 04, retrieved chunks, the user's earlier replies; layer 05, conversation history, the email thread itself; and layer 06, the user instruction, the request to draft. It uses isolate for the decision whether to reply at all, and it needs every production discipline: traces, held-out evaluation, and a guard on `send`, the most dangerous action in the inbox.
 
-- **System prompt**: your identity, your rules, your format.
-- **Tools**: read, draft, send (and a guard on send).
-- **Memory**: what you have said to this recipient before, your stylistic preferences.
-- **Retrieval**: your prior replies on similar topics, for tone transfer.
-- **Compression**: long threads must be summarised before drafting.
-- **Isolation**: "decide whether to reply at all" is a different task from "draft the reply"; a sub-agent does the first.
-- **Observability**: every draft is a trace; every send is an audit row.
-- **Security**: `send_email` is the most dangerous tool in the inbox.
-- **Evaluation**: held-out replies as ground truth; LLM-as-judge for tone fidelity.
-
-![The nine context-engineering layers this build exercises, what each does here, and the post in the series that covers it](diagrams/01-every-lever.svg)
-
-*The capstone is an index to the series as much as a build: every layer is present because not having it bites.*
-
-The Gmail tool layer is a direct application of the tool-and-MCP design from [Post 15](../15-tools-and-mcp/index.md): typed tools with narrow scopes, a dangerous action (`send`) gated behind a deterministic check.
-
-A capstone that hits all of these is also realistic: every box is there because *not* having it bites in production.
+The question is how these compose into one agent that can be run, tested and deployed. The companion, [`code/30-email-reply-agent`](../../code/30-email-reply-agent/), is a runnable skeleton of the triager, drafter, memory, retrieval and send gate against a fake mailbox; this post says, part by part, what it does, what its tests prove, and what a deployment adds.
 
 ---
 
 ## 2. Architecture at a glance
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                       email-reply agent                          │
-│                                                                  │
-│  ┌─────────────┐   ┌────────────┐   ┌────────────────────────┐   │
-│  │   triager   │ → │   drafter  │ → │  reviewer / send-gate  │   │
-│  │ (sub-agent) │   │ (main agent)   │ (deterministic + user) │   │
-│  └─────────────┘   └────────────┘   └────────────────────────┘   │
-│        ↑                  ↑                                      │
-│        │                  │                                      │
-│   Gmail tools       RAG over prior replies                       │
-│   memory store      compression on long threads                  │
-└──────────────────────────────────────────────────────────────────┘
-            │                                      │
-            ▼                                      ▼
-   ┌────────────────┐                    ┌────────────────────┐
-   │  Vercel (web)  │                    │  Railway (worker)  │
-   │  approve UI    │                    │  scheduled poll    │
-   └────────────────┘                    └────────────────────┘
-```
+The figure at the top draws the pipeline. A mailbox driver lists new threads: `FakeMailbox` reads JSON (JavaScript Object Notation) files from `data/inbox/`, and `GmailMailbox` is a stub that raises `NotImplementedError` and lists the steps a live driver needs. The **triager** puts each thread in one of four buckets; only a `reply_needed` thread goes to the **drafter**, which assembles memory, prior replies and the thread into one request and asks for the draft as JSON. The **send gate** checks the draft, and the runner writes it with the verdict to `data/drafts/`; no email leaves the machine.
 
-*The product architecture: a triager sub-agent gates every thread, a drafter main agent composes the reply, and a deterministic send-gate plus human approval sit between the draft and the outbox. The web approval UI runs on Vercel; the scheduled worker runs on Railway.*
+A deployment adds two steps: a person approves, edits or rejects each draft in an approval interface, and only an approved draft reaches the send path, where the gate runs again on the final text. Three properties matter more than any one component:
 
-A scheduled worker on Railway polls Gmail every 10 minutes (or listens to push notifications). For each new thread, it runs the **triager** sub-agent: should this even get a reply? If yes, it runs the **drafter** main agent, which uses Gmail tools, RAG over the user's prior replies, and the memory store. The output is a draft; a deterministic guard checks for hard rules; the result lands in a Vercel-hosted approval UI; the operator clicks send (or edit-and-send) from a phone.
-
-Three properties to notice:
-
-- **Send is never automatic.** The agent drafts; the human ships. This is Post 23, §3, Defence 1 applied where it matters most.
-- **The drafter never sees the *whole* inbox.** Only the current thread, plus selectively retrieved prior replies. The selection is the engineering.
-- **Approval generates labels.** Each approve/reject/edit is a fixture for the eval harness; the system improves itself from real feedback.
+- **Sending is never automatic.** This is defence D1 of [post 23](../23-security/index.md), section 5, where an action is hardest to undo: the model proposes, the application decides.
+- **The drafter never sees the whole inbox**: only the thread, a few lines of memory about the sender and a handful of earlier replies to them (section 6).
+- **Every decision is a label.** Approved, edited and rejected drafts become the held-out cases of the evaluation set (section 10).
 
 ---
 
-## 3. The system prompt
+## 3. The system prompt: five blocks
+
+The drafter's system prompt, `prompts/drafter_system.md`, has the five blocks of [post 14](../14-system-prompt-as-software/index.md), section 2: identity, rules, format, knowledge and tool-use guidance. Its first two:
 
 ```markdown
 # Identity
-You are the email-reply assistant for Ajay Kumar, an engineer
-and educator who writes the Context Engineering series. You draft replies in their voice for their
-review. You never send.
+You are the email-reply assistant for {{USER_NAME}}, an educator and engineer
+who writes the Context Engineering series. You draft replies in their voice for their review. You never send.
 
 # Rules
-- Match the tone and length of his prior replies on similar threads.
+- Match the tone and length of the prior replies provided below on similar threads.
 - For unfamiliar senders, default to a polite, brief, professional tone.
-- If the email is promotional, automated, or otherwise not worth a
-  reply, return { "draft": null, "reason": "..." }.
+- If the email is promotional, automated, or otherwise not worth a reply,
+  return { "draft": null, "reason": "..." }.
 - Never include URLs, attachments, or commitments not present in the
-  thread or in his prior replies.
-- Refer to his calendar only via the `check_availability` tool; do
-  not invent times.
+  thread or in prior replies.
+- Refer to the calendar only if explicitly told a slot; do not invent times.
 - Never send. Always return a draft for human review.
-
-# Format
-- Output JSON: { "draft": "<body text or null>", "reason": "<why>",
-  "needs_attention": <bool>, "suggested_label": "<string>" }.
-- The draft uses the same greeting and sign-off pattern as the
-  retrieved prior replies.
-- No markdown in the draft body; emails are plain text.
-
-# Knowledge
-- Ajay writes from-scratch engineering series and teaches machine learning and context engineering; the time zone is IST.
-- Standard meeting slot is 30 minutes, 9:30–17:30 IST (India Standard Time),
-  weekdays.
-- Default sign-off: "Best, Ajay".
-
-# Tools
-- `read_thread(thread_id)`: fetch the full thread.
-- `retrieve_prior_replies(query, k=5)`: RAG over previous replies.
-- `recall_recipient(email)`: pull memory cells for this contact.
-- `check_availability(window_days=7)`: calendar lookup.
 ```
 
-The five blocks ([Post 14](../14-system-prompt-as-software/index.md), §2). The rules block bans the failure modes that actually bite in an inbox agent ("never invent meeting times", "never include URLs not in the thread"). The format block enforces a JSON contract that the next stage parses. The tools block lists *only* the tools the drafter needs; the triager has its own, separate tool catalogue.
+The rules ban the failures that bite in an inbox: an invented meeting time, a link (URL, uniform resource locator) or a commitment found nowhere in the thread. The format block asks for JSON with four fields (`draft`, `reason`, `needs_attention`, `suggested_label`) and the sign-off "Best, Ajay" by default; the knowledge block gives 30-minute slots from 09:00 to 18:00 India Standard Time (IST) on weekdays; the `# Tools` block says this skeleton has none; a deployed drafter lists one line per tool there, and the Gmail tools' schemas go in layer 02 ([post 15](../15-tools-and-mcp/index.md); the MCP server build, `ctx-029`, shows a server of such tools).
+
+`draft.py` fills `{{USER_NAME}}` from `EMAILBOT_USER_NAME` (default "Ajay Kumar") as it loads the file. The knowledge block's hours match the gate's defaults (section 9), but one rule written in two places drifts unless one copy is generated from the other.
 
 ---
 
-## 4. Memory: episodic, semantic, procedural
+## 4. Memory: three kinds of knowledge about a sender
 
-Three tables, the taxonomy from [Post 16](../16-memory-systems/index.md), §2.
+[Post 16](../16-memory-systems/index.md) gives an agent three kinds of memory, and `memory.py` keeps them in three SQLite tables:
 
-- **Episodic.** Each past email exchange becomes one row: `{subject, recipient, summary, sent_at, my_response_id}`. Used for "what did we discuss with this person last time".
-- **Semantic.** Per-recipient preferences and facts: `{recipient, kind, content, confidence, last_confirmed_at}`. Examples: "uses formal English", "is on the engineering team at X", "prefers calls over emails".
-- **Procedural.** Global rules in `prompts/rules.md`, plus per-relationship rules ("with my advisor: always use 'Dr.'", "with my co-founder: never mark messages as urgent unless they really are").
+- **Episodic**: one row per past exchange (`recipient`, `subject`, `summary`, `sent_at`, `source`): what the user discussed with this person last time.
+- **Semantic**: facts and preferences about a sender (`recipient`, `kind`, a free label such as `role` or `style`, `content`, `confidence`, `last_confirmed_at`, `source`).
+- **Procedural**: rules (`scope`, `rule`, `created_at`) for learned per-sender how-tos such as "send this client's invoices as CSV".
 
-The drafter's memory layer ([Post 02](../02-six-layers-of-context/index.md), §6) is assembled per-call by `recall_recipient(email)`, which queries all three tables for the current sender and returns a small bundle:
+Against the row of post 16, section 3 ([post 08](../08-write-strategies/index.md)'s nine fields plus `trigger`), the tables are a start, not the finished store: a procedural row has neither `source` nor `trigger`, no row has `last_accessed_at` or `expires_at`, and the procedural table is created but never written or read. The docstring promises decay as "a periodic job" that does not exist; post 16, section 8, decays confidence on read instead.
 
-```
-[memory: about this recipient]
-- Anika Iyer, COO (Chief Operating Officer) at PartnerCo.
-  (verified from billing system)
-- Prefers concise replies; usually under 80 words. (last 7 exchanges)
-- In mid-negotiation for a partnership; expect business tone.
-
-[memory: rules for this thread]
-- Anika has been waiting 3 days for a reply on the partnership terms.
-  Prioritise responsiveness.
-```
-
-Each cell has provenance and a timestamp ([Post 08](../08-write-strategies/index.md), §2). The "under 80 words" figure here is an observed property of this recipient's history, not a hard rule. Decay is a nightly job that lowers confidence on cells not confirmed within a chosen window (say, 90 days as a rule of thumb; tune it to how fast a recipient's facts go stale).
+`recall_recipient(email)` is the read path: by default the five highest-confidence semantic facts and the three most recent episodes about the sender, as a text block for layer 03. The companion's runner writes no rows, so on its sample inbox the block always says "(no prior interactions on file)"; the snippet of section 6 writes three illustrative rows through the companion's own `add_semantic` and `add_episodic` and shows the block that comes back. Each line carries a confidence but not its source or date, which post 16, section 9, prints so that a confirmed fact can be told from a guess. A fact learned from an email is external text, and D4 of [post 23](../23-security/index.md) forbids it to return as a rule.
 
 ---
 
-## 5. Retrieval: RAG over the user's prior replies
+## 5. Retrieval over the user's prior replies
 
-The corpus is *every email the user has sent in the last 12 months*. It is ingested with the pipeline from [Post 28](../28-build-rag-chatbot/index.md) (chunk by message; contextual headers; hybrid retrieval; cross-encoder rerank). Two refinements specific to this use case:
+The corpus is the user's sent folder. `replies.py` embeds each sent reply whole, since a reply is the unit of style transfer, into a Chroma collection with the recipient and subject as metadata. At draft time the query is the thread's last message, the search is filtered to replies sent to the same address, and five are requested. The recipient filter is the cheapest precision there is.
 
-- **Chunks are full messages**, not paragraphs. A reply is the unit of style transfer.
-- **Metadata includes the recipient** for filtered retrieval. *"Past replies to Anika"* is a cheap, high-precision filter.
-- **The retrieval query is the *current thread's last message plus a tone prompt*.** Not just the sender's words; the embedding match needs to find replies the user wrote in similar situations.
-
-A typical retrieval pass returns 5 prior replies; the bookend layout ([Post 09](../09-select-strategies/index.md), §5) puts the most relevant first and the most stylistically representative last. The hybrid-plus-rerank machinery here is exactly the advanced-retrieval stack from [Post 17](../17-advanced-retrieval/index.md), applied to a personal email corpus.
-
-The drafter sees:
-
-```
-[prior replies, for tone reference]
-[reply to Anika, 2025-09-12, partnership topic] Hi Anika, ...
-[reply to a different partner, 2025-08-03, scheduling] ...
-[reply to Anika, 2025-07-29, intro] ...
-```
-
-The combination (recipient memory + tone-matched prior replies + the current thread) gives the model the smallest possible context that contains everything it needs to produce a reply that sounds like the user.
-
----
-
-## 6. Compression: long threads
-
-Long email threads (5+ messages) burn budget fast. The compression policy follows the two-trigger pattern from [Post 12](../12-compress-strategies/index.md), §9, whose 80 %/95 % thresholds are illustrative defaults to tune, not a measured law:
-
-- **Soft trigger at 80 %** of the thread budget: tool-result clearing and priority pruning. Earlier quoted-reply blocks (the `>` chains) are clipped; structural metadata stays.
-- **Hard trigger at 95 %**: a sub-agent summarises the older portion of the thread into a short brief (a couple hundred tokens is a reasonable target); the latest 2–3 messages stay verbatim.
-
-The summary uses the structured prompt from [Post 12](../12-compress-strategies/index.md), §3: preserve decisions, open questions, and stated facts, in priority order. The drafter receives the summary plus the recent messages and behaves as if it had the whole thread.
-
----
-
-## 7. The triager sub-agent
-
-The triager runs first on every thread. Its job: classify the thread into one of four buckets: `reply_needed`, `info_only`, `promotional`, `automated_no_reply`. The output is a small JSON object the orchestrator routes on.
-
-Why a sub-agent?
-
-- **Different tools.** The triager only needs to *read*; it does not need draft or send tools. Smaller catalogue means a smaller prompt, which is faster and cheaper.
-- **Different context.** The triager does not need prior replies or recipient memory. It just needs the thread.
-- **Different model.** A small fast model (Claude Haiku 4.5 in this build) is sufficient; the drafter uses a bigger, slower one (Claude Sonnet 4.5 or Opus 4.x).
-
-The point is the cost arithmetic ([Post 13](../13-isolate-strategies/index.md), §8), and the numbers below are illustrative placeholders to show the shape of the calculation, not measured figures. Suppose a cheap triage call costs about a tenth of a cent and a full draft costs about five cents. If two-thirds of incoming threads are promotional or automated and get filtered before the drafter runs, then across 100 threads you pay 100 cheap triage calls plus roughly 33 expensive drafts, instead of 100 expensive drafts: a large fraction of the drafting spend disappears. Plug in your own inbox mix and your provider's current per-token prices to get the real number.
-
----
-
-## 8. The send-gate
-
-![Draft, human review, send-gate, send — with the three deterministic checks the gate runs](diagrams/02-send-gate.svg)
-
-*The order is the argument: a human can approve a draft that still breaks a rule, so the gate runs after them rather than instead of them.*
-
-Even after the human approves, a deterministic guard runs before the actual `send_email` call:
+The hits are packed in the bookend layout of [post 09](../09-select-strategies/index.md), section 5, a select decision: best first, second-best last, the rest between, where models use context most reliably. The core of `pack_prior_replies` in `replies.py`:
 
 ```python
-def send_gate(draft: dict, thread: list[dict]) -> SendDecision:
-    body = draft["body"]
-    # 1. URL allow-list: no URLs that did not appear in the thread or
-    #    in a known set of personal/company URLs
-    for url in extract_urls(body):
-        if url not in known_urls(thread):
-            return SendDecision.BLOCK("unknown_url:" + url)
-    # 2. No new monetary commitments
-    if mentions_money(body) and not any(mentions_money(m["body"]) for m in thread):
-        return SendDecision.BLOCK("introduced_monetary_term")
-    # 3. No times outside business hours
-    for t in extract_times(body):
-        if not in_business_hours(t):
-            return SendDecision.BLOCK("non_business_hour:" + str(t))
-    return SendDecision.OK
+    if len(hits) > 1:
+        ordered = [hits[0]] + hits[2:] + [hits[1]]
+    else:
+        ordered = hits
 ```
 
-This is Post 23, §3, Defence 1 *in code*: the model proposed; the application enforces. Three concrete checks; the agent can produce drafts that fail any of them, and the system does the right thing without depending on the prompt to forbid them.
+Five replies ranked r1 to r5 are packed as `r1 r3 r4 r5 r2` (the snippet prints it); two hits, as for thread t-001, keep their rank order.
+
+The ranking is only as good as the embedding. With `VOYAGE_API_KEY` set, `replies.py` embeds with Voyage's `voyage-3-lite`; without it, it falls back to a hashed bag of words (each word counted in one of 64 buckets by its SHA-256 hash), the same on every run but blind to meaning, so offline the recipient filter does the real work. The snippet ranks with this fallback and Chroma's default squared L2 distance. A deployment would add what [post 11](../11-rag-in-depth/index.md) and [post 17](../17-advanced-retrieval/index.md) describe and the RAG (retrieval-augmented generation) build of `ctx-028` implements: contextual headers (post 11, section 2), hybrid keyword and vector search, and reranking.
 
 ---
 
-## 9. Observability and eval
+## 6. What the drafter sees
 
-**Trace per session.** The whole pipeline (triager call, drafter call with retrieval, memory, and tools, send-gate decision, user action) emits one trace with nested spans ([Post 22](../22-observability/index.md), §3). The trace is the primary debugging artefact.
+`draft.py` sends two messages: the system prompt, and everything else as one user message.
 
-**Four headline metrics** on the dashboard ([Post 22](../22-observability/index.md), §4): cost per draft, p95 latency (the 95th-percentile latency, the slow tail rather than the average), **approval rate** (the user's accept/edit/reject as the quality proxy), and error rate by kind.
+```python
+    user = (
+        f"{memory_block}\n{prior_block}\n[current thread]\n{thread_block}\n\n"
+        f"Draft a reply for review. Return JSON only."
+    )
+    msgs = [
+        {"role": "system", "content": SYSTEM},
+        {"role": "user", "content": user},
+    ]
+```
 
-**Eval harness** ([Post 20](../20-evaluation/index.md), §4) runs nightly on a held-out set of historical threads with the user's actual replies as ground truth. Three metrics:
+The order is the layer order. The system message is layer 01; there is no layer 02, since the skeleton's drafter has no tools; memory is layer 03 and the packed replies layer 04, the per-turn injection; the thread plays layer 05, conversation history, because it is the conversation the reply continues, it grows, and it is what compression trims (section 7); the closing request is layer 06, last. `uv run python posts/30-capstone-email-reply-agent/snippets/drafter_request.py` assembles the request for thread t-001 with the companion's own functions and counts tokens with tiktoken's `o200k_base` encoding (the one for `gpt-4o-mini`, the companion's default model):
 
-- **Tone fidelity**: an LLM-judge prompt that scores how close the draft sounds to the user's own writing on a 1–5 scale.
-- **Factual faithfulness**: claims in the draft are supported by the thread or by retrieved memory.
-- **Decision accuracy**: the triager's classification matches the user's revealed preference (did the human reply? was it promotional?).
+```text
+user message of the drafter call for thread t-001, outline:
+  [memory: about anika@partnerco.io]
+  - role: COO at PartnerCo (conf 0.90)
+  - style: prefers short replies (conf 0.70)
+  [memory: recent threads]
+  - Partnership terms: confirmed 70/30 for year one; offered a Thursday call
+  [prior replies, for tone reference]
+  --- to anika@partnerco.io re: partnership terms ---
+      ... 5 line(s)
+  --- to anika@partnerco.io re: intro ---
+      ... 5 line(s)
+  [current thread]
+  --- message 1 ---
+      ... 6 line(s)
+  Draft a reply for review. Return JSON only.
+tokens by layer, o200k_base:
+  01 System prompt                  313
+  02 Tools and MCP descriptions       0
+  03 Memory and state                62
+  04 Retrieved chunks               144
+  05 Conversation history            72
+  06 User instruction                10
+  sum                               601   (system message 313, user message 289)
+```
 
-A regression on any of these blocks the deploy. The harness gets stronger every week as approve/reject data accumulates.
+The figure below draws the six counts. More than half of the 601 tokens is the system prompt; memory, two earlier replies and the thread are under 300 (counted apart they sum to 288 against the user message's 289, since a token can span a join). What grows with the inbox is the index, not the request.
 
----
+![Six horizontal bars of tokens by layer for the drafter's request on thread t-001: 01 System prompt 313, 02 Tools and MCP descriptions 0, 03 Memory and state 62, 04 Retrieved chunks 144, 05 Conversation history 72, 06 User instruction 10, in the role colours of their lifetime classes.](diagrams/02-drafter-request.svg)
 
-## 10. Deployment
-
-The whole system fits a small modern stack.
-
-- **Vercel** for the approval UI (Next.js). Serverless functions for the OAuth (Open Authorisation) callback and the approve endpoint.
-- **Railway** for the worker (Python, FastAPI). A cron schedule polls Gmail every 10 minutes; long-running drafts run as one-off workers.
-- **Postgres** (Railway's managed instance) for memory, audit log, eval fixtures, and the trace store.
-- **Chroma** (or pgvector) for the email-corpus index.
-- **The drafter and triager both run on Claude.** The drafter uses a frontier model (Claude Opus 4.x or Sonnet 4.5); the triager uses Claude Haiku 4.5, the cheap, fast tier. (Note: Voyage and Cohere are retrieval/embedding vendors, so they belong in the RAG index, not as the triage classifier.)
-
-### Gmail API and OAuth
-
-The worker authenticates to Gmail once, on behalf of the single account, using OAuth 2.0. The minimum scopes are `gmail.readonly` (read threads), `gmail.compose` (create drafts), and `gmail.send` (send). Request the narrowest set that still lets the human ship a reply; the send scope is the dangerous one, which is exactly why the send-gate in §8 sits in front of it. The OAuth consent flow returns a refresh token; store it in the secret manager, never in the repository, and let the worker exchange it for short-lived access tokens on each poll.
-
-### Backend (FastAPI on Railway)
-
-The Python service is thin: a scheduled poll endpoint that lists new threads, the triager-then-drafter pipeline, the send-gate, and a small REST surface the UI calls (`GET /pending` to list drafts awaiting approval, `POST /approve/{id}` to run the send-gate and dispatch, `POST /reject/{id}` to record a negative label). Everything the pipeline touches (memory reads, retrieval, LLM calls, the gate decision) is wrapped in one trace per thread, so the backend doubles as the observability source.
-
-### Frontend (Next.js on Vercel)
-
-The approval UI is deliberately small: a list of pending drafts, each showing the original thread, the proposed reply, and the triager's reason. Each row has approve, edit-and-send, and reject actions that call the backend endpoints above. A serverless function handles the OAuth callback; the rest is a static-ish single page the operator opens on a phone. The UI does not talk to Gmail or the model directly; it only records the human decision, which is what keeps send off the critical path.
-
-Personal-use cost is on the order of a few dollars a month for the managed database and worker, zero on a free web-hosting tier, and a per-token LLM bill that depends on inbox volume. All of these are illustrative and provider-dependent, so treat "roughly the low tens of dollars a month for one person" as a rough envelope and check each provider's current pricing page. A team variant scales roughly linearly with users.
-
-The full deployment guide (environment variables, the OAuth setup walk-through, Gmail scopes, Vercel config, Railway services, the cron schedule, and the secret manager) lives in `code/30-email-reply-agent/README.md`.
-
----
-
-## 11. The lesson the capstone teaches
-
-The capstone is not impressive because it has more code than the other builds. It is impressive because every choice in it has a *reason*, and every reason traces to one of the earlier posts. The system prompt has five blocks because [Post 14](../14-system-prompt-as-software/index.md) said it should. The retrieval is hybrid + reranked because [Post 09](../09-select-strategies/index.md) said so. The triager is a sub-agent because [Post 13](../13-isolate-strategies/index.md) said so. The send-gate is in code because [Post 23](../23-security/index.md) said it had to be.
-
-This is the shape of a serious LLM system. None of it is heroic; all of it is *deliberate*. A team that can build this can build the next one.
-
----
-
-## 12. Where to go next
-
-A short list of directions worth exploring once the capstone is running.
-
-- **Active learning.** Every user edit on a draft becomes a training signal. Periodically fine-tune a small model on the (draft, edited-draft) pairs for tone transfer; the LLM-judge stays as backstop.
-- **Cross-channel.** The same architecture works for Slack, Discord, LinkedIn messages. Swap Gmail tools for the channel's API; everything else stays.
-- **Multi-user.** A team variant where the agent learns each user's voice; the memory store gets a `user_id` column and a tenant boundary.
-- **Voice notes.** A voice-to-draft pipeline using Whisper + the same drafter chain; useful for replying on the move.
-- **Scheduling agent.** A second agent specialised for calendar logistics, called via the tools layer when a thread becomes a scheduling thread.
-
-Each of these is a small step; the foundation supports them all without re-architecting.
+*A reply is drafted from a few hundred selected tokens, not from the mailbox.*
 
 ---
 
-## 13. Closing: what the series tried to do
+## 7. Compression of long threads
 
-This series began with the claim that *prompt engineering* was the right name for 2022–2023 and *context engineering* is the right name for the current era. Twenty-four posts later, the case the series set out to make is concrete:
+Thread t-001 is one message; a real thread can run to dozens, each quoting the one before. The companion does not compress. A deployed drafter applies the two triggers of [post 12](../12-compress-strategies/index.md), section 9, whose 80 and 95 percent are illustrative defaults, measured against a budget for the thread:
 
-- The model receives a stack of layers; each layer is engineered separately ([Post 02](../02-six-layers-of-context/index.md)).
-- The model reads that stack with measurable, predictable biases ([Post 03](../03-how-llms-read-context/index.md)).
-- Every token costs money and time and attention; the engineering is making each one count ([Post 04](../04-tokens-windows-budgets/index.md)).
-- Failures have names and shapes; they are not mysterious ([Post 06](../06-context-failure-modes/index.md)).
-- Four operations cover almost every technique: Write, Select, Compress, Isolate ([Posts 07–13](../07-write-select-compress-isolate/index.md)).
-- Each layer is its own engineering discipline ([Posts 14–17](../14-system-prompt-as-software/index.md)).
-- Production demands eval, observability, and security as first-class concerns ([Posts 20–25](../20-evaluation/index.md)).
-- The modern workflow puts these disciplines in the editor and on the server ([Posts 26–27](../26-modern-agentic-workflow/index.md)).
-- The builds (Posts 28–30) are how the principles become muscle memory.
+- **At 80 percent, the soft trigger**: priority pruning (post 12, section 5), with no model call. The quoted copies of earlier messages (the `>` chains mail clients append) go first, because those messages are already in the thread; signatures and disclaimers next.
+- **At 95 percent, the hard trigger**: summarisation (post 12, section 3). A separate call condenses the older messages into a brief that keeps decisions, open questions and stated facts, in that order; the latest two or three messages stay verbatim.
 
-The intended outcome is simple: a reader who works through the series end-to-end should be equipped to ship LLM systems that improve over time instead of decaying, and to teach the next person the same.
+The summary reads all it replaces, so it runs on the trigger only.
+
+---
+
+## 8. The triager sub-agent
+
+The triager runs first and classifies each thread as `reply_needed`, `info_only`, `promotional` or `automated_no_reply`. Its prompt, `prompts/triager_system.md`, has identity, rules and format blocks and says to choose `reply_needed` when torn between it and `info_only`. It uses JSON mode (`response_format={"type": "json_object"}`), which, as [post 21](../21-structured-output-guardrails/index.md) says, guarantees valid JSON and not the fields, so `triage.py` checks them:
+
+```python
+    try:
+        out = json.loads(raw)
+    except json.JSONDecodeError:
+        return {"bucket": "reply_needed", "reason": "triager_json_parse_error", "confidence": 0.0}
+    bucket = out.get("bucket", "reply_needed")
+    if bucket not in VALID_BUCKETS:
+        bucket = "reply_needed"
+```
+
+Every failure falls back to `reply_needed`: a wasted draft costs cents, a missed reply costs a relationship. This is isolation as [post 13](../13-isolate-strategies/index.md) recommends it (sections 3 and 5), a sub-task with a clean contract: the thread in, a small JSON object out. The triager needs no tools, so its window has no layer 02; it needs no memory or prior replies; and it can run on a cheaper model. The companion sets both models through `EMAILBOT_TRIAGE_MODEL` and `EMAILBOT_DRAFT_MODEL`, both defaulting to `gpt-4o-mini` through OpenAI's Chat Completions API (application programming interface), so choosing a smaller triage model is a configuration change.
+
+What the split saves is arithmetic in the manner of post 13, section 8. With illustrative costs of a tenth of a cent per triage call and five cents per draft, and an illustrative inbox of 90 threads of which 30 need a reply, `snippets/triage_saving.py` prints:
+
+```text
+90 threads, 30 need a reply; triage 0.1 c, draft 5.0 c a call
+drafter on every thread:   90 x 5.0 = 450.0 cents
+triager first:             90 x 0.1 + 30 x 5.0 = 159.0 cents
+saving: 291.0 cents, 64.7% of the bill
+the triager pays for itself once more than 2% of threads are filtered
+```
+
+The last line is the general rule: the triager costs $c_t$ on every thread and saves $c_d$ on every thread it filters, so it pays once the filtered share exceeds $c_t / c_d$, here $0.1 / 5 = 2$ percent. The dollars depend on the prices and the inbox; the break-even depends only on the ratio.
+
+---
+
+## 9. The send gate
+
+A rule in a prompt is followed most of the time, so the companion enforces three rules in code, `send_gate.py`:
+
+```python
+def send_gate(draft_body: str, thread: list[dict], *, known_urls: set[str] | None = None) -> SendDecision:
+    body = draft_body or ""
+    thread_text = "\n".join(m.get("body", "") for m in thread)
+
+    # 1. URL allow-list: only the operator's links; a link quoted from the thread is not trusted
+    allowed = {u.rstrip("/") for u in (known_urls if known_urls is not None else known_urls_from_env())}
+    for url in _urls_in(body):
+        if url.rstrip("/") not in allowed:
+            return SendDecision.BLOCK(f"unknown_url:{url}")
+
+    # 2. No new monetary terms
+    if MONEY_RE.search(body) and not MONEY_RE.search(thread_text):
+        return SendDecision.BLOCK("introduced_monetary_term")
+
+    # 3. No times outside business hours
+    for h_str, _ in TIME_RE.findall(body):
+        h = int(h_str)
+        if h < BUSINESS_START_H or h >= BUSINESS_END_H:
+            return SendDecision.BLOCK(f"non_business_hour:{h:02d}")
+
+    return SendDecision.OK()
+```
+
+This is D1 and D2 of [post 23](../23-security/index.md), section 5, in code: the draft is a proposal, and the application decides whether it may leave. It runs after the person approves because a reviewer on a phone approves a draft that still carries an invented link, and the gate does not tire. The companion has no send path, so `run.py` runs the gate as each draft is written and records `send_gate: ok` or `BLOCK:<reason>` in the draft's header; a deployment runs it again on the approved text, just before sending.
+
+Three regular expressions block exactly what they match. `uv run python posts/30-capstone-email-reply-agent/snippets/send_gate_cases.py` sends nine drafts through the companion's `send_gate`, against its sample thread t-001 and two threads written for the test:
+
+```text
+gate hours: 09:00 to 18:00; thread A is t-001
+case                  gate says                                                   should  outcome
+1 clean reply         ok                                                          send    right
+2 new link            BLOCK unknown_url:https://docs.example/terms                block   right
+3 new money term      BLOCK introduced_monetary_term                              block   right
+4 late hour           BLOCK non_business_hour:21                                  block   right
+5 hour without colon  ok                                                          block   missed
+6 money in words      ok                                                          block   missed
+7 runs past 18:00     ok                                                          block   missed
+8 bigger sum          ok                                                          block   missed
+9 injected link       BLOCK unknown_url:https://partnerco-support.example/login   block   right
+5 of 9 right; 4 slip through
+```
+
+The figure below sets the nine cases beside the three checks. The first four are the kind the tests cover. Case 9, an attacker's link in an email, is the first step of post 23's exfiltration chain (section 3); the gate blocks it because its allow-list is the operator's alone (`known_urls`, which `run.py` fills from `EMAILBOT_KNOWN_URLS`), never the email's. Each of the other four slips through a gap: "9 pm" has no colon; "five thousand dollars" has no currency sign; a 30-minute call at 17:45 ends at 18:15; and a thread that mentions a 500-dollar deposit licenses a 50,000-dollar balance, because the money check asks only whether the thread mentions money. A stricter gate compares amounts, reads every way of writing a time, and checks where the slot ends.
+
+![Left, the three checks in order: the operator's URL allow-list, no new money term, hours 09:00 to 18:00. Right, nine draft cases with the gate's verdict: a clean reply passes; a new link, a new dollar term, 21:30 and an injected link are blocked; 9 pm, money in words, a call at 17:45 and a bigger sum pass and are marked missed in red.](diagrams/03-send-gate.svg)
+
+*The gate is a floor under the review, not a substitute for it.*
+
+---
+
+## 10. Observability and evaluation
+
+**One trace per thread.** In a deployment the triager call, memory read, retrieval, drafter call, gate verdict and the person's decision are spans of one trace in the trace store of [post 22](../22-observability/index.md), section 2; opening a bad draft's trace shows which layer was wrong. The four dashboard numbers of post 22, section 4, become cost per thread, latency at the 95th percentile (p95), quality, and errors by kind, and quality has a natural source: the share of drafts approved unedited, edited or rejected. The companion prints a line per thread and records nothing more.
+
+**Evaluation.** `eval.py` scaffolds the harness of [post 20](../20-evaluation/index.md) over held-out threads with the user's actual reply and the bucket their behaviour revealed. It reports decision accuracy (the triager's bucket against the revealed one) and two judge scores from 1 to 5, tone fidelity and factual faithfulness, both comparing the draft with the user's actual reply, not with the thread or memory. Two gaps remain: its default fixture file, `data/eval_fixtures.json`, is not shipped, and it has no gate: post 20, section 4, blocks a change whose metric drops by more than an absolute 0.05, while the scaffold only prints. For tone, the judge failure modes of post 20, section 6, apply in full.
+
+---
+
+## 11. Deployment: the live steps
+
+Nothing here is in the companion or run in this post; each step is from the provider's documentation, consulted October 2026.
+
+**Gmail.** The worker reads threads and writes drafts through the Gmail API, authorised once with OAuth 2.0, Google's authorisation protocol. Google's "Choose Gmail API scopes" lists `gmail.readonly` as "View your email messages and settings", `gmail.compose` as "Manage drafts and send emails", and `gmail.send` as "Send email on your behalf". The companion's stub requests the first two and notes that `gmail.compose` can send too, so the guarantee that a person ships comes from code that never calls send outside the gated path. "Using OAuth 2.0 for Web Server Applications" says to request `access_type=offline` when the application "needs to refresh access tokens when the user is not present at the browser", and to keep the token in "a secure, long-lived location": a secret manager, never the repository. New mail arrives by polling or by push: Google's "Configure push notifications with the Gmail API" states that "the Gmail API uses the Cloud Pub/Sub API to deliver push notifications" and that the watch must be renewed "at least once every 7 days".
+
+**The worker on Railway.** A Python service (FastAPI in the plan) runs the poll, the pipeline and the gate, and gives the interface endpoints to list pending drafts, approve one (gate, then send) and reject one (record the label). Railway's "Cron Jobs" page sets the terms: a scheduled service is "expected to execute a task, and exit as soon as that task is finished", runs "must be at least 5 minutes apart", schedules are in UTC (Coordinated Universal Time), and if a run is still going "Railway will skip the new cron job". A ten-minute poll fits.
+
+**The approval interface on Vercel.** A small Next.js page lists each pending draft with its thread, with approve, edit and reject. Vercel Functions handle "each incoming request as a new invocation"; the page's functions take the OAuth callback and forward each decision to the worker. The page never calls Gmail or the model, so the send path stays in one place, behind the gate.
+
+**Storage.** A managed PostgreSQL database holds the memory tables, the decision log, the evaluation fixtures and the trace store. Drafting ten held-out threads from a test mailbox and scoring them needs these live steps; the gate blocking an unreviewed send is shown at toy scale in section 9. This post quotes no hosting price: the bill is the hosts' plans plus a model bill that grows with the inbox.
+
+---
+
+## 12. The lesson: every lever has a post
+
+What makes the companion a capstone is not its size but that every choice in it traces to an earlier post. The figure below is the map, with what the companion contains.
+
+![A table of twelve parts of the agent, each with the layer or operation it uses, the posts that teach it, and its state in the companion: five-block system prompt, Gmail tools, recipient memory, prior-reply retrieval, bookend packing, thread compression, triager, JSON replies, send gate, email as data, trace per thread, held-out evaluation.](diagrams/01-every-lever.svg)
+
+*Every row is a decision an earlier post argued for; the right-hand column is how much of it the companion has built.*
+
+The prompt has five blocks because [post 14](../14-system-prompt-as-software/index.md) makes them the checklist for layer 01. The replies are filtered by recipient and bookend-packed because [post 09](../09-select-strategies/index.md) separates candidates from packing. The triager is a sub-agent because [post 13](../13-isolate-strategies/index.md) isolates a task with a clean contract. The gate is code because [post 23](../23-security/index.md) refuses to let the model be the permission system. A component whose reason cannot be named is a candidate for removal.
+
+---
+
+## 13. Where to go next
+
+- **Active learning.** Every edit to a draft is a signal for the prompt's rules or the retrieval filter.
+- **Another channel.** Slack or a support queue swap the mailbox driver and the gate's rules; the rest stays.
+- **More users.** The memory tables gain a user column and a tenant boundary ([post 24](../24-privacy-and-governance/index.md), section 6).
+- **Voice notes.** Transcription feeds layer 06 ([post 19](../19-multimodal-context/index.md), section 6).
+
+---
+
+## 14. Closing: what the series set out to show
+
+[Post 01](../01-why-context-engineering/index.md) argued that "prompt engineering" stopped describing the work once models were given tools, memory and retrieval. Thirty posts later the argument has a shape:
+
+- The model receives six layers, each engineered separately ([post 02](../02-six-layers-of-context/index.md)), and reads them with measured biases ([post 03](../03-how-llms-read-context/index.md)).
+- Every token costs money, time and attention ([post 04](../04-tokens-windows-budgets/index.md), [post 05](../05-economics-of-context/index.md)); failures have names and first fixes ([post 06](../06-context-failure-modes/index.md)).
+- Write, select, compress and isolate cover the techniques (posts 07 to 13), and each layer is its own discipline (posts 14 to 19).
+- Production adds evaluation, structured output, observability, security, privacy and the long-context decision (posts 20 to 25); the workflow puts them in the editor and on a server (posts 26 and 27).
+- The three builds, posts 28 to 30, turn the principles into code a reader can run.
+
+The intended result is a reader who ships LLM (large language model) systems that improve instead of decaying.
+
+---
+
+## 15. Make it run
+
+The companion's seven offline tests (six for the send gate, one for the triager's buckets) run from the series root with no key, because `llm.py` builds the OpenAI client on first use:
+
+```python
+def _oai() -> OpenAI:
+    """Build the client on first use, so importing this module needs no API key."""
+    global _client
+    if _client is None:
+        _client = OpenAI()
+    return _client
+```
+
+An earlier version built it at import (`_oai = OpenAI()`), so collecting the triager's test failed without `OPENAI_API_KEY`. In PowerShell, set `$env:PYTHONDONTWRITEBYTECODE = "1"` and drop that prefix:
+
+```text
+PYTHONDONTWRITEBYTECODE=1 uv run --with pytest --with pydantic --with python-dotenv --with openai python -m pytest -q -p no:cacheprovider -c code/30-email-reply-agent/pyproject.toml code/30-email-reply-agent/tests
+```
+
+It ends with `7 passed`. The tests prove that the gate blocks an unknown link, a link quoted in the thread but absent from the operator's list, a new dollar amount and a 22:00 time, and passes a clean draft, a listed link and a 14:00 time, and that the triager has the four documented buckets; nothing about the model's drafts. The three snippets need no key or network:
+
+```text
+uv run python posts/30-capstone-email-reply-agent/snippets/drafter_request.py
+uv run python posts/30-capstone-email-reply-agent/snippets/send_gate_cases.py
+uv run python posts/30-capstone-email-reply-agent/snippets/triage_saving.py
+```
+
+They load the companion's offline parts through `snippets/companion.py`, which bypasses the package's imports of the openai, chromadb and voyageai libraries. The live steps are not run here: `uv sync` in the companion directory, a `.env` from `.env.example` with a real `OPENAI_API_KEY` (and `VOYAGE_API_KEY` for meaningful retrieval), then `uv run python -m emailbot.run` triages the two sample threads and drafts the `reply_needed` ones into `data/drafts/`; a Gmail driver, the interface and the worker of section 11 come after.
+
+---
+
+## 16. What can go wrong?
+
+- **A test suite that needs a key to start.** A client built at import fails collection without a key, and continuous integration (CI) without secrets never runs the gate's tests. Create clients on first use.
+- **Offline retrieval that is noise.** A fallback on Python's salted `hash()` ranks at random, differently in every process; a deterministic one, such as the companion's hashed word counts, keeps the offline path honest.
+- **A placeholder the model reads literally.** Assert after loading that no `{{...}}` remains in a prompt.
+- **An allow-list that trusts the attacker.** Links from the thread include a malicious email's links; build the list from the operator's and the user's own.
+- **A scope taken for a guarantee.** `gmail.compose` without `gmail.send` still allows sending; only code keeps a person in the loop.
+- **A gate trusted as complete.** Four of the snippet's eight harmful drafts pass.
 
 ---
 
 ## Common pitfalls
 
-- **Auto-send.** The agent drafts; the human ships. Skipping the gate is the one mistake that ends the project on day one.
-- **Drafting without memory.** The replies are technically correct and emotionally generic. The memory layer is the difference.
-- **Drafting without prior-reply RAG.** The drafts sound like an LLM, not like the user.
-- **Skipping the triager.** The drafter runs on every promotional email; cost and quality both suffer.
-- **No approval-data feedback loop.** The system never learns from edits.
-- **No send-gate.** The first time the model hallucinates a URL, you find out by sending it.
+1. **Auto-send.** Removing the review to save a click turns every model error into a sent email.
+2. **Skipping the triager.** The drafter runs on every newsletter and receipt; cost rises and the review queue fills with unwanted drafts.
+3. **Drafting without memory or prior replies.** The drafts are correct and generic, and the user rewrites them.
+4. **One rule in two places.** The prompt's hours and the gate's hours drift apart, and the gate passes what the prompt forbids.
+5. **No feedback loop.** Approvals and edits are discarded, so the evaluation set never grows.
 
 ---
 
 ## Further reading
 
-- See the 23 prior posts. Every section above traces to one of them.
-- Google, *"Gmail API"* docs (latest) — scopes, threads, drafts, and send.
-- Google, *"OAuth 2.0 for Web Server Applications"* docs (latest) — the consent flow and refresh tokens.
-- Anthropic, *"Models overview"* and *"Pricing"* docs (latest) — Claude Opus 4.x, Sonnet 4.5, and Haiku 4.5 tiers and current per-token prices.
-- Vercel, *"Next.js + serverless functions"* docs.
-- Railway, *"Workers and cron"* docs.
+- Google, "Choose Gmail API scopes", "Configure push notifications with the Gmail API" and the Gmail API reference (consulted October 2026).
+- Google, "Using OAuth 2.0 for Web Server Applications" (consulted October 2026): offline access and refresh tokens.
+- Railway, "Cron Jobs" (consulted October 2026).
+- Vercel, "Vercel Functions" (consulted October 2026).
+- The earlier posts cited above, above all posts 14, 16, 20, 22 and 23.
 
-Full citations in [REFERENCES.md](../../REFERENCES.md).
+Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
 ---
 
 ## What to read next
 
-- **Re-read [Post 01](../01-why-context-engineering/index.md)** with the capstone in mind.
-- **The [GLOSSARY](../../GLOSSARY.md)**: every term from the series in one place.
-- **The [CHEATSHEET](../../CHEATSHEET.md)**: the printable single-page summary.
-- **Build something of your own** using the capstone as a template.
+- **[Post 20 - Evaluation](../20-evaluation/index.md):** the regression gate and judge discipline the capstone's evaluation scaffold still lacks, the next thing to build before trusting any change.
+- **[Post 01 - Why context engineering, and why now](../01-why-context-engineering/index.md):** the series' opening argument, which reads differently once every part of it has been built.

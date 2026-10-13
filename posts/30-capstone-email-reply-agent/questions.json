@@ -1,0 +1,841 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-030",
+  "next_ordinal": 19,
+  "questions": [
+    {
+      "id": "ctx-030-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "layers",
+        "drafter"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In the companion's drafter request, the current email thread sits between the packed prior replies and the closing request to draft. Which layer does the thread play?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Layer 04, retrieved chunks, because the thread is fetched from the mailbox by the runner before the drafter call is made.",
+          "correct": false,
+          "feedback": "Fetching is not what makes a layer. Layer 04 holds content selected by a search (here, the prior replies); the thread is the conversation the reply continues."
+        },
+        {
+          "key": "b",
+          "text": "Layer 05, conversation history, because it is the conversation the reply continues and it grows with each message.",
+          "correct": true,
+          "feedback": "Right. The thread grows message by message, and it is what the compression triggers trim, exactly the role of layer 05."
+        },
+        {
+          "key": "c",
+          "text": "Layer 06, the user instruction, because the sender's last message is what the agent must answer.",
+          "correct": false,
+          "feedback": "Layer 06 is the user's own request, last and short: here, \"Draft a reply for review. Return JSON only.\" The sender is not the user."
+        },
+        {
+          "key": "d",
+          "text": "Layer 03, memory and state, because the thread records what was said before.",
+          "correct": false,
+          "feedback": "Layer 03 is the store's distilled facts and episodes about the sender, assembled by recall_recipient, not the raw thread."
+        }
+      ],
+      "explanation": "Section 6 maps the drafter's request onto the layers: the system message is 01, memory 03, the packed replies 04, the thread plays 05, the conversation history, and the closing instruction is 06.",
+      "hints": [
+        "Ask which layer grows over a conversation and is the target of compression."
+      ]
+    },
+    {
+      "id": "ctx-030-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "9",
+      "est_minutes": 3,
+      "tags": [
+        "send-gate",
+        "review"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In the deployed design, a person reviews each draft and only then does the send gate run on the approved text. Why keep the gate after a human has already approved?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Because a reviewer can approve a draft that breaks a hard rule, and code applies the rule every time.",
+          "correct": true,
+          "feedback": "Right. Review and gate fail differently: the person misses literal slips when tired or on a phone, the gate never tires on what it matches."
+        },
+        {
+          "key": "b",
+          "text": "Because the gate is more reliable than the person, and once it is in place the review becomes an optional courtesy step.",
+          "correct": false,
+          "feedback": "The gate blocks only what its patterns match; the snippet's four misses show it cannot replace the review."
+        },
+        {
+          "key": "c",
+          "text": "Because the model may still change the draft after approval, and the gate re-runs the model to check the final text.",
+          "correct": false,
+          "feedback": "The gate is deterministic code and calls no model; it checks the text as approved."
+        },
+        {
+          "key": "d",
+          "text": "Because Gmail requires a programmatic check before the send scope can be used.",
+          "correct": false,
+          "feedback": "No such requirement exists; the scopes govern what the token may do, not what checks run before it."
+        }
+      ],
+      "explanation": "Section 9: the draft is a proposal and the application decides (D1 and D2 of post 23). The gate runs after approval because a reviewer can approve a draft that still breaks a rule; the review in turn catches what the gate's patterns miss.",
+      "hints": [
+        "Compare the kinds of mistake a person makes with the kinds a regular expression makes."
+      ]
+    },
+    {
+      "id": "ctx-030-q03",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "9",
+      "est_minutes": 4,
+      "tags": [
+        "send-gate",
+        "regex"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A thread reads \"Could we meet this week?\" and contains no links or amounts. Which draft does the companion's `send_gate` let through, although the post's rules would refuse it?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "\"How about 08:30 IST on Tuesday?\"",
+          "correct": false,
+          "feedback": "The time check reads the hour, 8, which is below 9, so the gate blocks it as non_business_hour:08."
+        },
+        {
+          "key": "b",
+          "text": "\"Let's do 6 pm IST on Tuesday.\"",
+          "correct": true,
+          "feedback": "Right. The time pattern needs hours and minutes with a colon, so \"6 pm\" is never seen, and a slot from 18:00 lies outside 09:00 to 18:00."
+        },
+        {
+          "key": "c",
+          "text": "\"The agenda is at https://agenda.example/t\"",
+          "correct": false,
+          "feedback": "The link is not on the operator's allow-list, so the gate blocks it as unknown_url."
+        },
+        {
+          "key": "d",
+          "text": "\"A USD 200 deposit secures the slot.\"",
+          "correct": false,
+          "feedback": "The draft has a currency code and digits and the thread has none, so the money check blocks it."
+        }
+      ],
+      "explanation": "Section 9: the gate is three regular expressions and blocks only what they match. Times must be written HH:MM; a time with am or pm and no colon passes, as case 5 of the snippet shows.",
+      "hints": [
+        "For each draft, ask which of the three patterns matches it at all.",
+        "Look at the shape the time pattern requires."
+      ]
+    },
+    {
+      "id": "ctx-030-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "15",
+      "est_minutes": 3,
+      "tags": [
+        "offline-tests",
+        "companion"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Which claim do the companion's seven offline tests support?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The send gate blocks a link that appears nowhere in the thread.",
+          "correct": true,
+          "feedback": "Right. test_send_gate_blocks_unknown_url checks exactly that, with no key and no network."
+        },
+        {
+          "key": "b",
+          "text": "The drafter's replies match the user's tone on the sample threads.",
+          "correct": false,
+          "feedback": "No test calls the model; tone is what the evaluation scaffold would score with a judge and a key."
+        },
+        {
+          "key": "c",
+          "text": "The triager puts the BigCorp promotion in the promotional bucket.",
+          "correct": false,
+          "feedback": "The only triager test checks that VALID_BUCKETS holds the four documented names; it never classifies a thread."
+        },
+        {
+          "key": "d",
+          "text": "Retrieval returns the most relevant prior reply first.",
+          "correct": false,
+          "feedback": "No test exercises retrieval, and offline its hashed bag of words ranks by shared words, not meaning."
+        }
+      ],
+      "explanation": "Section 15 lists what the seven tests prove: six gate behaviours and the triager's bucket names. Nothing about the model's drafts, the triage decision or retrieval is tested offline, which is what a portfolio write-up must say.",
+      "hints": [
+        "Ask which of these could be checked without calling a model."
+      ]
+    },
+    {
+      "id": "ctx-030-q05",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "11",
+      "est_minutes": 3,
+      "tags": [
+        "gmail",
+        "oauth",
+        "scopes"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team deploys the worker with only the `gmail.readonly` and `gmail.compose` scopes and tells reviewers the agent therefore cannot send email. What is wrong with the claim?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Nothing: without gmail.send in the granted scopes the token cannot send any email, so the guarantee holds as stated.",
+          "correct": false,
+          "feedback": "Google's scopes page describes gmail.compose as \"Manage drafts and send emails\"; the token can send."
+        },
+        {
+          "key": "b",
+          "text": "Google describes gmail.compose as able to send email too, so only the worker's code keeps a person in the loop.",
+          "correct": true,
+          "feedback": "Right. The scope is broader than the team assumed; the guarantee has to come from the worker's code and the gate."
+        },
+        {
+          "key": "c",
+          "text": "gmail.readonly also allows sending messages on the user's behalf, so the team should drop that scope as well.",
+          "correct": false,
+          "feedback": "gmail.readonly is described as \"View your email messages and settings\"; it does not send."
+        },
+        {
+          "key": "d",
+          "text": "The claim fails only because the refresh token can be used to request new scopes silently.",
+          "correct": false,
+          "feedback": "A refresh token renews access for the scopes already granted; it does not add scopes without consent."
+        }
+      ],
+      "explanation": "Section 11 quotes Google's \"Choose Gmail API scopes\" page: gmail.compose is \"Manage drafts and send emails\". Leaving out gmail.send is therefore not enough, as the companion's stub notes; the guarantee comes from code that never calls send outside the gated path.",
+      "hints": [
+        "Look at how Google itself describes each scope, not at its name.",
+        "Ask which scope lets a client manage drafts, and whether managing includes sending them."
+      ]
+    },
+    {
+      "id": "ctx-030-q06",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 1,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "drafter",
+        "layer-order"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Put the parts of the companion's drafter request in the order the model receives them.",
+      "items": [
+        {
+          "key": "a",
+          "text": "The packed prior replies"
+        },
+        {
+          "key": "b",
+          "text": "The system prompt from prompts/drafter_system.md"
+        },
+        {
+          "key": "c",
+          "text": "\"Draft a reply for review. Return JSON only.\""
+        },
+        {
+          "key": "d",
+          "text": "The memory block from recall_recipient"
+        },
+        {
+          "key": "e",
+          "text": "The current thread"
+        }
+      ],
+      "answer": [
+        "b",
+        "d",
+        "a",
+        "e",
+        "c"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 6: draft.py sends the system prompt as the system message, then one user message of memory, prior replies, the thread and the instruction. That is the layer order 01, 03, 04, 05, 06, with the instruction last.",
+      "hints": [
+        "The system message comes first; inside the user message, follow the layer numbers."
+      ]
+    },
+    {
+      "id": "ctx-030-q07",
+      "type": "mcq",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "bookend",
+        "select"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Retrieval returns five prior replies ranked r1 (best) to r5. In which order does the companion's `pack_prior_replies` put them into the prompt?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "r1 r2 r3 r4 r5",
+          "correct": false,
+          "feedback": "That is rank order. The packer moves the second-best reply to the end."
+        },
+        {
+          "key": "b",
+          "text": "r1 r3 r4 r5 r2",
+          "correct": true,
+          "feedback": "Right: best first, second-best last, the rest in rank order between, the bookend layout of post 09."
+        },
+        {
+          "key": "c",
+          "text": "r5 r4 r3 r2 r1",
+          "correct": false,
+          "feedback": "Reversing the ranking puts the best reply last and the second-best next to it; that is not what the code does."
+        },
+        {
+          "key": "d",
+          "text": "r2 r3 r4 r5 r1",
+          "correct": false,
+          "feedback": "This puts the best reply at the end; the packer keeps it first."
+        }
+      ],
+      "explanation": "Section 5 quotes the line ordered = [hits[0]] + hits[2:] + [hits[1]], and the snippet prints the packed order r1 r3 r4 r5 r2: the two strongest examples sit at the start and the end, where models use context most reliably.",
+      "hints": [
+        "Read the list expression in pack_prior_replies one slice at a time."
+      ]
+    },
+    {
+      "id": "ctx-030-q08",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "12",
+      "est_minutes": 4,
+      "tags": [
+        "wsci",
+        "levers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Match each part of the email reply agent to the operation or defence it is an instance of.",
+      "left": [
+        {
+          "key": "a",
+          "text": "The triager classifies the thread in its own small window"
+        },
+        {
+          "key": "b",
+          "text": "Prior replies are packed best first and second-best last"
+        },
+        {
+          "key": "c",
+          "text": "Older messages of a long thread are replaced by a brief at 95 percent"
+        },
+        {
+          "key": "d",
+          "text": "Each past exchange becomes an episodic row in the memory store"
+        },
+        {
+          "key": "e",
+          "text": "Code refuses a draft with an unknown link before it is sent"
+        }
+      ],
+      "right": [
+        {
+          "key": "p",
+          "text": "isolate"
+        },
+        {
+          "key": "q",
+          "text": "select"
+        },
+        {
+          "key": "r",
+          "text": "compress"
+        },
+        {
+          "key": "s",
+          "text": "write"
+        },
+        {
+          "key": "t",
+          "text": "D1 and D2: the application decides"
+        },
+        {
+          "key": "u",
+          "text": "D3: wrap and tag external text"
+        }
+      ],
+      "answer": {
+        "a": "p",
+        "b": "q",
+        "c": "r",
+        "d": "s",
+        "e": "t"
+      },
+      "explanation": "Sections 4, 5, 7, 8, 9 and 12: memory rows are write (posts 08 and 16), bookend packing is select (post 09), the hard trigger's summary is compress (post 12), the triager is isolate (post 13), and the gate is D1 and D2 of post 23. D3, tagging the email as external, is the part the companion lacks.",
+      "hints": [
+        "For each, ask whether information moves out, comes in, shrinks, or is split across windows.",
+        "One right-hand item is about marking text, not about deciding an action."
+      ]
+    },
+    {
+      "id": "ctx-030-q09",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "8",
+      "est_minutes": 5,
+      "tags": [
+        "triager",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "An inbox receives 120 threads a week, a quarter of which need a reply. Take illustrative costs of 0.2 cents per triage call and 4 cents per drafter call. With the triager in front, what does the week cost in cents, and what share of the drafter-on-everything bill is saved, in percent?",
+      "answer": {
+        "parts": [
+          {
+            "label": "cost with the triager",
+            "value": 144,
+            "tolerance": 0.5,
+            "unit": "cents"
+          },
+          {
+            "label": "share saved",
+            "value": 70,
+            "tolerance": 0.5,
+            "unit": "%"
+          }
+        ]
+      },
+      "precision_note": "Without the triager: 120 x 4 = 480 cents. With it: 120 x 0.2 + 30 x 4 = 24 + 120 = 144 cents. Saving: 336 / 480 = 0.70. Forgetting the triage calls gives 120 cents and 75%; triaging only the 30 drafted threads gives 126 cents.",
+      "explanation": "Section 8: the triager runs on every thread and the drafter only on those that need a reply, so the bill is threads x triage cost + replies x draft cost, against threads x draft cost without it.",
+      "hints": [
+        "A quarter of 120 is the number of drafter calls.",
+        "The triager runs on all 120 threads, not only on the ones it passes."
+      ]
+    },
+    {
+      "id": "ctx-030-q10",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "8",
+      "est_minutes": 3,
+      "tags": [
+        "triager",
+        "break-even"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A triage call costs 0.3 cents and a drafter call 6 cents (illustrative). Above what share of filtered threads, in percent, does putting the triager in front lower the bill?",
+      "answer": {
+        "value": 5,
+        "tolerance": 0.05,
+        "unit": "%"
+      },
+      "precision_note": "The triager adds c_t per thread and saves c_d per filtered thread, so it pays when the filtered share f satisfies f x c_d > c_t: f > 0.3 / 6 = 0.05. Inverting the ratio gives 20; using 6 / (6 + 0.3) gives 95.2.",
+      "explanation": "Section 8 states the break-even: the triager pays for itself once the filtered share exceeds c_t / c_d, which depends only on the ratio of the two per-call costs, not on the size of the inbox.",
+      "hints": [
+        "Write the cost per thread with and without the triager as a function of the filtered share.",
+        "Set them equal and solve for the share."
+      ]
+    },
+    {
+      "id": "ctx-030-q11",
+      "type": "numeric",
+      "track": "run",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "snippet",
+        "tokens"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Run `uv run python posts/30-capstone-email-reply-agent/snippets/drafter_request.py` from the series root. How many o200k_base tokens does it report for layer 04, retrieved chunks, and for the system message?",
+      "answer": {
+        "parts": [
+          {
+            "label": "layer 04, retrieved chunks",
+            "value": 144,
+            "tolerance": 0,
+            "unit": "tokens"
+          },
+          {
+            "label": "system message",
+            "value": 313,
+            "tolerance": 0,
+            "unit": "tokens"
+          }
+        ]
+      },
+      "precision_note": "Read from the snippet's token table: 04 Retrieved chunks 144; 01 System prompt 313, repeated as \"system message 313\" on the sum line. The user message as a whole is 289.",
+      "explanation": "Section 6: the two packed replies to Anika are 144 tokens and the system prompt 313, more than half of the 601-token request; the memory, replies, thread and instruction together are under 300.",
+      "hints": [
+        "The table lists one row per layer.",
+        "The system message is layer 01."
+      ]
+    },
+    {
+      "id": "ctx-030-q12",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "9",
+      "est_minutes": 15,
+      "tags": [
+        "send-gate",
+        "fix"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The companion's hours check reads only the hour of an HH:MM time, so a 30-minute call at 17:45, which ends at 18:15, passes and \"9 pm\" is never seen. Fix `out_of_hours` so that it returns every time in the draft at which a 30-minute slot would not fit inside 09:00 to 18:00 (a start from 09:00 to 17:30 fits, both edges included), as \"HH:MM\" in order of appearance, reading HH:MM times and times with am or pm (with or without minutes, any case), and ignoring numbers that are not times.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "import re\n\nTIME_RE = re.compile(r\"\\b([01]?\\d|2[0-3]):([0-5]\\d)\\b\")\n\n\ndef out_of_hours(body):\n    \"\"\"Start times in the draft at which a 30-minute slot does not fit inside 09:00 to 18:00, each as \"HH:MM\", in order of appearance.\"\"\"\n    bad = []\n    for h, m in TIME_RE.findall(body):\n        if int(h) < 9 or int(h) >= 18:\n            bad.append(f\"{int(h):02d}:{m}\")\n    return bad\n",
+      "solution": "import re\n\nTIME_RE = re.compile(r\"\\b([01]?\\d|2[0-3])(?::([0-5]\\d))?\\s*(am|pm)?\\b\", re.IGNORECASE)\nSTART, LAST = 9 * 60, 17 * 60 + 30   # the last start whose 30-minute slot ends by 18:00\n\n\ndef out_of_hours(body):\n    \"\"\"Start times in the draft at which a 30-minute slot does not fit inside 09:00 to 18:00, each as \"HH:MM\", in order of appearance.\"\"\"\n    bad = []\n    for h, m, ampm in TIME_RE.findall(body):\n        if not m and not ampm:\n            continue  # a bare number such as 70 or 3 is not a time\n        h, m = int(h), int(m or 0)\n        if ampm:\n            if h > 12:\n                continue\n            h = h % 12 + (12 if ampm.lower() == \"pm\" else 0)\n        t = h * 60 + m\n        if t < START or t > LAST:\n            bad.append(f\"{h:02d}:{m:02d}\")\n    return bad\n",
+      "tests": "# Inside the slot, both edges included.\nassert out_of_hours(\"Thursday at 14:00 IST works.\") == []\nassert out_of_hours(\"09:00 or 17:30 both suit me.\") == []\nassert out_of_hours(\"The 2:30 pm call is fine.\") == []\nassert out_of_hours(\"Noon, 12 pm, works.\") == []\nassert out_of_hours(\"How about 10:15am?\") == []\n\n# Outside the slot, with minutes counted, not only the hour.\nassert out_of_hours(\"How about 08:45 IST?\") == [\"08:45\"]\nassert out_of_hours(\"Could we talk at 17:45?\") == [\"17:45\"]\nassert out_of_hours(\"Is 17:31 too late?\") == [\"17:31\"]\nassert out_of_hours(\"Could we talk at 21:30 IST instead?\") == [\"21:30\"]\n\n# Times written with am or pm and no colon.\nassert out_of_hours(\"Could we talk at 9 pm IST instead?\") == [\"21:00\"]\nassert out_of_hours(\"Call me at 12 am.\") == [\"00:00\"]\nassert out_of_hours(\"7am or 8:00 PM?\") == [\"07:00\", \"20:00\"]\n\n# Numbers that are not times.\nassert out_of_hours(\"Confirming 70/30 for year one, a 30-minute slot, 3 options.\") == []\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 9: the gate checks only the hour a time starts in, so a 30-minute call at 17:45 that ends at 18:15 passes, and a time without a colon slips past. Comparing minutes since midnight with the last start that fits, 17:30, and reading am and pm (12 am is 00:00, 12 pm is 12:00), closes both gaps.",
+      "hints": [
+        "Convert each time to minutes since midnight, and ask what the latest start is for a 30-minute slot.",
+        "Make the minutes and the am or pm suffix optional groups, and skip a bare number with neither.",
+        "12 pm is noon and 12 am is midnight: use the hour modulo 12."
+      ]
+    },
+    {
+      "id": "ctx-030-q13",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "9",
+      "est_minutes": 3,
+      "tags": [
+        "send-gate",
+        "injection",
+        "allow-list"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In one sentence: why does a send gate that allows any link already present in the thread let a link planted by an attacker through?",
+      "answer": {
+        "model": "Because the attacker writes the email, so the attacker's link is part of the thread, and an allow-list built from the thread trusts whatever its authors put there.",
+        "accept": [
+          "^(?=(?:\\S+\\s+){5}\\S)(?!\\s*(possibly|probably)\\b)(?![\\s\\S]*\\b(maybe|perhaps|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*(\\b[\\w-]+\\s*[,;]\\s*){4})(?![\\s\\S]*\\b(not|never|isn'?t|aren'?t|wasn'?t|doesn'?t|don'?t)\\s+((?!who\\b)\\w+\\s+){0,2}(in|part of|appear\\w*|includ\\w*|contain\\w*|inside|present)\\s+((?!who\\b)\\w+\\s+){0,2}(the\\s+)?(thread|email|message))(?![\\s\\S]*\\b(attackers?|senders?|they|outsiders?)\\s+(cannot|can'?t|could not|couldn'?t|never|do not|don'?t|does not|doesn'?t)\\s+(\\w+\\s+){0,1}(write|wrote|control|put|add|insert|choose|plant|send|include|edit|reach))(?![\\s\\S]*\\b(user|person|reviewer|human)\\s+(\\w+\\s+){0,2}(approv\\w*|typed|wrote|added|put|inserted)\\s+(\\w+\\s+){0,3}(link|url))(?=[\\s\\S]*\\b(attackers?|senders?|malicious|external|untrusted|outsiders?|third[- ]part\\w*|adversar\\w*|whoever|anyone|injected|injection|hostile)\\b)(?=[\\s\\S]*\\b(links?|urls?)\\b)(?=[\\s\\S]*\\b(thread|emails?|messages?|body)\\b)(?=[\\s\\S]*\\b(writes?|wrote|written|writing|controls?|controlled|puts?|plant\\w*|insert\\w*|adds?|added|includ\\w*|chooses?|chose|authored|suppl\\w*|came|comes|sent|sends|contains?|carr\\w*|appears?|present|trust\\w*|allow\\w*|admit\\w*)\\b)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 9: an email body is external text (post 23, section 5), so a link's presence in the thread says nothing about whether it is safe. The companion's gate therefore takes its allow-list from the operator's known_urls only, and blocks case 9 of the snippet.",
+      "hints": [
+        "Ask who chose the links that appear in an inbound email."
+      ]
+    },
+    {
+      "id": "ctx-030-q14",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "15",
+      "est_minutes": 3,
+      "tags": [
+        "tests",
+        "import"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In one sentence: an earlier version of the companion's `llm.py` ran `_oai = OpenAI()` at module level. Why did collecting `tests/test_triage.py` then fail when `OPENAI_API_KEY` was unset, although no test calls the model?",
+      "answer": {
+        "model": "Because llm.py created the OpenAI client at import time, and importing triage imports llm, so the client's constructor demanded the key during collection.",
+        "accept": [
+          "^(?=(?:\\S+\\s+){5}\\S)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*(\\b[\\w-]+\\s*[,;]\\s*){4})(?![\\s\\S]*\\b(a|the|one|some|every|each)\\s+tests?\\s+(\\w+\\s+){0,1}(calls?|uses?|hits?|quer\\w*|reach\\w*|contacts?|sends?)\\s+(the\\s+|a\\s+)?(model|api|openai|network|llm))(?![\\s\\S]*\\btests?\\s+(\\w+\\s+){0,1}(sends?|makes?|issues?|performs?|fires?)\\s+(an?\\s+|the\\s+)?(api\\s+|network\\s+|http\\s+)?(requests?|calls?)\\b)(?![\\s\\S]*\\bnot\\s+(created\\s+|built\\s+|made\\s+)?(at|on|during|when)\\s+(\\w+\\s+){0,1}import)(?!\\s*(because\\s+)?(the\\s+)?(openai\\s+)?client\\s+(is|was|gets|are)\\s+(created|built|made|constructed|instantiated)\\s+lazily)(?![\\s\\S]*\\b(pytest|the tests?|test runner)\\s+(itself\\s+)?(needs?|requires?|reads?)\\s+(the\\s+|an?\\s+)?(api\\s+)?key)(?=[\\s\\S]*\\b(import\\w*|module[- ]level|top[- ]level|load\\w*|collect\\w*)\\b)(?=[\\s\\S]*(\\bclient\\b|\\b_oai\\b|\\bconstructor\\b|\\binstantiat|OpenAI\\s*\\(\\)|\\bOpenAI\\b))[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 15: `_oai = OpenAI()` ran when llm.py was imported, the triager test imports `emailbot.triage`, which imports llm, and the constructor raised a missing-credentials error. The companion now creates the client on first use, in `_oai()`.",
+      "hints": [
+        "Ask what code runs when a module is imported, before any test function.",
+        "Follow the imports from the test file down to llm.py."
+      ]
+    },
+    {
+      "id": "ctx-030-q15",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 15,
+      "tags": [
+        "memory",
+        "schema"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The companion keeps memory in three tables: episodic (recipient, subject, summary, sent_at, source), semantic (recipient, kind, content, confidence, last_confirmed_at, source) and procedural (scope, rule, created_at). Redesign the store on post 16's row (post 08's nine fields plus `trigger`), say how `recall_recipient` changes, and name two bugs of the current store the redesign removes.",
+      "connects": [
+        "ctx-008",
+        "ctx-016"
+      ],
+      "kind": "design",
+      "answer_length": "half a page",
+      "solution": "1. **One row for all kinds.** `id`, `kind` (episodic, semantic, procedural), `subject` (the sender's address; for a rule, its scope), `content` (the summary, the fact, or the rule), `source`, `created_at`, `last_accessed_at`, `confidence`, `expires_at`, plus `trigger` on procedural rows. The semantic table's free `kind` label (role, style) moves into the content or a tag, since `kind` now names the memory kind.\n\n2. **Mapping.** Episodic `sent_at` becomes `created_at`, `summary` becomes `content`; semantic `last_confirmed_at` feeds decay as `last_accessed_at` does in post 16; procedural rows gain a `source` and a `trigger` (for example `recipient=anika@partnerco.io`).\n\n3. **Recall as post 16's orchestrator.** First every procedural row whose trigger is true for this thread, unranked; then the top semantic facts by decayed confidence; then episodes, only when the thread refers to the past. The block prints each line with its source and date, and marks low-confidence facts as to be confirmed.\n\n4. **Bugs removed.** The procedural table that is created but never read now feeds the prompt; rules gain provenance (the current table has no `source`); decay exists (the docstring's periodic job never did); the block stops dropping sources and dates. Rules are written only from the user's own instructions, never from email text (D4 of post 23).",
+      "rubric": [
+        {
+          "criterion": "Uses the nine fields plus trigger and maps the old columns onto them correctly.",
+          "points": 2
+        },
+        {
+          "criterion": "Recall follows the orchestrator order: rules by trigger, facts by confidence, episodes on reference.",
+          "points": 2
+        },
+        {
+          "criterion": "Prints source and date per line and handles low confidence.",
+          "points": 1
+        },
+        {
+          "criterion": "Names two real defects of the current store (unread procedural table, rules without source, no decay, block drops provenance).",
+          "points": 2
+        },
+        {
+          "criterion": "Keeps rules from being written from external email text.",
+          "points": 1
+        }
+      ],
+      "explanation": "Section 4 compares the companion's tables with post 16's row: procedural rows lack source and trigger, nothing has last_accessed_at or expires_at, the procedural table is never read, and no decay runs. Post 16's sections 3, 7 and 9 give the row, the orchestrator and the printed block.",
+      "hints": [
+        "Start from post 16's table of fields by kind.",
+        "Then ask which table recall_recipient never queries, and what each printed line leaves out."
+      ]
+    },
+    {
+      "id": "ctx-030-q16",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o5"
+      ],
+      "section": "10",
+      "est_minutes": 15,
+      "tags": [
+        "evaluation",
+        "traces",
+        "feedback"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Turn the companion's evaluation scaffold into a working regression gate fed by real use. Describe what each approve, edit or reject decision should record, how decisions become held-out cases, which metrics the gate checks and with what rule, and which of the scaffold's defects must be fixed first.",
+      "connects": [
+        "ctx-020",
+        "ctx-022"
+      ],
+      "kind": "design",
+      "answer_length": "half a page",
+      "solution": "1. **Record each decision as a span of the thread's trace** (post 22's trace store): the thread, the request as sent, the draft, the gate's verdict, the decision, and for an edit the final text.\n\n2. **Cases.** A sample of decided threads becomes the held-out set: the thread, the user's final reply (the edited or approved text) and the revealed bucket (replied or not). Keep a slice nobody tunes against, and add every incident (a bad send, a wrong skip) as a case.\n\n3. **Metrics.** Decision accuracy of the triager; a judge's tone fidelity and faithfulness against the final reply (and, better, faithfulness against the thread and memory); the approval rate online. The judge is calibrated against human labels and watched for post 20's failure modes.\n\n4. **Gate.** As post 20, section 4: a change fails when a metric drops by more than an absolute tolerance (0.05 by default) against the baseline, and the cases that flipped are printed.\n\n5. **Fix first.** Ship the fixture file the scaffold expects (`data/eval_fixtures.json`), then add the gate, which the scaffold lacks.",
+      "rubric": [
+        {
+          "criterion": "Decisions recorded with the thread, draft, verdict and final text, in a trace.",
+          "points": 2
+        },
+        {
+          "criterion": "Held-out cases built from decisions, with an untouched slice and incidents added.",
+          "points": 1
+        },
+        {
+          "criterion": "Metrics named, including decision accuracy and judge scores, with judge calibration.",
+          "points": 2
+        },
+        {
+          "criterion": "Gate rule stated as an absolute drop beyond a tolerance, with flipped cases read.",
+          "points": 1
+        },
+        {
+          "criterion": "Names the scaffold's two gaps: the missing fixture file and no gate.",
+          "points": 2
+        }
+      ],
+      "explanation": "Section 10 lists the scaffold's two gaps (no fixture file, no gate) and maps the design onto posts 20 and 22; section 2 says every decision is a label.",
+      "hints": [
+        "Ask what a decision tells the system that a judge cannot.",
+        "Post 20's gate compares each metric with a baseline under a tolerance."
+      ]
+    },
+    {
+      "id": "ctx-030-q17",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 5,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "9",
+      "est_minutes": 25,
+      "tags": [
+        "send-gate",
+        "design",
+        "residual-risk"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Design a stricter send gate for the capstone that closes the four misses of the post's snippet (an hour without a colon, money in words, a call that runs past the slot, a bigger sum in a thread that mentions money), keeps a link planted in an email blocked, and does not block legitimate replies. For each check, say what it compares and where its reference data comes from; then argue which risks remain after such a gate and why a person still reviews every draft.",
+      "kind": "design",
+      "answer_length": "a page",
+      "solution": "1. **Links.** Keep the companion's rule: only the operator's `known_urls` (optionally plus links the user wrote in earlier sent replies), never a link from inbound email, which is tagged external (D3). Normalise (scheme, host, trailing punctuation) and compare hosts plus paths.\n\n2. **Money.** Parse amounts with and without currency signs, including written numbers (\"five thousand dollars\") and ranges; block any amount, or any increase, not present in the thread or the user's own messages, rather than asking only whether money is mentioned.\n\n3. **Times.** Parse HH:MM, am/pm and spelled times, convert to minutes, and check that the whole 30-minute slot, start and end, fits the hours read from the same configuration that writes the knowledge block, with time zones resolved (IST against the recipient's zone).\n\n4. **Commitments the patterns cannot see.** A second, cheap model classifier for new commitments or attachments can flag, not decide; its flags route to the person.\n\n5. **What remains.** Paraphrase can evade any parser (\"half of the year-one fee\"), a wrong but plausible fact passes every check, tone and appropriateness are not machine-checkable, and an attacker who controls the user's earlier messages would poison the allow-list. The gate is a floor of deterministic rules applied every time; the review catches the open-ended errors, and the gate's misses are added to the tests as they are found.",
+      "rubric": [
+        {
+          "criterion": "Link check uses operator and user sources, not thread text, and treats email as external.",
+          "points": 2
+        },
+        {
+          "criterion": "Money check compares amounts, including written numbers, not mere presence.",
+          "points": 2
+        },
+        {
+          "criterion": "Time check uses minutes, am/pm and the shared slot configuration.",
+          "points": 2
+        },
+        {
+          "criterion": "Avoids false blocks on legitimate replies and says how.",
+          "points": 1
+        },
+        {
+          "criterion": "Argues residual risks concretely and why review stays.",
+          "points": 2
+        },
+        {
+          "criterion": "Keeps the gate deterministic, with any model classifier only flagging.",
+          "points": 1
+        }
+      ],
+      "explanation": "Section 9 runs the companion's gate on nine drafts and names the gap behind each of its four misses; post 23's D1 to D3 give the frame. No rule-based gate is complete, which is why the review stays in front of it.",
+      "hints": [
+        "Take the four misses one at a time and ask what the pattern would need to compare.",
+        "For the link, ask who wrote the text the allow-list is built from.",
+        "Then list what no deterministic check can see."
+      ]
+    },
+    {
+      "id": "ctx-030-q18",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "8",
+      "est_minutes": 2,
+      "tags": [
+        "triager",
+        "fallback"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "When the triager's reply fails to parse or names an unknown bucket, the companion treats the thread as `reply_needed`. Why that default?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A wasted draft costs a few cents and is caught in review, while a wrongly skipped thread is a reply never written.",
+          "correct": true,
+          "feedback": "Right. The fallback errs toward the cheap, visible mistake: the triager prompt leans the same way, choosing reply_needed over info_only when unsure."
+        },
+        {
+          "key": "b",
+          "text": "JSON mode guarantees the fields, so a parse failure can only mean the thread is important.",
+          "correct": false,
+          "feedback": "JSON mode guarantees valid JSON, not the fields (post 21); a failure says nothing about the thread."
+        },
+        {
+          "key": "c",
+          "text": "reply_needed is the bucket the drafter can turn into a null draft, so the triager's work is repeated for free.",
+          "correct": false,
+          "feedback": "The drafter can return a null draft, but that call costs a full drafter call, not nothing."
+        },
+        {
+          "key": "d",
+          "text": "Promotional and automated threads are rare in most inboxes, so any default other than reply_needed would be wrong most of the time.",
+          "correct": false,
+          "feedback": "The default is about the cost of each kind of error, not the frequency of a bucket."
+        }
+      ],
+      "explanation": "Section 8: every triage failure falls back to reply_needed, because a wasted draft costs cents and a missed reply costs a relationship; the triager's own rules prefer reply_needed over info_only when uncertain.",
+      "hints": [
+        "Compare the cost of the two possible mistakes."
+      ]
+    }
+  ]
+}

@@ -1,15 +1,244 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 500" role="img" aria-labelledby="t d">
-  <title id="t">The nine context-engineering layers the capstone exercises</title>
-  <desc id="d">A hand-drawn table of the nine layers this build touches, each with what it does here and where the series covers it. The system prompt carries identity, rules, and format, including a rule that the agent never sends. Tools are read, draft, and send, typed and narrowly scoped with the dangerous one gated. Memory holds what was said to this recipient before and the user's stylistic preferences. Retrieval selects prior replies on similar topics for tone transfer. Compression summarises long threads before drafting. Isolation puts the &quot;should this get a reply&quot; decision in a sub-agent, separate from drafting. Observability gives one trace per thread and an audit row per send. Security puts the send-email guard in code, because it is the most dangerous tool in an inbox. Evaluation uses held-out replies as ground truth with an LLM judge for tone fidelity.</desc>
-
-  <style><![CDATA[
-    :root{--ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;--ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;--ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;--ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-neutral-1:#EAEAE4;--ctx-neutral-2:#CFCFC8;--ctx-neutral-3:#8E8E88;--ctx-on-fill:#FFFDF9;--ctx-on-accent:#1A1A1A;}
-    @media (prefers-color-scheme:dark){:root{--ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;--ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;--ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;--ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-neutral-1:#1F2229;--ctx-neutral-2:#2C3038;--ctx-neutral-3:#6E6E68;--ctx-on-fill:#14161A;--ctx-on-accent:#1A1A1A;}}
-    .bg{fill:var(--ctx-bg);}
-    text{dominant-baseline:auto;}
-  ]]></style>
-
-  <rect class="bg" width="960" height="500"/>
-<text xml:space="preserve" x="40" y="38.24" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="22" fill="var(--ctx-ink)">Every lever in the series, in one build</text><text xml:space="preserve" x="40" y="61.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink-muted)">This is the capstone's actual claim: nine layers, each present because not having it bites in production.</text><text xml:space="preserve" x="40" y="97.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-subtle)">Layer</text><text xml:space="preserve" x="224" y="97.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-subtle)">What it does here</text><text xml:space="preserve" x="700" y="97.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-subtle)">Covered in</text><path d="M39.57 109.94C40.78 116.6 40 123.55 40.93 139.86M39.78 109.84C40.35 118.46 40.13 125.77 40.43 139.47" fill="none" stroke="var(--ctx-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="54" y="127.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">System prompt</text><text xml:space="preserve" x="224" y="125.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">Identity, rules, format. &quot;You never send&quot; is a rule the gate then enforces.</text><text xml:space="preserve" x="700" y="125.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-subtle)">Post 14</text><path d="M40.23 144.99C357.35 145.06 674.68 144.99 919.96 144.93M40.06 144.9C223.31 144.61 406.54 144.61 920.09 144.92" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M40.38 149.35C39.14 163 39.89 174.3 40.7 180.17M40.44 149.71C39.83 158.96 39.96 168.21 39.88 179.91" fill="none" stroke="var(--ctx-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="54" y="167.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">Tools</text><text xml:space="preserve" x="224" y="165.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">Read, draft, send — typed, narrowly scoped, with the dangerous one gated.</text><text xml:space="preserve" x="700" y="165.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-subtle)">Post 15</text><path d="M39.92 184.87C337.68 185.74 635.96 185.95 919.91 184.99M39.95 185.11C247.98 186.2 456.06 186.17 919.98 185.01" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M41.18 191.16C40.29 201 40.17 213.05 40.47 220.49M39.89 189.58C40.51 199.47 39.79 209.44 40.53 220.36" fill="none" stroke="var(--ctx-accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="54" y="207.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">Memory</text><text xml:space="preserve" x="224" y="205.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">What was said to this recipient before, and the user's stylistic preferences.</text><text xml:space="preserve" x="700" y="205.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-subtle)">Post 16</text><path d="M40.08 225.23C318.48 224.58 597.23 224.59 919.87 225.05M40.08 225.09C272.89 225.22 505.59 225.17 920.11 225.1" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M39.59 230.57C41.04 241.4 40.06 251.8 40.24 260.8M40.54 229.45C40 239.97 39.62 250.68 39.98 259.61" fill="none" stroke="var(--ctx-accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="54" y="247.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">Retrieval</text><text xml:space="preserve" x="224" y="245.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">Prior replies on similar topics, selected for tone transfer.</text><text xml:space="preserve" x="700" y="245.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-subtle)">Posts 09, 11</text><path d="M40.24 265.12C299.29 265.27 558.5 265.56 919.82 265.11M39.97 265.06C297.57 264.24 555.11 264.16 920 264.94" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M40.4 269.98C39.39 279.4 39.94 290.55 40.02 301.12M39.99 270.52C39.48 281.67 39.45 293.11 39.43 300.05" fill="none" stroke="var(--ctx-warn)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="54" y="287.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">Compression</text><text xml:space="preserve" x="224" y="285.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">Long threads are summarised before drafting, or the budget goes to quoting.</text><text xml:space="preserve" x="700" y="285.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-subtle)">Post 12</text><path d="M39.92 305C279.61 304.11 519.78 304.2 919.77 305.18M40.1 305.03C322.24 305.58 604.63 305.72 919.89 305.03" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M38.81 309.39C40.14 319.8 39.83 329.31 39.79 339.03M39.44 310.39C40.16 316.17 40.48 322.35 40.07 340.5" fill="none" stroke="var(--ctx-warn)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="54" y="327.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">Isolation</text><text xml:space="preserve" x="224" y="325.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">&quot;Should this get a reply?&quot; is a different task from &quot;draft it&quot;, so a sub-agent</text><text xml:space="preserve" x="224" y="337.7" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">does the first.</text><text xml:space="preserve" x="700" y="325.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-subtle)">Post 13</text><path d="M40.08 344.88C260.41 345.27 481.05 345.16 920.21 344.76M39.99 345.01C347.15 344.84 654.15 344.72 920.02 344.88" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M39.61 348.8C40.9 357.8 39.72 368.06 39.56 379.35M40.1 350.26C39.64 356.68 40.31 363.58 39.52 379.75" fill="none" stroke="var(--ctx-success)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="54" y="367.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">Observability</text><text xml:space="preserve" x="224" y="365.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">One trace per thread; every send is an audit row.</text><text xml:space="preserve" x="700" y="365.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-subtle)">Post 22</text><path d="M39.76 384.76C241.22 385.95 442.32 386.13 920.16 384.82M39.88 384.98C371.83 383.86 703.67 383.96 919.91 384.97" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M40.42 390.61C39.25 398.2 39.6 406.81 39.33 419.66M39.55 390.13C40.32 398.38 40.14 406.02 40.17 420.19" fill="none" stroke="var(--ctx-alert)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="54" y="407.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">Security</text><text xml:space="preserve" x="224" y="405.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">send_email is the most dangerous tool in an inbox, so it is the one in code.</text><text xml:space="preserve" x="700" y="405.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-subtle)">Post 23</text><path d="M39.93 425.12C221.54 424.79 403.6 424.77 920.12 424.89M40.01 424.96C220.74 425.2 401.44 425.28 920.04 425.06" fill="none" stroke="var(--ctx-border)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M38.83 430.02C40 436.19 39.49 445.56 39.1 459.97M40.2 430C39.8 438.88 39.97 447.25 39.62 459.44" fill="none" stroke="var(--ctx-success)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="54" y="447.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">Evaluation</text><text xml:space="preserve" x="224" y="445.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">Held-out replies as ground truth; an LLM judge for tone fidelity.</text><text xml:space="preserve" x="700" y="445.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-subtle)">Post 20</text><text xml:space="preserve" x="40" y="491.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">A capstone that hits all nine is also realistic, which is the point: every box is there because not having it bites in production.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="ctx-01-every-lever-title" aria-describedby="ctx-01-every-lever-desc">
+<title id="ctx-01-every-lever-title">Every part of the agent traces to an earlier post</title>
+<desc id="ctx-01-every-lever-desc">A table of twelve parts of the agent with the lever each uses, the posts that teach it and its state in the companion. Five-block system prompt: 01 System prompt, post 14, yes. Gmail tools: 02 Tools and MCP descriptions, post 15, a stub. Recipient memory: 03 Memory and state, posts 08 and 16, yes but the rules table is never read. Prior replies: 04 Retrieved chunks, posts 09 and 11, yes, with a hashed bag of words standing in for embeddings offline. Bookend packing: select, post 09, yes. Thread compression: 05 Conversation history, post 12, no. Triager: isolate, post 13, yes. JSON replies: structured output, post 21, JSON mode. Send gate: defences D1 and D2, post 23, yes with three checks. Email as data: trust tag and D3, post 23, no. Trace per thread: observability, post 22, no. Held-out evaluation: post 20, a scaffold.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-blue-ink { fill: var(--ctx-blue-ink); }
+  .f-green-ink { fill: var(--ctx-green-ink); }
+  .f-orange-ink { fill: var(--ctx-orange-ink); }
+</style>
+<defs>
+<marker id="ctx-01-every-lever-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="720"/>
+<text x="40" y="48" class="t-title" data-w="577">Every part of the agent traces to an earlier post</text>
+<text x="40" y="76" class="t-subtitle" data-w="665">Each row: what the part uses, where the series teaches it, and what the companion has built.</text>
+<rect x="40" y="112" width="232" height="40" class="nofill"/>
+<rect x="272" y="112" width="280" height="40" class="nofill"/>
+<rect x="552" y="112" width="104" height="40" class="nofill"/>
+<rect x="656" y="112" width="264" height="40" class="nofill"/>
+<rect x="40" y="152" width="232" height="40" class="nofill"/>
+<rect x="272" y="152" width="280" height="40" class="nofill"/>
+<rect x="552" y="152" width="104" height="40" class="nofill"/>
+<rect x="656" y="152" width="264" height="40" class="nofill"/>
+<rect x="40" y="192" width="232" height="40" class="nofill"/>
+<rect x="272" y="192" width="280" height="40" class="nofill"/>
+<rect x="552" y="192" width="104" height="40" class="nofill"/>
+<rect x="656" y="192" width="264" height="40" class="nofill"/>
+<rect x="40" y="232" width="232" height="40" class="nofill"/>
+<rect x="272" y="232" width="280" height="40" class="nofill"/>
+<rect x="552" y="232" width="104" height="40" class="nofill"/>
+<rect x="656" y="232" width="264" height="40" class="nofill"/>
+<rect x="40" y="272" width="232" height="40" class="nofill"/>
+<rect x="272" y="272" width="280" height="40" class="nofill"/>
+<rect x="552" y="272" width="104" height="40" class="nofill"/>
+<rect x="656" y="272" width="264" height="40" class="nofill"/>
+<rect x="40" y="312" width="232" height="40" class="nofill"/>
+<rect x="272" y="312" width="280" height="40" class="nofill"/>
+<rect x="552" y="312" width="104" height="40" class="nofill"/>
+<rect x="656" y="312" width="264" height="40" class="nofill"/>
+<rect x="40" y="352" width="232" height="40" class="nofill"/>
+<rect x="272" y="352" width="280" height="40" class="nofill"/>
+<rect x="552" y="352" width="104" height="40" class="nofill"/>
+<rect x="656" y="352" width="264" height="40" class="nofill"/>
+<rect x="40" y="392" width="232" height="40" class="nofill"/>
+<rect x="272" y="392" width="280" height="40" class="nofill"/>
+<rect x="552" y="392" width="104" height="40" class="nofill"/>
+<rect x="656" y="392" width="264" height="40" class="nofill"/>
+<rect x="40" y="432" width="232" height="40" class="nofill"/>
+<rect x="272" y="432" width="280" height="40" class="nofill"/>
+<rect x="552" y="432" width="104" height="40" class="nofill"/>
+<rect x="656" y="432" width="264" height="40" class="nofill"/>
+<rect x="40" y="472" width="232" height="40" class="nofill"/>
+<rect x="272" y="472" width="280" height="40" class="nofill"/>
+<rect x="552" y="472" width="104" height="40" class="nofill"/>
+<rect x="656" y="472" width="264" height="40" class="nofill"/>
+<rect x="40" y="512" width="232" height="40" class="nofill"/>
+<rect x="272" y="512" width="280" height="40" class="nofill"/>
+<rect x="552" y="512" width="104" height="40" class="nofill"/>
+<rect x="656" y="512" width="264" height="40" class="nofill"/>
+<rect x="40" y="552" width="232" height="40" class="nofill"/>
+<rect x="272" y="552" width="280" height="40" class="nofill"/>
+<rect x="552" y="552" width="104" height="40" class="nofill"/>
+<rect x="656" y="552" width="264" height="40" class="nofill"/>
+<rect x="40" y="592" width="232" height="40" class="nofill"/>
+<rect x="272" y="592" width="280" height="40" class="nofill"/>
+<rect x="552" y="592" width="104" height="40" class="nofill"/>
+<rect x="656" y="592" width="264" height="40" class="nofill"/>
+<path d="M40,112H920M40,632H920" class="axis"/>
+<path d="M40,152H920" class="rule1"/>
+<text x="48" y="136" class="t-head" data-w="137">Part of the agent</text>
+<text x="280" y="136" class="t-head" data-w="45">Lever</text>
+<text x="560" y="136" class="t-head" data-w="47">Posts</text>
+<text x="664" y="136" class="t-head" data-w="142">In the companion</text>
+<text x="48" y="176" class="t-label" data-w="175">Five-block system prompt</text>
+<text x="280" y="176" class="t-label" data-w="124"><tspan class="f-blue-ink">01 System prompt</tspan></text>
+<text x="560" y="176" class="t-label" data-w="17">14</text>
+<text x="664" y="176" class="t-label" data-w="23">yes</text>
+<text x="48" y="216" class="t-label" data-w="77">Gmail tools</text>
+<text x="280" y="216" class="t-label" data-w="211"><tspan class="f-blue-ink">02 Tools and MCP descriptions</tspan></text>
+<text x="560" y="216" class="t-label" data-w="17">15</text>
+<text x="664" y="216" class="t-label" data-w="30">stub</text>
+<text x="48" y="256" class="t-label" data-w="123">Recipient memory</text>
+<text x="280" y="256" class="t-label" data-w="143"><tspan class="f-orange-ink">03 Memory and state</tspan></text>
+<text x="560" y="256" class="t-label" data-w="41">08, 16</text>
+<text x="664" y="256" class="t-label" data-w="115">yes; rules unread</text>
+<text x="48" y="296" class="t-label" data-w="81">Prior replies</text>
+<text x="280" y="296" class="t-label" data-w="137"><tspan class="f-orange-ink">04 Retrieved chunks</tspan></text>
+<text x="560" y="296" class="t-label" data-w="41">09, 11</text>
+<text x="664" y="296" class="t-label" data-w="162">yes; word hashes offline</text>
+<text x="48" y="336" class="t-label" data-w="116">Bookend packing</text>
+<text x="280" y="336" class="t-label" data-w="40">select</text>
+<text x="560" y="336" class="t-label" data-w="17">09</text>
+<text x="664" y="336" class="t-label" data-w="23">yes</text>
+<text x="48" y="376" class="t-label" data-w="138">Thread compression</text>
+<text x="280" y="376" class="t-label" data-w="159"><tspan class="f-green-ink">05 Conversation history</tspan></text>
+<text x="560" y="376" class="t-label" data-w="17">12</text>
+<text x="664" y="376" class="t-label" data-w="17">no</text>
+<text x="48" y="416" class="t-label" data-w="48">Triager</text>
+<text x="280" y="416" class="t-label" data-w="45">isolate</text>
+<text x="560" y="416" class="t-label" data-w="17">13</text>
+<text x="664" y="416" class="t-label" data-w="23">yes</text>
+<text x="48" y="456" class="t-label" data-w="89">JSON replies</text>
+<text x="280" y="456" class="t-label" data-w="117">structured output</text>
+<text x="560" y="456" class="t-label" data-w="17">21</text>
+<text x="664" y="456" class="t-label" data-w="82">JSON mode</text>
+<text x="48" y="496" class="t-label" data-w="70">Send gate</text>
+<text x="280" y="496" class="t-label" data-w="111">defences D1, D2</text>
+<text x="560" y="496" class="t-label" data-w="17">23</text>
+<text x="664" y="496" class="t-label" data-w="116">yes; three checks</text>
+<text x="48" y="536" class="t-label" data-w="92">Email as data</text>
+<text x="280" y="536" class="t-label" data-w="84">trust tag, D3</text>
+<text x="560" y="536" class="t-label" data-w="17">23</text>
+<text x="664" y="536" class="t-label" data-w="17">no</text>
+<text x="48" y="576" class="t-label" data-w="112">Trace per thread</text>
+<text x="280" y="576" class="t-label" data-w="86">observability</text>
+<text x="560" y="576" class="t-label" data-w="17">22</text>
+<text x="664" y="576" class="t-label" data-w="17">no</text>
+<text x="48" y="616" class="t-label" data-w="133">Held-out evaluation</text>
+<text x="280" y="616" class="t-label" data-w="70">evaluation</text>
+<text x="560" y="616" class="t-label" data-w="17">20</text>
+<text x="664" y="616" class="t-label" data-w="53">scaffold</text>
+<text x="40" y="684" class="t-note" data-w="484">A part whose reason cannot be named is the first candidate for removal.</text>
 </svg>
