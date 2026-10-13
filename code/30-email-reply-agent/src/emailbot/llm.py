@@ -5,7 +5,15 @@ import os
 
 from openai import OpenAI
 
-_oai = OpenAI()
+_client: OpenAI | None = None
+
+
+def _oai() -> OpenAI:
+    """Build the client on first use, so importing this module needs no API key."""
+    global _client
+    if _client is None:
+        _client = OpenAI()
+    return _client
 
 
 def chat(
@@ -22,5 +30,5 @@ def chat(
         kwargs["response_format"] = response_format
     if max_tokens is not None:
         kwargs["max_tokens"] = max_tokens
-    resp = _oai.chat.completions.create(**kwargs)
+    resp = _oai().chat.completions.create(**kwargs)
     return resp.choices[0].message.content or ""

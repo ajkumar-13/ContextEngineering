@@ -7,7 +7,7 @@ from pathlib import Path
 from .draft import draft as draft_thread
 from .mailbox import get_mailbox
 from .replies import index_sent_folder
-from .send_gate import send_gate
+from .send_gate import known_urls_from_env, send_gate
 from .triage import triage as triage_thread
 
 
@@ -41,7 +41,7 @@ def run_once() -> None:
             mb.mark_processed(tid)
             continue
 
-        decision = send_gate(body, msgs)
+        decision = send_gate(body, msgs, known_urls=known_urls_from_env())
         meta = {
             "thread_id": tid,
             "from": msgs[-1]["from"],
@@ -53,7 +53,7 @@ def run_once() -> None:
         path = mb.write_draft(tid, body, meta)
         print(f"  draft written: {path}")
         if not decision.ok:
-            print(f"  ⚠ send-gate would block: {decision.reason}")
+            print(f"  WARNING send gate would block: {decision.reason}")
         mb.mark_processed(tid)
 
 

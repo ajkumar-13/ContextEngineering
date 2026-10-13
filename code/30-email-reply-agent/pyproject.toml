@@ -1,7 +1,7 @@
 [project]
 name = "email-reply-agent"
 version = "0.1.0"
-description = "Companion code for Post 24 — email-reply agent capstone."
+description = "Companion code for post 30, the email reply agent capstone."
 requires-python = ">=3.11"
 dependencies = [
     "openai>=1.40",
@@ -18,6 +18,10 @@ gmail = [
     "google-auth-httplib2>=0.2",
 ]
 dev = ["pytest>=8.2"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
 
 [build-system]
 requires = ["hatchling"]

@@ -20,10 +20,12 @@ def test_send_gate_blocks_unknown_url():
     assert not send_gate(d, _thread("Hi.")).ok
 
 
-def test_send_gate_allows_url_present_in_thread():
+def test_send_gate_trusts_only_the_operators_urls():
+    # a link quoted from the inbound thread is external content, not an allow-list entry
     thread = _thread("My profile: https://example.com/me")
-    d = "Got it — https://example.com/me confirmed."
-    assert send_gate(d, thread).ok
+    d = "Got it, https://example.com/me confirmed."
+    assert not send_gate(d, thread, known_urls=set()).ok
+    assert send_gate(d, thread, known_urls={"https://example.com/me"}).ok
 
 
 def test_send_gate_blocks_introduced_money():

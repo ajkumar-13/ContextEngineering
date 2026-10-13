@@ -5,10 +5,10 @@ four buckets so the rest of the pipeline can route it.
 # Rules
 - Read the thread. Do not draft a reply.
 - Pick exactly ONE bucket from:
-    "reply_needed"           — a human reply is genuinely useful
-    "info_only"              — the sender does not expect a response
-    "promotional"            — marketing / sales / newsletter
-    "automated_no_reply"     — noreply@... receipts, alerts, calendar invites
+    "reply_needed"           : a human reply is genuinely useful
+    "info_only"              : the sender does not expect a response
+    "promotional"            : marketing / sales / newsletter
+    "automated_no_reply"     : noreply@... receipts, alerts, calendar invites
 - Be conservative: if uncertain between reply_needed and info_only,
   pick reply_needed.
 

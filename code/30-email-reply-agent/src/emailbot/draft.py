@@ -9,7 +9,11 @@ from .llm import chat
 from .memory import recall_recipient
 from .replies import pack_prior_replies, retrieve_prior_replies
 
-SYSTEM = (Path(__file__).resolve().parents[2] / "prompts" / "drafter_system.md").read_text(encoding="utf-8")
+SYSTEM = (
+    (Path(__file__).resolve().parents[2] / "prompts" / "drafter_system.md")
+    .read_text(encoding="utf-8")
+    .replace("{{USER_NAME}}", os.environ.get("EMAILBOT_USER_NAME", "Ajay Kumar"))
+)
 
 
 def _render_thread(thread: list[dict]) -> str:

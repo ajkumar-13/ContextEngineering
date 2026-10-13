@@ -26,7 +26,7 @@ JUDGE_MODEL = os.environ.get("EMAILBOT_JUDGE_MODEL", "gpt-4o-mini")
 
 JUDGE_PROMPT = """You are an evaluator. On a 1-5 scale, score how well the
 candidate reply matches the reference reply on the dimension below.
-Return JSON only: {"score": <int>, "reason": "<short>"}.
+Return JSON only: {{"score": <int>, "reason": "<short>"}}.
 
 Dimension: {dimension}
 

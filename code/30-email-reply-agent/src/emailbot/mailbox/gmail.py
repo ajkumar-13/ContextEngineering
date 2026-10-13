@@ -1,4 +1,4 @@
-"""Gmail mailbox driver — STUB.
+"""Gmail mailbox driver: STUB.
 
 To implement live:
   1. Enable the Gmail API in a Google Cloud project.
@@ -6,7 +6,8 @@ To implement live:
   3. Request scopes:
        https://www.googleapis.com/auth/gmail.readonly
        https://www.googleapis.com/auth/gmail.compose
-     (Do NOT request gmail.send for the agent path; the human ships.)
+     (gmail.compose can also send: Google lists it as "Manage drafts and send emails". The
+      human-ships guarantee comes from the worker never calling send outside the gated path.)
   4. Persist the refresh token securely (Secret Manager / OS keychain).
   5. Implement the three methods below using google-api-python-client:
        - users().messages().list / .get for threads
