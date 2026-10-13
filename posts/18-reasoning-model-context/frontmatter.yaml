@@ -1,64 +1,26 @@
 id: ctx-018
-slug: 18-context-for-reasoning-models
-title: "18 · Context for Reasoning Models"
-
-description: >
-  Learn how reasoning models use thinking tokens, adaptive reasoning,
-  and effort controls to solve complex tasks. Explore token budgeting,
-  interleaved thinking, prompt caching, reasoning traces, and best
-  practices for integrating reasoning models into production AI systems.
-
-author: "Ajay"
-
+slug: 18-reasoning-model-context
+title: "18 - Context for reasoning models"
+summary: "Thinking tokens are billed as output, fill the window and can stay in the history. This post budgets them per effort level, steers adaptive thinking with effort, and keeps trace text out of the prefix and memory."
 date: 2026-05-26
-last_modified: 2026-05-26
-
-tags:
-  - context-engineering
-  - reasoning-models
-  - thinking-tokens
-  - adaptive-thinking
-  - chain-of-thought
-  - prompt-caching
-  - ai-agents
-  - inference
-
-category: Components
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part III - Layers in depth"
-chapter: "Part III — Components"
-
-hero: diagrams/00-hero-reasoning-model-context.svg
-hero_alt: "Illustration showing prompt input, adaptive thinking tokens, and final answer within an LLM context window"
-
+level: intermediate
 reading_time: 17
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - Reasoning Models
-  - Thinking Tokens
-  - Adaptive Thinking
-  - Extended Thinking
-  - Effort Dial
-  - Chain of Thought
-  - CoT
-  - Interleaved Thinking
-  - Prompt Caching
-  - KV Cache
-  - Context Window
-  - Token Budget
-  - Reasoning Trace
-  - Claude
-  - OpenAI o-series
-  - DeepSeek R1
-  - AI Agents
-  - Inference
-  - Long Context
-
-canonical_url: ""
-
-prev: ../17-advanced-retrieval/
-next: ../19-multimodal-context/
+tags: [context-engineering, reasoning-models, thinking-tokens, adaptive-thinking, effort, prompt-caching, interleaved-thinking]
+hero: diagrams/01-thinking-in-the-budget.svg
+prerequisites: [ctx-004]
+code: optional
+outcomes:
+  - id: o1
+    text: "Budget thinking tokens as a separate output line, priced at the output rate, and size the output cap and the window to hold them."
+  - id: o2
+    text: "Choose an effort level per task instead of one global setting, knowing that changing it inside a cached conversation restarts the cache."
+  - id: o3
+    text: "Keep the text of reasoning traces out of the application's own layers, the cached prefix and long-term memory, while passing thinking blocks back unchanged."
+  - id: o4
+    text: "Budget an interleaved tool-use loop as one thinking segment per step, and keep its trail of tool calls and results at full fidelity."
+  - id: o5
+    text: "Decide when thinking can replace a hand-built reasoning step and when low effort, retrieval or a tool call is the better choice."
+recommended: [ctx-017]

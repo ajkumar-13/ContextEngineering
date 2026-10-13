@@ -1,0 +1,761 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-018",
+  "next_ordinal": 18,
+  "questions": [
+    {
+      "id": "ctx-018-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "thinking-tokens",
+        "billing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A request to Claude with adaptive thinking returns a short summary in its `thinking` block and a 300-token answer. How are the thinking tokens billed?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "As input tokens, because the model reads its own thinking before it answers.",
+          "correct": false,
+          "feedback": "Thinking of the current turn is generated, so it is billed as output. Only thinking from earlier turns kept in context is billed as input."
+        },
+        {
+          "key": "b",
+          "text": "As output tokens, counting only the tokens of the summary that comes back.",
+          "correct": false,
+          "feedback": "The bill is for the full thinking the model generated, not the summary; the billed output count does not match the visible text."
+        },
+        {
+          "key": "c",
+          "text": "As output tokens, counting the full thinking the model generated, whatever is returned.",
+          "correct": true,
+          "feedback": "Right: thinking is billed at the output rate in full, and `usage.output_tokens_details.thinking_tokens` reports how many."
+        },
+        {
+          "key": "d",
+          "text": "Not at all when `display` is set to `\"omitted\"`, since no thinking text is returned.",
+          "correct": false,
+          "feedback": "Omitting the text reduces latency, not cost: the full thinking tokens are still billed."
+        }
+      ],
+      "explanation": "Section 2: thinking tokens are billed as output tokens even when their text is not returned, and the bill is for the full thinking, not the summary. The usage block reports the count in `usage.output_tokens_details.thinking_tokens`.",
+      "hints": [
+        "Ask what the model actually generated, and at which rate generated tokens are priced."
+      ]
+    },
+    {
+      "id": "ctx-018-q02",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "thinking-tokens",
+        "pricing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "One turn on Claude Opus 4.6 (5 dollars per million input tokens, 25 per million output tokens) sends 8,000 input tokens with no caching, thinks for 6,000 tokens and returns a 1,200-token answer (illustrative numbers). What does the turn cost, in dollars, and what share of its output tokens is thinking, in percent?",
+      "answer": {
+        "parts": [
+          {
+            "label": "cost of the turn",
+            "value": 0.22,
+            "tolerance": 0.001,
+            "unit": "USD"
+          },
+          {
+            "label": "thinking share of the output",
+            "value": 83.3,
+            "tolerance": 0.1,
+            "unit": "%"
+          }
+        ]
+      },
+      "precision_note": "8,000 x 5 / 1,000,000 + (6,000 + 1,200) x 25 / 1,000,000 = 0.04 + 0.18 = 0.22 dollars; 6,000 / 7,200 = 83.33%. The turn_cost function of snippets/thinking_budget.py prices output the same way. Pricing the thinking at the input rate gives 0.10, and leaving it out gives 0.07, the nearest wrong methods; 6,000 / 15,200 (thinking over input plus output) gives 39.5%.",
+      "explanation": "Section 4: thinking is billed at the output rate, like the answer, so the output line is 7,200 tokens at 25 dollars per million. Thinking makes up 6,000 of those 7,200 output tokens, and none of it is visible in the answer.",
+      "hints": [
+        "Price input and output separately; thinking belongs to the output.",
+        "The output is 6,000 + 1,200 tokens at 25 dollars per million; the share is thinking over that output."
+      ]
+    },
+    {
+      "id": "ctx-018-q03",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "4",
+      "est_minutes": 6,
+      "tags": [
+        "thinking-tokens",
+        "history",
+        "window"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A conversation runs on a model that keeps all earlier turns' thinking blocks in context. Every turn sends the same 9,000 tokens of layers 01 to 06, plus the earlier turns in full; each turn thinks for 5,000 tokens and answers in 500 (illustrative numbers). How many input tokens does turn 4 send, and how many would it send if the application omitted the earlier turns' thinking blocks? Give both.",
+      "answer": {
+        "parts": [
+          {
+            "label": "turn 4, thinking blocks kept",
+            "value": 25500,
+            "tolerance": 0,
+            "unit": "tokens"
+          },
+          {
+            "label": "turn 4, thinking blocks omitted",
+            "value": 10500,
+            "tolerance": 0,
+            "unit": "tokens"
+          }
+        ]
+      },
+      "precision_note": "Turn 4 carries three earlier turns: 9,000 + 3 x (5,000 + 500) = 25,500 with thinking kept, 9,000 + 3 x 500 = 10,500 without; the history_after function of snippets/thinking_budget.py computes the same sum. Counting four earlier turns gives 31,000, and keeping only the last turn's thinking gives 15,500, the nearest wrong methods.",
+      "explanation": "Sections 2 and 4: on a keep-all model, earlier turns' thinking stays in context and is billed as input, so it grows layer 05 by the whole thinking of every turn. Turn 4 carries three earlier turns, and 15,000 of its 25,500 input tokens are old thinking.",
+      "hints": [
+        "Count how many earlier turns turn 4 carries.",
+        "Each earlier turn adds its answer, and its thinking too when the blocks are kept."
+      ]
+    },
+    {
+      "id": "ctx-018-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "effort",
+        "adaptive-thinking"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Which statement about the effort level on Claude Opus 4.6 is correct?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "It caps the number of thinking tokens a request may spend.",
+          "correct": false,
+          "feedback": "Effort is soft guidance; the strict limit on output, thinking included, is `max_tokens`."
+        },
+        {
+          "key": "b",
+          "text": "It shapes the thinking only; answer text and tool calls are unaffected.",
+          "correct": false,
+          "feedback": "Effort shapes every output token: lower effort also means fewer and terser tool calls."
+        },
+        {
+          "key": "c",
+          "text": "Changing it between requests in one conversation starts the cache over.",
+          "correct": true,
+          "feedback": "Right: the effort level is rendered into the prompt, so a top-level change invalidates cache breakpoints, and this model has no per-message effort."
+        },
+        {
+          "key": "d",
+          "text": "It accepts all five levels, from `low` up to `xhigh` and `max`.",
+          "correct": false,
+          "feedback": "Not every model accepts all five; Claude Opus 4.6 accepts `low`, `medium`, `high` and `max`, with `high` the default."
+        }
+      ],
+      "explanation": "Section 3: effort is a tendency, not a limit, and it applies to all output tokens. Because the thinking configuration and the effort level are rendered into the prompt, a change between requests invalidates cache breakpoints, which on a model without per-message effort makes effort a per-workflow or per-conversation setting.",
+      "hints": [
+        "Look for the statement about what happens to the prompt itself when the level changes."
+      ]
+    },
+    {
+      "id": "ctx-018-q05",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "effort",
+        "prompt-caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An application on Claude Opus 4.6, which has no per-message effort setting, raises the top-level effort level for hard turns and lowers it for easy ones within one long conversation that relies on prompt caching. Why does its input bill go up?",
+      "answer": {
+        "model": "The effort level is rendered into the prompt, so each change invalidates the cache breakpoints: the next request misses the cache and writes the prefix again instead of reading it.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(cache|cached prefix|prefix)\\w* (is |are |stays? |remains? |still )*(kept|preserved|intact|valid|unaffected|unchanged|safe)\\b)(?![\\s\\S]*\\b(does not|doesn'?t|do not|don'?t|never|won'?t|will not|cannot|can'?t) (affect|change|touch|break|invalidate|reset|restart|matter)\\w*( for| to)? (the )?(cache|caching|prefix))(?![\\s\\S]*\\b(no|not an?) (effect|impact) on (the )?(cache|caching|prefix))(?=[\\s\\S]*\\b(effort|level|setting|switch\\w*|chang\\w*|rais\\w*|lower\\w*|toggl\\w*|alternat\\w*)\\b)(?=[\\s\\S]*\\b(cache|cached|caching|prefix)\\b)(?=[\\s\\S]*(invalidat|\\bmiss|\\bbreak|\\bbroke|\\brestart|\\breset|start\\w* (the cache |caching )?(over|again|from scratch)|no longer (match|hit|valid)|written again|re-?writ|\\bwrit\\w* (it |the prefix |the cache |everything )?(again|anew)|cache[ -]?writes?\\b|creation|\\bbust|\\blost\\b|\\bloses?\\b|not (be )?read|can'?t be (read|reused)|cannot be (read|reused)|new cache|fresh cache|differ\\w*|changes? the (prompt|prefix)|stops? (hitting|matching)))(?=[\\s\\S]*\\b(is|are|so|because|since|which|means|makes|causes?|changes?|forces?|invalidates?|rendered|part|breaks?|misses|restarts?|resets?|written|must|has|have|gets?|turns?|becomes?)\\b)[\\s\\S]*\\s\\S"
+        ]
+      },
+      "explanation": "Section 3: the thinking configuration and the effort level are rendered into the prompt, so changing either between requests invalidates cache breakpoints. Message-level breakpoints always miss and tool and system breakpoints can miss too, so the next request pays a cache write instead of a read.",
+      "hints": [
+        "Ask where the effort setting ends up when the request is built.",
+        "Anything that changes the prompt in front of a cache breakpoint changes what the cache can match."
+      ]
+    },
+    {
+      "id": "ctx-018-q06",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 4,
+      "tags": [
+        "trace-hygiene",
+        "prompt-caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent on Claude Opus 4.6 has cache breakpoints after the tool definitions and after the system prompt. After each turn, the application copies the 2,000 tokens of returned thinking text somewhere. Which choice makes the next call write its system prompt to the cache again instead of reading it?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Appending the text to the user's next message, layer 06.",
+          "correct": false,
+          "feedback": "Layer 06 comes after both breakpoints, so the prefix still matches; the copy adds 2,000 full-price tokens but no cache write."
+        },
+        {
+          "key": "b",
+          "text": "Saving the text to the memory store and reading it back into layer 03.",
+          "correct": false,
+          "feedback": "Layer 03 sits in the messages, after the system prompt, so the cached prefix is untouched; the damage is the stored trace and its tokens."
+        },
+        {
+          "key": "c",
+          "text": "Adding the text as a section of notes at the end of the system prompt.",
+          "correct": true,
+          "feedback": "Right: the system prompt now differs on every turn, so only the tools are read and the system prompt is written again at 1.25 times the base price."
+        },
+        {
+          "key": "d",
+          "text": "Passing the thinking blocks back to the API unchanged with the assistant turn.",
+          "correct": false,
+          "feedback": "Blocks passed back unchanged keep the cache intact; they are part of the history after the cached prefix."
+        }
+      ],
+      "explanation": "Section 5: Anthropic builds the cached prefix as tools, system, messages, and a hit needs the prompt identical up to a breakpoint. Only a copy that lands in front of a breakpoint, here inside the system prompt, breaks the prefix; snippets/trace_cache.py prices that case at 0.06155 dollars against 0.03180.",
+      "hints": [
+        "Find which of the four places lies in front of a cache breakpoint.",
+        "The prefix is built in the order tools, system, messages."
+      ]
+    },
+    {
+      "id": "ctx-018-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 6,
+      "tags": [
+        "trace-hygiene",
+        "prompt-caching",
+        "pricing"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent on Claude Opus 4.6 (5 dollars per million input tokens) sends 2,000 tokens of tool definitions, a 4,000-token system prompt and 6,000 further input tokens, with cache breakpoints after the tools and after the system prompt; a cache read costs 0.1 times the base input price and a write 1.25 times. Normally both prefix blocks are read from the cache. One version of the agent splices 1,500 tokens of the last turn's thinking text into the system prompt. What does the next call's input cost, in dollars, with the splice and without it?",
+      "answer": {
+        "parts": [
+          {
+            "label": "with the thinking text in the system prompt",
+            "value": 0.065375,
+            "tolerance": 0.0004,
+            "unit": "USD"
+          },
+          {
+            "label": "without it",
+            "value": 0.033,
+            "tolerance": 0.0004,
+            "unit": "USD"
+          }
+        ]
+      },
+      "precision_note": "With the splice: tools 2,000 x 0.5 / 1,000,000 = 0.001, system 5,500 x 6.25 / 1,000,000 = 0.034375, rest 6,000 x 5 / 1,000,000 = 0.03; total 0.065375. Without: 6,000 x 0.5 / 1,000,000 + 0.03 = 0.033. The price_prefix function of snippets/trace_cache.py applies the same rule. Pricing the changed system prompt at the plain input price gives 0.0585, and pricing only the 1,500 added tokens at full price gives 0.0405, the nearest wrong methods.",
+      "explanation": "Section 5: a change inside the system prompt ends the matching prefix after the tools, so the tools are still read but the whole new system prompt is written to the cache again, and that repeats on every turn because the trace is new each time. The splice roughly doubles the input cost of every call.",
+      "hints": [
+        "Split the input into what is read from the cache, what is written to it, and what pays the base price.",
+        "With the splice, only the 2,000 tool tokens are read; the 5,500-token system prompt is written at 6.25 dollars per million."
+      ]
+    },
+    {
+      "id": "ctx-018-q08",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "thinking-blocks",
+        "summarised-thinking"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "With `display: \"summarized\"`, what is the text in the `thinking` field of a block Claude returns?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The raw chain of thought, token for token as the model generated it.",
+          "correct": false,
+          "feedback": "The page states that no `display` setting returns the raw chain of thought."
+        },
+        {
+          "key": "b",
+          "text": "A summary of the reasoning, written by a different model from the one that thought.",
+          "correct": true,
+          "feedback": "Right: the returned text is a summary, so it is a by-product of the reasoning, not a transcript of it."
+        },
+        {
+          "key": "c",
+          "text": "An encrypted copy of the full reasoning that the application can decode.",
+          "correct": false,
+          "feedback": "That describes the `signature` field, which is opaque: the API reads it when the block is passed back, and the application does not decode it."
+        },
+        {
+          "key": "d",
+          "text": "The answer itself, repeated so that the reasoning and the answer match.",
+          "correct": false,
+          "feedback": "The answer comes in the `text` blocks; the thinking block carries the reasoning, in summarised form."
+        }
+      ],
+      "explanation": "Section 2: the text of a thinking block is a summary of Claude's reasoning, written by a different model, and no setting returns the raw chain of thought. That is why no control flow should depend on parsing it.",
+      "hints": [
+        "Separate the two fields of a thinking block: the readable one and the encrypted one."
+      ]
+    },
+    {
+      "id": "ctx-018-q09",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 4,
+      "tags": [
+        "trace-hygiene",
+        "memory"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "An agent writes each turn's returned thinking text into its long-term memory store \"so it remembers how it reasoned\". In one or two sentences, what goes wrong when those entries are read back in later sessions?",
+      "answer": {
+        "model": "The trace is full of hypotheses that were tried and abandoned; read back later, a rejected branch looks like an established fact or conclusion, so the store feeds wrong, transient content into later turns, and costs tokens every time.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(nothing|no harm|no problem|it is fine|it'?s fine|works fine|helps?|improves?|better recall)\\b(?! (to|is) (persist|store)))(?=[\\s\\S]*\\b(reject\\w*|abandon\\w*|discard\\w*|dead[- ]?ends?|tentative|unverified|exploratory|hypothes\\w*|branch\\w*|guess\\w*|false starts?|wrong|mistak\\w*|errors?|incorrect|half[- ]?baked|stale|outdated|superseded|draft|scratch|deliberation|working notes?|transient|interim|intermediate)\\b)(?=[\\s\\S]*\\b(read back|recalled|retrieved|resurfac\\w*|reused|re-?injected|brought back|taken|treated|mistaken|looks?|reads?|appears?|seen|believed|trusted|accepted|as if|as though|facts?|truth|true|conclusions?|decisions?|settled|established|confus\\w*|conflict\\w*|mislead\\w*|misled|contradict\\w*|pollut\\w*)\\b)(?=[\\s\\S]*\\b(is|are|was|were|get|gets|become|becomes|look|looks|read|reads|treated|taken|so|because|which|and|as|then|will|would|can|may)\\b)[\\s\\S]*\\s\\S"
+        ]
+      },
+      "explanation": "Section 5: a trace is a working note full of abandoned hypotheses. Written to a long-lived store it is post 08's wrong-content bug, a transient value read back as if it were still true; the outcome (the decision, the preference, the corrected rule) is what deserves to be written.",
+      "hints": [
+        "Think about what a trace contains besides the conclusion the model reached.",
+        "Ask how an abandoned line of reasoning reads when it comes back without its context."
+      ]
+    },
+    {
+      "id": "ctx-018-q10",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1",
+        "o2",
+        "o3"
+      ],
+      "section": "9",
+      "est_minutes": 5,
+      "tags": [
+        "diagnosis",
+        "thinking-tokens"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Match each symptom of a reasoning agent to its cause.",
+      "left": [
+        {
+          "key": "a",
+          "text": "Hard requests return `stop_reason: \"max_tokens\"` with a truncated answer after adaptive thinking is switched on."
+        },
+        {
+          "key": "b",
+          "text": "Within one conversation, responses alternate between cache reads and `cache_creation_input_tokens` for the prefix, following the turns a router marks as hard or easy."
+        },
+        {
+          "key": "c",
+          "text": "The API rejects a request with a 400 error about a modified thinking block."
+        },
+        {
+          "key": "d",
+          "text": "Every response reports a cache read for the tools alone and a cache write for the system prompt."
+        },
+        {
+          "key": "e",
+          "text": "Input tokens climb by roughly one turn's thinking on every turn of a long session."
+        }
+      ],
+      "right": [
+        {
+          "key": "p",
+          "text": "The output cap was sized for the answer alone"
+        },
+        {
+          "key": "q",
+          "text": "The top-level effort level changes between requests"
+        },
+        {
+          "key": "r",
+          "text": "The application trimmed or redacted thinking text before sending it back"
+        },
+        {
+          "key": "s",
+          "text": "Thinking text is copied into the system prompt"
+        },
+        {
+          "key": "t",
+          "text": "Earlier turns' thinking blocks are kept in context on a keep-all model"
+        },
+        {
+          "key": "u",
+          "text": "The thinking summary is written by a different model"
+        }
+      ],
+      "answer": {
+        "a": "p",
+        "b": "q",
+        "c": "r",
+        "d": "s",
+        "e": "t"
+      },
+      "explanation": "Section 9 gives each symptom: thinking counts toward `max_tokens`, so a cap sized for the answer truncates; the effort level is rendered into the prompt, so changing it restarts the cache; modified thinking blocks are rejected; a system prompt that changes every turn is written again while the tools are still read; and on a keep-all model old thinking accumulates as input. The summariser does not cause any of these.",
+      "hints": [
+        "Each symptom names a field or an error; ask which part of the request or the response it points at."
+      ]
+    },
+    {
+      "id": "ctx-018-q11",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 6,
+      "tags": [
+        "interleaved-thinking",
+        "tool-use"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "One tool-use turn starts from an 8,000-token request. The first reply thinks 1,000 tokens and makes a 200-token tool call, whose result is 1,000 tokens; the second reply thinks 800 tokens and makes a 200-token call, whose result is 500 tokens; the third reply thinks 600 tokens and answers in 300 (illustrative numbers). Every request repeats everything before it unchanged. How many input tokens does the third request send, and what share of the turn's output tokens is thinking, in percent?",
+      "answer": {
+        "parts": [
+          {
+            "label": "input tokens of request 3",
+            "value": 11700,
+            "tolerance": 0,
+            "unit": "tokens"
+          },
+          {
+            "label": "thinking share of the turn's output",
+            "value": 77.4,
+            "tolerance": 0.1,
+            "unit": "%"
+          }
+        ]
+      },
+      "precision_note": "Request 2 = 8,000 + 1,000 + 200 + 1,000 = 10,200; request 3 = 10,200 + 800 + 200 + 500 = 11,700 (the tool_turn function of snippets/trace_cache.py builds requests the same way). Output = 1,000 + 200 + 800 + 200 + 600 + 300 = 3,100, of which thinking 2,400: 77.42%. Dropping the earlier thinking from request 3 gives 9,900, and counting tool results as output gives 2,400 / 4,600 = 52.2%, the nearest wrong methods.",
+      "explanation": "Section 6: a tool-use loop is one assistant turn, and each request repeats the one before it, thinking blocks included, plus the new reply and tool result. The output has one thinking segment per step, so thinking is most of what the turn generates.",
+      "hints": [
+        "Build each request as the previous request plus the reply to it and the tool result.",
+        "Output is what the model generated: thinking, tool calls and the answer; tool results are input."
+      ]
+    },
+    {
+      "id": "ctx-018-q12",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "interleaved-thinking",
+        "tool-use"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "Put the events of one tool-use turn with interleaved thinking in the order they happen.",
+      "items": [
+        {
+          "key": "a",
+          "text": "The model thinks about the tool result."
+        },
+        {
+          "key": "b",
+          "text": "The application sends the first request, ending in the user's question."
+        },
+        {
+          "key": "c",
+          "text": "The model writes the final answer."
+        },
+        {
+          "key": "d",
+          "text": "The application sends the next request: everything so far, unchanged, plus the tool result."
+        },
+        {
+          "key": "e",
+          "text": "The reply opens with a thinking block and ends with a tool call."
+        }
+      ],
+      "answer": [
+        "b",
+        "e",
+        "d",
+        "a",
+        "c"
+      ],
+      "explanation": "Section 6: the first reply thinks and calls a tool; the application runs it and sends the next request with every earlier block unchanged plus the result; with interleaved thinking the model thinks about that result before it answers.",
+      "hints": [
+        "Start from the user's question and alternate between what the application sends and what the model generates."
+      ]
+    },
+    {
+      "id": "ctx-018-q13",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o1",
+        "o4"
+      ],
+      "section": "4",
+      "est_minutes": 10,
+      "tags": [
+        "thinking-tokens",
+        "budgets",
+        "max-tokens"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "`price_turn` prices one turn of a reasoning model and checks its output cap, but both results are wrong for any turn that thinks. Fix it so that thinking is billed as the post says, and so that `fits` is True exactly when `max_tokens` can hold everything the turn generates.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "def price_turn(input_tokens, thinking, answer, rate_in, rate_out, max_tokens):\n    \"\"\"Return (dollars, fits) for one turn of a reasoning model.\n\n    dollars: the input at rate_in, and the thinking and the answer at their billed rate;\n             rates are dollars per million tokens.\n    fits: True when max_tokens leaves room for everything the turn generates.\n    \"\"\"\n    dollars = (input_tokens + thinking) * rate_in / 1e6 + answer * rate_out / 1e6\n    fits = answer <= max_tokens\n    return dollars, fits\n",
+      "solution": "def price_turn(input_tokens, thinking, answer, rate_in, rate_out, max_tokens):\n    \"\"\"Return (dollars, fits) for one turn of a reasoning model.\n\n    dollars: the input at rate_in, and the thinking and the answer at their billed rate;\n             rates are dollars per million tokens.\n    fits: True when max_tokens leaves room for everything the turn generates.\n    \"\"\"\n    output = thinking + answer\n    dollars = input_tokens * rate_in / 1e6 + output * rate_out / 1e6\n    fits = output <= max_tokens\n    return dollars, fits\n",
+      "tests": "import math\n\ndef close(a, b):\n    return math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-12)\n\n# The high-effort turn of section 4 on Claude Opus 4.6, uncached: 10,500 in, 16,000 thinking, 1,500 answer.\nd, ok = price_turn(10500, 16000, 1500, 5.0, 25.0, 32000)\nassert close(d, 0.49), d\nassert ok is True\n# Thinking is billed at the output rate, not the input rate.\nd, _ = price_turn(0, 1000, 0, 5.0, 25.0, 4000)\nassert close(d, 0.025), d\n# The input is still billed at the input rate.\nd, _ = price_turn(2000, 0, 0, 3.0, 15.0, 4000)\nassert close(d, 0.006), d\n# Both rates come from the arguments, not from one model's price list.\nd, _ = price_turn(1000, 2000, 500, 3.0, 15.0, 4000)\nassert close(d, 0.0405), d\n# The cap has to hold the thinking and the answer together.\nassert price_turn(10500, 16000, 1500, 5.0, 25.0, 16000)[1] is False\nassert price_turn(100, 3000, 1000, 5.0, 25.0, 3500)[1] is False\n# A cap exactly equal to the output is enough.\nassert price_turn(100, 3000, 1000, 5.0, 25.0, 4000)[1] is True\n# No thinking: the answer alone decides.\nassert price_turn(100, 0, 500, 5.0, 25.0, 500)[1] is True\nassert price_turn(100, 0, 501, 5.0, 25.0, 500)[1] is False\nprint(\"ok\")\n",
+      "expected_output": "ok\n",
+      "explanation": "Sections 2 and 4: thinking tokens are billed as output tokens at the output rate, and they count toward `max_tokens` alongside the answer. The starter bills thinking at the input rate and checks the cap against the answer alone, which is how a reasoning turn gets truncated.",
+      "hints": [
+        "Ask which rate the thinking tokens are billed at, and what `max_tokens` has to hold.",
+        "Add thinking and answer into one output count; price it at rate_out and compare it with max_tokens, inclusively."
+      ]
+    },
+    {
+      "id": "ctx-018-q14",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 15,
+      "tags": [
+        "effort",
+        "prompt-caching",
+        "design"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A support agent on Claude Opus 4.6 caches a 6,000-token prefix (tools and system prompt) and runs long conversations. Most turns are lookups; a few need a multi-step diagnosis. The team wants high effort for the diagnoses and low effort elsewhere, plus a budget per turn. Using the cache rules and prices of post 05 and the per-layer budget of post 04, design how the effort levels are applied without losing the cache, and what the per-turn budget must contain. Any number the design uses is labelled illustrative.",
+      "kind": "design",
+      "solution": "Effort and the cache. On Claude Opus 4.6 the effort level is rendered into the prompt and there is no per-message effort, so changing the top-level level between requests of one conversation invalidates cache breakpoints (message-level always, tools and system possibly). Switching per turn would turn cheap reads of the 6,000-token prefix (0.1 times 5 dollars per million, 0.003 dollars) into writes (1.25 times, 0.0375 dollars) on every switch. So the main conversation keeps one level (low or medium) for its whole life, and the diagnosis runs as a separate call at high effort: a sub-agent or a separate request with its own cached prefix (post 13's isolation), whose result, not its thinking, comes back to the main conversation as a short summary.\n\nThe budget. Post 04's per-layer budget gains a thinking line inside the output reserve: `max_tokens` must hold thinking plus answer (for example 16,000 thinking plus 1,500 answer at high effort, illustrative), or the diagnosis is truncated with `stop_reason: \"max_tokens\"`. Thinking is priced at the output rate, 25 dollars per million, five times input (post 05), so at high effort it dominates the turn's cost. On a keep-all model, earlier thinking stays in layer 05 as input on later turns, so the history budget either counts it or the application omits earlier turns' thinking outside tool use, accepting that this changes the cached history from that point. Measured `usage.output_tokens_details.thinking_tokens` per call type replaces the illustrative sizes.",
+      "rubric": [
+        {
+          "criterion": "States that a top-level effort change invalidates the cache on this model and avoids per-turn switching inside the cached conversation.",
+          "points": 3
+        },
+        {
+          "criterion": "Proposes a workable alternative (one level per conversation, a separate high-effort call or sub-agent) and keeps the thinking out of the main context.",
+          "points": 2
+        },
+        {
+          "criterion": "Adds a thinking line to the budget, sizes max_tokens for thinking plus answer, and prices thinking at the output rate.",
+          "points": 3
+        },
+        {
+          "criterion": "Accounts for earlier thinking kept in layer 05 on a keep-all model, or its omission and the cache consequence.",
+          "points": 1
+        },
+        {
+          "criterion": "Labels numbers as illustrative or cites them, and names the usage field to measure.",
+          "points": 1
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Sections 3 and 4, with post 05's cache multipliers and post 04's per-layer budget: effort changes restart the cache on a model without per-message effort, and thinking belongs in the output reserve and the bill.",
+      "hints": [
+        "Start from what a top-level effort change does to the cached prefix on this model.",
+        "Then ask where a high-effort step can run without changing the main conversation's prompt, and what `max_tokens` must hold."
+      ],
+      "connects": [
+        "ctx-005",
+        "ctx-004"
+      ]
+    },
+    {
+      "id": "ctx-018-q15",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 12,
+      "tags": [
+        "when-not-to-think",
+        "retrieval"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A support bot gives wrong answers about a refund policy that was changed last month; the new policy is in the company's document store but is not retrieved into the prompt. The team's fix is to set effort to `max` on every call. Critique the fix and propose a better one, saying what each choice does to quality, cost and latency.",
+      "kind": "critique",
+      "solution": "The fix targets the wrong bottleneck. The bot fails for missing information, not missing reasoning: the new policy never reaches the window, so more thinking cannot supply it; at best the model argues more elaborately towards the old or a guessed policy. Meanwhile `max` effort on every call adds thinking tokens billed at the output rate (five times the input rate on Claude Opus 4.6) and delay on every turn, including greetings and lookups that need no derivation, and on a keep-all model the extra thinking also accumulates in the history.\n\nThe better fix is select: retrieve the current policy into layer 04 (RAG, post 11, or a tool call that reads the policy), check that the stale version is not also retrieved, and give the system prompt a rule for which source wins. Effort stays low or medium for routine turns; a higher level is reserved for turns that need derivation, set per workflow so the cache survives. Quality is then checked with an evaluation set rather than assumed.",
+      "rubric": [
+        {
+          "criterion": "Identifies the failure as missing information that thinking cannot supply.",
+          "points": 3
+        },
+        {
+          "criterion": "Names the cost and latency of max effort on every call, including easy turns.",
+          "points": 2
+        },
+        {
+          "criterion": "Proposes retrieval or a tool call that brings the current policy into the window, and handles the stale version.",
+          "points": 3
+        },
+        {
+          "criterion": "Keeps effort per task (low for routine turns) and mentions verifying quality.",
+          "points": 2
+        }
+      ],
+      "answer_length": "one paragraph",
+      "explanation": "Section 7: thinking is the wrong tool when the answer needs a fact the model does not have; the fix is select, retrieval or a tool call, and effort is set per task.",
+      "hints": [
+        "Ask whether the model lacks reasoning or lacks a fact.",
+        "Then price what max effort adds on every call, including the easy ones."
+      ]
+    },
+    {
+      "id": "ctx-018-q16",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 4,
+      "tags": [
+        "scaffolding",
+        "when-not-to-think"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "A pipeline has four hand-built steps. Which one is the best candidate to drop in favour of the model's own thinking?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A step that rewrites dates from one fixed format into another.",
+          "correct": false,
+          "feedback": "There is nothing to derive in a format conversion; thinking adds cost and delay and no quality. A plain function or low effort fits."
+        },
+        {
+          "key": "b",
+          "text": "A planning prompt that breaks a multi-part analysis question into ordered sub-steps before answering it.",
+          "correct": true,
+          "feedback": "Right: decomposition and multi-step planning are reasoning-shaped work that a thinking model can absorb, removing a prompt that could break."
+        },
+        {
+          "key": "c",
+          "text": "A retrieval step that fetches the current contract before the model answers questions about it.",
+          "correct": false,
+          "feedback": "The model cannot think its way to a document it has not been given; retrieval supplies missing information."
+        },
+        {
+          "key": "d",
+          "text": "A check whose result must be logged and reproduced exactly for an audit.",
+          "correct": false,
+          "feedback": "Steps that need determinism or an audit trail stay hand-built: the thinking is summarised at best and cannot be replayed."
+        }
+      ],
+      "explanation": "Section 7: thinking can replace reasoning-shaped scaffolding such as decomposition, multi-hop planning and self-critique, while deterministic steps, retrieval of missing facts and auditable checks stay explicit.",
+      "hints": [
+        "Ask which step's difficulty is reasoning depth rather than missing data or a need for exact reproduction.",
+        "Rule out a step with nothing to derive, a step that supplies a fact, and a step that must be replayed exactly."
+      ]
+    },
+    {
+      "id": "ctx-018-q17",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 2,
+      "tags": [
+        "interleaved-thinking",
+        "tool-use"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12",
+      "prompt": "From the model's point of view, what does a tool-use loop of three requests that ends in a final answer amount to, and what must the application do with the thinking blocks it received along the way?",
+      "answer": {
+        "model": "One assistant turn; the thinking blocks must be passed back to the API complete and unmodified with the tool results.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?![\\s\\S]*\\b(two|three|four|multiple|several|many|3|2) (assistant |separate |different )?turns\\b)(?![\\s\\S]*\\b(a|one) turn per\\b)(?![\\s\\S]*\\b(nothing (needs|has) to|no need to|need not|needn'?t|not necessary to|(do|does)(n'?t| not) (need|have) to|optional(ly)?)\\b)(?![\\s\\S]*(?<!not )(?<!n't )(?<!never )(?<!without )(?<!no )(?<!or )(?<!nor )(?<!neither )\\b(strip\\w*|drop\\w*|remov\\w*|summari[sz]\\w*|trim\\w*|edit\\w*|modif\\w*|discard\\w*|delet\\w*|rewrit\\w*|omit\\w*|clear\\w*|redact\\w*) (the |them|those|all |its |their |each )?(thinking )?(blocks?)?\\b(?!\\s*((them|it|the blocks?|the thinking blocks?|blocks?|thinking blocks?)\\s+)?((is|are) (forbidden|rejected|not allowed|an error|invalid)|gives?|causes?|triggers?|breaks?|fails?|gets? rejected|(would|will) be rejected|(leads?|results?) (to|in)|returns? (a |an )?(400|error))\\b))(?=[\\s\\S]*\\b(one|a single|single|1|the same) (assistant )?(turn|response)\\b)(?=[\\s\\S]*\\b(pass\\w*|send\\w*|sent|return\\w*|includ\\w*|keep\\w*|kept|echo\\w*|resend\\w*|re-?send\\w*|giv\\w*|go|goes|going)\\b)(?=[\\s\\S]*\\b(back|unchanged|unmodified|untouched|as[- ]is|as (they were |it was )?received|intact|complete|verbatim|exactly|in full|unedited|unaltered)\\b)[\\s\\S]*\\s\\S"
+        ]
+      },
+      "explanation": "Section 6: a tool-use loop is one assistant turn, and within it every thinking block is passed back complete and unmodified alongside the tool results; an edited block is rejected.",
+      "hints": [
+        "Count turns the way the model does, not the way the application counts requests."
+      ]
+    }
+  ]
+}
