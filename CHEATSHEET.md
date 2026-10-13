@@ -112,13 +112,13 @@ Figures from Anthropic's "Pricing" and "Prompt caching" pages: rates as of early
 ## Evaluation pyramid
 
 ```
-            4. online       real users, real traffic, approval rate
+            4. online       production traffic and its signals
          3. end-to-end      the full pipeline on gold tasks, regression-gated
       2. component          retriever, reranker, prompt block, each alone
    1. unit                  deterministic functions: chunker, prompt assembly, send gate
 ```
 
-LLM-as-judge biases to watch: position, length, self-preference, rubric drift.
+LLM-as-judge biases to watch: position, verbosity (length), self-preference, rubric drift.
 
 **Output guardrails:** validate against a schema, retry on failure with a cap, moderate or redact, then return.
 
@@ -131,14 +131,18 @@ LLM-as-judge biases to watch: position, length, self-preference, rubric drift.
 3. Quality: the end-to-end eval score or explicit feedback.
 4. Error rate, by kind.
 
+Cache-hit rate = cache-read input tokens over total input; on Anthropic the total is `input_tokens` + `cache_read_input_tokens` + `cache_creation_input_tokens`.
+
 ---
 
 ## Security: the four architectural defences
 
 1. The model is not the permission system: enforce permissions in code.
 2. Constrain tool blast radius: least-privileged credentials, sandboxed tools.
-3. Filter at trust boundaries: validate arguments, structure tool returns.
+3. Filter at trust boundaries: tag external text as data, validate model output before it is used.
 4. Never silently merge attacker text into trusted context.
+
+**Privacy:** detect and redact at the trust boundary; placeholders into the trace store, values only when the task needs them; a lifecycle rule on every store; erasure fans out to memory, documents, chunks, traces and the provider; filter by tenant before ranking ([post 24](posts/24-privacy-and-governance/index.md)).
 
 ---
 
@@ -149,7 +153,7 @@ LLM-as-judge biases to watch: position, length, self-preference, rubric drift.
 3. Does each query need most of the corpus, or a small slice?
 4. Can the model actually use the long context for this task?
 
-Apply them in order. A no to question 1 settles it for retrieval; the other three weigh caching, the shape of the queries, and what the long-context benchmarks show. Most production systems route per query ([post 25](posts/25-long-context-vs-rag/index.md)).
+Apply them in order. A no to question 1 settles it for retrieval; the other three weigh caching, the shape of the queries, and what the long-context benchmarks show. A workload with both whole-corpus and local queries routes per query ([post 25](posts/25-long-context-vs-rag/index.md)).
 
 ---
 

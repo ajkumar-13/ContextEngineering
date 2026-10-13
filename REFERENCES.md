@@ -184,54 +184,66 @@ Citation style: author or organisation, title in quotation marks, venue or publi
 
 ## Post 20 - Evaluation
 
-- **Zheng, L. *et al.*** "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena." *NeurIPS 2023 Datasets and Benchmarks* (arXiv:2306.05685). https://arxiv.org/abs/2306.05685: the source for position, length, and self-preference bias.
+- **Zheng, L. *et al.*** "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena." *NeurIPS 2023 Datasets and Benchmarks* (arXiv:2306.05685). https://arxiv.org/abs/2306.05685: the source for position, verbosity and self-enhancement bias (Tables 2 to 4).
 - **Chiang, W.-L. *et al.*** "Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference." *LMSYS, ICML 2024* (arXiv:2403.04132). https://arxiv.org/abs/2403.04132
 - **Es, S., James, J., Espinosa-Anke, L., Schockaert, S.** "RAGAS: Automated Evaluation of Retrieval Augmented Generation." *EACL 2024 demo* (arXiv:2309.15217, 2023). https://arxiv.org/abs/2309.15217
 - **Liu, Y. *et al.*** "G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment." *EMNLP 2023* (arXiv:2303.16634). https://arxiv.org/abs/2303.16634
-- **Anthropic.** "Create strong empirical evaluations." *Anthropic documentation*, 2024 to 2025. https://docs.anthropic.com/en/docs/test-and-evaluate
-- **promptfoo.** Documentation. https://www.promptfoo.dev/docs/
-- **DeepEval (Confident AI).** Documentation. https://docs.confident-ai.com/
-- **OpenAI Evals.** GitHub. https://github.com/openai/evals
-- ARES: see Post 11. LangSmith: see Post 22.
+- **Ragas.** "Available metrics" (faithfulness, answer relevancy, context precision, context recall). *Documentation*, consulted October 2026. https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/
+- **promptfoo.** Documentation, consulted October 2026. https://www.promptfoo.dev/docs/
+- **DeepEval (Confident AI).** Documentation, consulted October 2026. https://deepeval.com/docs
+- **LangSmith.** "Evaluation." *Documentation*, consulted October 2026. https://docs.langchain.com/langsmith/evaluation
+- ARES: see Post 11. LangSmith tracing: see Post 22.
 
 ## Post 21 - Structured output and guardrails
 
-- **OpenAI.** "Structured Outputs." *OpenAI documentation*. https://platform.openai.com/docs/guides/structured-outputs
-- **Anthropic.** "Tool use." *Anthropic documentation*, 2024 to 2025. https://docs.anthropic.com/en/docs/build-with-claude/tool-use
-- **Pydantic**, **Instructor**, **Outlines.** Structured-output libraries. https://docs.pydantic.dev/, https://python.useinstructor.com/, https://dottxt-ai.github.io/outlines/
-- **Guardrails AI** and **NVIDIA NeMo Guardrails.** Output-guardrail frameworks. https://www.guardrailsai.com/, https://github.com/NVIDIA/NeMo-Guardrails
+- **OpenAI.** "Structured Outputs", "Function calling" and "Moderation." *OpenAI API documentation*, consulted October 2026. https://developers.openai.com/api/docs/guides/structured-outputs
+- **Anthropic.** "Structured outputs" and "Define tools." *Claude API documentation*, consulted October 2026. https://platform.claude.com/docs/en/build-with-claude/structured-outputs
+- **OpenAI.** "Introducing Structured Outputs in the API." *OpenAI blog*, August 2024. https://openai.com/index/introducing-structured-outputs-in-the-api/: constrained decoding over a context-free grammar compiled from the schema.
+- **Willard, B. T., Louf, R.** "Efficient Guided Generation for Large Language Models." *arXiv:2307.09702*, 2023. https://arxiv.org/abs/2307.09702
+- **Pydantic**, **Instructor** ("Retrying", consulted October 2026), **Outlines.** Structured-output libraries. https://docs.pydantic.dev/, https://python.useinstructor.com/, https://dottxt-ai.github.io/outlines/
+- **Guardrails AI.** "Validator on-fail actions." *Documentation*, consulted October 2026. https://www.guardrailsai.com/docs/concepts/validator_on_fail_actions
+- **NVIDIA.** "NeMo Guardrails." *Documentation*, consulted October 2026. https://docs.nvidia.com/nemo/guardrails/
 
 ## Post 22 - Observability, tracing, and cost
 
-- **LangSmith.** "Tracing and evaluation." *Documentation*, 2024 to 2025. https://docs.smith.langchain.com/
-- **Langfuse.** "Open source LLM observability." *Documentation*, 2025. https://langfuse.com/docs
-- **Arize.** "Phoenix." *Documentation*, 2024 to 2025. https://docs.arize.com/phoenix
-- **Helicone.** "Proxy-based LLM observability." *Documentation*, 2025. https://docs.helicone.ai/
-- **OpenTelemetry.** "Semantic conventions for generative AI systems." In development, 2025. https://opentelemetry.io/docs/specs/semconv/gen-ai/
+- **LangSmith.** "Tracing and evaluation." *Documentation*, consulted October 2026. https://docs.langchain.com/langsmith
+- **Langfuse.** "Open source LLM observability." *Documentation*, consulted October 2026. https://langfuse.com/docs
+- **Arize.** "Phoenix" (Elastic License 2.0). *Documentation*, consulted October 2026. https://docs.arize.com/phoenix
+- **Helicone.** "Proxy-based LLM observability." *Documentation*, consulted October 2026. https://docs.helicone.ai/
+- **Braintrust.** Documentation, consulted October 2026. https://www.braintrust.dev/docs
+- **OpenTelemetry.** "Semantic conventions for generative AI." Status Development, consulted October 2026. https://github.com/open-telemetry/semantic-conventions-genai
+- Prompt caching (Anthropic and OpenAI): see Post 05. Pricing: see Post 01.
 
 ## Post 23 - Security and prompt injection
 
-- **OWASP.** "Top 10 for Large Language Model Applications." 2025 edition. https://owasp.org/www-project-top-10-for-large-language-model-applications/
+- **OWASP.** "Top 10 for Large Language Model Applications." 2025 edition, consulted October 2026. https://owasp.org/www-project-top-10-for-large-language-model-applications/
 - **Willison, S.** "Prompt injection" essay series, 2022 to 2025. https://simonwillison.net/series/prompt-injection/
 - **Willison, S.** "The Dual LLM pattern for building AI assistants that can resist prompt injection." *Personal blog*, April 2023. https://simonwillison.net/2023/Apr/25/dual-llm-pattern/
-- **Bai, Y. *et al.*** "Constitutional AI: Harmlessness from AI Feedback." *Anthropic, arXiv:2212.08073*, 2022. https://arxiv.org/abs/2212.08073
-- **Anthropic.** "Responsible Scaling Policy." Ongoing. https://www.anthropic.com/news/anthropics-responsible-scaling-policy
+- **Willison, S.** "The lethal trifecta for AI agents: private data, untrusted content, and external communication." *Personal blog*, 16 June 2025. https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/
+- **Willison, S.** "New prompt injection attack on ChatGPT web version. Markdown images can steal your chat data" (Samoilenko's finding). *Personal blog*, 14 April 2023. https://simonwillison.net/2023/Apr/14/new-prompt-injection-attack-on-chatgpt-web-version-markdown-imag/
+- **Rehberger, J.** "ChatGPT Plugins: Data Exfiltration via Images & Cross Plugin Request Forgery." *Embrace The Red*, 16 May 2023. https://embracethered.com/blog/posts/2023/chatgpt-webpilot-data-exfil-via-markdown-injection/
+- **Edwards, B.** "AI-powered Bing Chat spills its secrets via prompt injection attack." *Ars Technica*, February 2023. https://arstechnica.com/information-technology/2023/02/ai-powered-bing-chat-spills-its-secrets-via-prompt-injection-attack/
+- **Invariant Labs.** "MCP Security Notification: Tool Poisoning Attacks." April 2025. https://invariantlabs.ai/blog/mcp-security-notification
+- **Aim Labs.** "EchoLeak" (CVE-2025-32711), June 2025; described in Aim Security, "When Public Prompts Turn Into Local Shells", 1 August 2025. https://www.aim.security/post/when-public-prompts-turn-into-local-shells-rce-in-cursor-via-mcp-auto-start
 - **NIST.** "AI 600-1: Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile." July 2024. https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf
-- Greshake et al.: see Post 06.
+- Greshake et al.: see Post 06. Model Context Protocol specification (revision 2026-07-28): see Post 15.
 
 ## Post 24 - Privacy, PII, and data governance
 
-- **European Union.** "General Data Protection Regulation (GDPR)," Articles 5(1)(e) and 17. 2016. https://gdpr-info.eu/
-- **Microsoft.** "Presidio" (PII detection and anonymisation). https://github.com/microsoft/presidio
-- **Anthropic**, "Privacy and data usage"; **OpenAI**, "Enterprise privacy." *Vendor documentation*, 2024 to 2025.
+- **European Union.** Regulation (EU) 2016/679 (GDPR), Articles 5(1)(e), 6, 9 and 17. 2016. https://gdpr-info.eu/
+- **Presidio** (begun at Microsoft; now Data Privacy Stack). Documentation and "Supported entities", consulted October 2026. https://presidio.dataprivacystack.org/
+- **Anthropic.** "API and data retention" and "Data residency." *Claude Platform documentation*, consulted October 2026. https://platform.claude.com/docs/en/manage-claude/api-and-data-retention and https://platform.claude.com/docs/en/manage-claude/data-residency
+- **Anthropic.** "How long do you store my organization's data?" *Anthropic Privacy Center*, consulted October 2026. https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data
+- **OpenAI.** "Data controls in the OpenAI platform." *API documentation*, consulted October 2026. https://developers.openai.com/api/docs/guides/your-data
 - NIST AI 600-1, OWASP Top 10 for Large Language Model Applications: see Post 23.
 
 ## Post 25 - Long context vs. RAG: a decision framework
 
-- **Kuratov, Y. *et al.*** "In Search of Needles in a 11M Haystack: Recurrent Memory Finds What LLMs Miss." *arXiv:2402.10790*, 2024. https://arxiv.org/abs/2402.10790: BABILong.
+- **Kuratov, Y. *et al.*** "BABILong: Testing the Limits of LLMs with Long Context Reasoning-in-a-Haystack." *NeurIPS 2024 Datasets and Benchmarks* (arXiv:2406.10149, 2024). https://arxiv.org/abs/2406.10149
+- **Kuratov, Y. *et al.*** "In Search of Needles in a 11M Haystack: Recurrent Memory Finds What LLMs Miss." *arXiv:2402.10790*, 2024. https://arxiv.org/abs/2402.10790: the predecessor of BABILong.
 - **Vodrahalli, K. *et al.*** "Michelangelo: Long Context Evaluations Beyond Haystacks via Latent Structure Queries." *Google DeepMind, arXiv:2409.12640*, 2024. https://arxiv.org/abs/2409.12640
 - **Gemini Team, Google.** "Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context." *arXiv:2403.05530*, 2024. https://arxiv.org/abs/2403.05530
-- Pricing (Anthropic, the per-token rates for the cost arithmetic of section 7; prices change often): see Post 01. RULER: see Post 03. LongBench: see Post 12. Long context prompting for Claude 2.1: see Post 17. Prompt caching: see Post 02. Long context (Gemini API): see Post 04.
+- Pricing (Anthropic, the per-token rates for the cost arithmetic of section 7; consulted October 2026; the full 1M window of Claude Opus 4.6 is billed at standard rates; prices change often): see Post 01. RULER: see Post 03. Needle In A Haystack (Kamradt): see Post 03. Context windows: see Post 04. Prompt caching (multipliers): see Post 05. LongBench: see Post 12. Long context prompting for Claude 2.1: see Post 17. Long context (Gemini API, page updated 22 June 2026): see Post 04.
 
 ## Post 26 - The modern agentic workflow
 

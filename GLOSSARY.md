@@ -82,7 +82,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Distraction.** The failure mode in which irrelevant tokens crowd out relevant ones and the model attends to the wrong material. The first fix is a tighter select step (post 06).
 
-**Dual LLM pattern.** A security pattern in which a quarantined model processes untrusted content into structured output and a privileged model, which never sees the raw content, acts on that output (Willison, 2023; post 23).
+**Dual LLM pattern.** A security pattern in which a quarantined model with no tools reads untrusted content, a controller (ordinary code) stores its output in variables, and a privileged model that plans actions sees only the variable names, never the content (Willison, 2023; post 23).
 
 **Effort (reasoning).** A provider parameter that sets how many output tokens a model spends, thinking included, trading answer quality against latency and cost; soft guidance, not a limit (post 18).
 
@@ -104,7 +104,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Grounding.** Making the model answer from supplied evidence rather than from what it learned in training. The purpose of RAG.
 
-**Guardrail.** A check placed around a model call, on the input, the output, or both, that blocks or rewrites unsafe or off-policy content (post 21).
+**Guardrail.** A check placed around a model call, on the input, the output, or both, that passes, fixes, blocks or re-asks for unsafe or off-policy content (post 21).
 
 **Hallucination.** A fluent but factually wrong output, often because the needed fact is not in the context.
 
@@ -132,7 +132,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Layout-aware parsing.** Document parsing that keeps visual structure (tables, columns, headings, reading order) instead of flattening a page to a stream of text (post 10).
 
-**LLM-as-judge.** Using a model to score another model's outputs against a rubric. Subject to position bias, length bias, self-preference, and rubric drift (Zheng et al., 2023; post 20).
+**LLM-as-judge.** Using a model to score another model's outputs against a rubric. Subject to position bias, verbosity (length) bias and self-preference, the first three studied by Zheng et al. (2023), and to rubric drift over time (post 20).
 
 **Long-context routing.** Deciding per query whether to answer by retrieval or by loading whole documents into the window (posts 17 and 25).
 
@@ -176,13 +176,15 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Prompt injection.** An attack in which adversarial text in the input makes the model ignore its instructions or take unintended actions. Direct injection comes from the user; indirect injection comes from content the model reads (post 23).
 
+**Pseudonymisation.** Replacing an identifying value with a placeholder whose mapping is kept separately under stricter access; the data stays personal data (post 24).
+
 **Provenance.** The recorded source of a memory cell or a retrieved chunk: who or what put it there, and when (posts 08 and 10).
 
 **Query rewriting.** Reformulating the user's question into one or more retrieval-friendly queries before search; the first stage of the select pipeline (post 09).
 
 **RAG (retrieval-augmented generation).** A pattern in which relevant chunks are retrieved at query time and placed in the prompt, as layer 04, before generation (post 11).
 
-**Ragas.** An open-source evaluation library for RAG systems that provides faithfulness, answer relevancy, context precision, and context recall (Es et al., 2023).
+**Ragas.** An open-source evaluation library for RAG systems that provides faithfulness, answer relevancy, context precision and context recall; the 2023 paper (Es et al.) defined faithfulness, answer relevance and context relevance.
 
 **Reasoning model.** A model trained to generate thinking tokens before its final answer, spending extra compute to improve accuracy on hard problems (post 18).
 
@@ -216,7 +218,7 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Span.** A timed unit of work inside a trace; spans nest into a tree of operations (post 22).
 
-**Structured output.** A provider feature that constrains the model's response to a supplied JSON Schema, so it returns parseable data rather than free text (post 21).
+**Structured output.** A provider feature that makes the model's response follow a supplied JSON Schema, by constrained decoding when strict mode is on and on a best-effort basis otherwise (post 21).
 
 **Sub-agent.** A child model call invoked by a parent agent, running in its own isolated context window and returning only a structured result (post 13).
 
@@ -246,9 +248,13 @@ Every term the series uses, one entry each, in alphabetical order. A post that i
 
 **Top-N.** The size of the candidate set that candidate generation passes to the reranker (post 09).
 
-**Trace.** The full record of one agent run: every model call, every tool call, every span, with tokens, latency, and cost (post 22).
+**Trace.** The record of one user-facing interaction (a chat turn, an agent run, a workflow execution): every model, retrieval and tool call as a tree of spans, with tokens, latency, and cost (post 22).
+
+**Trace store.** The store of captured traces, each a copy of the full prompt and response of every model call in it, with the spans around them; the source of dashboards, debugging and replays (post 22).
 
 **Triager.** A small sub-agent whose only job is to classify an input and route it (post 30).
+
+**Trust tag.** A label the application attaches to every piece of content in the window and every memory row, set from the channel it arrived by (system, user or external), saying whether it may instruct; external content is data (post 23).
 
 **Trust boundary.** A line in a system across which input is treated as untrusted; filtering, validation, or sandboxing happens at the boundary (post 23).
 
