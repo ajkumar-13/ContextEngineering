@@ -1,0 +1,736 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-029",
+  "next_ordinal": 17,
+  "questions": [
+    {
+      "id": "ctx-029-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "schema",
+        "validation"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In the original companion server, `issue_refund` declared `amount: Annotated[float, Field(gt=0, ...)]` under `@mcp.tool(...)` and no other decorator. What does the `gt=0` become?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A constraint in the tool's input schema, which the SDK checks whenever a host sends `tools/call`.",
+          "correct": true,
+          "feedback": "Right. The SDK writes it into `inputSchema` as an exclusive minimum of 0 and validates every `tools/call` against that schema before the function runs."
+        },
+        {
+          "key": "b",
+          "text": "A check that runs on every call of the Python function, including from a unit test.",
+          "correct": false,
+          "feedback": "This is the misconception the post corrects: without `validate_call`, a direct Python call never meets the schema, so `amount=-5` called from Python returned a refund."
+        },
+        {
+          "key": "c",
+          "text": "A sentence the SDK appends to the tool's description, for the model to read before it calls the tool.",
+          "correct": false,
+          "feedback": "The description is the `description` argument as written. The constraint goes into the schema, which the model also sees, but as a schema keyword."
+        },
+        {
+          "key": "d",
+          "text": "Nothing outside Python: Pydantic field constraints are documentation for developers only.",
+          "correct": false,
+          "feedback": "They are published in `tools/list` as part of the input schema and enforced on the protocol path."
+        }
+      ],
+      "explanation": "Section 4: typed parameters become the tool's input schema (`exclusiveMinimum: 0` for `amount`, `minLength: 4` for `reason`), and the SDK validates every `tools/call` against it, returning a tool execution error with `isError: true` for a bad argument. A direct Python call skips that layer unless the function is wrapped in `validate_call`, as the companion's tools now are.",
+      "hints": [
+        "Ask where `tools/list` gets each parameter's type and limits from."
+      ]
+    },
+    {
+      "id": "ctx-029-q02",
+      "type": "mcq",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "permission-boundary",
+        "smoke-test"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In the companion's data, order ORD-9001 totals 1,499 dollars and ORD-9004 totals 12,000 dollars; the refund threshold is 1,000 dollars. A tester asks the agent to refund 1,500 dollars on ORD-9001 to see the confirmation gate fire. What does `issue_refund` return?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "`ok: false` with `requires_confirmation: true`, because 1,500 is over the threshold.",
+          "correct": false,
+          "feedback": "The order-total check runs first: 1,500 is more than the 1,499 the order cost, so the function returns before it reaches the threshold."
+        },
+        {
+          "key": "b",
+          "text": "`ok: false` with reason `amount_exceeds_order_total`, and the threshold check is never reached.",
+          "correct": true,
+          "feedback": "Right. The checks run in order, and this request fails the first one. To see the gate fire, the request must be under the order total and over the threshold, as 1,500 on ORD-9004 is."
+        },
+        {
+          "key": "c",
+          "text": "`ok: true` with a refund id, because the model confirmed the amount with the user first.",
+          "correct": false,
+          "feedback": "Nothing the model says changes the result; the checks are in code and do not read the conversation."
+        },
+        {
+          "key": "d",
+          "text": "`ok: false` with reason `order_not_found`, because amounts over the threshold are treated as unknown orders.",
+          "correct": false,
+          "feedback": "ORD-9001 exists in `orders.json`; `order_not_found` is returned only when no order has that id."
+        }
+      ],
+      "explanation": "Sections 5 and 7: `issue_refund` checks that the order exists, then that the amount does not exceed the order's total, then the threshold. A smoke test with 1,500 on ORD-9001 stops at the order total and never exercises the gate; 1,500 on ORD-9004 returns `requires_confirmation: true`.",
+      "hints": [
+        "Read the three `if` statements of `issue_refund` in order.",
+        "Compare 1,500 with ORD-9001's total before comparing it with the threshold."
+      ]
+    },
+    {
+      "id": "ctx-029-q03",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 4,
+      "tags": [
+        "testing",
+        "validation"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The companion's `test_escalate_validates_queue` calls `escalate_to_human(summary=\"enough characters here\", queue=\"bogus\")` and expects an exception, because `queue` is declared with a `Field` pattern that allows only general, billing or engineering. On the original companion, whose tools carried `@mcp.tool(...)` and no other decorator, the test failed. Why?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The regular expression is wrong, so it accepts \"bogus\" on every call path.",
+          "correct": false,
+          "feedback": "The same pattern refuses \"bogus\" when the tool is called through `tools/call`; the pattern is fine."
+        },
+        {
+          "key": "b",
+          "text": "The constraint is in the tool's schema, checked on `tools/call`; a direct call skips it.",
+          "correct": true,
+          "feedback": "Right. The function body does not check `queue`, so a plain call returned a ticket in queue \"bogus\". Wrapping the function in `validate_call`, as the companion now does, makes the test pass."
+        },
+        {
+          "key": "c",
+          "text": "The summary is too short, so the function fails on `summary` before it ever looks at `queue`.",
+          "correct": false,
+          "feedback": "The summary has 22 characters, above the minimum of 10, and in any case a failure on `summary` would raise and make the test pass."
+        },
+        {
+          "key": "d",
+          "text": "The test needs a running host, because validation happens only inside Claude Desktop.",
+          "correct": false,
+          "feedback": "Validation happens in the SDK on the server's side of `tools/call`, not in the host; calling `call_tool` on the server object refuses the arguments with no host at all."
+        }
+      ],
+      "explanation": "Section 8: `Annotated[..., Field(...)]` constraints are published in `inputSchema` and enforced by the SDK on the protocol path. A unit test that calls the function directly exercises plain Python, so the rule was invisible to it until each tool was wrapped in `validate_call`.",
+      "hints": [
+        "Ask which code runs the validation, and whether a direct call goes through that code.",
+        "Section 4 describes two paths into the same function."
+      ]
+    },
+    {
+      "id": "ctx-029-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "transport",
+        "stdio",
+        "streamable-http"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Which statement about MCP's two standard transports matches the specification (revision 2026-07-28)?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A Streamable HTTP server must validate the `Origin` header of incoming connections.",
+          "correct": true,
+          "feedback": "Right. The specification says servers MUST validate `Origin`, SHOULD bind only to localhost when running locally, and SHOULD implement proper authentication."
+        },
+        {
+          "key": "b",
+          "text": "A stdio server should run the OAuth authorisation flow before answering its first request.",
+          "correct": false,
+          "feedback": "The Authorization page says stdio implementations should not follow it and should retrieve credentials from the environment instead."
+        },
+        {
+          "key": "c",
+          "text": "A stdio server may print debugging text to standard output between messages.",
+          "correct": false,
+          "feedback": "The server must not write anything to `stdout` that is not a valid MCP message; logs go to standard error."
+        },
+        {
+          "key": "d",
+          "text": "A Streamable HTTP server should bind to all network interfaces so that every client can reach it.",
+          "correct": false,
+          "feedback": "When running locally the specification recommends binding only to localhost (127.0.0.1), not to 0.0.0.0."
+        }
+      ],
+      "explanation": "Section 2: stdio is a subprocess the host launches, with standard output reserved for protocol messages and credentials from the environment; Streamable HTTP is a network service, so the specification asks for `Origin` validation, a localhost bind when local, and authentication.",
+      "hints": [
+        "One transport is a child process of the host, the other a network service; which one needs protecting from the network?"
+      ]
+    },
+    {
+      "id": "ctx-029-q05",
+      "type": "mcq",
+      "track": "connect",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "6",
+      "est_minutes": 4,
+      "tags": [
+        "agents-md",
+        "instructions"
+      ],
+      "connects": [
+        "ctx-014"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team ships an MCP server whose repository holds an `AGENTS.md` saying \"never refund more than 1,000 dollars without confirmation\". The server's code has no such check and passes no `instructions`. A user connects it to Claude Desktop. Which statement is right?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Claude Desktop loads the `AGENTS.md` when the server is enabled, so the model follows the rule.",
+          "correct": false,
+          "feedback": "Nothing in the protocol sends a repository file to the host; the host starts `server.py` and never sees the file."
+        },
+        {
+          "key": "b",
+          "text": "The file never reaches the host's model through MCP, and only a check in code would enforce the limit.",
+          "correct": true,
+          "feedback": "Right. The protocol's channel for guidance is the server's `instructions`, and guidance is not a control: D1 puts the limit in the tool's code."
+        },
+        {
+          "key": "c",
+          "text": "The rule holds because `AGENTS.md` is placed in layer 01, the system prompt, which the model always obeys.",
+          "correct": false,
+          "feedback": "No layer is always obeyed, and this file does not reach the window at all through the server."
+        },
+        {
+          "key": "d",
+          "text": "The rule holds as long as the tool's description repeats it word for word.",
+          "correct": false,
+          "feedback": "A description is text the model reads and usually follows; it is not a permission boundary."
+        }
+      ],
+      "explanation": "Section 6: `AGENTS.md` is a repository file for coding agents (post 14, section 4), not something an MCP host loads. Guidance for the host's model travels as the server's `instructions` (from `server/discover`, or `initialize` in earlier revisions), and no text, wherever it lands, enforces a limit; the code does.",
+      "hints": [
+        "Trace how the file would travel from the repository to the host's model.",
+        "Ask whether any text in the window is a control."
+      ]
+    },
+    {
+      "id": "ctx-029-q06",
+      "type": "numeric",
+      "track": "run",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "13",
+      "est_minutes": 4,
+      "tags": [
+        "tests",
+        "companion"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "From the series root, run `uv run --with pytest --with \"mcp==2.3.0\" --with pydantic python -m pytest -v -p no:cacheprovider code/29-mcp-server-full/tests`. How many tests are collected, and how many of them call `issue_refund`?",
+      "answer": {
+        "parts": [
+          {
+            "label": "tests collected",
+            "value": 6,
+            "tolerance": 0,
+            "unit": ""
+          },
+          {
+            "label": "tests that call issue_refund",
+            "value": 3,
+            "tolerance": 0,
+            "unit": ""
+          }
+        ]
+      },
+      "precision_note": "pytest -v lists six tests in tests/test_server.py; three call issue_refund (test_refund_under_threshold, test_refund_over_threshold_requires_confirmation, test_refund_unknown_order).",
+      "explanation": "Section 8: the six tests cover search by email, a search with no input, a refund under the threshold, a refund over it, an unknown order, and the queue validation of `escalate_to_human`. The three refund tests pin the permission boundary's behaviour as plain function calls.",
+      "hints": [
+        "With -v, pytest prints one line per test.",
+        "Count the test names that start with test_refund."
+      ]
+    },
+    {
+      "id": "ctx-029-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "10",
+      "est_minutes": 5,
+      "tags": [
+        "permission-boundary",
+        "split-refund"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A customer of order ORD-9004 (total 12,000 dollars) asks for 2,600 dollars back. The agent is told that refunds over 1,000 dollars need confirmation, and instead issues the amount as equal refunds, each at or below the threshold. With the companion's `issue_refund` as written, what is the smallest number of calls that does this, and how many of those calls return `requires_confirmation: true`?",
+      "answer": {
+        "parts": [
+          {
+            "label": "calls",
+            "value": 3,
+            "tolerance": 0,
+            "unit": ""
+          },
+          {
+            "label": "calls returning requires_confirmation",
+            "value": 0,
+            "tolerance": 0,
+            "unit": ""
+          }
+        ]
+      },
+      "precision_note": "ceil(2600 / 1000) = 3 calls of 866.67 dollars; each is under the order total of 12,000 and at or below the threshold, and the tool keeps no history, so all three return ok.",
+      "explanation": "Section 10: the threshold is checked per call and the tool is stateless, so splitting a refused amount into pieces under the threshold passes every check. The fix is a running total per order that the check reads.",
+      "hints": [
+        "How many pieces of at most 1,000 dollars make 2,600?",
+        "Does `issue_refund` know about the refunds it made before?"
+      ]
+    },
+    {
+      "id": "ctx-029-q08",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "permission-boundary",
+        "d1"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In one sentence: why does `issue_refund` enforce its threshold with an `if` statement in its body, when its description already tells the model that larger refunds need confirmation?",
+      "answer": {
+        "model": "Because the model treats the description as guidance it may not follow, or may be talked out of by injected text, whereas the check in code runs on every call whatever the model proposes.",
+        "accept": [
+          "^(?=(?:\\S+\\s+){5}\\S)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\b(code|check|if|server|function)\\b(?:(?!\\b(model|llm|description|prompt)\\b)[^.;]){0,30}\\b(can|could|may|might|will)\\s+(be\\s+)?(ignor|bypass|skip|disregard)\\w*)(?![\\s\\S]*\\b(description|prompt|model|llm)\\b(?:(?!\\b(code|check|if|server)\\b)[^.;]){0,20}\\b(is|are|gets?)\\s+(always\\s+)?(enforced|guaranteed|binding)\\b)(?![\\s\\S]*\\b(model|llm)\\b(?:(?!\\bnot\\b|n't\\b)[^.;]){0,20}\\b(always|reliably|never fails to)\\s+(follows?|obeys?|respects?)\\b)(?![\\s\\S]*\\b(code|check)\\b[^.;]{0,20}\\b(does not|doesn'?t|never|cannot|can'?t)\\s+(run|enforce|apply|hold)\\w*)(?![\\s\\S]*\\b(faster|cheaper|tokens?|latency|performance|readab\\w*)\\b)(?=[\\s\\S]*\\b(model|llm|description|prompt|text|instruction)s?\\b[\\s\\S]{0,120}?\\b(ignor\\w*|disregard\\w*|not\\s+(always\\s+)?(follow|obey|respect|enforc|guarantee|binding|a\\s+control)\\w*|not\\s+(the\\s+|a\\s+)?(permission|control|guard|boundary|security)\\w*|may\\s+not|might\\s+not|can\\s+(choose\\s+to\\s+)?not|won'?t\\s+always|doesn'?t\\s+always|does\\s+not\\s+always|untrust\\w*|not\\s+trust\\w*|suggest\\w*|hints?|guidance|advisory|request|bypass\\w*|trick\\w*|manipulat\\w*|inject\\w*|overrid\\w*|talked|persuad\\w*|misread\\w*|mistak\\w*|wrong|err\\w*|fail\\w*|probabilist\\w*|unreliabl\\w*|fallibl\\w*)|[\\s\\S]*\\b(ignor\\w*|disregard\\w*|bypass\\w*|trick\\w*|manipulat\\w*|inject\\w*|overrid\\w*|talk\\w*)\\b[\\s\\S]{0,60}?\\b(model|llm|description|prompt|instruction)s?\\b)(?=[\\s\\S]*\\b(code|if|check|condition|server|function|line|program)s?\\b[\\s\\S]{0,120}?\\b(always|every\\s+(single\\s+)?(call|time|request|refund)|enforc\\w*|regardless|whatever|no\\s+matter|determinist\\w*|guarante\\w*|cannot\\s+be\\s+(bypass|ignor|skip|talk|argu)\\w*|can'?t\\s+be\\s+(bypass|ignor|skip|talk|argu)\\w*|holds?|binding|boundar\\w*|actually\\s+(stops?|blocks?|prevents?)|stops?|blocks?|prevents?|refuses?|runs?\\s+on\\s+every)|[\\s\\S]*\\b(enforc\\w*|guarante\\w*|always\\s+runs?|runs\\s+every)\\b[\\s\\S]{0,60}?\\b(code|if|check|server|function)\\b|[\\s\\S]*\\bbut\\s+(the\\s+)?(code|if(\\s+statement)?|check|condition)\\s+is\\s*\\.?\\s*$)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Sections 4 and 5: the description is text the model reads and usually follows; the `if amount > REFUND_THRESHOLD` line makes the rule true on every call. It is D1 of post 23: the model is not the permission system.",
+      "hints": [
+        "Compare what happens when the model does not do what the description says with what happens when the code does not."
+      ]
+    },
+    {
+      "id": "ctx-029-q09",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "stdio",
+        "logging"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A developer adds `print(\"refund called\")` inside a tool of a server that runs over stdio, and the host starts reporting errors. In one sentence: why?",
+      "answer": {
+        "model": "Over stdio the server's standard output is the protocol channel, so the printed line lands among the JSON-RPC messages and the host cannot parse it as a valid message.",
+        "accept": [
+          "^(?=(?:\\S+\\s+){5}\\S)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\b(print|it|output)\\b[^.;]{0,20}\\b(goes|go|is\\s+sent|is\\s+written|lands)\\s+(only\\s+)?(to|on)\\s+(stderr|standard\\s+error)\\b)(?![\\s\\S]*\\bstdout\\b[^.;]{0,25}\\b(is\\s+not|isn'?t|not)\\s+(used|the\\s+protocol|read)\\b)(?![\\s\\S]*\\b(slow\\w*|latency|memory|performance|tokens?|cost)\\b)(?=[\\s\\S]*\\b(stdout|standard\\s+output|output\\s+stream|the\\s+pipe|the\\s+channel|the\\s+stream|protocol\\s+(channel|stream))\\b)(?=[\\s\\S]*\\b(protocol|json[- ]?rpc|mcp\\s+messages?|messages?|channel|wire|framing)\\b)(?=[\\s\\S]*\\b(corrupt\\w*|invalid|not\\s+(a\\s+)?valid|malformed|garbl\\w*|can'?t\\s+(be\\s+)?pars\\w*|cannot\\s+(be\\s+)?pars\\w*|fails?\\s+to\\s+pars\\w*|unparsabl\\w*|unparseabl\\w*|pars\\w*\\s+(error|fail\\w*)|break\\w*|mix\\w*|interleav\\w*|inject\\w*|pollut\\w*|confus\\w*|not\\s+json|isn'?t\\s+json|non[- ]?json|only\\s+valid|desync\\w*|out\\s+of\\s+sync)\\b)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 2: the stdio transport carries newline-delimited JSON-RPC on standard output, and the specification says the server must not write anything there that is not a valid MCP message. Logging belongs on standard error, which hosts such as Claude Desktop collect in a log file.",
+      "hints": [
+        "Ask which stream the host reads the server's replies from.",
+        "What does the host expect every line on that stream to be?"
+      ]
+    },
+    {
+      "id": "ctx-029-q10",
+      "type": "short",
+      "track": "connect",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "structured-content",
+        "structured-output"
+      ],
+      "connects": [
+        "ctx-021"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In one sentence: how does a tool result's `structuredContent` differ from the structured outputs of post 21 (strict mode and constrained decoding)?",
+      "answer": {
+        "model": "structuredContent is data the server's tool produces and returns, while structured outputs constrain the tokens the model itself generates so that its answer fits a schema.",
+        "accept": [
+          "^(?=(?:\\S+\\s+){5}\\S)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\bstructured\\s*content\\b[^.;]{0,40}\\b(generated|produced|written|decoded|emitted)\\s+by\\s+the\\s+(model|llm)\\b)(?![\\s\\S]*\\bstructured\\s*content\\b[^.;]{0,30}\\b(uses?|is|relies\\s+on|comes\\s+from)\\s+(constrained\\s+decoding|strict\\s+mode)\\b)(?![\\s\\S]*\\bstructured\\s+outputs?\\b[^.;]{0,40}\\b(produced|returned|generated|written)\\s+by\\s+the\\s+(server|tool)\\b)(?![\\s\\S]*\\b(no|there is no)\\s+difference\\b)(?![\\s\\S]*\\b(they are|both are)\\s+the\\s+same\\b)(?=[\\s\\S]*\\b(server|tool|function|code|handler)s?\\b[\\s\\S]{0,80}?\\b(produc\\w*|return\\w*|creat\\w*|build\\w*|emit\\w*|send\\w*|computes?|computed|generat\\w*|writes?|written|own\\s+data|data)|[\\s\\S]*\\b(produc\\w*|return\\w*|creat\\w*|emitt\\w*|sent|generat\\w*|comes?|coming)\\b\\s+(by|from)\\s+the\\s+(server|tool|function|code)\\b)(?=[\\s\\S]*\\b(model|llm|decod\\w*|generation|sampl\\w*|tokens?)\\b)(?=[\\s\\S]*\\b(constrain\\w*|restrict\\w*|forc\\w*|guarantee\\w*|grammar|mask\\w*|schema[- ]compliant|conform\\w*|shap\\w*|strict|limit\\w*|controls?|what\\s+the\\s+model\\s+(writes|generates|outputs|emits))\\b)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 4: the specification notes that `structuredContent` is server-produced result data, unrelated to LLM structured outputs. The companion returns Pydantic models, which the SDK sends as `structuredContent` plus the same JSON as text; post 21's constrained decoding acts on the model's own generation.",
+      "hints": [
+        "Ask who writes each one: the server or the model."
+      ]
+    },
+    {
+      "id": "ctx-029-q11",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 4,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "9",
+      "est_minutes": 20,
+      "tags": [
+        "defences",
+        "design",
+        "untrusted-content"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The team wants a fourth tool, `read_ticket_history(ticket_id)`, that returns the last ten messages a customer wrote on a support ticket so the agent can summarise them. Design it for the acme-support server: for each of the four architectural defences D1 to D4, say what the tool's code does; add the specification's server obligations that apply to it; and name what the host must still do.",
+      "kind": "design",
+      "answer_length": "half a page",
+      "solution": "**D1, the model is not the permission system.** The tool reads, so it needs no confirmation, but it must not let the model choose whose history it reads: the code checks that `ticket_id` belongs to the customer of the current session (from the server's own session or token, never from an argument the model fills), and refuses otherwise.\n\n**D2, bounded blast radius.** It runs with read access to one table of ticket messages and nothing else, returns at most ten messages, and truncates each to a fixed length, so neither a large ticket nor a crafted argument can pull more data into the window.\n\n**D3, filter at trust boundaries.** The messages are external text: customer-written and possibly carrying instructions. The tool returns them as structured data, each with a trust tag `external` and its author and time, inside delimiters, and the server's guidance (its `instructions` and the description) says that this content is data to summarise, never instructions. Inputs are validated in the function as well as by the schema, for example `ticket_id` against a fixed pattern.\n\n**D4, never silently merge attacker text into trusted context.** The tool writes nothing to memory, and nothing it returns may become a rule or a `system` fact; if the agent proposes a memory write after reading it, that write carries the `external` tag and is refused as a rule.\n\n**Specification obligations.** Servers MUST validate all tool inputs (schema plus in-function check), implement access controls (the ticket-ownership check), rate limit invocations (a cap per session) and sanitise outputs (strip markup and links that could exfiltrate data when rendered).\n\n**What the host must still do.** Apply D3 to the tool result on its side too, show the user which tool ran, and alert or gate when a session that read this history then calls an outward tool, the cross-server flow of post 23, section 9.",
+      "rubric": [
+        {
+          "criterion": "D1: ownership of the ticket is checked in code from the session, not from a model-supplied argument.",
+          "points": 2
+        },
+        {
+          "criterion": "D2: least-privilege read access and a bounded size of the result.",
+          "points": 1
+        },
+        {
+          "criterion": "D3: messages returned as tagged, delimited external data, with inputs validated in the function as well as by the schema.",
+          "points": 2
+        },
+        {
+          "criterion": "D4: nothing from the history may become a memory rule or a trusted fact.",
+          "points": 1
+        },
+        {
+          "criterion": "Names the four server obligations of the specification and applies each.",
+          "points": 2
+        },
+        {
+          "criterion": "States a host-side duty, such as tagging tool results or watching a read followed by an outward call.",
+          "points": 1
+        }
+      ],
+      "explanation": "Section 9 applies post 23's D1 to D4 to the existing tools; a tool that returns customer-written text is the case D3 and D4 exist for. The specification's Tools page adds input validation, access control, rate limiting and output sanitisation as server obligations.",
+      "hints": [
+        "Start from who wrote the text the tool returns.",
+        "For D1, ask which argument the model could change to read someone else's ticket."
+      ]
+    },
+    {
+      "id": "ctx-029-q12",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 5,
+      "outcomes": [
+        "o2",
+        "o3"
+      ],
+      "section": "10",
+      "est_minutes": 30,
+      "tags": [
+        "permission-boundary",
+        "critique",
+        "state"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Critique `issue_refund` as a permission boundary for real money. Find at least three distinct ways the server as written lets more than the threshold leave without a person's approval, or lets the rule be broken in another way, and explain each. Then redesign the tool so the 1,000-dollar rule holds, keeping refunds under the threshold automatic.",
+      "kind": "critique",
+      "answer_length": "one page",
+      "solution": "**Weaknesses.**\n\n1. *Splitting.* The check sees one call: 2,600 dollars on ORD-9004 goes through as three calls of 866.67. The tool is stateless, so the order-total check also compares each piece with the full total, and the sum of refunds can exceed what the order cost.\n2. *Concurrency.* Even with a running total added naively (read the total, compare, then write), two calls in flight can both read the old total and both pass: a check-then-act race.\n3. *Retries without idempotency.* A host or model that retries a call after a timeout makes a second refund; the demo id `RF-{last four}-{int(amount)}` is not an idempotency key, and two different refunds of 50.20 and 50.90 share the id `RF-9001-50`.\n4. *Validation that coerces.* `validate_call` and the schema now refuse `amount=-5` and NaN on both paths, but Pydantic's lax mode turns `true` into a refund of 1 and `\"100\"` into 100, and the refund id truncates the amount; money wants a strict decimal type.\n5. *Scope of the cap.* The cap is per order: a customer with several orders gets 1,000 dollars per order with no approval, and the server has one identity, so it cannot tell which user's session asked.\n6. *The approval itself.* `requires_confirmation` only tells the model to escalate; nothing binds a later approval to this request, so a model or an injection could call `issue_refund` again with a smaller amount.\n\n**Redesign.** Validate strictly (positive, finite, Decimal with two places, no coercion). Keep a refunds ledger and, in one database transaction with a row lock on the order (or a unique constraint), compute the running total for the order and for the customer over a window; auto-approve only when the new running total stays at or below the threshold and the order total. Otherwise create a pending refund record and return its id with `requires_confirmation: true`; only an out-of-band approval by a person (a separate admin tool or user interface the model cannot call, authenticated as the approver) moves it to paid. Require an idempotency key per request and return the existing result for a repeat. Take the user identity from the session or token, not from arguments. Log every decision to an audit table, and alert on several sub-threshold refunds in a short time.",
+      "rubric": [
+        {
+          "criterion": "Identifies splitting into sub-threshold calls and the missing running total.",
+          "points": 2
+        },
+        {
+          "criterion": "Identifies a second distinct weakness: the check-then-act race, retries without idempotency, or the per-order scope.",
+          "points": 2
+        },
+        {
+          "criterion": "Identifies that `requires_confirmation` binds no later approval to the request, so a smaller or repeated call by the model or injected text goes through.",
+          "points": 2
+        },
+        {
+          "criterion": "Redesign keeps a ledger and checks the running total atomically in one transaction.",
+          "points": 2
+        },
+        {
+          "criterion": "Approval is out of band and bound to a pending record, not left to the model's next call.",
+          "points": 2
+        },
+        {
+          "criterion": "Adds idempotency, strict validation and identity from the session, with an audit trail.",
+          "points": 2
+        }
+      ],
+      "explanation": "Sections 5, 8 and 10: the boundary holds for one well-formed call through the protocol, but a rule about money is a rule about totals over time and over callers. Statelessness, races, retries and an approval bound to nothing each let it be bypassed; a ledger checked atomically, an out-of-band approval and idempotency keys close them.",
+      "hints": [
+        "Ask what the tool knows about earlier refunds on the same order.",
+        "Consider two calls at the same moment, and what stops the next call after `requires_confirmation: true`."
+      ]
+    },
+    {
+      "id": "ctx-029-q13",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o2",
+        "o5"
+      ],
+      "section": "10",
+      "est_minutes": 12,
+      "tags": [
+        "permission-boundary",
+        "running-total"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "`decide(amount, order_total, refunded)` decides one refund request on an order that has already had `refunded` dollars refunded. It must return \"refuse\" when the amount is not a positive finite number or when `refunded + amount` exceeds `order_total`; \"confirm\" when `refunded + amount` exceeds `THRESHOLD`; and \"refund\" otherwise (a running total exactly at the threshold is automatic). The starter checks each call on its own, as the companion does, so splitting a large refund defeats it. Fix it.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "THRESHOLD = 1000  # dollars\n\n\ndef decide(amount, order_total, refunded):\n    \"\"\"Return \"refund\", \"confirm\" or \"refuse\" for one refund request.\"\"\"\n    if amount > order_total:\n        return \"refuse\"\n    if amount > THRESHOLD:\n        return \"confirm\"\n    return \"refund\"\n",
+      "solution": "import math\n\nTHRESHOLD = 1000  # dollars\n\n\ndef decide(amount, order_total, refunded):\n    \"\"\"Return \"refund\", \"confirm\" or \"refuse\" for one refund request.\"\"\"\n    if not isinstance(amount, (int, float)) or isinstance(amount, bool):\n        return \"refuse\"\n    if not math.isfinite(amount) or amount <= 0:\n        return \"refuse\"\n    total = refunded + amount\n    if total > order_total:\n        return \"refuse\"\n    if total > THRESHOLD:\n        return \"confirm\"\n    return \"refund\"\n",
+      "tests": "# Single requests behave as before.\nassert decide(50, 1499, 0) == \"refund\"\nassert decide(1500, 12000, 0) == \"confirm\"\nassert decide(1500, 1499, 0) == \"refuse\"\nassert decide(1000, 12000, 0) == \"refund\"   # at the threshold is automatic\n\n# Splitting no longer gets round the threshold.\nassert decide(750, 12000, 0) == \"refund\"\nassert decide(750, 12000, 750) == \"confirm\"\nassert decide(500, 12000, 500) == \"refund\"   # running total exactly 1,000\nassert decide(501, 12000, 500) == \"confirm\"\n\n# The order total counts earlier refunds too.\nassert decide(100, 1499, 1450) == \"refuse\"\nassert decide(49, 1499, 1450) == \"confirm\"\nassert decide(40, 49, 0) == \"refund\"\nassert decide(10, 49, 40) == \"refuse\"\n\n# Bad amounts are refused, whatever the path that called the function.\nfor bad in (0, -5, -0.01, float(\"nan\"), float(\"inf\"), \"100\", None):\n    assert decide(bad, 12000, 0) == \"refuse\", bad\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 10: a threshold checked per call is defeated by splitting, because the tool keeps no history. Checking the running total, `refunded + amount`, against both the order total and the threshold closes it, and validating the amount inside the function covers callers that never pass through `tools/call` (section 8). A NaN fails every comparison, so it must be refused explicitly.",
+      "hints": [
+        "Replace `amount` with the running total in both comparisons.",
+        "Try `float(\"nan\")` and `True` on the starter: what do the comparisons return?"
+      ]
+    },
+    {
+      "id": "ctx-029-q14",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "host",
+        "claude-desktop",
+        "live-check"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Put the steps of connecting the companion server to Claude Desktop and checking its confirmation gate in the order they must happen.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Quit Claude Desktop completely and start it again."
+        },
+        {
+          "key": "b",
+          "text": "Ask the agent to refund 1,500 dollars on ORD-9004 and watch `requires_confirmation: true` lead to `escalate_to_human`."
+        },
+        {
+          "key": "c",
+          "text": "Open Settings, Developer, Edit Config, and add the `acme-support` block under `mcpServers` with the absolute path to `server.py`."
+        },
+        {
+          "key": "d",
+          "text": "Check that the server's three tools are listed in the host."
+        },
+        {
+          "key": "e",
+          "text": "Install Claude Desktop."
+        }
+      ],
+      "answer": [
+        "e",
+        "c",
+        "a",
+        "d",
+        "b"
+      ],
+      "explanation": "Section 7: the configuration file is created from the installed application's settings, the application reads it only at start-up, and the tools must be listed before a live turn can exercise them. The refund turn comes last because it depends on everything before it.",
+      "hints": [
+        "The host reads its configuration file only when it starts.",
+        "A tool cannot be called before it is listed."
+      ]
+    },
+    {
+      "id": "ctx-029-q15",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "1",
+      "est_minutes": 3,
+      "tags": [
+        "primitives",
+        "layers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Match each part of the acme-support project to who decides that it is used and how it reaches the model, if at all.",
+      "left": [
+        {
+          "key": "a",
+          "text": "`issue_refund`, a tool"
+        },
+        {
+          "key": "b",
+          "text": "`file://refunds_policy.md`, a resource"
+        },
+        {
+          "key": "c",
+          "text": "`triage_intake`, a prompt"
+        },
+        {
+          "key": "d",
+          "text": "`AGENTS.md`, beside the server"
+        }
+      ],
+      "right": [
+        {
+          "key": "p",
+          "text": "The model decides to call it; its schema rides in layer 02 on every call."
+        },
+        {
+          "key": "q",
+          "text": "The host application decides to attach it, for example in layer 04."
+        },
+        {
+          "key": "r",
+          "text": "The user picks it, and it becomes layer 06, the user instruction."
+        },
+        {
+          "key": "s",
+          "text": "No one in the protocol: people and coding agents read it in the repository."
+        },
+        {
+          "key": "t",
+          "text": "The server sends it with every tools/call result."
+        }
+      ],
+      "answer": {
+        "a": "p",
+        "b": "q",
+        "c": "r",
+        "d": "s"
+      },
+      "explanation": "Sections 1 and 6: in MCP, tools are the model's to call, resources the application's to attach and prompts the user's to pick, as post 15 tabulates. `AGENTS.md` is a repository file outside the protocol; nothing is sent with every result.",
+      "hints": [
+        "For each primitive, ask whose action brings it into the window.",
+        "One part of the project is not an MCP primitive at all."
+      ]
+    },
+    {
+      "id": "ctx-029-q16",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "2",
+      "est_minutes": 5,
+      "tags": [
+        "streamable-http",
+        "authentication"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "To share the server with a team, a developer changes the last line to `mcp.run(transport=\"streamable-http\")`, configures it to listen on all interfaces of a machine on the office network, and adds nothing else. Which statement is right?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Nothing changes for security, because the threshold in `issue_refund` still holds.",
+          "correct": false,
+          "feedback": "The threshold limits one call's amount; it does not decide who may call. Any caller can still make sub-threshold refunds and read every order."
+        },
+        {
+          "key": "b",
+          "text": "Anyone who can reach the port can call every tool; authentication and an `Origin` check must come first.",
+          "correct": true,
+          "feedback": "Right. Moving to HTTP turns a local process into a network service: reach becomes whatever can route to the port, so authentication and the `Origin` check come before the tools."
+        },
+        {
+          "key": "c",
+          "text": "Only the people whose hosts list the server in `mcpServers` can reach it, because the configuration file is the access control.",
+          "correct": false,
+          "feedback": "The configuration file is the client's list of servers to connect to; it controls nothing on the server's side."
+        },
+        {
+          "key": "d",
+          "text": "The model's input schema validation blocks unauthorised callers, because their requests carry no session.",
+          "correct": false,
+          "feedback": "Schema validation checks argument shapes, not identity; revision 2026-07-28 has no protocol-level session either."
+        }
+      ],
+      "explanation": "Section 2: the specification asks Streamable HTTP servers to validate `Origin`, to bind only to localhost when running locally, and to implement authentication. A server on a shared interface with none of these exposes every tool to every caller that can reach it.",
+      "hints": [
+        "Ask who can reach the port after the change.",
+        "Which of the post's checks decide who is calling, rather than what is asked?"
+      ]
+    }
+  ]
+}
