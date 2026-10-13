@@ -1,79 +1,26 @@
 id: ctx-020
 slug: 20-evaluation
-title: "20 · Evaluation"
-
-description: >
-  Learn how to systematically evaluate LLM applications using the
-  four-layer evaluation pyramid, regression testing, golden datasets,
-  LLM-as-a-judge, RAG-specific metrics, and production monitoring.
-  Build reliable CI evaluation pipelines that prevent regressions before
-  deployment.
-
-author: "Ajay"
-
+title: "20 - Evaluation"
+summary: "A four-tier evaluation pyramid, three metric families, a golden set and a CI regression gate turn changing an LLM system into improving it; the LLM judge has four failure modes to manage."
 date: 2026-05-12
-last_modified: 2026-05-12
-
-tags:
-  - context-engineering
-  - evaluation
-  - llm-evaluation
-  - ragas
-  - promptfoo
-  - deepeval
-  - llm-as-judge
-  - regression-testing
-  - production-ai
-
-category: Production Systems
-series: Context Engineering
+updated: 2026-10-13
+status: complete
 part: "Part IV - Production-grade practice"
-chapter: "Part IV — Production Concerns"
-
+level: intermediate
+reading_time: 16
+tags: [context-engineering, evaluation, llm-as-judge, golden-set, regression-gate, ragas, continuous-integration]
 hero: diagrams/00-hero-evaluation.svg
-hero_alt: "Four-layer evaluation pyramid showing unit, component, end-to-end, and online evaluation with increasing cost and decreasing frequency"
-
-reading_time: 24
-
-toc: true
-draft: false
-
-keywords:
-  - Evaluation
-  - LLM Evaluation
-  - AI Evaluation
-  - Context Engineering
-  - Evaluation Pyramid
-  - Unit Testing
-  - Component Testing
-  - End-to-End Evaluation
-  - Online Evaluation
-  - Regression Testing
-  - Golden Dataset
-  - Golden Set
-  - LLM as Judge
-  - Pairwise Evaluation
-  - Absolute Evaluation
-  - Promptfoo
-  - Ragas
-  - DeepEval
-  - LangSmith Evaluation
-  - Faithfulness
-  - Answer Relevance
-  - Context Precision
-  - Context Recall
-  - Citation Validation
-  - Hallucination Detection
-  - CI/CD
-  - GitHub Actions
-  - Benchmarking
-  - Human Evaluation
-  - MT-Bench
-  - Chatbot Arena
-  - Production AI
-  - AI Agents
-
-canonical_url: ""
-
-prev: ../19-memory-in-production/
-next: ../21-structured-output-and-guardrails/
+prerequisites: [ctx-011]
+code: included
+outcomes:
+  - id: o1
+    text: "Place a check on the four-tier evaluation pyramid and pick its metric family (deterministic, LLM judge or human) and its scoring shape (absolute or pairwise)."
+  - id: o2
+    text: "Wire a regression gate on a golden set that blocks a pull request when a metric drops by more than its tolerance, and read which cases flipped."
+  - id: o3
+    text: "Define faithfulness, answer relevancy, context precision and context recall, and say which inputs each needs and what failure each catches."
+  - id: o4
+    text: "Recognise position bias, verbosity bias, self-preference and rubric drift in an LLM judge, and apply the mitigation for each."
+  - id: o5
+    text: "Choose the online signals to watch and turn each production incident into an offline fixture."
+recommended: [ctx-006]

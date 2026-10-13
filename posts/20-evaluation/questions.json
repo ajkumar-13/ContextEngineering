@@ -1,0 +1,809 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-020",
+  "next_ordinal": 19,
+  "questions": [
+    {
+      "id": "ctx-020-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "pyramid",
+        "unit-tier"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A test checks that the prompt assembler always places the user instruction last in the request body. It calls no model. Where does this check belong in the evaluation pyramid, and how often should it run?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The unit tier, as an ordinary test on every commit.",
+          "correct": true,
+          "feedback": "Right. It is deterministic code around the model, cheap enough to run on every commit."
+        },
+        {
+          "key": "b",
+          "text": "The component tier, on each pull request touching the assembler.",
+          "correct": false,
+          "feedback": "The component tier scores pieces that use a model or rank for one. Code that calls no model is a unit test."
+        },
+        {
+          "key": "c",
+          "text": "The end-to-end tier, on each pull request touching the answer.",
+          "correct": false,
+          "feedback": "An end-to-end case runs the whole pipeline at a higher cost per case. This check needs none of it."
+        },
+        {
+          "key": "d",
+          "text": "The online tier, watched on the production dashboard.",
+          "correct": false,
+          "feedback": "Online signals arrive after users have met the bug. A deterministic check belongs before the merge."
+        }
+      ],
+      "explanation": "Section 2 puts the deterministic code around the model (chunkers, parsers, schema validators, the prompt assembler) in the unit tier, run on every commit. Higher tiers exist for what a deterministic test cannot judge, and they run less often because each case costs more.",
+      "hints": [
+        "Ask whether the check needs a model, a ranking or real traffic to give its verdict."
+      ]
+    },
+    {
+      "id": "ctx-020-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "scoring-shape",
+        "regression-gate"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team wants a CI gate that fails a pull request when the quality of its free-text support answers drops. Which scoring setup suits the gate itself?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Pairwise judging of each new answer against the old one, counting wins.",
+          "correct": false,
+          "feedback": "Pairwise judging picks between two candidates and carries position bias; it yields no stable per-output score to track and threshold."
+        },
+        {
+          "key": "b",
+          "text": "Absolute rubric scores per answer, compared with a saved baseline.",
+          "correct": true,
+          "feedback": "Right. An absolute score is a number per output that can be averaged, tracked over time and thresholded against the baseline."
+        },
+        {
+          "key": "c",
+          "text": "Human labelling of every golden case on every pull request.",
+          "correct": false,
+          "feedback": "People are the slowest and costliest family. Their job in the harness is to calibrate the judge on a sample, not to gate each pull request."
+        },
+        {
+          "key": "d",
+          "text": "Exact string match of each answer against its gold answer.",
+          "correct": false,
+          "feedback": "Free-text answers rarely have one correct string, so exact match fails correct rephrasings. Deterministic checks need the right answers to be writable."
+        }
+      ],
+      "explanation": "Section 3: a regression gate needs absolute scores, one number per output to track and threshold, with no second candidate. Pairwise judging suits choosing between variants; people calibrate the judge; exact match suits constrained answers only.",
+      "hints": [
+        "The gate compares this run with a saved baseline. Which shape produces a number that can be compared like that?"
+      ]
+    },
+    {
+      "id": "ctx-020-q03",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 4,
+      "tags": [
+        "position-bias",
+        "pairwise"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A pairwise judge compares answers A and B twice. Shown A first, it prefers A. Shown B first, it prefers B. Under the swap protocol that Zheng et al. (2023) call the conservative approach, what is the verdict, and what do the two results suggest?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A wins, because it won the first judgement.",
+          "correct": false,
+          "feedback": "Which order is run first is arbitrary. The first judgement only shows that A won while it sat in the first position."
+        },
+        {
+          "key": "b",
+          "text": "A tie, and the judge appears to favour whichever answer comes first.",
+          "correct": true,
+          "feedback": "Right. A win counts only when the same answer wins both orders; here the verdict followed the position, the signature of position bias."
+        },
+        {
+          "key": "c",
+          "text": "B wins, because the later judgement reflects the judge's settled view.",
+          "correct": false,
+          "feedback": "A judge has no settled view across calls. The second judgement also followed the position, so it carries no more weight than the first."
+        },
+        {
+          "key": "d",
+          "text": "Rerun the first order until two results agree, then take that answer.",
+          "correct": false,
+          "feedback": "Rerunning one order keeps the same answer in the same position, so agreement there says nothing about position bias."
+        }
+      ],
+      "explanation": "Section 6: the paper's conservative approach judges both orders and declares a win only when the same answer is preferred in both, a tie otherwise. A verdict that flips with the order is exactly what the paper's consistency measure counts as inconsistent.",
+      "hints": [
+        "Write down which position won each time, not which answer.",
+        "A win has to survive the swap."
+      ]
+    },
+    {
+      "id": "ctx-020-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "ragas",
+        "metrics",
+        "reference"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "An evaluation set holds questions, the pipeline's retrieved contexts and its responses, but no reference answers, reference contexts or reference ids. Which of the four Ragas metrics cannot be computed on it?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Faithfulness",
+          "correct": false,
+          "feedback": "Faithfulness checks the response's claims against the retrieved contexts. It needs the question, the response and the contexts, all present."
+        },
+        {
+          "key": "b",
+          "text": "Answer relevancy",
+          "correct": false,
+          "feedback": "Answer relevancy compares questions generated from the response with the user's question. It needs only those two."
+        },
+        {
+          "key": "c",
+          "text": "Context precision",
+          "correct": false,
+          "feedback": "Context precision has a reference-free variant that judges relevance against the response instead of a reference answer."
+        },
+        {
+          "key": "d",
+          "text": "Context recall",
+          "correct": true,
+          "feedback": "Right. Context recall asks how much of what the answer needs was retrieved, and that needs a reference: an answer, contexts or ids."
+        }
+      ],
+      "explanation": "Section 5: context recall is the share of the reference answer's claims that the retrieved context supports (or, in the other variants, of the reference contexts or ids found). With no reference of any kind there is nothing to recall against.",
+      "hints": [
+        "For each metric, list the fields it compares."
+      ]
+    },
+    {
+      "id": "ctx-020-q05",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "self-preference",
+        "zheng-2023"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "What did Zheng et al. (2023) conclude about self-enhancement bias, an LLM judge favouring answers from its own model?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Every judge tested favoured its own model, which confirmed the bias for all.",
+          "correct": false,
+          "feedback": "GPT-3.5 did not favour itself in the paper's data, and the paper stops short of confirming the bias."
+        },
+        {
+          "key": "b",
+          "text": "Some judges seemed to favour themselves; the data could not settle it.",
+          "correct": true,
+          "feedback": "Right. GPT-4 showed a 10% and Claude-v1 a 25% higher win rate for themselves, and the paper says its limited data cannot determine whether the bias exists."
+        },
+        {
+          "key": "c",
+          "text": "No judge favoured itself, so a same-family judge is safe to use.",
+          "correct": false,
+          "feedback": "The paper did see judges favour themselves; it only could not establish the bias. Absence of proof is not proof of absence."
+        },
+        {
+          "key": "d",
+          "text": "It was the strongest bias measured, larger than position bias.",
+          "correct": false,
+          "feedback": "Position bias was the one the paper measured as strong (Table 2). Self-enhancement was the least settled of the three."
+        }
+      ],
+      "explanation": "Section 6: the paper saw GPT-4 favour itself with a 10% higher win rate and Claude-v1 with a 25% higher one, but GPT-3.5 did not, and it concluded that limited data could not determine whether the bias exists. The mitigation, a judge from another model family, is cheap enough to apply on suspicion.",
+      "hints": [
+        "The paper reports win rates for some judges and then states a limitation.",
+        "Check whether every judge favoured itself, and what the paper says its data can determine."
+      ]
+    },
+    {
+      "id": "ctx-020-q06",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "online",
+        "incident",
+        "golden-set"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A user reports that the assistant quoted a refund policy that was retired last month. The team fixes the retrieval filter and ships. What should happen to the incident in the evaluation harness?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Nothing more: the fix is live and the report is closed.",
+          "correct": false,
+          "feedback": "Without a case that checks it, a later change can bring the same bug back and no gate will notice."
+        },
+        {
+          "key": "b",
+          "text": "It becomes a golden case with the expected answer and source.",
+          "correct": true,
+          "feedback": "Right. Every online incident becomes an offline fixture, so the gate checks this question on every later change."
+        },
+        {
+          "key": "c",
+          "text": "It is counted on the dashboard as one more thumbs-down.",
+          "correct": false,
+          "feedback": "A dashboard counts feedback; it cannot stop the bug from returning in a pull request."
+        },
+        {
+          "key": "d",
+          "text": "The judge rubric is rewritten so that it penalises retired policies.",
+          "correct": false,
+          "feedback": "Editing the judge changes the measuring instrument and the baseline, and a rubric does not encode this case."
+        }
+      ],
+      "explanation": "Section 7: the rule that joins the tiers is that every online incident produces an offline fixture. The case stays in the golden set, so the same bug cannot return unseen; section 2 says to grow the golden set from real failures.",
+      "hints": [
+        "Ask what would stop the same bug from coming back in a future pull request."
+      ]
+    },
+    {
+      "id": "ctx-020-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "regression-gate",
+        "answer-match"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A golden set has 20 cases. The saved baseline scores `answer_match` 0.75. After a change, 13 of the 20 cases match. Give the drop in `answer_match` and the net number of cases lost.",
+      "answer": {
+        "parts": [
+          {
+            "label": "drop in answer_match",
+            "value": 0.1,
+            "tolerance": 0.001,
+            "unit": ""
+          },
+          {
+            "label": "net cases lost",
+            "value": 2,
+            "tolerance": 0,
+            "unit": "cases"
+          }
+        ]
+      },
+      "precision_note": "0.75 - 13/20 = 0.75 - 0.65 = 0.10; one case on 20 moves the mean by 1/20 = 0.05, so 0.10 is two cases. The baseline 0.75 is 15 of 20.",
+      "explanation": "Section 4: on 20 cases each case moves `answer_match` by 0.05. The baseline 0.75 is 15 matching cases, the change leaves 13, so the mean falls by 0.10, two net cases, and the companion's gate at a tolerance of 0.05 blocks it.",
+      "hints": [
+        "Turn the baseline score into a count of matching cases first."
+      ]
+    },
+    {
+      "id": "ctx-020-q08",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 5,
+      "tags": [
+        "noise-floor",
+        "standard-error",
+        "golden-set-size"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A golden set has $n = 50$ cases, and the system scores $p = 0.8$ on it. Give how much one case moves the mean score, and the standard error $\\sqrt{p(1-p)/n}$ of that score as an estimate of the score on all traffic, to three decimals.",
+      "answer": {
+        "parts": [
+          {
+            "label": "one case",
+            "value": 0.02,
+            "tolerance": 0.0005,
+            "unit": ""
+          },
+          {
+            "label": "standard error",
+            "value": 0.057,
+            "tolerance": 0.001,
+            "unit": ""
+          }
+        ]
+      },
+      "precision_note": "1/n = 1/50 = 0.02; sqrt(0.8 x 0.2 / 50) = sqrt(0.0032) = 0.0566, written 0.057. Dividing sqrt(p(1-p)) by n instead gives 0.008; forgetting the square root gives 0.0032.",
+      "explanation": "Section 5: one case moves a mean by $1/n$, and post 11's standard error $\\sqrt{p(1-p)/n}$ says how far the set's score may sit from the score on all traffic. Here the error, about 0.057, is close to three cases, so a gate on these 50 cases can say they got worse but cannot claim traffic got worse by a few hundredths.",
+      "hints": [
+        "The first part is a single division.",
+        "For the second, compute $p(1-p)$, divide by $n$, then take the square root."
+      ]
+    },
+    {
+      "id": "ctx-020-q09",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 4,
+      "tags": [
+        "faithfulness",
+        "context-recall",
+        "ragas"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A response makes 8 claims, and the retrieved context supports 6 of them. The reference answer makes 5 claims, and the retrieved context supports 4 of them. Give the response's faithfulness and the context recall as the Ragas documentation defines them.",
+      "answer": {
+        "parts": [
+          {
+            "label": "faithfulness",
+            "value": 0.75,
+            "tolerance": 0.005,
+            "unit": ""
+          },
+          {
+            "label": "context recall",
+            "value": 0.8,
+            "tolerance": 0.005,
+            "unit": ""
+          }
+        ]
+      },
+      "precision_note": "Faithfulness = supported response claims / all response claims = 6/8 = 0.75. Context recall = reference claims supported by the context / all reference claims = 4/5 = 0.8. Mixing the two counts gives 4/8 = 0.5 or 6/5 = 1.2.",
+      "explanation": "Section 5: faithfulness counts the response's own claims that the context supports, so it checks the generator; context recall counts the reference answer's claims that the context supports, so it checks the retriever. Each divides by the claims of its own text.",
+      "hints": [
+        "Faithfulness looks at the response's claims; context recall looks at the reference's.",
+        "Each ratio divides by the number of claims in the text it examines."
+      ]
+    },
+    {
+      "id": "ctx-020-q10",
+      "type": "numeric",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "10",
+      "est_minutes": 4,
+      "tags": [
+        "tolerance",
+        "floating-point",
+        "golden-set-size"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A golden set has 40 cases. Following the advice to set a gate's tolerance between multiples of $1/n$, so that no drop lands exactly on the boundary, give the change in a mean score caused by one case, and the tolerance halfway between a one-case drop and a two-case drop.",
+      "answer": {
+        "parts": [
+          {
+            "label": "one case",
+            "value": 0.025,
+            "tolerance": 0.0005,
+            "unit": ""
+          },
+          {
+            "label": "tolerance",
+            "value": 0.0375,
+            "tolerance": 0.0005,
+            "unit": ""
+          }
+        ]
+      },
+      "precision_note": "1/40 = 0.025; halfway between 0.025 and 0.050 is 0.0375 (1.5 cases). Copying the twenty-case value 0.075 would let a two-case drop (0.05) through.",
+      "explanation": "Section 10: with a tolerance equal to a whole number of cases, a drop of exactly that many cases sits on the boundary and floating point decides it. A tolerance of 1.5 cases, here 0.0375, passes any one-case drop and blocks any drop of two or more, with no rounding in play.",
+      "hints": [
+        "One case moves the mean by $1/n$.",
+        "Take the midpoint of one and two cases' worth."
+      ]
+    },
+    {
+      "id": "ctx-020-q11",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 10,
+      "tags": [
+        "position-bias",
+        "pairwise",
+        "swap"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "`pairwise_verdict(judge, a, b)` should apply the conservative swap protocol: judge the two answers in both orders and return `\"a\"` or `\"b\"` only when the same answer wins both, and `\"tie\"` otherwise. `judge(first, second)` returns `\"first\"` or `\"second\"`. The starter judges one order only, so a judge that always prefers the first position makes `a` win every time. Fix it.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "def pairwise_verdict(judge, a, b):\n    \"\"\"Judge a against b in both orders; a win must survive the swap, else \"tie\".\n\n    judge(first, second) returns \"first\" or \"second\".\n    \"\"\"\n    return \"a\" if judge(a, b) == \"first\" else \"b\"\n",
+      "solution": "def pairwise_verdict(judge, a, b):\n    \"\"\"Judge a against b in both orders; a win must survive the swap, else \"tie\".\n\n    judge(first, second) returns \"first\" or \"second\".\n    \"\"\"\n    one = \"a\" if judge(a, b) == \"first\" else \"b\"\n    two = \"b\" if judge(b, a) == \"first\" else \"a\"\n    return one if one == two else \"tie\"\n",
+      "tests": "calls = []\n\n\ndef first_lover(x, y):\n    calls.append((x, y))\n    return \"first\"\n\n\ndef second_lover(x, y):\n    return \"second\"\n\n\ndef longer(x, y):\n    return \"first\" if len(x) >= len(y) else \"second\"\n\n\ndef knows(x, y):\n    return \"first\" if \"correct\" in x else \"second\"\n\n\n# A judge that only follows the position never produces a winner.\nassert pairwise_verdict(first_lover, \"answer A\", \"answer B\") == \"tie\"\nassert (\"answer A\", \"answer B\") in calls and (\"answer B\", \"answer A\") in calls\nassert pairwise_verdict(second_lover, \"p\", \"q\") == \"tie\"\n\n# A judge that follows the content gives the same winner whichever answer is passed first.\nassert pairwise_verdict(longer, \"a long answer\", \"short\") == \"a\"\nassert pairwise_verdict(longer, \"short\", \"a long answer\") == \"b\"\nfor a, b, want in [(\"correct answer\", \"wrong\", \"a\"), (\"wrong\", \"correct answer\", \"b\")]:\n    assert pairwise_verdict(knows, a, b) == want, (a, b)\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 6: the paper's conservative approach calls the judge twice with the order swapped and declares a win only when the same answer is preferred both times. A judge whose verdict follows the position then yields a tie instead of a false win, while a judge that follows the content still names the better answer.",
+      "hints": [
+        "Call the judge a second time with the arguments swapped, and translate its \"first\" back to the right answer.",
+        "Return the winner only when both calls name the same answer."
+      ]
+    },
+    {
+      "id": "ctx-020-q12",
+      "type": "code",
+      "track": "run",
+      "difficulty": 4,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "10",
+      "est_minutes": 12,
+      "tags": [
+        "regression-gate",
+        "tolerance",
+        "floating-point"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "`check_regression(current, baseline, tolerance)` should return the metrics whose score fell by more than `tolerance` below the baseline, or that are missing from `current`. A drop of exactly the tolerance must pass whatever the floating-point rounding of the scores. On a 20-case golden set the starter blocks the one-case drop from 0.20 to 0.15 while it passes the one from 0.75 to 0.70. Fix it.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "def check_regression(current, baseline, tolerance=0.05):\n    \"\"\"Return the metrics that fell by more than tolerance below the baseline, or are missing.\"\"\"\n    return [m for m, base in baseline.items()\n            if current.get(m) is None or current[m] < base - tolerance]\n",
+      "solution": "def check_regression(current, baseline, tolerance=0.05):\n    \"\"\"Return the metrics that fell by more than tolerance below the baseline, or are missing.\"\"\"\n    eps = 1e-9   # absorbs floating-point error; far below one case on any real golden set\n    return [m for m, base in baseline.items()\n            if current.get(m) is None or base - current[m] > tolerance + eps]\n",
+      "tests": "# Every one-case drop on 20 cases is exactly the tolerance and passes; every two-case drop is blocked.\nn = 20\nfor k in range(1, n + 1):\n    assert check_regression({\"m\": (k - 1) / n}, {\"m\": k / n}) == [], k\nfor k in range(2, n + 1):\n    assert check_regression({\"m\": (k - 2) / n}, {\"m\": k / n}) == [\"m\"], k\n\n# The same holds for other set sizes with a one-case tolerance.\nfor n in (10, 40, 50):\n    for k in range(1, n + 1):\n        assert check_regression({\"m\": (k - 1) / n}, {\"m\": k / n}, tolerance=1 / n) == [], (n, k)\n        if k >= 2:\n            assert check_regression({\"m\": (k - 2) / n}, {\"m\": k / n}, tolerance=1 / n) == [\"m\"], (n, k)\n\n# A drop just past the tolerance blocks; a rise passes; a missing metric blocks; new metrics are ignored.\nassert check_regression({\"m\": 0.749}, {\"m\": 0.8}) == [\"m\"]\nassert check_regression({\"m\": 0.9, \"new\": 0.1}, {\"m\": 0.8}) == []\nassert check_regression({}, {\"m\": 0.8}) == [\"m\"]\nassert check_regression({\"a\": 0.5, \"b\": 0.9}, {\"a\": 0.7, \"b\": 0.9}) == [\"a\"]\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 10: `0.20 - 0.05` is computed as slightly more than 0.15, so the strict comparison blocks a drop that equals the tolerance. Comparing the drop itself with the tolerance plus a tiny margin makes the boundary case pass on every set size, while a drop of 0.051 or two cases still blocks.",
+      "hints": [
+        "Print `0.2 - 0.05` and compare it with `3 / 20`.",
+        "Compare the drop `base - current` with the tolerance, and allow a margin far smaller than one case."
+      ]
+    },
+    {
+      "id": "ctx-020-q13",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "regression-gate",
+        "ci"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Put the steps of a regression gate in order, from the scoring of the main branch after its last merge to the decision on a new pull request.",
+      "answer": [
+        "c",
+        "a",
+        "e",
+        "b",
+        "d"
+      ],
+      "items": [
+        {
+          "key": "a",
+          "text": "Run the harness on the pull request's code over the same golden set"
+        },
+        {
+          "key": "b",
+          "text": "Exit non-zero if any metric fell by more than its tolerance, so the pull request cannot merge"
+        },
+        {
+          "key": "c",
+          "text": "Score the main branch on the golden set and save the scores as the baseline"
+        },
+        {
+          "key": "d",
+          "text": "Read the cases that flipped, even when the gate passes, before merging"
+        },
+        {
+          "key": "e",
+          "text": "Compare each metric of the run with its saved baseline value"
+        }
+      ],
+      "partial_credit": true,
+      "explanation": "Section 4: the baseline is the saved score of the main branch; each pull request reruns the same golden set, the gate compares each metric with its baseline and fails the build on a drop larger than the tolerance, and a reviewer reads the cases that flipped, since a passing mean can hide them.",
+      "hints": [
+        "Nothing can be compared before both the baseline and the new run exist.",
+        "The flipped cases are read after the verdict, whatever it is."
+      ]
+    },
+    {
+      "id": "ctx-020-q14",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 4,
+      "tags": [
+        "ragas",
+        "metrics",
+        "diagnosis"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Match each failure of a RAG system to the Ragas metric that catches it. One metric on the right matches no failure.",
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "c",
+        "d": "d"
+      },
+      "left": [
+        {
+          "key": "a",
+          "text": "The answer states a refund limit that no retrieved chunk mentions"
+        },
+        {
+          "key": "b",
+          "text": "The answer is accurate, but about shipping when the user asked about refunds"
+        },
+        {
+          "key": "c",
+          "text": "The right chunk was retrieved, but below four irrelevant ones"
+        },
+        {
+          "key": "d",
+          "text": "The reference answer needs a fact from a chunk that was never retrieved"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Faithfulness"
+        },
+        {
+          "key": "b",
+          "text": "Answer relevancy"
+        },
+        {
+          "key": "c",
+          "text": "Context precision"
+        },
+        {
+          "key": "d",
+          "text": "Context recall"
+        },
+        {
+          "key": "e",
+          "text": "Citation presence"
+        }
+      ],
+      "explanation": "Section 5: faithfulness catches claims the retrieved context does not support; answer relevancy catches an answer that drifts from the question; context precision catches relevant chunks ranked below irrelevant ones; context recall catches evidence the answer needs that retrieval missed. Citation presence only checks that some source is cited.",
+      "hints": [
+        "Two of the metrics look at the answer, two at the retrieved contexts."
+      ]
+    },
+    {
+      "id": "ctx-020-q15",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "regression-gate",
+        "flipped-cases"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In the snippet's run, the change that drops the BM25 half passes the gate with `answer_match` unchanged at 0.750, yet `answer_match` fell on two cases. In one sentence, how can both be true?",
+      "answer": {
+        "model": "Because two other cases started to match, so the two gains cancel the two losses and the mean is unchanged.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|unclear)\\b)(?![\\s\\S]*\\b(no|none of the|not any|never|nothing)\\s+(other\\s+|more\\s+)?(cases?|questions?|ones?)\\b[^.;]{0,25}(improv|rose|rise|gain|fix|went up|got better|match))(?=[\\s\\S]*(\\b(others?|two|2|different|another|remaining|separate|g\\d\\d|cases?|questions?)\\b[^.;]{0,50}\\b(improv\\w*|rose|rises|risen|rising|gain\\w*|fix\\w*|went up|go(es)? up|got better|get better|flipped up|now match\\w*|started match\\w*|began match\\w*|newly match\\w*)|\\b(improv\\w*|rose|rises|risen|rising|gain\\w*|fix\\w*|went up|go(es)? up|got better|get better|flipped up|now match\\w*|started match\\w*|began match\\w*|newly match\\w*)\\b[^.;]{0,40}\\b(others?|two|2|different|another|elsewhere|g\\d\\d)\\b|\\b(cancel\\w*|offset\\w*|balanc\\w*|compensat\\w*|even(s|ed)? out|net(ted)? out|zero net|net (zero|0)|net (change|effect) (is |was |of )?(zero|0|nothing))\\b(?=[\\s\\S]*\\b(gain\\w*|rose|rise[sn]?|improv\\w*|better|fix\\w*|(?<!each )others?|elsewhere)\\b)|\\b(gain\\w*|rose|rise[sn]?|improv\\w*|better|fix\\w*|(?<!each )others?|elsewhere)\\b[\\s\\S]*\\b(cancel\\w*|offset\\w*|balanc\\w*|compensat\\w*|even(s|ed)? out|net(ted)? out|zero net|net (zero|0)|net (change|effect) (is |was |of )?(zero|0|nothing))\\b))(?=(\\S+\\s+){5,}\\S)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 4: the per-case lines show `answer_match` fell on g02 and g07 and rose on g04 and g05. The gains and losses cancel, so the mean holds and the gate passes; only reading the flipped cases shows that two questions broke.",
+      "hints": [
+        "The mean is a sum divided by 20. What else could keep the sum the same?"
+      ]
+    },
+    {
+      "id": "ctx-020-q16",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "noise-floor",
+        "caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "When the noise floor of a judge-scored metric is measured by rerunning the unchanged suite several times, why must the harness's response cache be switched off? Answer in one sentence.",
+      "answer": {
+        "model": "Because with the cache on every rerun returns the same stored responses and verdicts, so the runs are identical and the measured spread is zero instead of the real run-to-run variation.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|unclear)\\b)(?![\\s\\S]*\\b(cache|caching)\\b[^.;]{0,30}\\b(does not|doesn'?t|has no|won'?t|will not|cannot|can'?t)\\b[^.;]{0,20}\\b(affect|change|matter|influence)\\w*)(?![\\s\\S]*\\b(cache|caching)\\s+(is\\s+|was\\s+)?(off|disabled|switched off|turned off)\\b[^.;]{0,30}\\b(same|identical|zero)\\b)(?![\\s\\S]*\\bwithout\\s+(the\\s+|a\\s+)?(cache|caching)\\b[^.;]{0,30}\\b(same|identical|zero)\\b)(?=[\\s\\S]*(\\b(same|identical|stored|cached|saved|previous|earlier|first)\\b[^.;]{0,40}\\b(answers?|responses?|verdicts?|outputs?|scores?|results?|calls?|judgements?|judgments?)\\b|\\b(answers?|responses?|verdicts?|outputs?|scores?|results?|judgements?|judgments?)\\b[^.;]{0,40}\\b(same|identical|repeat\\w*|reused|replayed|cached|stored|never change|do not change|don'?t change)\\b|\\b(zero|no|0)\\b[^.;]{0,25}\\b(spread|variance|variation|noise|difference)\\b|\\b(spread|variance|variation|noise floor|noise)\\b[^.;]{0,40}\\b(zero|0|nothing|disappear\\w*|vanish\\w*|hidden|hides?|masked|underestimat\\w*|artificially low|too low)\\b))(?=(\\S+\\s+){5,}\\S)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Sections 4 and 5: the cache keys calls by prompt, model and parameters, so an unchanged suite gets the stored outputs back. Every rerun then gives the same scores, the floor reads as zero, and a tolerance set from it makes real reruns fail at random (section 10).",
+      "hints": [
+        "What does a cached call return the second time it is made?",
+        "If every rerun gives the same scores, what spread does the measurement show?"
+      ]
+    },
+    {
+      "id": "ctx-020-q17",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o1",
+        "o5"
+      ],
+      "section": "2",
+      "est_minutes": 20,
+      "tags": [
+        "pyramid",
+        "design",
+        "golden-set"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The support assistant of post 11 answers from policy documents through a RAG pipeline, and its system prompt is versioned and tested as in post 14. Design its evaluation: for each of the four tiers, name one check, its metric family, the scoring shape where a judge or a person scores, and when it runs. Then say how a production incident reaches the golden set and what stops the same bug from returning.",
+      "connects": [
+        "ctx-011",
+        "ctx-014"
+      ],
+      "kind": "design",
+      "solution": "- **Unit (deterministic, every commit):** the chunker keeps every sentence whole and loses no text (post 11); the prompt assembler puts the user instruction last; the system prompt's linter finds no two rules in conflict (post 14).\n- **Component (every pull request touching the component):** the retriever scored by recall@N on golden questions labelled by answer phrase (deterministic); the reranker by precision@k or nDCG@5; a free-text prompt block by an LLM judge with an absolute rubric.\n- **End-to-end (every pull request touching the answer path):** answer match and citation validity (deterministic) plus faithfulness and answer relevancy from a judge, absolute scores averaged and compared with the saved baseline by the CI gate; pairwise judging only when choosing between two prompt variants, both orders. A human sample per release calibrates the judge.\n- **Online (always on):** task completion, refusal rate, cost per session, p95 latency, thumbs; a judge over sampled transcripts.\n- **Incident loop:** each incident (say, a retired policy quoted) becomes a golden case with its expected answer and source; the case stays, so the gate checks it on every later pull request.",
+      "answer_length": "half a page",
+      "rubric": [
+        {
+          "criterion": "Places a deterministic check in the unit tier, run on every commit",
+          "points": 2
+        },
+        {
+          "criterion": "Gives component checks with fitting metrics (recall@N or precision@k for retrieval, a judge for a free-text block)",
+          "points": 2
+        },
+        {
+          "criterion": "Uses absolute judged and deterministic scores behind the CI gate end to end, with pairwise kept for choosing variants",
+          "points": 2
+        },
+        {
+          "criterion": "Names online signals and a human sample that calibrates the judge",
+          "points": 2
+        },
+        {
+          "criterion": "Turns each incident into a golden case that the gate then checks on every change",
+          "points": 2
+        }
+      ],
+      "explanation": "Sections 2, 3 and 7: each tier takes the cheapest family that can judge it, the gate needs absolute scores, people calibrate the judge, and every online incident becomes an offline fixture. Post 11 supplies the retrieval metrics and post 14 the prompt's regression set and linter.",
+      "hints": [
+        "Go tier by tier from the base, asking what each check needs to give a verdict.",
+        "For the loop, ask what makes a fixed bug stay fixed."
+      ]
+    },
+    {
+      "id": "ctx-020-q18",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "6",
+      "est_minutes": 15,
+      "tags": [
+        "llm-judge",
+        "bias",
+        "protocol"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Two system-prompt variants will be compared with an LLM judge, and the winner then guarded in CI by a judged faithfulness score. Write the judging protocol so that each of the four judge failure modes is addressed by a named mitigation.",
+      "kind": "design",
+      "solution": "1. **Choosing the variant (pairwise):** judge every golden case in both orders and count a win only when the same variant wins both; an inconsistent pair is a tie (position bias). Report how often the verdict flips under the swap.\n2. **Length:** the rubric says to ignore length, and before use the judge is tested on padded copies of good answers; a judge that prefers padding is not used (verbosity bias).\n3. **Judge model:** a judge from a different model family than the one that wrote the answers, or several judges averaged (self-preference).\n4. **Guarding the winner (absolute):** faithfulness scored 0 or 1 per case against a versioned rubric; the judge prompt and model are pinned and versioned like code; a human-labelled sample is re-scored on a schedule, and whenever the judge changes the saved baseline is re-scored before any comparison (rubric drift).\n5. **Noise:** the tolerance of the gate sits above a noise floor measured with the cache off.",
+      "answer_length": "half a page",
+      "rubric": [
+        {
+          "criterion": "Position bias: both orders, a win must survive the swap, ties otherwise",
+          "points": 2
+        },
+        {
+          "criterion": "Verbosity bias: length-neutral rubric and a padded-answer test",
+          "points": 2
+        },
+        {
+          "criterion": "Self-preference: a judge from another model family or several judges",
+          "points": 2
+        },
+        {
+          "criterion": "Rubric drift: versioned judge prompt and model, scheduled human re-calibration, baseline re-scored on a judge change",
+          "points": 2
+        },
+        {
+          "criterion": "Uses pairwise to choose and absolute scores to gate, with a tolerance above the measured noise",
+          "points": 2
+        }
+      ],
+      "explanation": "Section 6 gives one mitigation per failure mode: swap the order for position bias, neutralise and test length for verbosity, change the judge's model family for self-preference, and version and re-calibrate for rubric drift. Section 3 assigns pairwise judging to choosing and absolute scores to the gate.",
+      "hints": [
+        "Take the four failure modes one at a time.",
+        "Separate the two jobs: choosing a variant and guarding it."
+      ]
+    }
+  ]
+}
