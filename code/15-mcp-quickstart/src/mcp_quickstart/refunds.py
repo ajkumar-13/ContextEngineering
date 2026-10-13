@@ -1,8 +1,8 @@
-"""Pure refund-eligibility logic — the business rules, with no MCP runtime.
+"""Pure refund-eligibility logic, the business rules, with no MCP runtime.
 
 Keeping the logic out of the server file is the point: the rules below are a plain
 function you can unit-test offline, while ``server.py`` is a thin MCP wrapper around
-them. This is the pattern Post 15 recommends — the protocol is a transport, not the
+them. This is the pattern Post 15 recommends, the protocol is a transport, not the
 place your logic should live.
 """
 from __future__ import annotations
@@ -31,7 +31,7 @@ class Decision:
 def check_refund_eligibility(order: Order, amount_usd: float) -> Decision:
     """Decide whether a refund of ``amount_usd`` against ``order`` may proceed.
 
-    Rules (illustrative — a real policy lives in code, not the model, per Post 23):
+    Rules (illustrative, a real policy lives in code, not the model, per Post 23):
       - an already-refunded order cannot be refunded again;
       - refunds must be requested within the return window;
       - you cannot refund more than the order total;
@@ -67,3 +67,20 @@ Refund policy (demo)
 - Amount: may not exceed the order total; an order may be refunded once.
 - Approval: refunds over ${MANAGER_APPROVAL_OVER_USD:.0f} require manager sign-off.
 """
+
+
+# Stands in for the shop's order store: the facts a refund rule checks are looked up, never taken from the model.
+DEMO_ORDERS = {
+    o.order_id: o
+    for o in (
+        Order("A-4821", total_usd=120.0, days_since_purchase=6),
+        Order("B-1177", total_usd=2400.0, days_since_purchase=3),
+        Order("C-0932", total_usd=80.0, days_since_purchase=41),
+        Order("D-5510", total_usd=60.0, days_since_purchase=2),
+    )
+}
+
+
+def lookup_order(order_id: str) -> Order | None:
+    """Return the stored order, or None if the id is unknown."""
+    return DEMO_ORDERS.get(order_id)

@@ -1,4 +1,4 @@
-"""mcp-quickstart — a ~60-line MCP server around pure, testable tool logic.
+"""mcp-quickstart: a 49-line MCP server around pure, testable tool logic.
 
 Companion code for Post 15 (Tools and MCP) and Post 29 (Build an MCP server).
 The refund rules live in ``refunds`` (pure, unit-tested offline); ``server``

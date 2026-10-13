@@ -4,22 +4,23 @@ Run it:  python server.py     (speaks MCP over stdio)
 
 It wraps the pure logic in ``mcp_quickstart.refunds`` so the interesting rules stay
 unit-testable without the MCP runtime. Requires the official SDK: ``pip install mcp``.
-Pin the version you test against — the SDK's API still moves.
+Pin the version you test against, the SDK's API still moves.
 """
 from __future__ import annotations
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
-from mcp_quickstart.refunds import REFUND_POLICY, Order, check_refund_eligibility
+from mcp_quickstart.refunds import REFUND_POLICY, check_refund_eligibility, lookup_order
 
-mcp = FastMCP("refunds-demo")
+mcp = MCPServer("refunds-demo")
 
 
 @mcp.tool()
-def check_refund(order_id: str, total_usd: float, days_since_purchase: int,
-                 amount_usd: float, already_refunded: bool = False) -> dict:
+def check_refund(order_id: str, amount_usd: float) -> dict:
     """Check whether a refund may proceed for an order. Returns a structured decision."""
-    order = Order(order_id, total_usd, days_since_purchase, already_refunded)
+    order = lookup_order(order_id)  # the order's facts come from the store, never from the model
+    if order is None:
+        return {"eligible": False, "requires_manager_approval": False, "reason": f"Unknown order {order_id}."}
     d = check_refund_eligibility(order, amount_usd)
     return {
         "eligible": d.eligible,

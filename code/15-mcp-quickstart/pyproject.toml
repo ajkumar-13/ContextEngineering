@@ -6,7 +6,7 @@ requires-python = ">=3.11"
 dependencies = []  # the pure tool logic + its tests need nothing
 
 [project.optional-dependencies]
-server = ["mcp>=1.2"]   # needed only to actually RUN server.py
+server = ["mcp==2.3.0"]   # needed only to actually RUN server.py
 dev = ["pytest>=8.0"]
 
 [build-system]
