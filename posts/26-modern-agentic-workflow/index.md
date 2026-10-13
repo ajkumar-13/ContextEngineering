@@ -1,254 +1,271 @@
-# 26 · The modern agentic workflow
+# 26 - The modern agentic workflow
 
-> **TL;DR.** A whole generation of coding tools (Claude Code, Cursor, Aider, Continue, Codex CLI, Cline, Replit Agent) converged on the same operating model: a long-running agent inside the editor or terminal, with file-system tools, repository-aware system prompts, sub-agent orchestration, and per-project skills. Understanding the *shape* of this workflow is now a context-engineering literacy. This post is the practitioner's tour: how the loop works, what `AGENTS.md` and skills actually do for you, and the patterns that make sessions productive.
+> **TL;DR.** Coding agents such as Claude Code, Cursor, Aider and Codex share one operating model: a long-running loop in the editor or terminal that reads files, edits them and runs commands, configured by files the repository carries. This post asks what that model is and which of those files make a session productive: `AGENTS.md` (or `CLAUDE.md`) in the five-block form, skills loaded on demand, hooks that enforce in code, and sub-agents that keep noise out of the main window. It closes with the four anti-patterns that multiply what a session costs.
 >
-> **After reading this you will be able to:**
-> - Describe the agent loop common to Claude Code, Cursor, Aider, and friends.
-> - Configure a project with the `AGENTS.md`, skills, and hooks that make the agent useful.
-> - Avoid the four workflow anti-patterns that quietly multiply the cost of a session by an order of magnitude.
+> **Prerequisites:** [Post 13](../13-isolate-strategies/index.md), [Post 14](../14-system-prompt-as-software/index.md).
+> **Safe to skip?** Skip it if a repository already carries a reviewed `AGENTS.md`, its own skills and hooks, sub-agents with turn caps and a compaction habit, and a session transcript can already be read as write, select, compress and isolate events.
+>
+> **After reading, you will be able to:**
+>
+> - Describe the agent loop that coding hosts share, and say which decisions the host makes and which the model makes.
+> - Write a project's AGENTS.md in the five-block form, and explain how it, CLAUDE.md and a skill's SKILL.md reach the window.
+> - Configure a hook that blocks or reports an edit, and say which hook events can stop the action.
+> - Delegate a scoped task to a sub-agent with a contract and a turn cap, and say which work stays in the main agent.
+> - Recognise the four workflow anti-patterns, and work out what an uncompacted session costs against a compacted one.
 
-![Project-layout map of an agentic repo: CLAUDE.md and AGENTS.md plus a .claude directory holding skills, sub-agents, hooks, and slash commands feeding the agent loop.](diagrams/00-hero-modern-agentic-workflow.svg)
-*The modern agentic workflow is a small operating system laid out in the repo.*
+![Repository files on the left feed the six-layer window on the right: the rules file and skill descriptions into layer 01, MCP servers into layer 02, sub-agent summaries and hook messages into layer 05. Sub-agents run in windows of their own; hooks run as code outside the window.](diagrams/00-hero-modern-agentic-workflow.svg)
+
+*The repository is the agent's configuration: each file feeds one layer of the window, by one of the four operations.*
 
 ---
 
-## 1. What changed
+## 1. The question: what did the coding tools converge on?
 
-For most of 2023 the standard "AI in the editor" pattern was *autocomplete plus inline chat*: Copilot suggested the next few lines; the user occasionally opened a side panel and asked a question. The model had no persistent context, no tools, no memory of the project.
+The first editor assistants were autocomplete plus a chat panel: the model suggested the next lines of the open file, with no tools and no view of the project. The current hosts work in the project: the agent reads files, edits them, runs commands (with confirmation where the host asks for it), plans across many turns and hands sub-tasks to other agent instances. Anthropic's "How Claude Code works" (Claude Code documentation, consulted October 2026) puts the contrast in one line: "This is different from inline code assistants that only see the current file." The person's job moves from prompting line by line to briefing task by task.
 
-The current generation is structurally different. The agent **lives in the project**, **reads files itself**, **edits files itself**, **runs commands itself** (with confirmation), **plans across many turns**, and **delegates sub-tasks to other agent instances**. The user moves from *prompting on every line* to *briefing on every task*.
-
-The shift is large enough that the team-level practice changes too. The artefacts the project carries (`AGENTS.md`, skills, prompts, hooks) become first-class citizens of the codebase. The discipline of context engineering moves into the repository.
-
-This post is deliberately vendor-neutral: the file names and menu items differ between hosts (Claude Code, Cursor, Aider, and the rest), but the underlying model, the loop and the four context-engineering levers, is the same everywhere. Where a concrete example helps, the examples use the conventions that have converged across vendors rather than any single tool's exact syntax; consult your host's own docs for the precise flags.
+That shift moves context engineering into the repository: the files a project carries decide what the model reads on every call, so they are reviewed like code ([post 14](../14-system-prompt-as-software/index.md)), and the figure at the top maps each to the layer it feeds. The patterns are vendor-neutral; each example names the host whose documentation it follows, mostly Claude Code's, the most explicit about the mechanics.
 
 ---
 
 ## 2. The agent loop
 
-Reduced to its simplest form, every modern coding agent runs the same loop.
+Reduced to its simplest form, every coding host runs the same loop:
 
-```
-load context (AGENTS.md, file tree, skills)
-↓
-plan task (decompose if needed, sometimes via a sub-agent)
-↓
-┌─────────────────────────────────────────┐
-│  while not done:                        │
-│    think (LLM call)                     │
-│    decide on next tool call             │
-│    execute tool (read, write, run, …)   │
-│    observe result                       │
-│    update plan / scratchpad             │
-└─────────────────────────────────────────┘
-↓
-summarise + commit / hand back to user
+```text
+load context: the rules file, skill descriptions, tool schemas
+while the task is not done:
+    model call: read the window, decide the next step
+    tool calls: read, search, edit, run (zero, one or several)
+    append the calls and their results to the window
+    compact the window when it nears its limit
+hand back: a summary of what changed, for review
 ```
 
-Each iteration is one LLM call plus one (or zero) tool call. A typical task takes 5–50 iterations; a complex one can take hundreds. The cost and latency of the loop are dominated by the *iteration count* and the *prompt size at each iteration*, which makes context engineering, again, the lever.
+Claude Code's documentation describes three phases, "gather context, take action, and verify results", and the division of labour: the model reasons and picks the tools, and "Claude Code is the layer around the model that provides the tools and manages the context the model sees." Every model call re-reads the whole window, so a session's cost and latency are set by how many calls it makes and how large the window is at each.
 
-The four context-engineering decisions that shape the loop:
+The host, configured by the repository, takes four context decisions, each one of the operations of [post 07](../07-write-select-compress-isolate/index.md):
 
-1. **What goes in the system prompt** → set by `AGENTS.md` plus the host's own preamble.
-2. **What goes in the tool catalogue** → set by the host (file tools, shell tool, MCP servers, custom tools). MCP is the Model Context Protocol, the standard way hosts plug external tool servers into the agent ([Post 15](../15-tools-and-mcp/index.md)).
-3. **How the conversation is compressed as it grows** → set by the host's auto-compaction policy plus per-project hooks.
-4. **What sub-agents the planner can delegate to** → set by the host's skill / sub-agent configuration.
+1. **The standing instructions.** `AGENTS.md` or `CLAUDE.md` on top of the host's preamble, selected into layer 01, the system prompt, every session (section 3).
+2. **The tool catalogue.** File, search and shell tools plus MCP servers (the Model Context Protocol, through which external tools reach a host; [post 15](../15-tools-and-mcp/index.md)) fill layer 02, tools and MCP descriptions. It is a select: in Claude Code, "MCP tool definitions are deferred by default and loaded on demand via tool search".
+3. **Compression.** Automatic compaction of layer 05, conversation history, which in Claude Code "clears older tool outputs first, then summarizes the conversation if needed", and `/compact` ([post 12](../12-compress-strategies/index.md), section 8).
+4. **Delegation.** Sub-agents with windows of their own: isolate (section 5).
 
-A team that consciously sets all four ships materially better sessions than a team that takes the defaults.
+The model's own choices are mostly selects: a coding agent does not load the repository but searches and reads the few files a step needs, the decision of [post 25](../25-long-context-vs-rag/index.md) taken on every turn.
 
 ---
 
-## 3. `AGENTS.md` (and `CLAUDE.md`)
+## 3. `AGENTS.md` and `CLAUDE.md`
 
-The repository's per-project system prompt. Every reachable agent in the project loads it. The format is convention; the convention has converged across vendors. The two file names are the same idea from two lineages: `CLAUDE.md` is Claude Code's original name, `AGENTS.md` is the vendor-neutral name most other hosts adopted; a host typically reads whichever it finds (and some read both). Treat them as interchangeable and pick one per repository; the rest of this section says `AGENTS.md` throughout.
+The standing instructions live in a file checked in beside the code: `AGENTS.md`, the open format read by Codex, Cursor and other agents, or `CLAUDE.md`, Claude Code's. [Post 14](../14-system-prompt-as-software/index.md), section 4, gives how each reaches the window. For nested files the agents.md site's rule is "The closest AGENTS.md to the edited file wins", and Cursor's "Rules" documentation (consulted October 2026) supports `AGENTS.md` "in the project root and subdirectories"; Claude Code instead concatenates the `CLAUDE.md` files from the root down and delivers them as a user message after the system prompt. Both do the job of layer 01, and one file can serve every host: Claude Code reads `AGENTS.md` when there is no `CLAUDE.md`, and a `CLAUDE.md` can import it with an `@AGENTS.md` line. Aider loads a conventions file when told to: its "Specifying coding conventions" page (consulted October 2026) recommends `aider --read CONVENTIONS.md`, which marks the file "read-only, and cached if prompt caching is enabled".
 
-A working skeleton (the same five-block structure as [Post 14](../14-system-prompt-as-software/index.md), §2):
+A skeleton in post 14's five blocks (identity, rules, format, knowledge, tool-use guidance), each rule carrying the issue that motivated it:
 
 ```markdown
-# Project: Acme API
+# AGENTS.md for acme-api
 
 ## Identity
-A Python 3.12 + FastAPI backend for Acme's customer API. SQLAlchemy
-2.x against Postgres 16. Tests with pytest + pytest-asyncio.
+A Python 3.12 and FastAPI backend for Acme's customer API, on PostgreSQL 16.
+Agents implement changes and open pull requests here; they do not deploy.
 
 ## Rules
-- Every public function has a type annotation.
-- Every change with behavioural impact has a test in `tests/`.
-- Never commit to `main` directly; open a PR.
-- Never edit files in `vendor/` or `legacy/`.
-- Use `ruff` for formatting; the CI will reject other formatters.
+- Every change in behaviour ships with a test in `tests/`. [#117]
+- Never edit `vendor/` or `legacy/`; a hook enforces this. [#142]
+- Open a pull request for every change; never commit to `main`. [#150]
 
 ## Format
-- PR titles use Conventional Commits (feat, fix, chore, refactor, …).
-- Commit bodies wrap at 72 columns.
-- Code uses `from __future__ import annotations`; `from typing import …`.
+- Pull-request titles use Conventional Commits (feat, fix, chore, refactor).
 
 ## Knowledge
-- Build: `make build`.
-- Test: `make test` (uses Docker for the Postgres dependency).
-- Deploy: `make deploy` (requires `STAGING=true` for non-prod).
-- The `users` and `orders` tables are joined on `users.id = orders.user_id`.
+- Build: `make build`. Test: `make test` (starts PostgreSQL in Docker).
 
-## Tools
+## Tool-use guidance
 - `make migrate`: generate and apply Alembic migrations.
-- `mcp:postgres`: read-only SQL against the local dev DB.
-- `slash:run-tests`: runs `make test` and surfaces failing test names.
+- `/run-tests` (a project skill): runs `make test`, lists the failures.
 ```
 
-Subdirectory `AGENTS.md` files override or add to the parent. A `frontend/AGENTS.md` with TypeScript rules wins inside the frontend tree. The deepest matching file is the effective prompt for any operation in that subtree.
-
-The discipline that makes this useful: **iterate from minimal**. Start with a near-empty file. Add a rule when a real failure motivates it (the agent removed a critical file; the agent renamed your enums; the agent committed in a style that broke CI). Speculative rules accumulate and contradict.
+A `frontend/CLAUDE.md` is read in addition to the root file, so it can add a rule but not replace one. The discipline is post 14's: **iterate from minimal**, adding a rule only when a real failure motivates it (the agent deleted a needed file, or committed in a style continuous integration (CI) rejected). Every line is read on every call; Claude Code's documentation targets under 200 lines per `CLAUDE.md`.
 
 ---
 
 ## 4. Skills
 
-A **skill** is a small Markdown file (often called `skill.md`) that packages a single capability: a workflow the agent can invoke when the situation calls for it. A typical skill describes one task: how to draft a PR description in the team's style; how to write a Postgres migration; how to triage a production alert.
-
-Each skill has the same five-block shape as a system prompt, but scoped to one concern. The host loads it *only when relevant*. A skill catalogue is essentially a small library of well-engineered procedural memories ([Post 16](../16-memory-systems/index.md), §4): searchable by name, retrievable on intent, and version-controlled like code.
-
-**Where a skill lives, and how the host finds it.** A skill is a file on disk under a conventional directory (for example `.claude/skills/write-migration/skill.md` for a project-local skill, or a global directory in your home folder for skills you want in every project). A minimal one looks like this:
+A **skill** packages one capability the agent loads when a task calls for it: a pull-request description in the team's style, a migration, an alert triage. In Anthropic's Agent Skills format ("Equipping agents for the real world with Agent Skills", 16 October 2025), a skill is a directory holding a `SKILL.md`, whose front matter gives a `name` and a `description`, and any scripts it uses ([post 08](../08-write-strategies/index.md), section 4). Claude Code's "Extend Claude with skills" page (consulted October 2026) reads project skills from `.claude/skills/<skill-name>/SKILL.md`, committed for the team, and a person's own from `~/.claude/skills/`. A minimal project skill, `.claude/skills/write-migration/SKILL.md`:
 
 ```markdown
 ---
 name: write-migration
-description: Draft an Alembic migration for a schema change on the Acme DB.
-trigger: schema change, new column, new table, alter table, migration
+description: Draft an Alembic migration for a schema change to the Acme database. Use when a task adds, drops or alters a table or a column.
 ---
-
-## When to use
-The user asks to change a database table or model.
 
 ## Steps
 1. Read the current model in `app/models/`.
 2. Generate the migration with `make migrate`.
-3. Check the generated file edits only the intended tables.
+3. Check that the generated file touches only the intended tables.
 
 ## Example
 Before: add a `deleted_at` column to `orders`.
 After: a migration that adds the nullable column and a matching index.
 ```
 
-The resolution rule has two parts. **Scope:** when a project-local skill and a global skill share a name, the project-local one wins, the same deepest-match override as subdirectory `AGENTS.md` files. **Relevance:** the host decides a skill is applicable by matching the current task against the skill's `name`, `description`, and `trigger` keywords, then loads that skill's body into context only for the turns where it applies. A skill you never trigger costs nothing; a skill with a vague description triggers at the wrong time. Write the `description` for the matcher, not for a human reader.
+**How the host decides to load it.** By the description. The page states that "skill descriptions are loaded into context so Claude knows what's available, but full skill content only loads when invoked", and the `description` field's entry reads "Claude uses this to decide when to apply the skill." No keyword list fires it: the model judges the match from the description (an optional `when_to_use` field is appended), so the description says what the skill does and when to use it. An unused skill costs only its description per call.
 
-Two patterns make skill libraries pay off:
+**Which copy wins.** When a personal and a project skill share a name, the page's order is "Enterprise over personal, and personal over project". Sub-agent definitions resolve the other way (section 5).
 
-- **One concern per skill.** Like a Unix command. `write-migration.md` is a skill. `do-everything.md` is not.
-- **Examples beat instructions.** A skill with two before/after examples is more useful than a skill with five paragraphs of rules. The agent learns from the shape.
-
-The skill marketplaces (Anthropic's Agent Skills, third-party MCP directories, community skill repos) are early but growing. The *discipline* of writing your own skills is more valuable than the catalogue size; every team accumulates a small library specific to its codebase that no public skill could match. Skill mechanics are covered in more depth in [Post 15](../15-tools-and-mcp/index.md).
+Skills are the packaged-capability home of [post 16](../16-memory-systems/index.md), section 6: team rules in `AGENTS.md`, packaged capabilities in a `SKILL.md`, a how-to learned about one user as a procedural memory row. Two habits pay off: **one concern per skill**, and **examples over instructions**, since one before-and-after pair often steers better than a paragraph of rules (rule 5 of post 14, section 3).
 
 ---
 
 ## 5. Sub-agents and the orchestrator pattern
 
-![The four-step orchestrator handshake, with the argument against sub-agents and the rule that reconciles the two views](diagrams/02-orchestrator-handshake.svg)
+Hosts let the main agent hand a scoped task to a **sub-agent**. Claude Code's "Create custom subagents" page (consulted October 2026) says that "each subagent runs in its own context window with a custom system prompt, specific tool access, and independent permissions" and "returns only the summary". The patterns are [post 13](../13-isolate-strategies/index.md)'s: a **research** sub-agent reads a module and reports how it is wired (Claude Code's built-in Explore sub-agent, read-only by design); a **test-and-fix** sub-agent keeps the test logs in its own window. Definitions are files too: Markdown with YAML front matter (`name`, `description`, optionally `tools`, `model`, `maxTurns`) in `.claude/agents/`, where a project definition outranks a personal one in `~/.claude/agents/`.
 
-*The summary is what keeps the parent's window small, and it is also what makes the child's failures invisible.*
+Delegation is a four-step handshake, drawn below. The parent (1) frames a scoped task and names the result it expects; (2) spawns the sub-agent with a fresh window, only the tools the task needs and a turn cap; the sub-agent (3) runs its own loop of reads, tool calls and retries in isolation; the parent (4) folds only the returned summary into its window. It never sees the child's intermediate calls, so its window stays small and on task.
 
-Modern hosts let the main agent spawn sub-agents for scoped tasks. The patterns the field has converged on ([Post 13](../13-isolate-strategies/index.md), §2 and §4):
+![Two lanes, the parent's window above and the sub-agent's below, across four steps: frame the task and the result expected; spawn with a fresh window, scoped tools and a turn cap; the sub-agent's own loop, which never reaches the parent; fold in the summary only.](diagrams/02-orchestrator-handshake.svg)
 
-- **Research sub-agent.** "Read these three files and tell me how `process_order` is wired." The sub-agent does the reads; the parent gets a summary and keeps its context clean.
-- **Test-and-fix sub-agent.** "Run the failing test, find the root cause, propose a fix." The sub-agent has shell + file tools; the parent stays at the planning level.
-- **Migration sub-agent.** "Generate the Alembic migration for this schema change." The sub-agent has migration tools; the parent does not need to know the details.
+*The summary is what keeps the parent's window small, and also what hides the child's mistakes from it.*
 
-Two tactical points:
+- **Cap the turns.** Claude Code's `maxTurns` is the "maximum number of agentic turns before the subagent stops"; the output then comes back marked as partial. Nesting is capped too: by default a sub-agent can spawn its own, "up to three layers below the main conversation".
+- **Make the contract explicit.** The sub-agent returns a structured result (what it found, what it changed, which tests pass), and the parent checks it before acting ([post 13](../13-isolate-strategies/index.md), section 5).
+- **Review transcripts on a sample.** A summary can hide a skipped test, a hard-coded value or an edit the child should not have made.
 
-- **Set the budget.** Each sub-agent has a maximum number of tool calls. Without this, a stuck sub-agent burns the day's tokens.
-- **Make the contract explicit.** The sub-agent returns a structured summary (problem found, fix applied, tests passing). Free-form prose loses across the boundary.
-
-A useful organisational habit: **review sub-agent transcripts on a sample**. The summaries the parent received can hide problems (the sub-agent skipped a test, hard-coded a value, edited a file it should not have). Periodic spot-checks keep the trust calibrated.
-
-End to end, the orchestrator pattern is a four-step handshake. The parent (1) frames a scoped task and names the contract it expects back; (2) spawns the sub-agent with a fresh, minimal context and a tool budget; the sub-agent (3) does its own read-think-act loop in isolation and returns the agreed structured summary; the parent (4) folds only that summary back into its own context and continues planning. The point is the isolation: the parent never sees the sub-agent's forty intermediate tool calls, so its window stays small and on-task.
-
-**The steelman against all this.** Cognition's "Don't Build Multi-Agents" (Cognition, 2025) argues the opposite case, and it is worth taking seriously. Sub-agents fragment context: decisions made in one sub-agent are invisible to another, so parallel sub-agents can make locally sensible but globally contradictory edits, and the reconciliation cost can exceed the isolation benefit. Their prescription is a single agent with a long, well-compacted context for anything that needs coherent decisions, and sub-agents reserved for genuinely independent, read-mostly work (the research pattern above). The rule of thumb that reconciles the two views: delegate work you could hand to a contractor with a one-paragraph brief and check by its output alone; keep in the main agent anything where the reasoning has to stay coherent. The full argument and counter-argument are worked through in [Post 13](../13-isolate-strategies/index.md), §9.
+**The steelman against all this.** Walden Yan's "Don't Build Multi-Agents" (Cognition, June 2025) argues that splitting work fragments the context: each agent holds a slice of the reasoning behind the others' outputs, and parallel agents make conflicting implicit decisions. It recommends a single-threaded, linear agent, and describes Claude Code's sub-agents of the time as consistent with that view, since a sub-agent was usually given a question to answer rather than code to write and never ran in parallel with the main agent ([post 13](../13-isolate-strategies/index.md), section 9). The reconciling rule is post 13's contract test: delegate a task whose input is fully specified, whose output is structured and finite, and which needs none of the parent's evolving state; keep in the main agent anything whose reasoning must stay coherent across steps.
 
 ---
 
 ## 6. Hooks
 
-Most modern hosts allow **hooks**: scripts that run at specific points in the agent loop. The pattern is borrowed from git hooks (scripts git runs automatically before a commit, after a checkout, and so on) and is roughly as useful: a small script fires on an event and can inspect, modify, or block what happens next.
+A **hook** is a command the host runs at a fixed point of the loop, a pattern borrowed from git hooks: a small program fires on an event and can inspect what is about to happen, block it or report back. The model sees only what the hook chooses to say.
 
-A concrete one first, so the mechanism is not abstract. A post-edit hook that runs the linter and surfaces any failure back to the agent:
+Claude Code's "Hooks reference" (consulted October 2026) gives the protocol. Hooks are registered in a settings file such as `.claude/settings.json`, by event name and a matcher on the tool name. The host passes the event as JavaScript Object Notation (JSON) on standard input, with fields such as `cwd`, `tool_name` and `tool_input`, and the exit code is the answer. Exit 0 lets the action proceed. "Exit with code 2 to block the action": the hook's standard error becomes the message, which before a tool call blocks it and tells the model why, and after a tool call (the tool has already run) is shown to the model. Any other non-zero code is "a non-blocking error", so a hook that enforces a policy exits 2.
 
-```bash
-#!/usr/bin/env bash
-# .claude/hooks/post-edit.sh — fires after the agent edits a file.
-# $1 is the path the agent just wrote.
-if ! ruff check "$1"; then
-  echo "ruff failed on $1; fix the reported issues before continuing." >&2
-  exit 1   # non-zero: the host surfaces this back to the agent as a tool error
-fi
+`snippets/edit_hooks.py` implements two hooks in that protocol, registered under `PreToolUse` and `PostToolUse` with the matcher `Edit|Write`. The guard runs before every edit:
+
+```python
+def guard(event):
+    """PreToolUse on Edit|Write: block an edit outside the project or inside a protected directory."""
+    root = Path(event["cwd"]).resolve()
+    target = (root / event["tool_input"]["file_path"]).resolve()
+    if not target.is_relative_to(root):
+        return 2, "blocked: the file is outside the project."
+    top = target.relative_to(root).parts[0]
+    if top in PROTECTED:
+        return 2, f"blocked: {top}/ is read-only here; change the code that calls it."
+    return 0, ""
 ```
 
-The agent edits a file, the hook runs `ruff`, and if the file is malformed the failure lands back in the agent's context on the next turn, so it self-corrects without the user intervening. That is the whole idea; the rest is choosing good points to attach to.
+The second, `compile_check`, runs after each edit and reports a Python file that no longer parses. With no argument, the script builds a throwaway project in a temporary directory and calls itself five times as the host would. `uv run python posts/26-modern-agentic-workflow/snippets/edit_hooks.py` from the series root prints:
 
-![Seven hook points in the agent loop, what teams attach to each, and why each one is a hook rather than a rule in the project prompt](diagrams/01-hook-points.svg)
+```text
+PreToolUse   Edit   app/orders.py       exit 0  allowed
+PreToolUse   Edit   vendor/payments.py  exit 2  blocked: vendor/ is read-only here; change the code that calls it.
+PreToolUse   Write  ../.env             exit 2  blocked: the file is outside the project.
+PostToolUse  Edit   app/orders.py       exit 0  passed
+PostToolUse  Edit   app/refunds.py      exit 2  refunds.py line 1: expected ':'.
+```
 
-*The third column is the interesting one: each of these fails differently when written as prose instead.*
+The last line is the loop correcting itself: the syntax error reaches the model as the hook's message, and the next call fixes it. The figure below places the hook events on the loop.
 
-Common hook points and what teams use them for:
+![The agent loop from session start through the user's prompt, model calls and tool calls to session end, with hook events at their points: PreToolUse, UserPromptSubmit and PreCompact can block; PostToolUse reports after the tool has run; SessionStart adds its output to the context; SessionEnd cannot block.](diagrams/01-hook-points.svg)
 
-- **Pre-tool-call.** Validate the tool args; reject dangerous combinations (e.g., a `delete` on a path outside the project).
-- **Post-tool-call.** Format the output; clip noisy logs down to what matters; record a structured trace span.
-- **Pre-edit.** Check the target file is not in a generated/vendored directory.
-- **Post-edit.** Run the formatter; run the relevant test; if either fails, surface back to the agent.
-- **Pre-commit.** Run linter / typecheck; block if either fails.
-- **Session-start.** Print a one-line reminder of the day's task; load the project status; pin a "today's goal" cell into memory.
-- **Session-end.** Compress the conversation; write a summary to a daily journal; archive the trace.
+*Only a hook in front of an action can stop it; the hook after a tool call can only report, because the tool has already run.*
 
-Hooks are how a team encodes its culture into the agent without bloating the system prompt. They are also where security controls ([Post 23](../23-security/index.md)) actually enforce: *do not let the agent overwrite production config* is a hook, not a rule in `AGENTS.md`.
+The points teams attach to, in Claude Code's event names:
+
+- **`PreToolUse`.** Block dangerous arguments: an edit in `vendor/`, a delete outside the project, a force push. A pre-commit check is this event on the shell tool, or git's own pre-commit hook.
+- **`PostToolUse`.** Run the formatter or the relevant test after an edit and report a failure; record a trace span ([post 22](../22-observability/index.md)). Trimming a noisy tool result is the tool wrapper's job ([post 13](../13-isolate-strategies/index.md), section 6).
+- **`SessionStart`.** Claude Code adds such a hook's plain-text output "to Claude's context", so a hook that prints the branch's open issue is a select into the window.
+- **`PreCompact` and `SessionEnd`.** Both suit housekeeping, such as archiving the transcript outside every prompt; `SessionEnd` cannot block, while `PreCompact` exiting 2 blocks compaction.
+
+Local security controls belong here: "do not overwrite production configuration" is a hook, not a line in `AGENTS.md`, because a rule in the prompt is followed most of the time and code that intercepts the call every time (D1 of [post 23](../23-security/index.md), section 5).
 
 ---
 
 ## 7. The four workflow anti-patterns
 
-Each of these turns a productive session into an expensive one.
+**Anti-pattern 1: letting the history grow without compaction.** Every call re-reads the whole window, so a session's input grows with the square of its length when nothing is removed. `snippets/session_cost.py` replays one session with illustrative sizes: an 18,000-token stable prefix (layers 01 and 02) and 120 model calls, each appending a 300-token tool call and a 2,200-token tool result to layer 05, at Claude Opus 4.6's rates as of early 2026 (5 dollars per million input tokens, 25 per million output, a cache write at 1.25 times and a cache read at 0.1 times the input price; Anthropic, "Pricing" and "Prompt caching", consulted October 2026, as [post 05](../05-economics-of-context/index.md) states them). The second run compacts whenever the window would pass 100,000 tokens, an illustrative policy, into a 5,000-token summary. Running `uv run python posts/26-modern-agentic-workflow/snippets/session_cost.py` prints:
 
-**Anti-pattern 1: letting context grow without compaction.** The session has been running for four hours. The conversation is, say, 180k tokens (illustrative). Every new turn pays for all of it. The agent's quality has been silently degrading for the last hour because of distraction ([Post 06](../06-context-failure-modes/index.md), §2) and lost-in-the-middle ([Post 03](../03-how-llms-read-context/index.md), §4). The fix is hosted auto-compaction with sensible thresholds and the discipline of `/compact` (or equivalent) when the user notices quality drift.
+```text
+illustrative session: 120 calls, prefix 18000 tokens, +2500 tokens per call
+prices: Claude Opus 4.6, 5 and 25 dollars per million, cache write 1.25x, cache read 0.1x
+                        input tokens  peak window  compactions  uncached $  cached $
+no compaction               20010000       315500            0      100.95     12.72
+compact at 100000            7254000        95500            3       37.55      6.80
+no compaction reads 2.8 times the input tokens and costs 1.9 times as much with caching
+```
 
-**Anti-pattern 2: over-broad task framing.** "Refactor the codebase" is not a task; it is a research project. The agent will burn the budget exploring. The fix is to break the work into 30-minute scoped tasks with clear definition of done. The agent works best at the same scope a human contributor does in a focused hour.
+Without compaction the last call reads $18{,}000 + 119 \times 2{,}500 = 315{,}500$ tokens and the session $120 \times 18{,}000 + 2{,}500 \times (0 + 1 + \dots + 119) = 20{,}010{,}000$. Three compactions keep every call under 100,000 tokens and cut the input to 7,254,000. Caching narrows the dollar gap (12.72 against 6.80 dollars) but does not shrink what the model reads, and a long window is where distraction ([post 06](../06-context-failure-modes/index.md), section 2) and lost-in-the-middle (post 06, section 5) set in. The figure below draws the window call by call. The fix is automatic compaction left on, and `/compact` (or `/clear` at a real task boundary) when quality drifts ([post 12](../12-compress-strategies/index.md), sections 8 and 9).
 
-**Anti-pattern 3: letting the agent autonomously edit everything.** Confirmation prompts feel like friction; they catch a lot. Tools that can do destructive things (delete files, force-push, drop database tables, run `rm -rf`) need confirmation in the host, not just in the prompt. The fix is the security defences from [Post 23](../23-security/index.md), applied locally to the dev environment.
+![A line chart of the window in tokens over 120 model calls: without compaction a straight climb from 18,000 to 315,500; with compaction a sawtooth up to 95,500 and back to 23,000, three times, under a dotted 100,000-token limit. Illustrative sizes.](diagrams/03-session-window.svg)
 
-**Anti-pattern 4: no skills, no hooks, default `AGENTS.md`.** The team is using the agent on hard mode. Every session starts cold; the same instructions are typed for the dozenth time; the same defaults trip the agent up. The fix is investing one hour to set up the project-level customisations; it pays back within the first week.
+*Every call pays for the whole window, so the area under each line is the session's input.*
+
+**Anti-pattern 2: over-broad task framing.** "Refactor the codebase" is a research project, not a task, and the agent spends its budget exploring. The fix is scoped tasks with a clear definition of done; a rule of thumb from practice, not measurement, is the scope a person would finish in one focused sitting.
+
+**Anti-pattern 3: letting the agent edit and run everything unasked.** Confirmation prompts catch real mistakes. Claude Code's checkpoints undo file edits only: "Actions that affect remote systems (databases, APIs, deployments) can't be checkpointed." Deleting files, force-pushing, dropping tables and deploying need confirmation enforced by the host (a permission rule or a hook), not a sentence in the prompt: D1 and D2 of [post 23](../23-security/index.md), section 5, on the development machine, with the confirmation flow of [post 15](../15-tools-and-mcp/index.md), section 6.
+
+**Anti-pattern 4: no skills, no hooks, a default `AGENTS.md`.** Every session starts cold and the same mistakes recur. The fix is the setup of sections 3 to 6, grown from real failures.
 
 ---
 
 ## 8. The session as a unit of work
 
-A useful mental model: **treat each agent session like a focused human-collaborator session**. Brief on the goal. Give it the relevant context. Check in at meaningful boundaries. Review the diff. Pair on the hard parts.
+A useful mental model: **treat each agent session like a focused session with a human collaborator**: brief it, check in at boundaries, review the diff.
 
-The teams getting the most leverage from these tools are the ones that have moved decisively from "the agent autocompletes my code" to "the agent does scoped tasks I assign and review". The shift is cultural as much as technical, and it is the largest practical productivity change the tools deliver.
+A transcript can be read in the vocabulary of [post 07](../07-write-select-compress-isolate/index.md), section 9, each event a write, select, compress or isolate on one layer. One illustrative session on the repository of section 3, adding a `deleted_at` column to `orders`:
+
+| # | Event | Op | Layer |
+|---|---|---|---|
+| 1 | Before the session, a reviewed rule is added to `AGENTS.md`. | W | 01 System prompt |
+| 2 | At start, the host loads `AGENTS.md` and every skill's description. | S | 01 System prompt |
+| 3 | A `SessionStart` hook prints the branch's open issue. | S | 05 Conversation history |
+| 4 | The task matches `write-migration`; its `SKILL.md` loads. | S | 01 System prompt |
+| 5 | A research sub-agent reads the order module and returns a summary. | I | 05 Conversation history |
+| 6 | The agent writes its plan to a notes file outside the window. | W | none |
+| 7 | Near the limit, old tool outputs are cleared and the history summarised. | C | 05 Conversation history |
+| 8 | After compaction, the agent reads its notes file back. | S | 05 Conversation history |
+| 9 | A `SessionEnd` hook archives the transcript outside every prompt. | W | none |
+
+The rules file and the skill are placed by their job, standing instructions, as post 14 places `CLAUDE.md` in layer 01; hooks that only block or report are code and appear only where they write or select.
+
+---
+
+## 9. What can go wrong?
+
+- **A hook that exits 1.** It means to block an edit; Claude Code treats code 1 as a non-blocking error, and the protected file changes.
+- **A hook trusted unread.** The reference warns that "Command hooks execute shell commands with your full user permissions." Claude Code holds hooks back until a folder is trusted, so a cloned repository's `.claude/` settings are read first.
+- **A nested file expected to replace its parent.** A `frontend/CLAUDE.md` is written to override a root rule; Claude Code reads both, and the agent follows either.
+- **A skill that never loads.** Its description says "Database helper"; nothing in it matches a migration task, so the agent writes the migration from scratch and skips the team's checks.
+- **A sub-agent's summary taken on trust.** The child reports "all tests pass" after running a subset; CI fails on the tests it never ran.
+- **A session that runs all day.** Quality drops by the afternoon: the morning's instructions sit mid-history.
 
 ---
 
 ## Common pitfalls
 
-- **No `AGENTS.md`.** Every session re-discovers the project conventions.
-- **Bloated `AGENTS.md`.** Every call pays for it; humans stop reading it; rules contradict.
-- **No auto-compaction policy.** The session degrades silently after a few hours.
-- **Sub-agents without budget caps.** A stuck sub-agent burns the day's tokens.
-- **No hooks for dangerous commands.** Eventually the agent runs the wrong destructive command.
-- **Treating agents as autocomplete.** The leverage of the new tools comes from delegating tasks, not from typing assistance.
+1. **No `AGENTS.md`, or a bloated one.** Without it every session rediscovers the conventions; bloated, it costs tokens on every call and its rules contradict each other.
+2. **Rules where hooks belong.** "Never edit `vendor/`" in the prompt is followed most of the time; a `PreToolUse` hook that exits 2 every time.
+3. **No compaction habit.** The window grows until quality and the bill both suffer; compact or clear at task boundaries.
+4. **Sub-agents without turn caps or contracts.** A stuck child burns tokens, and an unchecked summary hides its mistakes.
+5. **Treating the agent as autocomplete.** The leverage comes from delegating scoped, reviewed tasks, not from faster typing.
 
 ---
 
 ## Further reading
 
-- Cursor, *"Rules and Composer"* docs (2025).
-- Aider, *"Architect mode and conventions"* docs (2024–25).
-- Anthropic, *"Claude Code"* docs (2024–25): the canonical reference (see Post 12).
-- agents.md project, *"AGENTS.md spec"* (2025): the per-project prompt format (see Post 08).
-- Anthropic Engineering, *"Agent Skills"* (2025): skill mechanics (see Post 15).
-- Cognition, *"Don't Build Multi-Agents"* (2025): the contrarian take, sharpens the discipline (see Post 15).
+- Anthropic, "How Claude Code works", "Hooks reference", "Extend Claude with skills", "Create custom subagents" and "How Claude remembers your project" (Claude Code documentation, consulted October 2026).
+- agents.md project, "AGENTS.md" (consulted October 2026).
+- Cursor, "Rules" (documentation, consulted October 2026).
+- Aider, "Specifying coding conventions" (documentation, consulted October 2026).
+- Anthropic Engineering, "Equipping agents for the real world with Agent Skills" (16 October 2025).
+- Cognition (Walden Yan), "Don't Build Multi-Agents" (June 2025): the counter-argument of section 5.
+- Anthropic, "Pricing" and "Prompt caching" (consulted October 2026): the rates of section 7.
 
-Full citations in [REFERENCES.md](../../REFERENCES.md).
+Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
 ---
 
 ## What to read next
 
-- **[Post 27 — Remote agentic workflow](../27-remote-agentic-workflow/index.md)**: the same workflow, on a remote machine.
-- **[Post 28 — Build a RAG chatbot](../28-build-rag-chatbot/index.md)**: the first capstone build.
-- **[Post 23 — Security and prompt injection](../23-security/index.md)**: the local-dev variant of the security story.
+- **[Post 27 - Remote agentic workflow](../27-remote-agentic-workflow/index.md):** the same workflow on a remote machine, reachable from any device.
+- **[Post 28 - Build #1: RAG chatbot from scratch](../28-build-rag-chatbot/index.md):** the first build, where an `AGENTS.md`, a five-block prompt and an eval gate meet in one repository.

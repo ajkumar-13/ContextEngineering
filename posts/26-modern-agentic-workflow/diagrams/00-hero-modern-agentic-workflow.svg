@@ -1,130 +1,201 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
-  <title id="t">The modern agentic workflow as a project layout</title>
-  <desc id="d">A repository laid out as an operating system for the agent. On the left, the repo root holds AGENTS.md and CLAUDE.md, the per-project system prompt, and a .claude directory containing four kinds of artefact: skills, sub-agents, hooks, and slash commands. Arrows run from each artefact into the agent loop on the right, which cycles through think, act, and observe. Labels show what each artefact contributes: skills add procedural memory, sub-agents add isolated delegation, hooks add enforcement, and slash commands add shortcuts.</desc>
-
-  <style><![CDATA[
-    :root{
-      --ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;
-      --ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;
-      --ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;
-      --ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-neutral-1:#EAEAE4;
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="ctx-00-hero-modern-agentic-workflow-title" aria-describedby="ctx-00-hero-modern-agentic-workflow-desc">
+<title id="ctx-00-hero-modern-agentic-workflow-title">The repository configures the window</title>
+<desc id="ctx-00-hero-modern-agentic-workflow-desc">Left, five files of a repository in Claude Code's names. Right, the six-layer window, 01 System prompt at the top to 06 User instruction at the bottom. AGENTS.md or CLAUDE.md is selected into layer 01 every session. The skills' SKILL.md files reach layer 01 as descriptions, with each body loaded on demand. The MCP servers in .mcp.json reach layer 02 through tool search. Sub-agent definitions start a separate sub-agent window, which returns only a summary to layer 05. Hook settings run hooks as code outside the window; only their messages reach layer 05. Layer 05 is marked compress, for compaction.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
     }
-    @media (prefers-color-scheme:dark){
-      :root{
-        --ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;
-        --ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;
-        --ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;
-        --ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-neutral-1:#1F2229;
-      }
-    }
-    .bg{fill:var(--ctx-bg);}
-    .card{fill:var(--ctx-surface);stroke:var(--ctx-border);stroke-width:1;}
-    .root{fill:var(--ctx-surface);stroke:var(--ctx-ink);stroke-width:1.5;}
-    .dir{fill:var(--ctx-neutral-1);stroke:var(--ctx-border);stroke-width:1;}
-    .flow{fill:none;stroke:var(--ctx-ink-muted);stroke-width:1;}
-    .loopring{fill:none;stroke:var(--ctx-primary);stroke-width:1.5;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ctx-ink);}
-    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:12px;fill:var(--ctx-ink);text-transform:uppercase;letter-spacing:0.06em;}
-    .l{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ctx-ink);}
-    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:11px;fill:var(--ctx-ink-muted);}
-    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ctx-ink-muted);}
-    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:12px;fill:var(--ctx-ink);}
-    .monos{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:10px;fill:var(--ctx-ink-muted);}
-    .loopt{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ctx-primary);}
-    .chip{stroke-width:1;}
-  ]]></style>
-
-  <rect class="bg" width="960" height="360"/>
-  <text class="title" x="48" y="44">The repo is the agent's operating system</text>
-  <text class="sub" x="48" y="64">AGENTS.md sets the prompt; .claude/ holds skills, sub-agents, hooks, and slash commands that feed the loop.</text>
-
-  <!-- Arrow marker -->
-  <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0 0 L10 5 L0 10 z" fill="var(--ctx-ink-muted)"/>
-    </marker>
-  </defs>
-
-  <!-- ============ LEFT: project layout ============ -->
-  <!-- repo root card -->
-  <rect class="root" x="48" y="92" width="230" height="52" rx="8"/>
-  <text class="h" x="64" y="114">Repo root</text>
-  <rect class="chip" x="150" y="100" width="118" height="20" rx="4" fill="var(--ctx-neutral-1)" stroke="var(--ctx-border)"/>
-  <text class="monos" x="160" y="114">AGENTS.md · CLAUDE.md</text>
-  <text class="s" x="64" y="134">the per-project system prompt</text>
-
-  <!-- .claude directory container -->
-  <rect class="dir" x="48" y="158" width="360" height="170" rx="8"/>
-  <rect class="chip" x="64" y="150" width="86" height="18" rx="4" fill="var(--ctx-surface)" stroke="var(--ctx-border)"/>
-  <text class="monos" x="72" y="163">.claude/</text>
-
-  <!-- four artefact rows, colour + shape paired with label -->
-  <!-- skills -->
-  <g>
-    <rect class="card" x="66" y="176" width="324" height="30" rx="6"/>
-    <rect x="66" y="176" width="5" height="30" rx="2" fill="var(--ctx-primary)"/>
-    <circle cx="86" cy="191" r="5" fill="var(--ctx-primary)"/>
-    <text class="l" x="100" y="195">skills/</text>
-    <text class="s" x="152" y="195">procedural memory · one concern each</text>
-  </g>
-  <!-- sub-agents -->
-  <g>
-    <rect class="card" x="66" y="212" width="324" height="30" rx="6"/>
-    <rect x="66" y="212" width="5" height="30" rx="2" fill="var(--ctx-accent)"/>
-    <path d="M81 222 h10 v10 h-10 z M89 214 h10 v10 h-10 z" fill="none" stroke="var(--ctx-accent)" stroke-width="1.5"/>
-    <text class="l" x="100" y="231">agents/</text>
-    <text class="s" x="152" y="231">isolated delegation with a tool budget</text>
-  </g>
-  <!-- hooks -->
-  <g>
-    <rect class="card" x="66" y="248" width="324" height="30" rx="6"/>
-    <rect x="66" y="248" width="5" height="30" rx="2" fill="var(--ctx-alert)"/>
-    <path d="M82 259 h8 v8 h-8 z" fill="var(--ctx-alert)"/>
-    <text class="l" x="100" y="267">hooks/</text>
-    <text class="s" x="152" y="267">enforcement: format, test, block</text>
-  </g>
-  <!-- slash commands -->
-  <g>
-    <rect class="card" x="66" y="284" width="324" height="30" rx="6"/>
-    <rect x="66" y="284" width="5" height="30" rx="2" fill="var(--ctx-success)"/>
-    <path d="M84 294 l-4 12 M92 294 l-4 12" stroke="var(--ctx-success)" stroke-width="1.5" fill="none"/>
-    <text class="l" x="100" y="303">commands/</text>
-    <text class="s" x="152" y="303">slash shortcuts for repeated tasks</text>
-  </g>
-
-  <!-- ============ MIDDLE: flow arrows ============ -->
-  <path class="flow" d="M278 118 C 460 118, 460 150, 632 150" marker-end="url(#arrow)"/>
-  <path class="flow" d="M390 191 C 500 191, 560 176, 632 178" marker-end="url(#arrow)"/>
-  <path class="flow" d="M390 227 C 500 227, 560 210, 632 208" marker-end="url(#arrow)"/>
-  <path class="flow" d="M390 263 C 520 263, 580 248, 632 236" marker-end="url(#arrow)"/>
-  <path class="flow" d="M390 299 C 500 299, 560 280, 632 264" marker-end="url(#arrow)"/>
-  <text class="s" x="470" y="112">loads at start</text>
-  <text class="s" x="470" y="330" text-anchor="middle">each artefact feeds the running loop</text>
-
-  <!-- ============ RIGHT: the agent loop ============ -->
-  <rect class="card" x="632" y="150" width="280" height="164" rx="10"/>
-  <text class="h" x="652" y="176">The agent loop</text>
-
-  <!-- loop ring with three stages -->
-  <g transform="translate(772,246)">
-    <circle class="loopring" r="52"/>
-    <!-- arrowheads suggesting direction -->
-    <path d="M52 -6 L52 6 M46 0 L58 0" stroke="var(--ctx-primary)" stroke-width="1.5" fill="none" transform="rotate(90)"/>
-    <!-- three stage nodes -->
-    <g>
-      <circle cx="0" cy="-52" r="20" fill="var(--ctx-surface)" stroke="var(--ctx-primary)" stroke-width="1.5"/>
-      <text class="loopt" x="0" y="-48" text-anchor="middle">think</text>
-    </g>
-    <g>
-      <circle cx="45" cy="26" r="20" fill="var(--ctx-surface)" stroke="var(--ctx-primary)" stroke-width="1.5"/>
-      <text class="loopt" x="45" y="30" text-anchor="middle">act</text>
-    </g>
-    <g>
-      <circle cx="-45" cy="26" r="20" fill="var(--ctx-surface)" stroke="var(--ctx-primary)" stroke-width="1.5"/>
-      <text class="loopt" x="-45" y="30" text-anchor="middle">observe</text>
-    </g>
-  </g>
-  <text class="mono" x="652" y="200">while not done:</text>
-  <text class="monos" x="652" y="218">think → act → observe → replan</text>
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-blue-soft { fill: var(--ctx-blue-soft); }
+  .f-green-soft { fill: var(--ctx-green-soft); }
+  .f-neutral-soft { fill: var(--ctx-neutral-soft); }
+  .f-orange-soft { fill: var(--ctx-orange-soft); }
+  .f-purple-soft { fill: var(--ctx-purple-soft); }
+  .f-surface { fill: var(--ctx-surface); }
+  .s-blue-line { stroke: var(--ctx-blue-line); }
+  .s-border { stroke: var(--ctx-border); }
+  .s-green-line { stroke: var(--ctx-green-line); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+  .s-orange-line { stroke: var(--ctx-orange-line); }
+  .s-purple-line { stroke: var(--ctx-purple-line); }
+</style>
+<defs>
+<marker id="ctx-00-hero-modern-agentic-workflow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="540"/>
+<text x="40" y="48" class="t-title" data-w="462">The repository configures the window</text>
+<text x="40" y="76" class="t-subtitle" data-w="698">Each file reaches the window by one operation, or acts from outside it. Claude Code's file names.</text>
+<rect x="600" y="112" width="320" height="48" rx="8" class="f-blue-soft" data-fit="skip"/>
+<rect x="600" y="112" width="320" height="48" rx="8" class="w1 nofill s-blue-line" data-fit="skip"/>
+<text x="616" y="140" class="t-label" data-w="124">01 System prompt</text>
+<rect x="600" y="168" width="320" height="48" rx="8" class="f-blue-soft" data-fit="skip"/>
+<rect x="600" y="168" width="320" height="48" rx="8" class="w1 nofill s-blue-line" data-fit="skip"/>
+<text x="616" y="196" class="t-label" data-w="211">02 Tools and MCP descriptions</text>
+<rect x="600" y="224" width="320" height="48" rx="8" class="f-orange-soft" data-fit="skip"/>
+<rect x="600" y="224" width="320" height="48" rx="8" class="w1 nofill s-orange-line" data-fit="skip"/>
+<text x="616" y="252" class="t-label" data-w="143">03 Memory and state</text>
+<rect x="600" y="280" width="320" height="48" rx="8" class="f-orange-soft" data-fit="skip"/>
+<rect x="600" y="280" width="320" height="48" rx="8" class="w1 nofill s-orange-line" data-fit="skip"/>
+<text x="616" y="308" class="t-label" data-w="137">04 Retrieved chunks</text>
+<rect x="600" y="336" width="320" height="48" rx="8" class="f-green-soft" data-fit="skip"/>
+<rect x="600" y="336" width="320" height="48" rx="8" class="w1 nofill s-green-line" data-fit="skip"/>
+<text x="616" y="364" class="t-label" data-w="159">05 Conversation history</text>
+<rect x="600" y="392" width="320" height="48" rx="8" class="f-purple-soft" data-fit="skip"/>
+<rect x="600" y="392" width="320" height="48" rx="8" class="w1 nofill s-purple-line" data-fit="skip"/>
+<text x="616" y="420" class="t-label" data-w="127">06 User instruction</text>
+<text x="904" y="364" text-anchor="end" class="t-note" data-w="66">compress</text>
+<rect x="40" y="112" width="296" height="64" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="40" y="112" width="296" height="64" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="56" y="136" class="t-code" data-w="188">AGENTS.md or CLAUDE.md</text>
+<text x="56" y="160" class="t-note" data-w="139">select: every session</text>
+<rect x="40" y="184" width="296" height="64" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="40" y="184" width="296" height="64" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="56" y="208" class="t-code" data-w="214">.claude/skills/*/SKILL.md</text>
+<text x="56" y="232" class="t-note" data-w="198">select: description, then body</text>
+<rect x="40" y="256" width="296" height="64" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="40" y="256" width="296" height="64" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="56" y="280" class="t-code" data-w="77">.mcp.json</text>
+<text x="56" y="304" class="t-note" data-w="123">select: tool search</text>
+<rect x="40" y="328" width="296" height="64" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="40" y="328" width="296" height="64" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="56" y="352" class="t-code" data-w="163">.claude/agents/*.md</text>
+<text x="56" y="376" class="t-note" data-w="150">isolate: summary back</text>
+<rect x="40" y="400" width="296" height="64" rx="8" class="f-neutral-soft" data-fit="skip"/>
+<rect x="40" y="400" width="296" height="64" rx="8" class="w1 nofill s-border" data-fit="skip"/>
+<text x="56" y="424" class="t-code" data-w="180">.claude/settings.json</text>
+<text x="56" y="448" class="t-note" data-w="152">hooks: messages back</text>
+<rect x="376" y="328" width="184" height="64" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="376" y="328" width="184" height="64" rx="8" class="w1 nofill s-ink-muted" data-fit="skip"/>
+<text x="392" y="352" class="t-label" data-w="123">sub-agent window</text>
+<text x="392" y="376" class="t-note" data-w="82">its own loop</text>
+<rect x="376" y="400" width="184" height="64" rx="8" class="f-surface" data-fit="skip"/>
+<rect x="376" y="400" width="184" height="64" rx="8" class="w1 nofill s-ink-muted d-lead" data-fit="skip"/>
+<text x="392" y="424" class="t-label" data-w="33">hook</text>
+<text x="392" y="448" class="t-note" data-w="117">code, not context</text>
+<path d="M336,140 L597,140" class="flow" marker-end="url(#ctx-00-hero-modern-agentic-workflow-arrow)"/>
+<path d="M336,212 L597.07,152.66" class="flow" marker-end="url(#ctx-00-hero-modern-agentic-workflow-arrow)"/>
+<path d="M336,284 L597.14,200.91" class="flow" marker-end="url(#ctx-00-hero-modern-agentic-workflow-arrow)"/>
+<path d="M336,360 L373,360" class="flow" marker-end="url(#ctx-00-hero-modern-agentic-workflow-arrow)"/>
+<path d="M560,360 L597,360" class="flow" marker-end="url(#ctx-00-hero-modern-agentic-workflow-arrow)"/>
+<path d="M336,432 L373,432" class="flow" marker-end="url(#ctx-00-hero-modern-agentic-workflow-arrow)"/>
+<path d="M560,424 L598.08,378.3" class="flow" marker-end="url(#ctx-00-hero-modern-agentic-workflow-arrow)"/>
+<text x="40" y="504" class="t-note" data-w="635">Sub-agents and hooks work outside the window; only a summary or a message comes back in.</text>
 </svg>

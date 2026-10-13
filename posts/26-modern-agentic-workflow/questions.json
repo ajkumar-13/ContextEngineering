@@ -1,0 +1,805 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-026",
+  "next_ordinal": 19,
+  "questions": [
+    {
+      "id": "ctx-026-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "agent-loop",
+        "host"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In a coding host such as Claude Code, which of these is chosen by the model during the loop rather than set by the host's configuration and the repository's files?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Which files to search and read for the next step",
+          "correct": true,
+          "feedback": "Right: the model picks its tools and their arguments call by call; choosing what to read is the model's own select."
+        },
+        {
+          "key": "b",
+          "text": "Whether AGENTS.md is loaded at the start of the session",
+          "correct": false,
+          "feedback": "The rules file is loaded by the host every session; the model does not decide whether it reads its standing instructions."
+        },
+        {
+          "key": "c",
+          "text": "When the history is compacted as the window nears its limit",
+          "correct": false,
+          "feedback": "Automatic compaction is a host policy; the model does not trigger it, although a person can with /compact."
+        },
+        {
+          "key": "d",
+          "text": "Which MCP servers the session can call at all",
+          "correct": false,
+          "feedback": "The servers come from the host's configuration (for a project, a file such as .mcp.json); the model can only use what is configured."
+        }
+      ],
+      "explanation": "Section 2: the host, configured by the repository, takes four context decisions (standing instructions, tool catalogue, compression, delegation), and the model takes the rest, chiefly which files to search and read on each turn.",
+      "hints": [
+        "Ask which of the four is decided again on every call, from what the last result showed."
+      ]
+    },
+    {
+      "id": "ctx-026-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "agents-md",
+        "claude-md",
+        "nesting"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A repository has a root rules file and a second one in `frontend/` that is meant to replace one root rule for front-end work. Which statement about AGENTS.md and Claude Code's CLAUDE.md is right?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "AGENTS.md: the closest file wins. CLAUDE.md: both are read, so the root rule stays",
+          "correct": true,
+          "feedback": "Right: the agents.md rule is that the closest file to the edited file wins, while Claude Code concatenates the CLAUDE.md files from the root down."
+        },
+        {
+          "key": "b",
+          "text": "Both let the closest file replace the root one, so either file name works for an override",
+          "correct": false,
+          "feedback": "That is AGENTS.md's rule only. Claude Code reads every CLAUDE.md from the root down to the working directory, so a nested file adds and cannot replace."
+        },
+        {
+          "key": "c",
+          "text": "Both are concatenated from the root down to the working directory, so neither can override",
+          "correct": false,
+          "feedback": "Concatenation is Claude Code's behaviour for CLAUDE.md; for AGENTS.md the closest file to the edited file wins."
+        },
+        {
+          "key": "d",
+          "text": "Neither nested file is read at all; only the file at the repository root reaches the window",
+          "correct": false,
+          "feedback": "Both read nested files: AGENTS.md by closeness to the edited file, CLAUDE.md when work reaches that directory."
+        }
+      ],
+      "explanation": "Section 3 and post 14, section 4: AGENTS.md resolves nesting by closeness, so a frontend/AGENTS.md governs edits there; Claude Code concatenates CLAUDE.md files, so a nested CLAUDE.md adds rules and the two can conflict.",
+      "hints": [
+        "The two formats resolve nested files in different ways: one picks a file, the other joins them."
+      ]
+    },
+    {
+      "id": "ctx-026-q03",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "skills",
+        "loading"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A project has twelve skills under `.claude/skills/`. At the start of a Claude Code session, what of them is in the model's window?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Each skill's description, so the model can tell when one applies",
+          "correct": true,
+          "feedback": "Right: the page says skill descriptions are loaded into context so Claude knows what is available, and full skill content loads only when invoked."
+        },
+        {
+          "key": "b",
+          "text": "The full SKILL.md of all twelve, so every procedure is at hand",
+          "correct": false,
+          "feedback": "Loading every body on every call is what skills avoid; the body loads only when a task invokes the skill."
+        },
+        {
+          "key": "c",
+          "text": "Nothing, until a person types the skill's name as a slash command",
+          "correct": false,
+          "feedback": "A person can invoke a skill by name, but the model can also apply one on its own, which is why the descriptions are always in context."
+        },
+        {
+          "key": "d",
+          "text": "Only the skills whose trigger keywords match words in the first message",
+          "correct": false,
+          "feedback": "No keyword match loads a skill; the model judges relevance from the description, with any when_to_use text appended to it."
+        }
+      ],
+      "explanation": "Section 4: Claude Code keeps every skill's description in context and loads a skill's full content only when it is invoked, by the model's judgement over the description or by a person typing its name.",
+      "hints": [
+        "Think about what the model needs to decide that a skill applies, before it has read the skill."
+      ]
+    },
+    {
+      "id": "ctx-026-q04",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "hooks",
+        "exit-codes"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A PreToolUse hook meant to stop edits under `secrets/` prints a reason to standard error and exits with code 1. An agent then edits `secrets/keys.yaml`. What happens in Claude Code?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The edit goes ahead, because only exit code 2 blocks a tool call",
+          "correct": true,
+          "feedback": "Right: the reference treats exit codes other than 0 and 2 as non-blocking errors, so a policy hook has to exit 2."
+        },
+        {
+          "key": "b",
+          "text": "The edit is blocked and the model reads the reason, as for any non-zero exit",
+          "correct": false,
+          "feedback": "Only exit code 2 blocks. Any other non-zero code is a non-blocking error and the action proceeds."
+        },
+        {
+          "key": "c",
+          "text": "The session stops with a hook error until someone fixes the script and restarts",
+          "correct": false,
+          "feedback": "A failing hook does not stop the session; with code 1 the tool call simply proceeds."
+        },
+        {
+          "key": "d",
+          "text": "The edit is blocked, but the reason is shown only to the person, not to the model",
+          "correct": false,
+          "feedback": "With code 1 nothing is blocked. With code 2 the call is blocked and the standard error becomes the reason the model reads."
+        }
+      ],
+      "explanation": "Section 6: \"Exit with code 2 to block the action\"; any other non-zero code is a non-blocking error and the action proceeds. The first item of What can go wrong? is exactly this bug.",
+      "hints": [
+        "The protocol gives one exit code a special meaning.",
+        "Ask what the reference calls an exit code other than 0 and 2."
+      ]
+    },
+    {
+      "id": "ctx-026-q05",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "hooks",
+        "post-tool-use"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team registers a PostToolUse hook on the shell tool that exits 2 when a command matches `DROP TABLE`. What does that hook achieve when the agent runs such a command?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "It tells the model after the command has run",
+          "correct": true,
+          "feedback": "Right: PostToolUse fires after the tool has run, and exit 2 there shows the message to the model. A guard has to be a PreToolUse hook."
+        },
+        {
+          "key": "b",
+          "text": "It blocks the command before it reaches the database, as any exit 2 does",
+          "correct": false,
+          "feedback": "That is what a PreToolUse hook does. A PostToolUse hook fires after the tool ran, so the table is already gone."
+        },
+        {
+          "key": "c",
+          "text": "It rolls the database back with a checkpoint once the hook exits 2",
+          "correct": false,
+          "feedback": "Checkpoints cover file edits only; actions on remote systems such as databases cannot be checkpointed."
+        },
+        {
+          "key": "d",
+          "text": "Nothing, because hooks only run on Edit and Write tools",
+          "correct": false,
+          "feedback": "The matcher can name any tool, including the shell tool; the problem is the event, not the matcher."
+        }
+      ],
+      "explanation": "Section 6 and the figure on hook points: only a hook in front of an action can stop it. PostToolUse runs after the tool, so exit 2 there only shows the message to the model; a destructive command needs a PreToolUse guard, as anti-pattern 3 says.",
+      "hints": [
+        "Look at when the event fires relative to the tool call.",
+        "Ask whether a database change can be checkpointed."
+      ]
+    },
+    {
+      "id": "ctx-026-q06",
+      "type": "mcq",
+      "track": "connect",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "sub-agents",
+        "contract-test"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "connects": [
+        "ctx-013"
+      ],
+      "prompt": "Which of these coding tasks is the best candidate to hand to a sub-agent, by the contract test that post 13 gives and this post applies?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Run the integration suite and return the failing tests with their first error lines",
+          "correct": true,
+          "feedback": "Right: the input is fully specified, the result is structured and checkable on its own, and the noisy logs stay in the child's window."
+        },
+        {
+          "key": "b",
+          "text": "Work through the design of the new billing module with the person, decision by decision",
+          "correct": false,
+          "feedback": "The value is the evolving conversation; there is no result of known shape to hand back, so the reasoning should stay in one agent."
+        },
+        {
+          "key": "c",
+          "text": "Rewrite three modules in parallel while the main agent rewrites the code that calls them",
+          "correct": false,
+          "feedback": "Parallel edits to code that depends on each other are the case Cognition warns about: each agent makes implicit decisions the others cannot see."
+        },
+        {
+          "key": "d",
+          "text": "Continue the refactor the main agent started, using everything it has learned so far",
+          "correct": false,
+          "feedback": "A task that needs the parent's whole evolving state fails the third test; passing the full window across defeats the isolation."
+        }
+      ],
+      "explanation": "Section 5 and post 13, section 3: delegate a task whose input is fully specified, whose output is structured and finite, and which does not need the parent's evolving state; keep coherent reasoning in the main agent.",
+      "hints": [
+        "Check each task for a result whose shape the parent knows in advance.",
+        "Ask which tasks need decisions the main agent is still making."
+      ]
+    },
+    {
+      "id": "ctx-026-q07",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "6",
+      "est_minutes": 3,
+      "tags": [
+        "hooks",
+        "enforcement"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team wants the agent never to edit files under `vendor/`. Give the reason a PreToolUse hook that exits 2 is a better home for this than a rule in `AGENTS.md`.",
+      "answer": {
+        "model": "A rule in the prompt is a request the model follows most of the time; a hook is code that intercepts every edit call and blocks it, so the rule is enforced every time.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess)\\b)(?=\\s*(?:\\S+\\s+){5}\\S)(?![\\s\\S]*\\bhooks?\\b[^.;]{0,50}(most of the time|sometimes|not always|can be ignored|may be ignored|might be ignored|is ignored|unreliab))(?![\\s\\S]*\\b(prompt|rule|agents\\.md)\\b[^.;]{0,50}(?<!not )(?<!n't )\\b(every time|always (followed|obeyed|enforced)|guaranteed|is enforced|are enforced|deterministic)\\b)(?![\\s\\S]*\\b(no|not any) (real )?difference\\b)(?=[\\s\\S]*(most of the time|\\bsometimes\\b|not always|\\bmay\\b|\\bmight\\b|\\bcan (ignore|skip|forget|miss|be ignored|disobey)|probabilis|no guarantee|not guarantee|isn'?t guaranteed|\\brequest|\\bonly asks?\\b|\\basks?\\b|suggest|\\bforget|\\bignor|disobey|\\bdrift|unreliab|not enforc|isn'?t enforc|\\bslips?\\b|non-?determin))(?=[\\s\\S]*(every time|\\balways\\b|determinis|\\bin code\\b|\\bcode\\b|\\benforc|\\bblock|intercept|can'?t be ignored|cannot be ignored|guarantee|\\bstops?\\b|\\brefus|\\bprevent))[\\s\\S]*$"
+        ]
+      },
+      "explanation": "Section 6: a rule in the prompt is followed most of the time and code that intercepts the call every time. That is why local security controls are hooks, D1 of post 23, section 5: the model is not the permission system.",
+      "hints": [
+        "Compare how reliably a model follows text in its window with how reliably code runs.",
+        "Think about what the hook does with the edit call before it executes."
+      ]
+    },
+    {
+      "id": "ctx-026-q08",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 1,
+      "tags": [
+        "skills",
+        "front-matter"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In Claude Code, which front-matter field of a skill's `SKILL.md` does Claude use to decide when to apply the skill? Name the main field, not an optional addition to it.",
+      "answer": {
+        "model": "description",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|i think|i guess)\\b)(?![\\s\\S]*(?<!not )(?<!not the )(?<!not a )(?<!not its )\\b(name|title|trigger|keywords?|paths|tags?|instructions?)\\b)(?![\\s\\S]*\\b(not|isn'?t|never)\\s+(the\\s+|its\\s+|a\\s+)?`?description)(?=[\\s\\S]*\\bdescriptions?\\b)[\\s\\S]{0,160}$"
+        ]
+      },
+      "explanation": "Section 4: the page's entry for the description field reads \"Claude uses this to decide when to apply the skill.\" Claude Code appends an optional when_to_use field to it, but no keyword list loads a skill, so the description says what the skill does and when to use it.",
+      "hints": [
+        "The model has to judge a match from text, before the skill's body is loaded."
+      ]
+    },
+    {
+      "id": "ctx-026-q09",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 5,
+      "tags": [
+        "cost",
+        "compaction"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "An illustrative session: a 12,000-token stable prefix, and 50 model calls, each appending 3,000 tokens of tool call and result to the history, with no compaction. Every call re-reads the whole window. Give the window that call 50 reads, and the input tokens over all 50 calls.",
+      "answer": {
+        "parts": [
+          {
+            "label": "window read by call 50",
+            "value": 159000,
+            "tolerance": 0,
+            "unit": "tokens"
+          },
+          {
+            "label": "input tokens over the session",
+            "value": 4275000,
+            "tolerance": 0,
+            "unit": "tokens"
+          }
+        ]
+      },
+      "precision_note": "Call c reads 12,000 + 3,000 (c - 1): call 50 reads 12,000 + 49 × 3,000 = 159,000. The session reads 50 × 12,000 + 3,000 × (0 + 1 + ... + 49) = 600,000 + 3,000 × 1,225 = 4,275,000. This is run() of snippets/session_cost.py with PREFIX=12000, TOOL_CALL=0, RESULT=3000, CALLS=50. Counting call 50 as 50 × 3,000 gives 162,000; forgetting the prefix gives 3,675,000.",
+      "explanation": "Section 7, anti-pattern 1: each call re-reads the prefix and every earlier append, so the window grows by a fixed step and the session's input is a sum of an arithmetic series, growing with the square of the number of calls.",
+      "hints": [
+        "Write the window of call c as the prefix plus the appends of the calls before it.",
+        "The total is 50 prefixes plus 3,000 times the sum 0 + 1 + ... + 49."
+      ]
+    },
+    {
+      "id": "ctx-026-q10",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 6,
+      "tags": [
+        "cost",
+        "prompt-caching"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The same session (12,000-token prefix, 50 calls, 3,000 tokens appended per call, 4,275,000 input tokens in all, call 50 reading 159,000) runs on Claude Opus 4.6 at 5 dollars per million input tokens as of early 2026. Ignore output. Give the input cost without caching, and with caching, where each call reads the previous call's whole prompt from the cache at 0.1 times the input price and writes everything new at 1.25 times (the first call writes the 12,000-token prefix).",
+      "answer": {
+        "parts": [
+          {
+            "label": "input cost without caching",
+            "value": 21.375,
+            "tolerance": 0.006,
+            "unit": "dollars"
+          },
+          {
+            "label": "input cost with caching",
+            "value": 3.05175,
+            "tolerance": 0.006,
+            "unit": "dollars"
+          }
+        ]
+      },
+      "precision_note": "Uncached: 4,275,000 × 5 / 1,000,000 = 21.375. Cached: the reads are every window but the last, 4,275,000 - 159,000 = 4,116,000 tokens at 0.50 dollars per million = 2.058; the writes are 12,000 + 49 × 3,000 = 159,000 tokens at 6.25 dollars per million = 0.99375; total 3.05175. snippets/session_cost.py with PREFIX=12000, TOOL_CALL=0, RESULT=3000, CALLS=50 prints the same. Billing every token at 0.1 times gives 2.1375; forgetting the writes gives 2.058.",
+      "explanation": "Section 7: caching bills a re-read prefix at a tenth of the input price, which narrows the dollar cost of a long session a great deal, but the model still reads every token of the window on every call.",
+      "hints": [
+        "Without caching, every input token costs 5 dollars per million.",
+        "With caching, split the input into tokens read from the cache (every window except the last) and tokens written new (the prefix and each append)."
+      ]
+    },
+    {
+      "id": "ctx-026-q11",
+      "type": "numeric",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 8,
+      "tags": [
+        "compaction",
+        "policy"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "An illustrative session: a 10,000-token prefix and 60 model calls, each appending 2,500 tokens. Before a call, if the window plus the 2,500 tokens that call will append would exceed 60,000, the history is first replaced by a 5,000-token summary, so the window drops to 15,000. How many compactions happen in the 60 calls, and what is the largest window any of the 60 calls reads?",
+      "answer": {
+        "parts": [
+          {
+            "label": "compactions",
+            "value": 3,
+            "tolerance": 0,
+            "unit": ""
+          },
+          {
+            "label": "largest window read",
+            "value": 57500,
+            "tolerance": 0,
+            "unit": "tokens"
+          }
+        ]
+      },
+      "precision_note": "Call 20 reads 10,000 + 19 × 2,500 = 57,500, and 57,500 + 2,500 = 60,000 does not exceed the limit. Call 21 would read 60,000; 62,500 exceeds it, so it compacts to 15,000. From 15,000 the window reaches 57,500 seventeen calls later, so calls 39 and 57 compact too: 3 compactions. run(60000) of snippets/session_cost.py with PREFIX=10000, TOOL_CALL=500, RESULT=2000, CALLS=60, SUMMARY=5000 prints the same. Reading the rule as 'compact once the window passes 60,000' gives a largest window of 60,000.",
+      "explanation": "Section 7: a compaction policy turns the straight climb into a sawtooth whose peak sits just under the limit. Where exactly the peak lands depends on how the trigger is written, which is why a policy states its threshold precisely.",
+      "hints": [
+        "Find the first call whose window plus its append would pass 60,000.",
+        "After a compaction the window restarts at 15,000; count how many calls it takes to come back."
+      ]
+    },
+    {
+      "id": "ctx-026-q12",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "6",
+      "est_minutes": 15,
+      "tags": [
+        "hooks",
+        "path-guard"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The starter is a PreToolUse guard for edits, written as a function. It returns exit code 1, treats `vendorized/` as protected, lets `app/../vendor/x.py` through and never checks for paths outside the project. Fix it so it returns `(2, reason)` for an edit outside the project root or inside the top-level `vendor/` or `legacy/` directory, and `(0, \"\")` otherwise. Paths are POSIX paths, absolute or relative to the root.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "PROTECTED = (\"vendor\", \"legacy\")\n\n\ndef guard(event):\n    \"\"\"A PreToolUse hook for Edit and Write, as a function.\n\n    event[\"cwd\"] is the project root and event[\"tool_input\"][\"file_path\"] the file to edit, both POSIX paths\n    (the path may be absolute or relative to the root). Return (exit_code, message): (0, \"\") to allow the edit,\n    (2, reason) to block an edit outside the project or inside a protected top-level directory.\n    \"\"\"\n    path = event[\"tool_input\"][\"file_path\"]\n    rel = path[len(event[\"cwd\"]) + 1:]\n    if rel.startswith(\"vendor\") or rel.startswith(\"legacy\"):\n        return 1, \"protected directory\"\n    return 0, \"\"\n",
+      "solution": "import posixpath\n\nPROTECTED = (\"vendor\", \"legacy\")\n\n\ndef guard(event):\n    \"\"\"A PreToolUse hook for Edit and Write, as a function.\n\n    event[\"cwd\"] is the project root and event[\"tool_input\"][\"file_path\"] the file to edit, both POSIX paths\n    (the path may be absolute or relative to the root). Return (exit_code, message): (0, \"\") to allow the edit,\n    (2, reason) to block an edit outside the project or inside a protected top-level directory.\n    \"\"\"\n    root = posixpath.normpath(event[\"cwd\"])\n    target = posixpath.normpath(posixpath.join(root, event[\"tool_input\"][\"file_path\"]))\n    rel = posixpath.relpath(target, root)\n    if rel == \"..\" or rel.startswith(\"../\"):\n        return 2, \"blocked: the file is outside the project.\"\n    top = rel.split(\"/\")[0]\n    if top in PROTECTED:\n        return 2, f\"blocked: {top}/ is read-only here.\"\n    return 0, \"\"\n",
+      "tests": "ROOT = \"/home/dev/acme\"\n\n\ndef run(path):\n    code, message = guard({\"cwd\": ROOT, \"tool_input\": {\"file_path\": path}})\n    assert code in (0, 2), \"a policy hook answers 0 or 2; exit code 1 is a non-blocking error\"\n    if code == 2:\n        assert message.strip(), \"a blocked edit needs a reason for the model\"\n    return code\n\n\nassert run(\"/home/dev/acme/app/orders.py\") == 0\nassert run(\"app/orders.py\") == 0\nassert run(\"/home/dev/acme/vendorized/client.py\") == 0, \"vendorized/ is not vendor/\"\nassert run(\"/home/dev/acme/vendor/payments.py\") == 2\nassert run(\"vendor/payments.py\") == 2\nassert run(\"/home/dev/acme/legacy/old.py\") == 2\nassert run(\"/home/dev/acme/app/../vendor/payments.py\") == 2, \"a path through .. still lands in vendor/\"\nassert run(\"/home/dev/acme/../.env\") == 2, \"outside the project\"\nassert run(\"/home/dev/acme-old/settings.py\") == 2, \"a sibling directory that shares the prefix is outside\"\nassert run(\"/etc/passwd\") == 2\nassert run(\"/home/dev/acme/app/vendor/notes.py\") == 0, \"only a top-level vendor/ is protected\"\nprint(\"guard passes\")\n",
+      "entry": "python -c \"exec(open('solution.py').read()); exec(open('tests.py').read())\"",
+      "expected_output": "guard passes\n",
+      "explanation": "Section 6: a policy hook exits 2, and a path guard compares normalised paths, not strings. Normalising removes the .. segments, a relative path from the root catches a sibling such as acme-old/ that merely shares the prefix, and comparing the first path component keeps vendorized/ apart from vendor/.",
+      "hints": [
+        "Start with the exit code the protocol uses to block.",
+        "Normalise the joined path, then express it relative to the root and look at its first component."
+      ]
+    },
+    {
+      "id": "ctx-026-q13",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "sub-agents",
+        "handshake"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Put the steps of delegating a task to a sub-agent in order, from the parent's decision to delegate to the parent continuing its work.",
+      "items": [
+        {
+          "key": "a",
+          "text": "The sub-agent runs its own loop of reads, tool calls and retries."
+        },
+        {
+          "key": "b",
+          "text": "The parent folds the returned summary into its own window."
+        },
+        {
+          "key": "c",
+          "text": "The parent frames the task and names the shape of the result it expects."
+        },
+        {
+          "key": "d",
+          "text": "The parent spawns the sub-agent with a fresh window, scoped tools and a turn cap."
+        }
+      ],
+      "answer": [
+        "c",
+        "d",
+        "a",
+        "b"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 5's handshake: frame the task and the contract, spawn with a fresh window and a cap, let the child loop in isolation, and fold back only the summary.",
+      "hints": [
+        "The contract has to exist before anything is spawned."
+      ]
+    },
+    {
+      "id": "ctx-026-q14",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "6",
+      "est_minutes": 4,
+      "tags": [
+        "hooks",
+        "events"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Match each Claude Code hook event to a job it suits. One job on the right suits none of them.",
+      "left": [
+        {
+          "key": "a",
+          "text": "PreToolUse"
+        },
+        {
+          "key": "b",
+          "text": "PostToolUse"
+        },
+        {
+          "key": "c",
+          "text": "SessionStart"
+        },
+        {
+          "key": "d",
+          "text": "SessionEnd"
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Archive the transcript to a journal outside every prompt"
+        },
+        {
+          "key": "b",
+          "text": "Block an edit to a protected directory before it happens"
+        },
+        {
+          "key": "c",
+          "text": "Print the branch's open issue into the context"
+        },
+        {
+          "key": "d",
+          "text": "Rewrite the model's reply before the person sees it"
+        },
+        {
+          "key": "e",
+          "text": "Run the formatter after an edit and report a failure to the model"
+        }
+      ],
+      "answer": {
+        "a": "b",
+        "b": "e",
+        "c": "c",
+        "d": "a"
+      },
+      "explanation": "Section 6: PreToolUse can block a tool call; PostToolUse runs after the tool and reports; SessionStart's plain-text output is added to the context; SessionEnd cannot block and suits housekeeping. None of the four rewrites the model's reply.",
+      "hints": [
+        "Sort the events by whether they fire before or after the thing they watch."
+      ]
+    },
+    {
+      "id": "ctx-026-q15",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o2",
+        "o4"
+      ],
+      "section": "3",
+      "est_minutes": 15,
+      "tags": [
+        "agents-md",
+        "skills",
+        "hooks",
+        "sub-agents",
+        "design"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "connects": [
+        "ctx-014",
+        "ctx-013",
+        "ctx-016"
+      ],
+      "prompt": "A team's coding agent has caused four problems in a month: it committed straight to `main`; it wrote migrations by hand and skipped the team's checklist; it edited generated files under `gen/`; and its window filled with test logs whenever it chased a failing test. For each, say where the fix belongs (a rule in `AGENTS.md`, a skill, a hook or a sub-agent), why there and not elsewhere, and write the one line or the front matter that implements it.",
+      "kind": "design",
+      "solution": "1. **Committing to `main`: a rule in `AGENTS.md`, backed by a hook.** It is a team rule for every session, so it belongs in the rules block of the five-block file with the issue that motivated it (`- Open a pull request for every change; never commit to main. [#150]`, post 14, sections 2 and 3). Because a prompt rule is followed most of the time, a PreToolUse hook on the shell tool that exits 2 on `git commit` or `git push` to `main` makes it hold every time.\n2. **Migrations without the checklist: a skill.** A packaged procedure used only when a task changes the schema is a skill, not a standing rule (post 16, section 6): `.claude/skills/write-migration/SKILL.md` with `name: write-migration` and a description that says what and when, such as `description: Draft an Alembic migration for a schema change. Use when a task adds, drops or alters a table or a column.` The body carries the checklist and an example; only the description costs tokens until a task matches.\n3. **Edits under `gen/`: a hook.** A protected path is a policy, so it is enforced in code: a PreToolUse hook with the matcher `Edit|Write` that normalises the path and exits 2 when its first component is `gen`, with a reason the model reads. A rule in `AGENTS.md` can sit beside it as guidance, but the hook is the control.\n4. **Test logs filling the window: a sub-agent.** Chasing a failing test has a clean contract (input: the test name; output: the root cause and the fix), so a test-and-fix sub-agent with the shell tools and a `maxTurns` cap keeps the logs in its own window and returns a structured summary (post 13, sections 3 and 5). The parent checks the result before acting on it.",
+      "rubric": [
+        {
+          "criterion": "Puts the main-branch rule in AGENTS.md and notes that a hook makes it hold every time",
+          "points": 2
+        },
+        {
+          "criterion": "Makes the migration checklist a skill and writes a description that says what and when",
+          "points": 2
+        },
+        {
+          "criterion": "Enforces the gen/ path with a PreToolUse hook that exits 2 on a normalised path",
+          "points": 2
+        },
+        {
+          "criterion": "Moves the test chase to a sub-agent with a contract and a turn cap",
+          "points": 2
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Sections 3 to 6: standing team rules go in AGENTS.md, packaged procedures in a skill loaded by its description, policies that must hold every time in a hook that exits 2, and noisy work with a clean contract in a sub-agent.",
+      "hints": [
+        "Ask of each problem whether it is a standing rule, a procedure used now and then, a policy that must never fail, or noisy work.",
+        "A rule that must hold every time needs code behind it."
+      ]
+    },
+    {
+      "id": "ctx-026-q16",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 12,
+      "tags": [
+        "anti-patterns",
+        "compaction",
+        "cost"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A developer keeps one agent session open from morning to evening on a large refactor, typed as \"refactor the payments code\". By the afternoon the agent ignores conventions it followed in the morning and the bill for the day is several times the team's usual. Diagnose the session with this post's anti-patterns and the failure modes of post 06, and say what the developer should have done differently.",
+      "kind": "critique",
+      "solution": "1. **Anti-pattern 2, over-broad framing.** \"Refactor the payments code\" is a research project, not a task; the agent spends its calls exploring, and the session never reaches a natural end. Cutting it into scoped tasks with a definition of done gives each its own short session.\n2. **Anti-pattern 1, no compaction.** Every call re-reads the whole window, so the input grows with the square of the session's length: in section 7's illustrative run, 120 calls read 20,010,000 input tokens without compaction against 7,254,000 with it. Caching narrows the dollar gap but not what the model reads.\n3. **The quality drop is a context failure.** The morning's instructions now sit in the middle of a long history full of tool output: lost-in-the-middle and distraction (post 06, sections 5 and 2). Conventions that matter should live in `AGENTS.md`, which the host reloads, not in early chat turns.\n4. **What to do instead.** Leave automatic compaction on and use `/compact` with a focus when quality drifts, or `/clear` at each real task boundary; write the plan to a notes file so it survives compaction; delegate log-heavy sub-tasks to a sub-agent; and put the conventions the agent forgot into `AGENTS.md`.",
+      "rubric": [
+        {
+          "criterion": "Identifies over-broad task framing and proposes scoped tasks",
+          "points": 2
+        },
+        {
+          "criterion": "Explains the quadratic growth of input without compaction, with the post's arithmetic or an equivalent",
+          "points": 2
+        },
+        {
+          "criterion": "Names lost-in-the-middle and distraction as the cause of the quality drop",
+          "points": 2
+        },
+        {
+          "criterion": "Prescribes compaction or clearing at boundaries and moving durable conventions into AGENTS.md",
+          "points": 2
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Section 7: anti-patterns 1 and 2 compound. A session that never ends re-reads an ever larger window, which raises the bill and pushes early instructions into the middle, where post 06's failure modes set in.",
+      "hints": [
+        "Ask why the session never ended, and what every call of a long session re-reads.",
+        "Look for where the morning's conventions sit in the window by the afternoon."
+      ]
+    },
+    {
+      "id": "ctx-026-q17",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 2,
+      "tags": [
+        "anti-patterns"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A developer opens a session with the single instruction \"Refactor the codebase\" and the agent spends most of its budget reading files. Which of the four anti-patterns is this?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Over-broad task framing",
+          "correct": true,
+          "feedback": "Right: the instruction is a research project rather than a task with a definition of done, so the agent explores."
+        },
+        {
+          "key": "b",
+          "text": "Letting the history grow without compaction",
+          "correct": false,
+          "feedback": "Compaction is about a long window, not about the scope of the instruction; the session can be short and still unscoped."
+        },
+        {
+          "key": "c",
+          "text": "Letting the agent edit and run everything unasked",
+          "correct": false,
+          "feedback": "That anti-pattern is about destructive actions without confirmation; here the problem is what was asked."
+        },
+        {
+          "key": "d",
+          "text": "No skills, no hooks, a default AGENTS.md",
+          "correct": false,
+          "feedback": "Missing configuration makes every session start cold, but an unscoped instruction wastes the budget even in a well-configured repository."
+        }
+      ],
+      "explanation": "Section 7, anti-pattern 2: \"Refactor the codebase\" is a research project, not a task; the fix is scoped tasks with a clear definition of done.",
+      "hints": [
+        "Ask what the instruction leaves undefined."
+      ]
+    },
+    {
+      "id": "ctx-026-q18",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "wsci",
+        "tool-search"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Claude Code defers MCP tool definitions and loads them on demand through tool search. Name the operation, of write, select, compress and isolate, that this is, and the layer of the window it acts on.",
+      "answer": {
+        "model": "Select, acting on layer 02, tools and MCP descriptions.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|i think)\\b)(?![\\s\\S]*?(?:^|[.;,:\\n(])(?:(?!\\b(?:not|neither|nor|never)\\b|n't\\b)[^.;,:\\n(])*?\\b(compress\\w*|isolat\\w*|write|writes|writing|written)\\b)(?![\\s\\S]*\\b(not|isn'?t|never) (a |an )?select)(?=[\\s\\S]*\\bselect\\w*)(?=[\\s\\S]*(\\blayer\\s*0?2\\b|\\b02\\b|\\btools?\\b|\\bmcp descriptions?\\b))(?![\\s\\S]*\\blayer\\s*0?[13456]\\b)[\\s\\S]*$"
+        ]
+      },
+      "explanation": "Section 2: the tool catalogue is the host's second decision, and loading only the tool definitions a step needs is a select on layer 02, tools and MCP descriptions, as post 15 treats runtime tool selection.",
+      "hints": [
+        "Ask whether the step adds, shrinks or splits, or chooses what comes in.",
+        "Tool schemas have their own layer in the six-layer stack."
+      ]
+    }
+  ]
+}

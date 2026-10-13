@@ -1,82 +1,26 @@
 id: ctx-026
 slug: 26-modern-agentic-workflow
-title: "26 · The Modern Agentic Workflow"
-
-description: >
-  Learn how modern AI coding agents like Claude Code, Cursor, Aider, Cline,
-  Continue, and Codex CLI operate. Explore the agent loop, AGENTS.md,
-  skills, hooks, sub-agents, orchestration patterns, and workflow best
-  practices for building productive AI-assisted software development.
-
-author: "Ajay"
-
+title: "26 - The modern agentic workflow"
+summary: "Coding agents share one loop, configured by files in the repository: AGENTS.md in five blocks, skills loaded by description, hooks that block in code, sub-agents with turn caps, and compaction to keep a session's cost down."
 date: 2026-05-20
-last_modified: 2026-05-20
-
-tags:
-  - ai-agents
-  - agentic-workflow
-  - claude-code
-  - cursor
-  - aider
-  - codex-cli
-  - agents-md
-  - skills
-  - hooks
-  - sub-agents
-  - orchestration
-  - context-engineering
-
-category: Advanced Agent Systems
-series: Context Engineering
+updated: 2026-10-13
+status: complete
 part: "Part V - Workflow and builds"
-chapter: "Part V — End-to-End Applications"
-
+level: intermediate
+reading_time: 17
+tags: [context-engineering, agentic-workflow, coding-agents, agents-md, skills, hooks, sub-agents]
 hero: diagrams/00-hero-modern-agentic-workflow.svg
-hero_alt: "Modern AI coding workflow showing AGENTS.md, skills, hooks, sub-agents, tool execution, planning, and iterative development"
-
-reading_time: 22
-
-toc: true
-draft: false
-
-keywords:
-  - Agentic Workflow
-  - Modern AI Agents
-  - AI Coding Assistant
-  - Coding Agents
-  - Claude Code
-  - Cursor
-  - Aider
-  - Continue
-  - Codex CLI
-  - Cline
-  - Replit Agent
-  - AGENTS.md
-  - CLAUDE.md
-  - System Prompt
-  - Project Instructions
-  - Skills
-  - Agent Skills
-  - Hooks
-  - Tool Calling
-  - Model Context Protocol
-  - MCP
-  - Sub Agents
-  - Multi Agent Systems
-  - Orchestrator Pattern
-  - Agent Loop
-  - Repository Context
-  - Context Engineering
-  - Prompt Engineering
-  - Context Compression
-  - Software Engineering
-  - AI Development Workflow
-  - Development Automation
-  - Human in the Loop
-  - AI Pair Programming
-
-canonical_url: ""
-
-prev: ../25-long-context-models/
-next: ../27-remote-agentic-workflow/
+prerequisites: [ctx-013, ctx-014]
+code: optional
+outcomes:
+  - id: o1
+    text: "Describe the agent loop that coding hosts share, and say which decisions the host makes and which the model makes."
+  - id: o2
+    text: "Write a project's AGENTS.md in the five-block form, and explain how it, CLAUDE.md and a skill's SKILL.md reach the window."
+  - id: o3
+    text: "Configure a hook that blocks or reports an edit, and say which hook events can stop the action."
+  - id: o4
+    text: "Delegate a scoped task to a sub-agent with a contract and a turn cap, and say which work stays in the main agent."
+  - id: o5
+    text: "Recognise the four workflow anti-patterns, and work out what an uncompacted session costs against a compacted one."
+recommended: [ctx-023, ctx-025]

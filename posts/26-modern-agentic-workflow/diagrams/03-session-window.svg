@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="ctx-03-session-window-title" aria-describedby="ctx-03-session-window-desc">
+<title id="ctx-03-session-window-title">Without compaction, every call reads more</title>
+<desc id="ctx-03-session-window-desc">A line chart of the window in tokens at each of 120 model calls of one illustrative session. Without compaction, in red, the window climbs in a straight line from 18,000 to 315,500 tokens. With compaction at 100,000 tokens, in ink, it climbs to 95,500, falls back to 23,000 and climbs again, three times. A dotted line marks the 100,000-token limit. The caption gives the session's input: 20,010,000 tokens without compaction and 7,254,000 with it. Values computed by snippets/session_cost.py.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-ink { fill: var(--ctx-ink); }
+  .f-ink-muted { fill: var(--ctx-ink-muted); }
+  .f-red-ink { fill: var(--ctx-red-ink); }
+  .s-ink { stroke: var(--ctx-ink); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+  .s-red { stroke: var(--ctx-red); }
+</style>
+<defs>
+<marker id="ctx-03-session-window-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+<clipPath id="ctx-03-session-window-clip-1"><rect x="90" y="122" width="716" height="312"/></clipPath>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="540"/>
+<text x="40" y="48" class="t-title" data-w="523">Without compaction, every call reads more</text>
+<text x="40" y="76" class="t-subtitle" data-w="613">Window at each model call, illustrative sizes. Computed by snippets/session_cost.py.</text>
+<g data-grid="skip">
+<path d="M96,428H800M96,334.25H800M96,240.5H800M96,146.75H800" class="gridline"/>
+<text x="88" y="432" text-anchor="end" class="t-tick" data-w="8">0</text>
+<text x="88" y="338.25" text-anchor="end" class="t-tick" data-w="50">100,000</text>
+<text x="88" y="244.5" text-anchor="end" class="t-tick" data-w="50">200,000</text>
+<text x="88" y="150.75" text-anchor="end" class="t-tick" data-w="50">300,000</text>
+<text x="96" y="448" text-anchor="middle" class="t-tick" data-w="8">0</text>
+<text x="330.67" y="448" text-anchor="middle" class="t-tick" data-w="16">40</text>
+<text x="565.33" y="448" text-anchor="middle" class="t-tick" data-w="16">80</text>
+<text x="800" y="448" text-anchor="middle" class="t-tick" data-w="23">120</text>
+<path d="M96,128V428H800" class="axis"/>
+<path d="M96,334.25H800" class="s-ink-muted w1 nofill d-ref"/>
+<g clip-path="url(#ctx-03-session-window-clip-1)">
+<path d="M101.87,411.12 L107.73,408.78 L113.6,406.44 L119.47,404.09 L125.33,401.75 L131.2,399.41 L137.07,397.06 L142.93,394.72 L148.8,392.38 L154.67,390.03 L160.53,387.69 L166.4,385.34 L172.27,383 L178.13,380.66 L184,378.31 L189.87,375.97 L195.73,373.62 L201.6,371.28 L207.47,368.94 L213.33,366.59 L219.2,364.25 L225.07,361.91 L230.93,359.56 L236.8,357.22 L242.67,354.88 L248.53,352.53 L254.4,350.19 L260.27,347.84 L266.13,345.5 L272,343.16 L277.87,340.81 L283.73,338.47 L289.6,336.12 L295.47,333.78 L301.33,331.44 L307.2,329.09 L313.07,326.75 L318.93,324.41 L324.8,322.06 L330.67,319.72 L336.53,317.38 L342.4,315.03 L348.27,312.69 L354.13,310.34 L360,308 L365.87,305.66 L371.73,303.31 L377.6,300.97 L383.47,298.62 L389.33,296.28 L395.2,293.94 L401.07,291.59 L406.93,289.25 L412.8,286.91 L418.67,284.56 L424.53,282.22 L430.4,279.88 L436.27,277.53 L442.13,275.19 L448,272.84 L453.87,270.5 L459.73,268.16 L465.6,265.81 L471.47,263.47 L477.33,261.12 L483.2,258.78 L489.07,256.44 L494.93,254.09 L500.8,251.75 L506.67,249.41 L512.53,247.06 L518.4,244.72 L524.27,242.38 L530.13,240.03 L536,237.69 L541.87,235.34 L547.73,233 L553.6,230.66 L559.47,228.31 L565.33,225.97 L571.2,223.62 L577.07,221.28 L582.93,218.94 L588.8,216.59 L594.67,214.25 L600.53,211.91 L606.4,209.56 L612.27,207.22 L618.13,204.88 L624,202.53 L629.87,200.19 L635.73,197.84 L641.6,195.5 L647.47,193.16 L653.33,190.81 L659.2,188.47 L665.07,186.12 L670.93,183.78 L676.8,181.44 L682.67,179.09 L688.53,176.75 L694.4,174.41 L700.27,172.06 L706.13,169.72 L712,167.38 L717.87,165.03 L723.73,162.69 L729.6,160.34 L735.47,158 L741.33,155.66 L747.2,153.31 L753.07,150.97 L758.93,148.62 L764.8,146.28 L770.67,143.94 L776.53,141.59 L782.4,139.25 L788.27,136.91 L794.13,134.56 L800,132.22" class="s-red w15 nofill"/>
+<path d="M101.87,411.12 L107.73,408.78 L113.6,406.44 L119.47,404.09 L125.33,401.75 L131.2,399.41 L137.07,397.06 L142.93,394.72 L148.8,392.38 L154.67,390.03 L160.53,387.69 L166.4,385.34 L172.27,383 L178.13,380.66 L184,378.31 L189.87,375.97 L195.73,373.62 L201.6,371.28 L207.47,368.94 L213.33,366.59 L219.2,364.25 L225.07,361.91 L230.93,359.56 L236.8,357.22 L242.67,354.88 L248.53,352.53 L254.4,350.19 L260.27,347.84 L266.13,345.5 L272,343.16 L277.87,340.81 L283.73,338.47 L289.6,406.44 L295.47,404.09 L301.33,401.75 L307.2,399.41 L313.07,397.06 L318.93,394.72 L324.8,392.38 L330.67,390.03 L336.53,387.69 L342.4,385.34 L348.27,383 L354.13,380.66 L360,378.31 L365.87,375.97 L371.73,373.62 L377.6,371.28 L383.47,368.94 L389.33,366.59 L395.2,364.25 L401.07,361.91 L406.93,359.56 L412.8,357.22 L418.67,354.88 L424.53,352.53 L430.4,350.19 L436.27,347.84 L442.13,345.5 L448,343.16 L453.87,340.81 L459.73,338.47 L465.6,406.44 L471.47,404.09 L477.33,401.75 L483.2,399.41 L489.07,397.06 L494.93,394.72 L500.8,392.38 L506.67,390.03 L512.53,387.69 L518.4,385.34 L524.27,383 L530.13,380.66 L536,378.31 L541.87,375.97 L547.73,373.62 L553.6,371.28 L559.47,368.94 L565.33,366.59 L571.2,364.25 L577.07,361.91 L582.93,359.56 L588.8,357.22 L594.67,354.88 L600.53,352.53 L606.4,350.19 L612.27,347.84 L618.13,345.5 L624,343.16 L629.87,340.81 L635.73,338.47 L641.6,406.44 L647.47,404.09 L653.33,401.75 L659.2,399.41 L665.07,397.06 L670.93,394.72 L676.8,392.38 L682.67,390.03 L688.53,387.69 L694.4,385.34 L700.27,383 L706.13,380.66 L712,378.31 L717.87,375.97 L723.73,373.62 L729.6,371.28 L735.47,368.94 L741.33,366.59 L747.2,364.25 L753.07,361.91 L758.93,359.56 L764.8,357.22 L770.67,354.88 L776.53,352.53 L782.4,350.19 L788.27,347.84 L794.13,345.5 L800,343.16" class="s-ink w15 nofill"/>
+</g>
+<text x="812" y="137.22" class="t-note f-red-ink" data-w="100">no compaction</text>
+<text x="812" y="348.16" class="t-note f-ink" data-w="75">compacted</text>
+<text x="104" y="328.25" class="t-note f-ink-muted" data-w="29">limit</text>
+</g>
+<text x="96" y="116" class="t-note" data-w="141">tokens in the window</text>
+<text x="448" y="472" text-anchor="middle" class="t-note" data-w="69">model call</text>
+<text x="40" y="504" class="t-note" data-w="601">Summed over the session: 20,010,000 input tokens without compaction, 7,254,000 with it.</text>
+</svg>
