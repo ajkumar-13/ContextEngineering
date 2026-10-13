@@ -1,14 +1,14 @@
-"""evalkit — a small, honest evaluation harness for RAG.
+"""evalkit: a small, honest evaluation harness for RAG.
 
 Companion code for Post 20 (Evaluation). It mirrors the eval pyramid:
 
     Offline base (pure, unit-tested):
-        metrics    — recall@k, answer_match
-        goldenset  — load a JSON golden set and score a run against it
-        gate       — the regression gate that blocks a deploy on a drop
+        metrics    : recall@k, answer_match
+        goldenset  : load a JSON golden set and score a run against it
+        gate       : the regression gate that blocks a deploy on a drop
 
     Online top (needs a key; imported lazily):
-        judge      — LLM-as-judge for faithfulness, with bias mitigations noted
+        judge      : LLM-as-judge for faithfulness, with bias mitigations noted
 
 ``ragas`` is the batteries-included alternative for the online metrics; this keeps
 the core dependency-free so the whole gate runs in CI without a key.

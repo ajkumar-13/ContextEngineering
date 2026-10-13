@@ -1,7 +1,7 @@
 """Load and run a golden set.
 
-A golden set is a small, fixed list of cases — question, ideal answer, and the ids
-of the chunks that should be retrieved — that you run on every change (Post 20).
+A golden set is a small, fixed list of cases (question, ideal answer, and the ids
+of the chunks that should be retrieved) that is run on every change (post 20).
 This loader is dependency-free JSON; the runner is a pure function that scores a
 system's outputs against the set.
 """

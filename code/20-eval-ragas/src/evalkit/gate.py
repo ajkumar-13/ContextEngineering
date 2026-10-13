@@ -2,14 +2,14 @@
 
 An eval only protects you if a drop blocks the deploy (Post 20). This gate compares
 a run's metrics against a saved baseline and fails if any metric falls more than a
-tolerance below it. The default 5% tolerance is a starting point, not a law — set it
-per metric to what your traffic can absorb.
+tolerance below it. The default, an absolute drop of 0.05, is a starting point, not a law:
+set it per metric to what the traffic can absorb.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-DEFAULT_TOLERANCE = 0.05  # 5% absolute drop, configurable
+DEFAULT_TOLERANCE = 0.05  # an absolute drop of 0.05, configurable
 
 
 @dataclass(frozen=True)
@@ -31,6 +31,6 @@ def check_regression(
     regressions: dict = {}
     for name, base in baseline.items():
         cur = current.get(name)
-        if cur is None or cur < base - tolerance:
+        if cur is None or base - cur > tolerance + 1e-9:
             regressions[name] = (base, cur)
     return GateResult(passed=not regressions, regressions=regressions)

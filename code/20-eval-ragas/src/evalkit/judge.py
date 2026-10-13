@@ -1,12 +1,12 @@
 """LLM-as-judge scaffold (online, guarded).
 
-The judge scores things the deterministic metrics cannot — faithfulness (is every
+The judge scores things the deterministic metrics cannot: faithfulness (is every
 claim supported by the retrieved context?) and answer relevancy. It is powerful and
-biased: judges favour the FIRST option (position bias), LONGER answers (verbosity
-bias), and their OWN family's outputs (self-preference). Mitigations are baked into
-the prompt and comments below (Post 20).
+biased: judges favour the FIRST option (position bias) and LONGER answers (verbosity
+bias), and may favour their OWN family's outputs (self-preference, which Zheng et al.
+2023 could not establish). Mitigations are in the prompt and comments below (post 20).
 
-The SDK is imported lazily; nothing here runs — or is needed — for the offline tests.
+The SDK is imported lazily; nothing here runs, or is needed, for the offline tests.
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def faithfulness(answer: str, context: str, model: str = "claude-sonnet-4-5") ->
     Requires ANTHROPIC_API_KEY and the ``anthropic`` package.
     """
     if not os.getenv("ANTHROPIC_API_KEY"):
-        raise RuntimeError("ANTHROPIC_API_KEY not set — the judge is the online layer; see README.")
+        raise RuntimeError("ANTHROPIC_API_KEY not set: the judge is the online layer; see README.")
     try:
         import anthropic
     except ImportError as e:  # pragma: no cover
@@ -42,6 +42,7 @@ def faithfulness(answer: str, context: str, model: str = "claude-sonnet-4-5") ->
     text = "".join(b.text for b in resp.content if b.type == "text").strip()
     return 1 if text.startswith("1") else 0
 
-# To reduce position/verbosity bias when comparing two answers: run each pair BOTH
-# orders and average; strip answers to comparable length before judging; and prefer
-# a judge from a different model family than the one under test (self-preference).
+# To reduce position/verbosity bias when comparing two answers: run each pair in BOTH
+# orders and count a win only when it survives the swap, a tie otherwise; strip answers
+# to comparable length before judging; and prefer a judge from a different model family
+# than the one under test (self-preference).

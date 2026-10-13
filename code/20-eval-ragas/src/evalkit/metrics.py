@@ -1,6 +1,6 @@
 """Deterministic, offline evaluation metrics for a RAG system.
 
-These are the metrics you can compute without a model in the loop — the cheap,
+These are the metrics computed without a model in the loop: the cheap,
 fast base of the eval pyramid (Post 20). The LLM-as-judge layer (``judge.py``)
 sits above them and needs a key.
 """
@@ -24,7 +24,7 @@ def _normalise(s: str) -> str:
 def answer_match(answer: str, ideal: str) -> float:
     """1.0 if the ideal answer's normalised text is contained in the answer, else 0.0.
 
-    A blunt proxy for correctness — enough to catch regressions on a golden set
+    A blunt proxy for correctness, enough to catch regressions on a golden set
     without a judge. Faithfulness/relevancy live in ``judge.py`` and Ragas.
     """
     return 1.0 if _normalise(ideal) in _normalise(answer) else 0.0

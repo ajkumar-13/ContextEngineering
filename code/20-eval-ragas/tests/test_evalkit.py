@@ -22,8 +22,8 @@ def test_recall_at_k():
 
 
 def test_answer_match_is_normalised():
-    assert answer_match("It is about  10%  of the input price.", "about 10% of the input price") == 1.0
-    assert answer_match("no idea", "about 10% of the input price") == 0.0
+    assert answer_match("It is  0.1 times  the base input price.", "0.1 times the base input price") == 1.0
+    assert answer_match("no idea", "0.1 times the base input price") == 0.0
 
 
 def test_load_and_score_a_run():
@@ -31,7 +31,7 @@ def test_load_and_score_a_run():
     assert len(cases) == 3
     # a system that retrieves and answers q1/q2 well but misses q3
     outputs = {
-        "q1": {"answer": "It costs about 10% of the input price.",
+        "q1": {"answer": "It costs 0.1 times the base input price.",
                "retrieved_ids": ["c_caching_1", "c_caching_2", "junk"]},
         "q2": {"answer": "Use 400 to 600 tokens for prose.",
                "retrieved_ids": ["c_chunk_1"]},
@@ -45,7 +45,9 @@ def test_load_and_score_a_run():
 
 def test_gate_passes_when_metrics_hold():
     res = check_regression({"answer_match": 0.80}, {"answer_match": 0.82}, tolerance=0.05)
-    assert res.passed  # 0.80 is within 5% of 0.82
+    assert res.passed  # 0.80 is within 0.05 of 0.82
+    # a drop of exactly the tolerance passes, despite float rounding (0.20 - 0.15 > 0.05 in floats)
+    assert check_regression({"m": 0.15}, {"m": 0.20}, tolerance=0.05).passed
 
 
 def test_gate_fails_on_a_drop():
