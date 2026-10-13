@@ -1,86 +1,26 @@
 id: ctx-028
-slug: 28-build-rag-chatbot-from-scratch
-title: "28 · Build #1 — RAG Chatbot from Scratch"
-
-description: >
-  Build a production-ready Retrieval-Augmented Generation (RAG) chatbot from
-  scratch using hybrid retrieval, contextual chunking, reranking, prompt
-  engineering, citation generation, evaluation with Ragas, and deployment
-  best practices. Learn how every component maps to Context Engineering
-  principles.
-
-author: "Ajay"
-
+slug: 28-build-rag-chatbot
+title: "28 - Build #1: RAG chatbot from scratch"
+summary: "A RAG chatbot in 369 lines of Python, read against the posts it implements: contextual chunk headers, hybrid retrieval with RRF and re-ranking, a bookend-packed prompt, a Ragas evaluation and the gate it still lacks."
 date: 2026-05-20
-last_modified: 2026-05-20
-
-tags:
-  - rag
-  - chatbot
-  - retrieval
-  - vector-database
-  - hybrid-search
-  - reranking
-  - evaluation
-  - ai-agents
-  - production-ai
-  - context-engineering
-
-category: Build Projects
-series: Context Engineering
+updated: 2026-10-13
+status: complete
 part: "Part V - Workflow and builds"
-chapter: "Part V — End-to-End Applications"
-
+level: advanced
+reading_time: 20
+tags: [context-engineering, rag, hybrid-retrieval, reranking, prompt-assembly, evaluation, companion-code]
 hero: diagrams/00-hero-build-rag-chatbot.svg
-hero_alt: "Architecture of a production RAG chatbot showing ingestion, hybrid retrieval, reranking, prompt assembly, generation, and evaluation"
-
-reading_time: 28
-
-toc: true
-draft: false
-
-keywords:
-  - RAG
-  - Retrieval Augmented Generation
-  - RAG Chatbot
-  - Build RAG
-  - Context Engineering
-  - Hybrid Retrieval
-  - Dense Retrieval
-  - Sparse Retrieval
-  - BM25
-  - Reciprocal Rank Fusion
-  - RRF
-  - Cross Encoder
-  - Reranking
-  - Contextual Retrieval
-  - Contextual Chunking
-  - Chunk Headers
-  - Semantic Search
-  - Embeddings
-  - Voyage AI
-  - ChromaDB
-  - pgvector
-  - Vector Database
-  - Cohere Rerank
-  - Prompt Engineering
-  - System Prompt
-  - Citation Generation
-  - Bookend Prompting
-  - Lost in the Middle
-  - Ragas
-  - Faithfulness
-  - Context Precision
-  - Context Recall
-  - Answer Relevancy
-  - Evaluation
-  - FastAPI
-  - Python
-  - LLM Engineering
-  - AI Chatbot
-  - Production AI
-
-canonical_url: ""
-
-prev: ../27-modern-agentic-workflow/
-next: ../29-build-mcp-server/
+prerequisites: [ctx-009, ctx-011, ctx-014, ctx-020]
+code: required
+outcomes:
+  - id: o1
+    text: "Trace one question through the build's offline and online lanes, naming the module and function that runs each stage from ingest to cited answer."
+  - id: o2
+    text: "Map each module of the build to the earlier post and section whose principle it implements, and spot where the code departs from it."
+  - id: o3
+    text: "Read the packed prompt the build sends and name the layer each part fills, the bookend order of the chunks and the blocks of the system prompt."
+  - id: o4
+    text: "Run the build's offline tests and core, and say what they prove and which steps need the Voyage AI, Cohere and OpenAI keys."
+  - id: o5
+    text: "Harden a starter for real traffic: lazy clients, an index that drops stale chunks and re-embeds on a model change, a regression gate, the omitted extensions."
+recommended: [ctx-026, ctx-027]

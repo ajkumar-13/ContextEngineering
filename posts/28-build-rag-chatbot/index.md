@@ -1,106 +1,83 @@
-# 28 · Build #1 — RAG chatbot from scratch
+# 28 - Build #1: RAG chatbot from scratch
 
-> **TL;DR.** This post turns the whole series into one runnable RAG (retrieval-augmented generation) chatbot in roughly 250 lines of Python, where every function traces back to an earlier principle. It delivers corpus ingestion with contextual chunk headers, a hybrid retriever (dense + BM25 + reranker), five-block prompt assembly, citation-checked generation, an eval harness with the four Ragas metrics, and a deployment path from local run to CI gate.
+> **TL;DR.** The companion `code/28-rag-chatbot` is a retrieval-augmented generation (RAG) chatbot in 369 lines of Python whose every stage traces to an earlier post: sentence-aware chunks with a model-written header, hybrid retrieval fused by reciprocal rank fusion and re-ranked by a cross-encoder, a bookend-packed prompt under a block-structured system prompt, and a Ragas evaluation. Its five tests pass offline with no key; indexing, answering and scoring need Voyage AI, Cohere and OpenAI keys. Read against the posts it implements, it also shows what hardening means: an index that forgets stale chunks, a larger golden set, and the regression gate it does not yet have.
 >
-> **After reading this you will be able to:**
-> - Assemble an end-to-end RAG pipeline: ingest, retrieve, prompt, generate, evaluate.
-> - Recognise the connection between every code block and an earlier post.
-> - Take the build as a starter and harden it for real traffic.
+> **Prerequisites:** [Post 09](../09-select-strategies/index.md), [Post 11](../11-rag-in-depth/index.md), [Post 14](../14-system-prompt-as-software/index.md), [Post 20](../20-evaluation/index.md).
+> **Safe to skip?** Skip it if a RAG service with hybrid retrieval, re-ranking, cited answers and an evaluation gate has already been built and run end to end.
 >
-> **Companion code:** `code/28-rag-chatbot/`. Full sources, tests, `.env.example`.
+> **After reading, you will be able to:**
+>
+> - Trace one question through the build's offline and online lanes, naming the module and function that runs each stage from ingest to cited answer.
+> - Map each module of the build to the earlier post and section whose principle it implements, and spot where the code departs from it.
+> - Read the packed prompt the build sends and name the layer each part fills, the bookend order of the chunks and the blocks of the system prompt.
+> - Run the build's offline tests and core, and say what they prove and which steps need the Voyage AI, Cohere and OpenAI keys.
+> - Harden a starter for real traffic: lazy clients, an index that drops stale chunks and re-embeds on a model change, a regression gate, the omitted extensions.
 
-![End-to-end RAG architecture split into an offline indexing lane and an online query lane, with an evaluation gate on deploy.](diagrams/00-hero-build-rag-chatbot.svg)
-*A production-leaning RAG chatbot is two pipelines: build the index offline, answer online.*
+![Three lanes. Offline, run by python -m rag.ingest: corpus files, chunk, header, embed, into a Chroma collection. Online, run by answer: dense and BM25 candidates, fused by RRF to top-50, re-ranked to top-5, packed, then generated. Evaluation: fixtures, eval.py, four Ragas means, then a dashed regression gate that the companion does not have. Each stage that calls Voyage AI, Cohere or OpenAI names the provider.](diagrams/00-hero-build-rag-chatbot.svg)
+
+*The offline lane writes the index once per corpus change; the online lane selects from it on every question; the evaluation lane replays fixed questions through the online lane.*
 
 ---
 
-## 1. Goals and scope
+## 1. The question: how do the earlier posts compose into one chatbot?
 
-The goal is a small RAG chatbot that does the right things, not a monolith that does everything. "Right" here means:
+Parts I to IV took retrieval, prompts and evaluation apart one lever at a time. This post puts them together in one program and asks of every function which earlier post it implements and where it falls short of it. The program is the companion [`code/28-rag-chatbot`](../../code/28-rag-chatbot/), a single-user chatbot over a folder of Markdown or text files. Its scope:
 
-- **Hybrid retrieval** with reciprocal rank fusion ([Post 09](../09-select-strategies/index.md), §3).
-- **Cross-encoder reranking** ([Post 09](../09-select-strategies/index.md), §4).
-- **Contextual chunk headers** ([Post 11](../11-rag-in-depth/index.md), §2).
-- **Bookend packing** with citation tags ([Post 09](../09-select-strategies/index.md), §5).
-- **A system prompt** with the five blocks ([Post 14](../14-system-prompt-as-software/index.md), §2).
-- **An eval harness** with faithfulness, answer relevance, context precision, context recall ([Post 20](../20-evaluation/index.md), §5).
+- **Chunks with contextual headers**: sentence-aware chunking with overlap and a model-written header per chunk ([post 11](../11-rag-in-depth/index.md), section 2).
+- **Hybrid candidates fused by reciprocal rank fusion** (RRF): a dense and a BM25 (Best Match 25, a keyword-ranking function) ranking merged by rank ([post 09](../09-select-strategies/index.md), section 3).
+- **Cross-encoder re-ranking** of the fused candidates (post 09, section 4).
+- **Bookend packing with citation tags** (post 09, section 5).
+- **A system prompt in blocks**, the checklist of [post 14](../14-system-prompt-as-software/index.md), section 2.
+- **An evaluation** with the four Ragas metrics of [post 20](../20-evaluation/index.md), section 5.
 
-What is *not* in scope: streaming UI, multi-tenant auth, GraphRAG, fine-tuning, distributed indexing. Those are extensions; the core works without them.
+Out of scope: streaming, multi-turn conversation, multi-tenant authentication, memory, GraphRAG, fine-tuning; section 9 says where the context-engineering ones attach.
 
 ---
 
 ## 2. Architecture and layout
 
-Before the code, the shape. The system has two phases. **Offline (ingest)** runs once per corpus change: read each document, split it into overlapping chunks, prepend a contextual header to each chunk, embed the chunks, and write them to both a dense vector index and a sparse BM25 (Best Match 25, a keyword-ranking function) index. **Online (a chat turn)** runs on every question: embed the query, run dense and sparse retrieval in parallel, fuse the two rankings with reciprocal rank fusion (RRF), rerank the survivors with a cross-encoder, pack the top few into a bookended prompt, call the generator, and return the answer with its source citations. The eval harness replays a fixture set of questions through the same online path and scores the results.
+The build has two lanes and a third that measures them, drawn in the figure at the top of the post. **Offline**, `python -m rag.ingest` splits each file into overlapping chunks, asks a small model for a one-sentence header per chunk, embeds the headed chunks and adds them to a Chroma collection on disk. **Online**, `answer(query)` takes a dense ranking from Chroma and a BM25 ranking over the same chunks, fuses them with RRF, re-ranks the fused list with Cohere's hosted cross-encoder, packs the best five and calls the generator. The **evaluation** lane replays fixture questions through `answer` and scores the results with Ragas.
 
-![The five modules of the build, each mapped to the stage of the flow it owns, plus the shared eval and model-client helpers](diagrams/01-module-map.svg)
+The companion's layout:
 
-*Which file owns which stage is the most useful thing to know before opening any of them.*
-
-The five modules map one-to-one onto that flow: `ingest.py` is the offline phase; `retrieve.py`, `prompt.py`, and `chat.py` are the online phase; `eval.py` wraps the online phase in a scorer. A `llm.py` helper holds the shared model clients (including the cheap model used for headers).
-
-```
+```text
 code/28-rag-chatbot/
-├── README.md
-├── pyproject.toml
-├── .env.example
-├── data/
-│   └── corpus/                    # drop .md / .txt / .pdf here
-├── src/rag/
-│   ├── __init__.py
-│   ├── llm.py                     # shared model clients (incl. cheap header model)
-│   ├── ingest.py                  # chunk + header + embed + index
-│   ├── retrieve.py                # hybrid + RRF + rerank
-│   ├── prompt.py                  # five-block system prompt
-│   ├── chat.py                    # the chat loop
-│   └── eval.py                    # the four metrics
-├── prompts/
-│   ├── system.md
-│   └── chunk_header.md
-└── tests/
-    ├── fixtures.json              # eval question/answer pairs
-    ├── test_chunker.py
-    └── test_retriever.py
+  .env.example         keys and the four model ids
+  data/corpus/         onboarding.md, refunds.md
+  prompts/             system.md, chunk_header.md
+  src/rag/
+    llm.py             small_llm (headers), chat_llm (answers)
+    ingest.py          chunk, contextual_header, ingest_path
+    retrieve.py        hybrid, rrf_merge, rerank, retrieve
+    prompt.py          pack
+    chat.py            answer and the command-line loop
+    eval.py            run: the four Ragas metrics
+  tests/               fixtures.json, test_chunker.py, test_retriever.py
 ```
 
-A single `pyproject.toml` declares the dependencies: `openai`, `voyageai` (or any embedding provider), `cohere` (rerank), `chromadb`, `rank-bm25`, `pypdf`, `pydantic`, `ragas`, `pytest`. Install can take several minutes on a fresh machine, depending on whether large transitive dependencies such as `torch` (pulled in by the cross-encoder stack) are already cached.
+`pyproject.toml` declares `openai`, `voyageai`, `cohere`, `chromadb`, `rank-bm25`, `pydantic`, `python-dotenv`, `ragas`, `langchain-community` and `datasets`, with `pytest` as a development extra; the re-ranker is a hosted call, so no local model is downloaded. Ingestion reads `.md` and `.txt` files only. The snippet of section 11 counts the code: `src/rag` holds 369 lines of Python (`ingest.py` 121, `retrieve.py` 97, `eval.py` 41, `llm.py` 41, `chat.py` 39, `prompt.py` 24, `__init__.py` 6), with the two prompts kept as files in `prompts/`. The table below maps each part to the post it implements.
 
-`llm.py` is a thin wrapper around the provider SDKs: it constructs the clients once and exposes `small_llm(prompt)`, a single-call helper backed by a cheap, fast model (for example Claude Haiku 4.5 or a small OpenAI model) that `ingest.py` uses to write chunk headers. Keeping it in one place means the header model, the generator model, and the embedding client are all configured together.
+![A table of nine functions of the build, each with the post section it implements and where it departs: words counted as tokens, a title-only header, stale chunks kept, ranks from 0, re-ranking skipped under another key name, four prompt blocks, a prefix perhaps too short to cache, three fixtures and no gate; only pack matches post 09.](diagrams/01-module-map.svg)
+
+*Every row has a post behind it; sections 3 to 7 say where each row stops short of its post.*
 
 ---
 
-## 3. Ingestion: chunking and headers
+## 3. Ingestion: chunks, headers and an idempotent index
+
+`chunk` in `src/rag/ingest.py` groups whole sentences up to a target and carries the tail of each chunk into the next:
 
 ```python
-# src/rag/ingest.py
-from pathlib import Path
-import hashlib, re
-
-import chromadb
-from rank_bm25 import BM25Okapi
-import voyageai
-
-from .prompt import CHUNK_HEADER_PROMPT  # one-line template
-from .llm import small_llm                # cheap model for headers
-
-CHUNK_TARGET = 500           # tokens
-CHUNK_OVERLAP = 80           # tokens
-client = chromadb.PersistentClient(path=".chroma")
-coll = client.get_or_create_collection("docs")
-vo = voyageai.Client()
-
-def split_sentences(text: str) -> list[str]:
-    return re.split(r"(?<=[.!?])\s+", text.strip())
-
 def chunk(text: str) -> list[str]:
     sentences = split_sentences(text)
-    chunks, current, current_len = [], [], 0
+    chunks: list[str] = []
+    current: list[str] = []
+    current_len = 0
     for s in sentences:
-        s_len = len(s.split())                        # cheap proxy
+        s_len = len(s.split())
         if current_len + s_len > CHUNK_TARGET and current:
             chunks.append(" ".join(current))
-            # overlap: keep tail
-            overlap = []
+            overlap: list[str] = []
             tail_len = 0
             for t in reversed(current):
                 tail_len += len(t.split())
@@ -108,132 +85,89 @@ def chunk(text: str) -> list[str]:
                 if tail_len >= CHUNK_OVERLAP:
                     break
             current, current_len = overlap, tail_len
-        current.append(s); current_len += s_len
+        current.append(s)
+        current_len += s_len
     if current:
         chunks.append(" ".join(current))
     return chunks
-
-def contextual_header(doc_title: str, chunk_text: str) -> str:
-    """One LLM call per chunk. Cached by doc-hash + chunk-hash."""
-    return small_llm(
-        CHUNK_HEADER_PROMPT.format(title=doc_title, chunk=chunk_text)
-    ).strip()
-
-def ingest_path(path: Path) -> None:
-    text = path.read_text(encoding="utf-8")
-    title = path.stem
-    chunks = chunk(text)
-    docs = []
-    for i, c in enumerate(chunks):
-        header = contextual_header(title, c)
-        full = f"[Document: {title}]\n[Summary: {header}]\n\n{c}"
-        cid = hashlib.sha256(f"{title}:{i}:{c}".encode()).hexdigest()[:16]
-        docs.append({"id": cid, "text": full, "title": title, "idx": i})
-    embs = vo.embed([d["text"] for d in docs], model="voyage-3-lite").embeddings
-    coll.add(
-        ids=[d["id"] for d in docs],
-        embeddings=embs,
-        documents=[d["text"] for d in docs],
-        metadatas=[{"title": d["title"], "idx": d["idx"]} for d in docs],
-    )
 ```
 
-Three things to notice. The chunker is sentence-aware with overlap ([Post 11](../11-rag-in-depth/index.md), §2); the target of ~500 tokens with ~80 tokens of overlap sits inside the series default of 400–600 tokens for prose with 10–20% overlap. Each chunk gets a *contextual header* generated by a cheap model: prepend each chunk with a one-sentence summary of its source document so the chunk still makes sense in isolation. This is Anthropic's contextual-retrieval technique ([Post 11](../11-rag-in-depth/index.md), §2), which cut retrieval failures by ~35% with contextual embeddings alone (Anthropic, 2024). The chunk's id is a hash of its source coordinates, so re-ingesting an unchanged file is idempotent.
+This is post 11's sentence-aware splitter, but `CHUNK_TARGET = 500` and `CHUNK_OVERLAP = 80` count words, not tokens. The snippet measures 1.42 tokens per word on the sample corpus, so a full chunk of such prose is about 710 tokens, above post 11's illustrative starting default of 400 to 600. On the companion's 1,200-word test text the chunks are 498, 498 and 366 words, each repeating the last 81 words of the one before. The two sample files (88 and 72 words) make two chunks in all.
 
-The BM25 side is built lazily from the same `documents` array on first query and cached in memory; for a large corpus, persist it (`pickle` is fine for the starter; `tantivy` if you have it).
+`ingest_path` then skips what is stored and heads what is new:
 
-**A note on model ids.** The version strings in this build (`voyage-3-lite` for embeddings, `rerank-english-v3.0` for reranking, and a small OpenAI generator below) are current examples as of early 2026, and providers turn these over quickly, so check each vendor's model cards before committing (Voyage AI; Cohere). Each id is a single line to change; nothing else in the pipeline depends on it.
+```python
+    ids = [_chunk_id(title, i, c) for i, c in enumerate(chunks)]
+    existing = set(COLL().get(ids=ids).get("ids") or [])
+    new_pairs = [(i, c, cid) for i, (c, cid) in enumerate(zip(chunks, ids)) if cid not in existing]
+    if not new_pairs:
+        return 0
+    docs: list[dict] = []
+    for i, c, cid in new_pairs:
+        header = contextual_header(title, c)
+        full = f"[Document: {title}]\n[Summary: {header}]\n\n{c}"
+        docs.append({"id": cid, "text": full, "title": title, "idx": i})
+```
+
+The **chunk id** hashes the file name, the chunk's index and its text, so re-ingesting an unchanged file makes no model call: half of the incremental re-indexing of [post 10](../10-data-ingestion-pipelines/index.md), section 8. The **header** is post 11's contextual retrieval: one headed text is embedded with Voyage AI, indexed for BM25 and shown to the generator. The **title** is kept as metadata and becomes the citation tag of section 5.
+
+The header is a weaker variant of Anthropic's method. "Introducing Contextual Retrieval" (Anthropic, September 2024) gives the model the whole document with the chunk, and its figures (the top-20 retrieval failure rate down 35% with contextual embeddings, 49% with contextual BM25 added and 67% with re-ranking, as post 11 quotes them) are for that method. `prompts/chunk_header.md` gives the model only the title and the chunk, the failure post 11 calls context written without the document. Anthropic's numbers do not transfer; the golden set has to show whether this header helps.
+
+The idempotence has two gaps, both the stale index that post 11, section 7, lists as a cause of conflict. A changed chunk gets a new id and a new record, and the old record is never deleted. And the id omits the embedding model: after `RAG_EMBED_MODEL` changes, re-ingesting embeds nothing, while queries use the new model. The fix is the manifest of post 10, sections 7 and 8: per document, its hash, its chunk ids and the embedding model, checked before every ingest so that a changed document's old chunks are replaced.
+
+**Model ids.** The defaults, each a hosted model behind its provider's API (application programming interface) and each overridable by an environment variable, as consulted in October 2026: `voyage-3-lite`, which Voyage AI's "Text embeddings" page lists under "Older models", "still accessible from our API", with the `voyage-4` family current; `rerank-english-v3.0`, still listed on Cohere's "Rerank" page beside `rerank-v3.5`, `rerank-v4.0-pro` and `rerank-v4.0-fast`; and `gpt-4o-mini` for headers and answers, which OpenAI's model page prices at 0.15 dollars per million input tokens and 0.60 per million output tokens, with a 128,000-token window.
 
 ---
 
-## 4. Retrieval: hybrid + RRF + rerank
+## 4. Retrieval: hybrid candidates, fusion and re-ranking
+
+**Candidates.** `hybrid` in `src/rag/retrieve.py` embeds the question, takes the dense top-50 from Chroma and the BM25 top-50 from `rank-bm25` over every stored chunk (lower-cased, split on letters, digits and underscores, built once per process and cached). Both see the headed text, so the header helps both halves. `top_n=50` is top-N in post 09's terms.
+
+**Fusion.** The two rankings meet in `rrf_merge`:
 
 ```python
-# src/rag/retrieve.py
-from collections import defaultdict
-from rank_bm25 import BM25Okapi
-import cohere, voyageai
-from .ingest import coll
-
-vo = voyageai.Client()
-co = cohere.Client()
-
-def rrf_merge(rankings: list[list[str]], k: int = 60) -> list[str]:
-    scores = defaultdict(float)
-    for r in rankings:
-        for rank, cid in enumerate(r):
+def rrf_merge(rankings: list[list[str]], *, k: int = 60) -> list[str]:
+    scores: dict[str, float] = defaultdict(float)
+    for ranking in rankings:
+        for rank, cid in enumerate(ranking):
             scores[cid] += 1.0 / (k + rank)
     return sorted(scores, key=scores.get, reverse=True)
+```
 
-def hybrid(query: str, top_n: int = 50) -> list[dict]:
-    q_emb = vo.embed([query], model="voyage-3-lite").embeddings[0]
-    dense = coll.query(query_embeddings=[q_emb], n_results=top_n)
-    dense_ids = dense["ids"][0]
-    docs = coll.get(include=["documents", "metadatas"])
-    bm25 = BM25Okapi([d.split() for d in docs["documents"]])
-    bm25_top = sorted(
-        zip(docs["ids"], bm25.get_scores(query.split())),
-        key=lambda p: p[1], reverse=True,
-    )[:top_n]
-    sparse_ids = [cid for cid, _ in bm25_top]
-    fused_ids = rrf_merge([dense_ids, sparse_ids])
-    id_to_doc = dict(zip(docs["ids"], docs["documents"]))
-    id_to_meta = dict(zip(docs["ids"], docs["metadatas"]))
-    return [
-        {"id": cid, "text": id_to_doc[cid], "meta": id_to_meta[cid]}
-        for cid in fused_ids[:top_n]
-    ]
+This is post 09's RRF with one difference: `enumerate` counts ranks from 0, so first place adds $1/(60 + 0) \approx 0.016667$ where post 09's formula, ranking from 1, adds $1/61 \approx 0.016393$. Every score equals the 1-based formula with $k = 59$, a constant the RRF paper found not critical. Exact ties keep their first appearance: on the companion's own test, `x` ranked first and second and `y` ranked second and first both score 0.033060.
 
-def rerank(query: str, candidates: list[dict], k: int = 5) -> list[dict]:
-    resp = co.rerank(
-        model="rerank-english-v3.0",
+**Re-ranking.** `rerank` keeps `k=5`, top-k in post 09's terms:
+
+```python
+def rerank(query: str, candidates: list[dict], *, k: int = 5) -> list[dict]:
+    if not candidates:
+        return []
+    if not os.environ.get("COHERE_API_KEY"):
+        return candidates[:k]
+    resp = _co().rerank(
+        model=os.environ.get("RAG_RERANK_MODEL", "rerank-english-v3.0"),
         query=query,
         documents=[c["text"] for c in candidates],
         top_n=k,
     )
     return [candidates[r.index] for r in resp.results]
-
-def retrieve(query: str, k: int = 5) -> list[dict]:
-    return rerank(query, hybrid(query, top_n=50), k=k)
 ```
 
-The pipeline is the four-stage shape from [Post 09](../09-select-strategies/index.md), §1. Dense and sparse retrieval run independently and see different things (semantics versus exact keywords); RRF fuses their two rankings into one without needing to compare raw scores; the cross-encoder then re-scores each candidate against the query jointly, which is accurate but expensive, so it only sees the fused shortlist. The two parameters worth surfacing, `top_n=50` for the candidate set and `k=5` for the final pack, are the main quality/cost dials.
+The cross-encoder reads each candidate with the query, which is why it sees only the fused shortlist. Without `COHERE_API_KEY` it returns the fused top-5, and `_co()` builds the Cohere client only after that check, so the program runs without a Cohere key. The check has a blind spot: Cohere's Python SDK (software development kit) reads `CO_API_KEY` first, and with only that name set, `rerank` silently skips re-ranking.
+
+Post 09's first lever, query construction, is absent: the question is embedded as typed, adequate for a single turn and the first thing multi-turn breaks.
 
 ---
 
-## 5. Prompt assembly: bookend packing with citations
+## 5. The packed prompt
 
-![Five reranked chunks packed into a prompt best-first and second-best-last, with the weakest in the middle and the question placed last](diagrams/02-packed-prompt.svg)
-
-*The ranking on the left and the order on the right are not the same sequence. That difference is the whole of bookend packing.*
+`pack` in `src/rag/prompt.py` builds the two messages the generator receives:
 
 ```python
-# src/rag/prompt.py
-SYSTEM = """\
-# Identity
-You are a concise, accurate technical assistant for the Acme product.
-
-# Rules
-- Use only the sources below. If the answer is not in them, say
-  "I could not find that in the provided sources."
-- Cite the source in [brackets] after every claim, e.g. [docs/refunds.md].
-- If sources disagree, surface the disagreement and cite both.
-- Refuse anything outside Acme's product documentation.
-
-# Format
-- Plain prose, no headings unless asked.
-- ≤ 200 words unless the user asks for detail.
-- Citations are [{title}] using the bracketed title from each source.
-
-# Knowledge
-- Acme is a B2B SaaS product. Refunds over $1 000 require manager approval.
-- Office hours are 9:00–18:00 IST; out-of-hours requests get a "next business day" reply.
-"""
-
 def pack(query: str, hits: list[dict]) -> list[dict]:
     """Bookend layout: best chunk first, second-best last, rest in middle."""
     if not hits:
-        ordered = []
+        ordered: list[dict] = []
     elif len(hits) == 1:
         ordered = hits
     else:
@@ -246,92 +180,68 @@ def pack(query: str, hits: list[dict]) -> list[dict]:
         {"role": "system", "content": SYSTEM},
         {"role": "user", "content": user},
     ]
-
-CHUNK_HEADER_PROMPT = """\
-You will receive one chunk from a longer document titled "{title}".
-Write ONE sentence (≤ 25 words) describing what role this chunk plays
-in the document. No preamble.
-
-Chunk:
-{chunk}
-"""
 ```
 
-`SYSTEM` is the five-block structure literally, the same shape from [Post 14](../14-system-prompt-as-software/index.md), §2. `pack` implements the bookend layout from [Post 09](../09-select-strategies/index.md), §5: the best chunk goes first and the second-best goes last because the first and last positions are the best-attended, the lost-in-the-middle U-curve from [Post 03](../03-how-llms-read-context/index.md). Citations are the bracketed document titles, machine-parseable downstream.
+**The order is post 09's bookend layout.** Five hits ranked 1 to 5 are packed as 1, 3, 4, 5, 2: the best first, the second best last among the sources, because models use the start and end of a long input more reliably than its middle (Liu et al., 2023, in [post 03](../03-how-llms-read-context/index.md), section 5). Bookend packing is the packing step of select, not compression: nothing is removed. With two hits, as on the sample corpus, the bookend order is the rank order.
+
+**The layers.** The system message is layer 01, the system prompt. The user message carries the sources as layer 04, retrieved chunks, and ends with the `Question:` line as layer 06, the user instruction, last as post 02 orders them. Layers 02, 03 and 05 are empty: no tools, no memory, no history. The figure below draws the packed prompt.
+
+![Two messages sent top to bottom. The system message, layer 01, holds prompts/system.md with four blocks, Identity, Rules, Format and Knowledge, 187 tokens. The user message holds the label Sources, five chunks in the order 1, 3, 4, 5, 2 as layer 04, each opening with its bracketed title tag, and the Question line as layer 06. Layers 02, 03 and 05 are marked empty.](diagrams/02-packed-prompt.svg)
+
+*Two messages, three layers: the stable system prompt first, the chunks in bookend order, the question last.*
+
+**The system prompt.** `SYSTEM` is read from `prompts/system.md`. Its first two blocks:
+
+```text
+# Identity
+You are a concise, accurate technical assistant for the Acme product.
+
+# Rules
+- Use only the sources below. If the answer is not in them, say
+  "I could not find that in the provided sources."
+- Cite the source in [brackets] after every claim, e.g. [refunds].
+- If sources disagree, surface the disagreement and cite both.
+- Refuse anything outside Acme's product documentation.
+```
+
+Format (plain prose, at most 200 words, bracketed-title citations) and Knowledge (two stable facts about Acme) follow. That is four of post 14's five blocks: there is no tool-use guidance because the chatbot has no tools, and post 14 asks only that a missing block be missing on purpose. The snippet counts the file at 187 tokens. The rules are post 11's section 5 trio: say so when the sources lack the answer, cite in a parseable form, surface disagreement.
+
+**Citations.** Each source opens with its title in brackets, `[refunds]`, then the stored text, which begins `[Document: refunds]` and the header. A cited title can be checked against the retrieved set, post 20's citation validity; the companion asks for citations but does not check them.
+
+**Caching.** The system message is the same bytes on every call and comes first, the prefix a provider can cache, as [post 05](../05-economics-of-context/index.md), section 4, prescribes; the usage block `answer` returns reports cached tokens. Whether so short a prefix is cached depends on the provider's minimum, which OpenAI's "Prompt caching" guide (consulted October 2026) says varies with request settings for models before GPT-5.6.
 
 ---
 
-## 6. The chat loop
+## 6. Generation: the chat loop
+
+`answer` in `src/rag/chat.py` joins the stages:
 
 ```python
-# src/rag/chat.py
-from openai import OpenAI
-from .retrieve import retrieve
-from .prompt import pack
-
-oai = OpenAI()
-
-def answer(query: str) -> dict:
-    hits = retrieve(query, k=5)
+def answer(query: str, *, k: int = 5) -> dict:
+    hits = retrieve(query, k=k)
     msgs = pack(query, hits)
-    resp = oai.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=msgs,
-        temperature=0.0,
-    )
-    answer_text = resp.choices[0].message.content
+    out = chat_llm(msgs)
     return {
-        "answer": answer_text,
+        "answer": out["text"],
         "sources": [{"title": h["meta"]["title"], "id": h["id"]} for h in hits],
-        "usage": resp.usage.model_dump(),
+        "usage": out["usage"],
     }
-
-if __name__ == "__main__":
-    while True:
-        q = input("> ").strip()
-        if not q:
-            continue
-        out = answer(q)
-        print(out["answer"])
-        print("\nSources:", ", ".join(s["title"] for s in out["sources"]))
 ```
 
-The complete chat loop. The generator model here is a small OpenAI chat model, chosen as a cheap, fast default; swap it for any instruction-tuned model (see the note on model ids in §3). `temperature=0.0` keeps answers reproducible for the eval harness. Conversation history is omitted from the starter; for a multi-turn version, append the last *N* turns to `msgs` and add a query-rewrite step at the top of `answer` ([Post 09](../09-select-strategies/index.md), §2).
+`chat_llm` in `src/rag/llm.py` sends the messages to OpenAI's Chat Completions API with `temperature=0.0`, which narrows the variation between runs without making answers identical, and returns the text and the usage block; `llm.py` is the one file to change for another provider. The returned answer, sources in rank order and token usage are the raw material of a trace. `python -m rag.chat` wraps `answer` in a prompt loop.
 
 ---
 
-## 7. Eval: the four Ragas metrics
+## 7. Evaluation: four Ragas metrics, and the gate the companion lacks
 
-The harness reads a fixture file of question/answer pairs. The schema is two keys per row:
-
-```json
-[
-  {"question": "How much does a refund over the limit need?",
-   "answer": "Refunds over $1 000 require manager approval."},
-  {"question": "What are Acme's office hours?",
-   "answer": "9:00 to 18:00 IST; out-of-hours requests get a next-business-day reply."}
-]
-```
+`run` in `src/rag/eval.py` replays the fixtures and averages the four metrics of post 20, section 5:
 
 ```python
-# src/rag/eval.py
-import json
-from pathlib import Path
-from datasets import Dataset
-from ragas import evaluate
-from ragas.metrics import (
-    faithfulness, answer_relevancy,
-    context_precision, context_recall,
-)
-from .chat import answer
-from .retrieve import retrieve
-
-def run(fixtures_path: Path = Path("tests/fixtures.json")) -> dict:
-    fixtures = json.loads(fixtures_path.read_text())
-    rows = []
+def run(fixtures_path: Path | str = Path("tests/fixtures.json")) -> dict:
+    fixtures = json.loads(Path(fixtures_path).read_text(encoding="utf-8"))
+    rows: list[dict] = []
     for fx in fixtures:
         out = answer(fx["question"])
-        # ragas wants context strings, not the wrapped chunks
         ctxs = [h["text"] for h in retrieve(fx["question"], k=5)]
         rows.append({
             "question": fx["question"],
@@ -340,94 +250,118 @@ def run(fixtures_path: Path = Path("tests/fixtures.json")) -> dict:
             "ground_truth": fx["answer"],
         })
     ds = Dataset.from_list(rows)
-    res = evaluate(ds, metrics=[
-        faithfulness, answer_relevancy,
-        context_precision, context_recall,
-    ])
+    res = evaluate(
+        ds,
+        metrics=[faithfulness, answer_relevancy, context_precision, context_recall],
+    )
     return res.to_pandas().mean(numeric_only=True).to_dict()
-
-if __name__ == "__main__":
-    print(json.dumps(run(), indent=2))
 ```
 
-A `tests/fixtures.json` of 50 question/answer tuples is enough to start; grow it to 100 over the first few weeks. Running `python -m rag.eval` prints the mean of each metric, for example:
+The column names are Ragas's older ones; the current documentation uses `user_input`, `response`, `retrieved_contexts` and `reference`, and Ragas 0.4.3, read in October 2026, still converts the older names. Its default judge is `gpt-4o-mini` through OpenAI, the model that wrote the answers, which invites the self-preference post 20, section 6, warns about. Four gaps separate this from post 20's harness:
 
-```json
-{
-  "faithfulness": 0.91,
-  "answer_relevancy": 0.88,
-  "context_precision": 0.79,
-  "context_recall": 0.83
-}
-```
+- **The golden set is three questions.** `tests/fixtures.json` holds three pairs; one case moves a mean by a third. Grow it from real failures, labelled by answer, never by chunk id.
+- **The contexts are fetched twice.** `run` retrieves again after `answer` did, so each question pays for two embeddings and two re-rank calls, and the scored contexts need not be the ones the answer saw. `answer` should return the hit texts.
+- **One fixture is answered by the system prompt.** It asks how a refund over 1,000 dollars is handled, a fact also in the Knowledge block, so its answer can be right with retrieval broken.
+- **There is no gate.** `run` prints four means and compares them with nothing. The missing step is post 20's, section 4: save the means of an approved run and, in CI (continuous integration), fail when any metric falls by more than an absolute 0.05 below its baseline, as post 20's `check_regression` does. The companion README's "within 5 % of baseline" names a test that does not exist.
 
-Those values are illustrative, not a benchmark; the absolute numbers matter less than the trend across builds. The CI gate is one extra YAML file ([Post 20](../20-evaluation/index.md), §4) that runs `python -m rag.eval` and fails the build if any of the four metrics drops more than 5% below baseline, a reasonable default threshold you should tune to how noisy your fixture set is.
+Nothing here is quoted from a live evaluation run; it needs an OpenAI key and the network.
 
 ---
 
 ## 8. Deployment
 
-The starter runs as a script; a small amount of packaging turns it into a service.
+**Secrets.** `.env.example` lists `OPENAI_API_KEY`, `VOYAGE_API_KEY`, `COHERE_API_KEY`, the four model ids and `RAG_CHROMA_PATH`; `rag/__init__.py` loads a local `.env`. In production the same variables come from the platform's secret store.
 
-**Secrets and config.** Every provider key lives in the environment, never in code. `.env.example` lists the variables (`OPENAI_API_KEY`, `VOYAGE_API_KEY`, `COHERE_API_KEY`, and the chosen model ids); copy it to `.env` for local runs and load it with `python-dotenv`. In production, inject the same variables from your platform's secret store rather than shipping a file. `llm.py` reads them once at import.
+**A service.** A thin HTTP (Hypertext Transfer Protocol) layer, such as a FastAPI route `POST /chat` returning `answer(query)` as JSON (JavaScript Object Notation), turns the script into a service. Ingestion stays a separate job, run when the corpus changes, so serving never waits on embedding. The companion builds its clients on first use (section 11), so the service, its tests and its health check start without every key.
 
-**Running the service.** Wrap `answer` in a thin HTTP layer, for example a FastAPI app exposing `POST /chat` that calls `answer(query)` and returns the JSON payload (answer, sources, usage). Ingestion stays a separate offline job (`python -m rag.ingest <path>`), run on a schedule or a webhook whenever the corpus changes, so the serving path never blocks on embedding.
-
-**The eval gate.** The CI step from §7 is the deployment safety net: it runs `python -m rag.eval` on every pull request and blocks merge if any metric regresses past the threshold, so a prompt or chunking change that quietly hurts retrieval cannot ship. This is the build's one non-negotiable piece of automation.
-
-**Hosting.** The stateless serving process fits any container host; the state is the Chroma directory and the corpus, both of which want a persistent volume or a managed vector store. For a single-server deployment, `pgvector` on an existing Postgres instance ([Post 11](../11-rag-in-depth/index.md), §3) removes the extra moving part.
+**State.** The serving process is stateless; the Chroma directory and the corpus need a persistent volume or a managed store. On one server, `pgvector` in an existing Postgres removes a moving part (post 11, section 3). Section 7's gate then runs on every pull request that touches a prompt, the chunker or a model id.
 
 ---
 
-## 9. What this build leaves out, and how to add it
+## 9. What the build leaves out, and how to add it
 
-A short tour, with the post that covers each.
-
-- **Streaming UI.** Wrap `answer` in a Server-Sent Events endpoint; switch to the streaming chat completion API. Standard work; nothing context-engineering-specific.
-- **Multi-turn conversation.** Append the last *N* user/assistant turns to `pack`; add a query-rewrite call before retrieval (Post 09, §2). About 30 lines.
-- **Memory.** Persist user-stated facts in a key-value store; pack them into a `[memory]` block before sources (Post 16, §7).
-- **Observability.** Wrap each function in spans using your trace store of choice (Post 22, §3). About 20 lines for the basic shape.
-- **Auto-compaction.** When the conversation exceeds a set share of the budget (for example 80%), summarise the older turns (Post 12, §3 + §7).
-- **Sub-agents.** Add a tool-using sub-agent for queries like *"draft me a refund email for ticket #4321"*: the orchestrator pattern from Post 13.
-- **Long-context routing.** A small classifier in front of `answer` that picks between `retrieve + pack` and `load_whole_document + pack` based on query type (Post 25, §6).
-
-Each of these is a self-contained extension. The starter is the substrate.
+- **Multi-turn conversation.** Append recent turns as layer 05, conversation history, and rewrite the query before `retrieve` (post 09, section 2).
+- **Memory.** Retrieve rows of the nine-field memory row ([post 16](../16-memory-systems/index.md), section 3) and render them as one block of layer 03, memory and state, after the system prompt (post 16, section 9).
+- **Untrusted sources.** Retrieved chunks come from outside the application; tag them as external with the trust tag of [post 23](../23-security/index.md), section 5.
+- **Observability.** One span per retrieval and per model call, with candidates, packed top-k and usage ([post 22](../22-observability/index.md), section 3), kept in post 22's trace store.
+- **Compression.** Once history exists, summarise older turns when the window passes a budget share ([post 12](../12-compress-strategies/index.md), section 3; the series' 80 and 95 percent triggers are its section 9).
+- **Sub-agents.** A tool-using sub-agent for a request such as "draft a refund email for this ticket", returning only its result ([post 13](../13-isolate-strategies/index.md), section 2).
+- **Long-context routing.** A per-query router in front of `answer` that loads a short document whole ([post 25](../25-long-context-vs-rag/index.md), section 6; [post 17](../17-advanced-retrieval/index.md), section 6).
 
 ---
 
-## 10. The lesson the build teaches
+## 10. The lesson: one select pipeline around a write
 
-Walking through this build is the fastest way to feel the shape of the field. Every function corresponds to a principle. The chunker is from [Post 11](../11-rag-in-depth/index.md). The retriever is from [Post 09](../09-select-strategies/index.md). The prompt is from [Post 14](../14-system-prompt-as-software/index.md). The eval is from [Post 20](../20-evaluation/index.md). The whole shape is the WSCI (write, select, compress, isolate) framework from [Post 07](../07-write-select-compress-isolate/index.md): **Write** is `ingest`, **Select** is `retrieve`, **Compress** is the bookend layout (the starter omits compression, but the pack budget is the natural place to add it), **Isolate** is the sub-agent extension.
+In the operations of [post 07](../07-write-select-compress-isolate/index.md), the build is two of the four. `ingest` is **write**: it parks the corpus in an index outside the window, the offline side of layer 04 in post 07's section 7. `retrieve` and `pack` are **select**: post 09's four levers with the first missing. The starter does no **compress** (every packed chunk goes in whole) and no **isolate** (one window serves the question).
 
-A team that has built and operated this much understands more about context engineering than a team that has read every paper but built none of it.
+The larger lesson is in the module map. Every function implements an earlier post, and almost every one departs from it somewhere: words counted as tokens, a header written without its document, an index that cannot forget, a re-ranker a key name can switch off, a golden set of three with no gate. None shows in a demo; each is found by reading the code against the post it came from.
+
+---
+
+## 11. Make it run
+
+**Offline, today.** The five tests check the chunker (three tests) and `rrf_merge` (two). The modules they import need their packages (all but `ragas` and `datasets`) but no key: the OpenAI, Voyage AI and Cohere clients and the Chroma collection are opened on first use, and no test uses them. From the series root:
+
+```text
+uv run --with pytest --with rank-bm25 --with python-dotenv --with openai --with cohere --with voyageai --with chromadb python -m pytest -q -p no:cacheprovider code/28-rag-chatbot/tests
+```
+
+It ends with `5 passed`, with no key set and no Chroma directory created; `pytest` takes the source path from the companion's `pyproject.toml`. The tests prove that the chunker keeps to its word budget and that fusion ranks consistently high items above a consistently low one; they do not touch the header, the index, the re-ranker, the packing or the generator.
+
+The snippet `offline_core.py` reads the companion's source, executes only its pure parts (`chunk`, `rrf_merge`, `pack`) and prints what they do on the sample corpus, counting tokens with tiktoken's `o200k_base` encoding, the one `gpt-4o-mini` uses. It runs in under a second:
+
+```text
+uv run python posts/28-build-rag-chatbot/snippets/offline_core.py
+```
+
+Its packing lines:
+
+```text
+4. Packing (prompt.py)
+   five hits in rank order 1 to 5 are packed as: 1, 3, 4, 5, 2
+   two hits are packed as: 1, 2
+   messages: ['system', 'user']
+   system prompt blocks: ['Identity', 'Rules', 'Format', 'Knowledge']; 187 tokens
+```
+
+**Live, with keys.** These steps follow the companion's README and were not run for this post. In `code/28-rag-chatbot`: `uv sync`; copy `.env.example` to `.env` and fill in the three keys; `uv run python -m rag.ingest data/corpus` (an OpenAI header call per new chunk, a Voyage AI embedding call per file); `uv run python -m rag.chat` (per question, a Voyage AI embedding, a Cohere re-rank, an OpenAI generation); `uv run python -m rag.eval` (the same per fixture, plus the judge's OpenAI calls). `pyproject.toml` pins `ragas` 0.4.3 and holds `langchain-community` below 0.4: with 0.4.2, which an unpinned install resolved in October 2026, `import ragas` fails on a missing `langchain_community.chat_models.vertexai`.
+
+---
+
+## 12. What can go wrong?
+
+- **An edited document answered from its old version.** A refund limit changes in `refunds.md`; re-ingestion adds the new chunk and keeps the old, and the bot cites both limits. Delete a file's previous chunk ids before adding new ones.
+- **A changed embedding model that changes nothing.** `RAG_EMBED_MODEL` is switched and the corpus re-ingested; every id exists, so nothing is re-embedded, and queries come from another model than the index. With other dimensions Chroma rejects the query; with equal ones retrieval silently degrades. Record the model per document and re-embed on change.
+- **A re-ranker switched off by a key name.** The Cohere key is exported as `CO_API_KEY`, the name the SDK reads first; `rerank` looks only for `COHERE_API_KEY`, returns the fused order, and nothing reports it. Accept both names; log skipped re-ranks.
+- **A header that guesses.** The header model sees a title and one chunk and writes a plausible sentence about a document it never read. Pass the whole document, cached, as post 11 does.
+- **A green evaluation that proves little.** Three fixtures, one answerable from the system prompt, judged by the model that answered: the means can stay high while retrieval breaks.
+- **Swapping the re-ranker off on the sample corpus.** Two chunks pass the top-5 either way, so turning re-ranking off only reorders them, and the comparison shows nothing. The corpus needs more chunks than k.
 
 ---
 
 ## Common pitfalls
 
-- **Skipping the contextual header call** to save one cheap LLM call per chunk. Anthropic reports ~35% fewer retrieval failures from contextual embeddings alone (Anthropic, 2024); the header cost is a one-off at ingest time, not per query.
-- **Re-embedding the corpus on every run** instead of keying chunks by content hash. The hash id makes re-ingest idempotent; drop it and cost and latency balloon on unchanged files.
-- **Free-form citations.** Bracketed titles parse trivially; prose citations do not.
-- **No eval fixtures.** The next prompt edit silently regresses something, and without `fixtures.json` the CI gate has nothing to check.
-- **Logging the prompt only on error.** You need the assembled prompt on every call to debug a bad answer after the fact.
-- **Treating `top_n = 50` as universal.** Tune the candidate-set size and the final `k` to your corpus and your latency budget.
+1. **Reading `CHUNK_TARGET` as tokens.** It counts words; at the sample's 1.42 tokens per word a 500-word chunk is about 710 tokens.
+2. **Quoting Anthropic's contextual-retrieval numbers for a title-only header.** The 35, 49 and 67 percent reductions belong to the method that shows the model the whole document.
+3. **Calling the bookend layout compression.** It reorders the packed chunks and removes nothing; it is the packing step of select.
+4. **Logging the answer without the packed prompt.** A bad answer cannot be debugged without the exact messages and ranked hits.
+5. **Treating `top_n=50` and `k=5` as settled.** They are post 09's illustrative starting values; the golden set decides them for each corpus.
 
 ---
 
 ## Further reading
 
-- The principle sources this build implements: [Post 09](../09-select-strategies/index.md) (hybrid + RRF + rerank), [Post 11](../11-rag-in-depth/index.md) (chunking, contextual retrieval), [Post 14](../14-system-prompt-as-software/index.md) (system-prompt blocks), [Post 20](../20-evaluation/index.md) (Ragas metrics).
-- LangChain, *"RAG from scratch"* cookbook, 2024: a similar walkthrough in their idiom.
-- Anthropic, *"Introducing Contextual Retrieval"*, September 2024: the chunk-header trick and the ~35%/49%/67% figures.
-- Cohere, *"Rerank"* documentation (model cards, latest): reranker model ids.
-- Voyage AI, *"voyage-3"* model cards (latest): embedding model ids.
+- Anthropic, "Introducing Contextual Retrieval" (September 2024): the header method with the whole document, and its retrieval-failure figures.
+- Cormack, G. V. *et al.*, "Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods" (SIGIR 2009).
+- Es, S. *et al.*, "RAGAS: Automated Evaluation of Retrieval Augmented Generation" (EACL 2024 demo), and the Ragas documentation (consulted October 2026).
+- Voyage AI, "Text embeddings"; Cohere, "Rerank"; OpenAI, `gpt-4o-mini` model page and "Prompt caching" (documentation, consulted October 2026).
+- LangChain, "RAG from scratch": notebooks that accompany a video playlist building RAG from indexing to generation (GitHub, consulted October 2026).
 
-Full citations in [REFERENCES.md](../../REFERENCES.md).
+Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
 ---
 
 ## What to read next
 
-- **[Post 29 — Build an MCP server](../29-build-mcp-server/index.md)**: the second build, complementary surface area.
-- **[Post 30 — Capstone: email reply agent](../30-capstone-email-reply-agent/index.md)**: the everything-together project.
-- **Back to the principles:** [Post 11 — RAG in depth](../11-rag-in-depth/index.md) for the retrieval theory this build implements, and [Post 20 — Evaluation](../20-evaluation/index.md) for the eval harness behind the CI gate.
+- **[Post 29 - Build #2: MCP server from scratch](../29-build-mcp-server/index.md):** the second build, which puts tools behind the Model Context Protocol (MCP) with a permission boundary.
+- **[Post 30 - Capstone: email reply agent](../30-capstone-email-reply-agent/index.md):** reuses this pipeline over prior replies inside an agent with memory and a send gate.

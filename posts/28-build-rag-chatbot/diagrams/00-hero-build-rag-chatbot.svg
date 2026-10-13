@@ -1,145 +1,215 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img" aria-labelledby="t d">
-  <title id="t">A RAG chatbot is two pipelines</title>
-  <desc id="d">An end-to-end retrieval-augmented generation architecture split into two lanes. The offline lane, run once per corpus change, flows left to right through five stages: ingest documents, chunk with overlap, add a contextual header per chunk, embed the chunks, and write them to a dense vector index and a sparse BM25 index. The online lane, run on every question, flows through five stages: rewrite the query, run hybrid dense-plus-sparse search fused with reciprocal rank fusion, rerank the survivors with a cross-encoder, bookend-pack the top few chunks, and generate an answer with source citations. The shared index feeds the online search step. An evaluation gate sits on the deploy path, blocking release when any of the four Ragas metrics regresses past its threshold.</desc>
-
-  <style><![CDATA[
-    :root{
-      --ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;
-      --ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;
-      --ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;
-      --ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-neutral-1:#EAEAE4;--ctx-neutral-3:#8E8E88;
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-labelledby="ctx-00-hero-build-rag-chatbot-title" aria-describedby="ctx-00-hero-build-rag-chatbot-desc">
+<title id="ctx-00-hero-build-rag-chatbot-title">Two lanes build and answer; a third replays them</title>
+<desc id="ctx-00-hero-build-rag-chatbot-desc">Three lanes of the companion code/28-rag-chatbot. Offline, run by python -m rag.ingest: corpus files (.md and .txt), chunk (500 words, 80 overlap), header (one sentence, OpenAI), embed (Voyage AI), into a Chroma collection that holds the chunks of layer 04. The collection is searched on every question by the online lane, run by answer(): candidates (dense with Voyage AI and BM25, top-50 each), fuse (RRF, k = 60, top-50), re-rank (Cohere, top-5), pack (layers 01, 04 and 06 in bookend order, in the per-turn colour) and generate (OpenAI, answer and sources). The evaluation lane: 3 fixtures, eval.py replaying them through answer(), Ragas computing four means with an OpenAI judge, and a regression gate on an absolute drop of 0.05, drawn dashed because the companion does not have it.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
     }
-    @media (prefers-color-scheme:dark){
-      :root{
-        --ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;
-        --ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;
-        --ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;
-        --ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-neutral-1:#1F2229;--ctx-neutral-3:#6E6E68;
-      }
-    }
-    .bg{fill:var(--ctx-bg);}
-    .lane{fill:var(--ctx-surface);stroke:var(--ctx-border);stroke-width:1;}
-    .node{fill:var(--ctx-surface);stroke:var(--ctx-ink);stroke-width:1.5;}
-    .node-p{fill:var(--ctx-surface);stroke:var(--ctx-primary);stroke-width:1.5;}
-    .node-a{fill:var(--ctx-surface);stroke:var(--ctx-accent);stroke-width:1.5;}
-    .index{fill:var(--ctx-neutral-1);stroke:var(--ctx-ink);stroke-width:1.5;}
-    .gate{fill:var(--ctx-surface);stroke:var(--ctx-success);stroke-width:1.5;}
-    .flow{fill:none;stroke:var(--ctx-ink);stroke-width:1.5;}
-    .flow-a{fill:none;stroke:var(--ctx-accent);stroke-width:1.5;}
-    .link{fill:none;stroke:var(--ctx-ink-muted);stroke-width:1;stroke-dasharray:4 3;}
-    .deploy{fill:none;stroke:var(--ctx-success);stroke-width:1.5;stroke-dasharray:5 3;}
-    .title{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:20px;fill:var(--ctx-ink);}
-    .sub{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:12px;fill:var(--ctx-ink-muted);}
-    .h{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:11px;fill:var(--ctx-ink);text-transform:uppercase;letter-spacing:0.06em;}
-    .n{font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:12px;fill:var(--ctx-ink);}
-    .s{font-family:Inter,system-ui,sans-serif;font-weight:400;font-size:10px;fill:var(--ctx-ink-muted);}
-    .mono{font-family:'JetBrains Mono',ui-monospace,Consolas,monospace;font-size:10px;fill:var(--ctx-ink-muted);}
-    .tag-p{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:10px;fill:var(--ctx-primary);letter-spacing:0.04em;}
-    .tag-a{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:10px;fill:var(--ctx-accent);letter-spacing:0.04em;}
-    .tag-s{font-family:Inter,system-ui,sans-serif;font-weight:700;font-size:10px;fill:var(--ctx-success);letter-spacing:0.04em;}
-  ]]></style>
-
-  <defs>
-    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="var(--ctx-ink)"/>
-    </marker>
-    <marker id="ar-a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="var(--ctx-accent)"/>
-    </marker>
-    <marker id="ar-s" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="var(--ctx-success)"/>
-    </marker>
-  </defs>
-
-  <rect class="bg" width="960" height="360"/>
-  <text class="title" x="48" y="42">A RAG chatbot is two pipelines</text>
-  <text class="sub" x="48" y="62">Build the index offline once per corpus change · answer online on every question.</text>
-
-  <!-- ============ OFFLINE LANE ============ -->
-  <rect class="lane" x="48" y="86" width="864" height="86" rx="10"/>
-  <circle cx="66" cy="103" r="4" fill="var(--ctx-primary)"/>
-  <text class="tag-p" x="78" y="107">OFFLINE · BUILD THE INDEX</text>
-  <text class="mono" x="864" y="107" text-anchor="end">python -m rag.ingest</text>
-
-  <!-- offline nodes: 5 stages, x centres roughly evenly across 60..900 -->
-  <!-- node width 130, height 40, y 118 -->
-  <g>
-    <rect class="node-p" x="62"  y="118" width="130" height="40" rx="7"/>
-    <text class="n" x="127" y="135" text-anchor="middle">Ingest</text>
-    <text class="s" x="127" y="150" text-anchor="middle">read md · txt · pdf</text>
-
-    <rect class="node-p" x="222" y="118" width="130" height="40" rx="7"/>
-    <text class="n" x="287" y="135" text-anchor="middle">Chunk</text>
-    <text class="s" x="287" y="150" text-anchor="middle">~500 tok · overlap</text>
-
-    <rect class="node-p" x="382" y="118" width="140" height="40" rx="7"/>
-    <text class="n" x="452" y="135" text-anchor="middle">Contextualise</text>
-    <text class="s" x="452" y="150" text-anchor="middle">header per chunk</text>
-
-    <rect class="node-p" x="552" y="118" width="130" height="40" rx="7"/>
-    <text class="n" x="617" y="135" text-anchor="middle">Embed</text>
-    <text class="s" x="617" y="150" text-anchor="middle">vector per chunk</text>
-
-    <rect class="index" x="712" y="118" width="184" height="40" rx="7"/>
-    <text class="n" x="804" y="135" text-anchor="middle">Index</text>
-    <text class="s" x="804" y="150" text-anchor="middle">dense vectors + BM25</text>
-  </g>
-
-  <!-- offline flow arrows -->
-  <line class="flow" x1="192" y1="138" x2="218" y2="138" marker-end="url(#ar)"/>
-  <line class="flow" x1="352" y1="138" x2="378" y2="138" marker-end="url(#ar)"/>
-  <line class="flow" x1="522" y1="138" x2="548" y2="138" marker-end="url(#ar)"/>
-  <line class="flow" x1="682" y1="138" x2="708" y2="138" marker-end="url(#ar)"/>
-
-  <!-- ============ INDEX FEEDS ONLINE (shared store) ============ -->
-  <!-- dashed link from index down into the hybrid-search node -->
-  <path class="link" d="M804,158 L804,196 L617,196 L617,214" marker-end="url(#ar)"/>
-  <text class="mono" x="812" y="184">shared store</text>
-
-  <!-- ============ ONLINE LANE ============ -->
-  <rect class="lane" x="48" y="214" width="864" height="86" rx="10"/>
-  <circle cx="66" cy="231" r="4" fill="var(--ctx-accent)"/>
-  <text class="tag-a" x="78" y="235">ONLINE · ANSWER THE QUESTION</text>
-  <text class="mono" x="864" y="235" text-anchor="end">answer(query)</text>
-
-  <!-- online nodes: 5 stages, y 246, height 40 -->
-  <g>
-    <rect class="node-a" x="62"  y="246" width="130" height="40" rx="7"/>
-    <text class="n" x="127" y="263" text-anchor="middle">Query rewrite</text>
-    <text class="s" x="127" y="278" text-anchor="middle">resolve · expand</text>
-
-    <rect class="node-a" x="222" y="246" width="130" height="40" rx="7"/>
-    <text class="n" x="287" y="263" text-anchor="middle">Hybrid search</text>
-    <text class="s" x="287" y="278" text-anchor="middle">dense + BM25 · RRF</text>
-
-    <rect class="node-a" x="382" y="246" width="140" height="40" rx="7"/>
-    <text class="n" x="452" y="263" text-anchor="middle">Rerank</text>
-    <text class="s" x="452" y="278" text-anchor="middle">cross-encoder · top k</text>
-
-    <rect class="node-a" x="552" y="246" width="130" height="40" rx="7"/>
-    <text class="n" x="617" y="263" text-anchor="middle">Bookend-pack</text>
-    <text class="s" x="617" y="278" text-anchor="middle">best first · last</text>
-
-    <rect class="node-a" x="712" y="246" width="184" height="40" rx="7"/>
-    <text class="n" x="804" y="263" text-anchor="middle">Generate</text>
-    <text class="s" x="804" y="278" text-anchor="middle">answer + citations</text>
-  </g>
-
-  <!-- online flow arrows -->
-  <line class="flow-a" x1="192" y1="266" x2="218" y2="266" marker-end="url(#ar-a)"/>
-  <line class="flow-a" x1="352" y1="266" x2="378" y2="266" marker-end="url(#ar-a)"/>
-  <line class="flow-a" x1="522" y1="266" x2="548" y2="266" marker-end="url(#ar-a)"/>
-  <line class="flow-a" x1="682" y1="266" x2="708" y2="266" marker-end="url(#ar-a)"/>
-
-  <!-- ============ EVAL GATE ON DEPLOY ============ -->
-  <g transform="translate(48,318)">
-    <rect class="gate" x="0" y="0" width="286" height="34" rx="8"/>
-    <circle cx="18" cy="17" r="4" fill="var(--ctx-success)"/>
-    <text class="tag-s" x="30" y="14">EVAL GATE ON DEPLOY</text>
-    <text class="s" x="30" y="27">4 Ragas metrics · block merge on regression</text>
-  </g>
-  <!-- deploy path from Generate down to gate concept -->
-  <path class="deploy" d="M804,286 L804,335 L342,335" marker-end="url(#ar-s)"/>
-  <text class="s" x="360" y="331">replays the online path as a CI check</text>
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-orange { fill: var(--ctx-orange); }
+  .f-orange-soft { fill: var(--ctx-orange-soft); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+  .s-orange-line { stroke: var(--ctx-orange-line); }
+</style>
+<defs>
+<marker id="ctx-00-hero-build-rag-chatbot-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="720"/>
+<text x="40" y="48" class="t-title" data-w="597">Two lanes build and answer; a third replays them</text>
+<text x="40" y="76" class="t-subtitle" data-w="675">Offline runs once per corpus change, online once per question. Dashed: not in the companion.</text>
+<text x="40" y="128" class="t-head" data-w="236">Offline: python -m rag.ingest</text>
+<rect x="40" y="144" width="160" height="104" rx="8" class="card"/>
+<text x="56" y="176" class="t-head" data-w="99">Corpus files</text>
+<text x="56" y="208" class="t-label" data-w="91">data/corpus/,</text>
+<text x="56" y="232" class="t-label" data-w="81">.md and .txt</text>
+<rect x="220" y="144" width="160" height="104" rx="8" class="card"/>
+<text x="236" y="176" class="t-head" data-w="53">Chunk</text>
+<text x="236" y="208" class="t-label" data-w="74">500 words,</text>
+<text x="236" y="232" class="t-label" data-w="71">80 overlap</text>
+<rect x="400" y="144" width="160" height="104" rx="8" class="card"/>
+<text x="416" y="176" class="t-head" data-w="58">Header</text>
+<text x="416" y="208" class="t-label" data-w="95">one sentence,</text>
+<text x="416" y="232" class="t-label" data-w="51">OpenAI</text>
+<rect x="580" y="144" width="160" height="104" rx="8" class="card"/>
+<text x="596" y="176" class="t-head" data-w="57">Embed</text>
+<text x="596" y="208" class="t-label" data-w="106">headed chunks,</text>
+<text x="596" y="232" class="t-label" data-w="69">Voyage AI</text>
+<rect x="760" y="144" width="160" height="104" rx="8" class="card"/>
+<text x="776" y="176" class="t-head" data-w="65">Chroma</text>
+<text x="776" y="208" class="t-label" data-w="65">ids, texts,</text>
+<text x="776" y="232" class="t-label" data-w="49">vectors</text>
+<rect x="768" y="144" width="144" height="4" class="f-orange" data-fit="skip"/>
+<path d="M200,196 L217,196" class="flow" marker-end="url(#ctx-00-hero-build-rag-chatbot-arrow)"/>
+<path d="M380,196 L397,196" class="flow" marker-end="url(#ctx-00-hero-build-rag-chatbot-arrow)"/>
+<path d="M560,196 L577,196" class="flow" marker-end="url(#ctx-00-hero-build-rag-chatbot-arrow)"/>
+<path d="M740,196 L757,196" class="flow" marker-end="url(#ctx-00-hero-build-rag-chatbot-arrow)"/>
+<text x="40" y="336" class="t-head" data-w="134">Online: answer()</text>
+<rect x="40" y="352" width="160" height="104" rx="8" class="card"/>
+<text x="56" y="384" class="t-head" data-w="92">Candidates</text>
+<text x="56" y="416" class="t-label" data-w="103">dense + BM25,</text>
+<text x="56" y="440" class="t-label" data-w="81">top-50 each</text>
+<rect x="220" y="352" width="160" height="104" rx="8" class="card"/>
+<text x="236" y="384" class="t-head" data-w="40">Fuse</text>
+<text x="236" y="416" class="t-label" data-w="85">RRF, k = 60,</text>
+<text x="236" y="440" class="t-label" data-w="45">top-50</text>
+<rect x="400" y="352" width="160" height="104" rx="8" class="card"/>
+<text x="416" y="384" class="t-head" data-w="64">Re-rank</text>
+<text x="416" y="416" class="t-label" data-w="41">top-5,</text>
+<text x="416" y="440" class="t-label" data-w="50">Cohere</text>
+<rect x="580" y="352" width="160" height="104" rx="8" class="f-orange-soft s-orange-line w1"/>
+<text x="596" y="384" class="t-head" data-w="40">Pack</text>
+<text x="596" y="416" class="t-label" data-w="70">01, 04, 06,</text>
+<text x="596" y="440" class="t-label" data-w="99">bookend order</text>
+<rect x="760" y="352" width="160" height="104" rx="8" class="card"/>
+<text x="776" y="384" class="t-head" data-w="74">Generate</text>
+<text x="776" y="416" class="t-label" data-w="113">answer, sources,</text>
+<text x="776" y="440" class="t-label" data-w="51">OpenAI</text>
+<path d="M200,404 L217,404" class="flow" marker-end="url(#ctx-00-hero-build-rag-chatbot-arrow)"/>
+<path d="M380,404 L397,404" class="flow" marker-end="url(#ctx-00-hero-build-rag-chatbot-arrow)"/>
+<path d="M560,404 L577,404" class="flow" marker-end="url(#ctx-00-hero-build-rag-chatbot-arrow)"/>
+<path d="M740,404 L757,404" class="flow" marker-end="url(#ctx-00-hero-build-rag-chatbot-arrow)"/>
+<path d="M840,248 L840,296 L176,296 L176,349" class="flow" marker-end="url(#ctx-00-hero-build-rag-chatbot-arrow)"/>
+<text x="192" y="288" class="t-note" data-w="396">searched on every question (dense embedding: Voyage AI)</text>
+<text x="40" y="512" class="t-head" data-w="249">Evaluation: python -m rag.eval</text>
+<rect x="40" y="528" width="160" height="104" rx="8" class="card"/>
+<text x="56" y="560" class="t-head" data-w="67">Fixtures</text>
+<text x="56" y="592" class="t-label" data-w="78">3 questions</text>
+<text x="56" y="616" class="t-label" data-w="87">with answers</text>
+<rect x="220" y="528" width="160" height="104" rx="8" class="card"/>
+<text x="236" y="560" class="t-head" data-w="58">eval.py</text>
+<text x="236" y="592" class="t-label" data-w="95">each question</text>
+<text x="236" y="616" class="t-label" data-w="114">through answer()</text>
+<rect x="400" y="528" width="160" height="104" rx="8" class="card"/>
+<text x="416" y="560" class="t-head" data-w="51">Ragas</text>
+<text x="416" y="592" class="t-label" data-w="80">four means,</text>
+<text x="416" y="616" class="t-label" data-w="92">OpenAI judge</text>
+<path d="M200,580 L217,580" class="flow" marker-end="url(#ctx-00-hero-build-rag-chatbot-arrow)"/>
+<path d="M380,580 L397,580" class="flow" marker-end="url(#ctx-00-hero-build-rag-chatbot-arrow)"/>
+<rect x="580" y="528" width="160" height="104" rx="8" class="w15 nofill s-ink-muted d-proj" data-fit="skip"/>
+<text x="596" y="560" class="t-head" data-w="39">Gate</text>
+<text x="596" y="592" class="t-label" data-w="89">fail on a drop</text>
+<text x="596" y="616" class="t-label" data-w="62">over 0.05</text>
+<path d="M560,580 L577,580" class="flow d-proj" marker-end="url(#ctx-00-hero-build-rag-chatbot-arrow)"/>
+<text x="760" y="560" class="t-note" data-w="99">post 20's gate,</text>
+<text x="760" y="580" class="t-note" data-w="89">not yet in the</text>
+<text x="760" y="600" class="t-note" data-w="75">companion</text>
+<text x="40" y="684" class="t-note" data-w="607">The index is written once per change; every question, live or replayed, runs the online lane.</text>
 </svg>

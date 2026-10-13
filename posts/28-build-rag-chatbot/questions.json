@@ -1,0 +1,786 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-028",
+  "next_ordinal": 18,
+  "questions": [
+    {
+      "id": "ctx-028-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "architecture",
+        "offline-lane"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In the companion `code/28-rag-chatbot`, which entry point runs once per corpus change rather than once per question?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "`python -m rag.ingest`, which chunks, heads, embeds and stores the files",
+          "correct": true,
+          "feedback": "Right: ingestion is the offline lane that writes the Chroma collection once per corpus change."
+        },
+        {
+          "key": "b",
+          "text": "`answer(query)` in `chat.py`",
+          "correct": false,
+          "feedback": "`answer` is the online lane: it retrieves, packs and generates for every question."
+        },
+        {
+          "key": "c",
+          "text": "`rerank` in `retrieve.py`",
+          "correct": false,
+          "feedback": "Re-ranking scores candidates against one question, so it runs on every question."
+        },
+        {
+          "key": "d",
+          "text": "`pack` in `prompt.py`",
+          "correct": false,
+          "feedback": "Packing orders the hits for one question; it runs every time `answer` runs."
+        }
+      ],
+      "explanation": "Section 2: `python -m rag.ingest` is the offline lane. It chunks, heads, embeds and indexes the corpus, and it needs to run again only when a file changes; everything else runs per question.",
+      "hints": [
+        "One lane writes the index; the other reads it."
+      ]
+    },
+    {
+      "id": "ctx-028-q02",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "packed-prompt",
+        "layers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "`pack` returns a system message and one user message that contains the sources followed by a line starting `Question:`. Which layer of the six-layer stack does that final `Question:` line fill?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Layer 04, retrieved chunks, because it sits in the same message as the sources",
+          "correct": false,
+          "feedback": "Sharing a message does not make it a chunk: the sources are layer 04, the question after them is the instruction."
+        },
+        {
+          "key": "b",
+          "text": "Layer 06, the user instruction",
+          "correct": true,
+          "feedback": "Right: the question is the trigger, placed last after the retrieved chunks."
+        },
+        {
+          "key": "c",
+          "text": "Layer 05, conversation history, because it is a user-role message",
+          "correct": false,
+          "feedback": "The starter keeps no history; a user role does not make text history. Layer 05 is empty."
+        },
+        {
+          "key": "d",
+          "text": "Layer 01, the system prompt, because the rules refer to it",
+          "correct": false,
+          "feedback": "Layer 01 is the separate system message read from `prompts/system.md`."
+        }
+      ],
+      "explanation": "Section 5: the system message is layer 01, the sources inside the user message are layer 04, retrieved chunks, and the closing question is layer 06, the user instruction. A message role does not decide the layer: one user message carries two layers.",
+      "hints": [
+        "Two different layers share the user message.",
+        "Which layer is the trigger that comes last?"
+      ]
+    },
+    {
+      "id": "ctx-028-q03",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o2",
+        "o4"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "rerank",
+        "key-names",
+        "cohere"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "`rerank` begins with `if not os.environ.get(\"COHERE_API_KEY\"): return candidates[:k]`, and the Cohere client is built by `_co()` on first use. A developer exports the Cohere key only as `CO_API_KEY`, the name Cohere's Python SDK reads first, and asks a question. What does `rerank` do?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "It returns the fused top-5 unchanged, without calling Cohere",
+          "correct": true,
+          "feedback": "Right: the guard reads only `COHERE_API_KEY`, so it returns before `_co()` is ever called, and nothing reports the skip."
+        },
+        {
+          "key": "b",
+          "text": "It re-ranks with Cohere, because the SDK finds `CO_API_KEY`",
+          "correct": false,
+          "feedback": "The SDK would find it, but the guard returns before the client is built, so the SDK never runs."
+        },
+        {
+          "key": "c",
+          "text": "The import of `rag.retrieve` fails, because the Cohere client needs a key",
+          "correct": false,
+          "feedback": "The client is not built at import: `_co()` builds it on first use, and here it is never called."
+        },
+        {
+          "key": "d",
+          "text": "It raises an authentication error when `_co()` builds the client",
+          "correct": false,
+          "feedback": "`_co()` is never called, because the guard returns first; had it been called, the SDK would have found `CO_API_KEY`."
+        }
+      ],
+      "explanation": "Section 4: the guard in `rerank` checks only `COHERE_API_KEY`, and `_co()` builds the client after the guard, on first use. With the key exported as `CO_API_KEY` (the SDK reads it first, then `COHERE_API_KEY`), the guard returns the fused top-5 and re-ranking is skipped without a word. Accepting both names, and logging a skipped re-rank, closes the gap.",
+      "hints": [
+        "Which line of `rerank` runs first, and which environment variable does it read?",
+        "Is the Cohere client ever built in this run?"
+      ]
+    },
+    {
+      "id": "ctx-028-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "10",
+      "est_minutes": 2,
+      "tags": [
+        "wsci",
+        "bookend",
+        "select"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The companion's `pack` puts the best chunk first and the second best last among the sources. In the write, select, compress, isolate operations of post 07, which operation is this?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Select: it is the packing step of the select pipeline",
+          "correct": true,
+          "feedback": "Right: query, candidates, re-rank and pack are select's four levers, and the bookend order is the pack."
+        },
+        {
+          "key": "b",
+          "text": "Compress: it keeps the window within budget",
+          "correct": false,
+          "feedback": "Nothing is shortened or dropped; every packed chunk goes in whole. Compression changes how many tokens the content takes."
+        },
+        {
+          "key": "c",
+          "text": "Write: it stores the chunks for later",
+          "correct": false,
+          "feedback": "Writing is what `ingest` does when it parks the corpus in the index outside the window."
+        },
+        {
+          "key": "d",
+          "text": "Isolate: it separates the best chunks from the rest",
+          "correct": false,
+          "feedback": "Isolation splits work across separate windows; the bookend layout reorders one window."
+        }
+      ],
+      "explanation": "Sections 5 and 10: bookend packing reorders the chunks and removes nothing, so it is the packing step of select (post 09, section 5). The starter does no compression at all.",
+      "hints": [
+        "Does the layout remove any tokens?"
+      ]
+    },
+    {
+      "id": "ctx-028-q05",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "12",
+      "est_minutes": 4,
+      "tags": [
+        "embedding-model",
+        "idempotence",
+        "manifest"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A team switches `RAG_EMBED_MODEL` from `voyage-3-lite` to a newer model and runs `python -m rag.ingest data/corpus` again on the unchanged corpus. What does the companion's ingestion do?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "It re-embeds every chunk with the new model, because the model is part of each chunk id",
+          "correct": false,
+          "feedback": "The id is a hash of title, index and text; the model is not in it."
+        },
+        {
+          "key": "b",
+          "text": "It embeds nothing: every chunk id already exists, so the index keeps the old vectors while queries use the new model",
+          "correct": true,
+          "feedback": "Right: the idempotence check skips every chunk, and the index and the queries now disagree."
+        },
+        {
+          "key": "c",
+          "text": "It deletes the old vectors and writes new ones beside the old ids",
+          "correct": false,
+          "feedback": "The companion never deletes a record; that is its other stale-index gap."
+        },
+        {
+          "key": "d",
+          "text": "It raises an error because the dimensions of the two models differ",
+          "correct": false,
+          "feedback": "Ingestion makes no embedding call at all here; a dimension mismatch can surface later, at query time."
+        }
+      ],
+      "explanation": "Sections 3 and 12: the chunk id hashes the file name, chunk index and chunk text, not the embedding model. Every id is already stored, so `ingest_path` returns 0 and embeds nothing, while queries are now embedded with the new model. A manifest that records the model per document (post 10, sections 7 and 8) forces the re-embedding.",
+      "hints": [
+        "What goes into the chunk id?",
+        "What does `ingest_path` do when every id already exists?"
+      ]
+    },
+    {
+      "id": "ctx-028-q06",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "11",
+      "est_minutes": 4,
+      "tags": [
+        "keys",
+        "live-steps",
+        "providers"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A fresh `.chroma` directory exists and the sample corpus has never been ingested. Which providers does `uv run python -m rag.ingest data/corpus` call? Select all that apply.",
+      "select": "multiple",
+      "options": [
+        {
+          "key": "a",
+          "text": "OpenAI, for the one-sentence header of each new chunk",
+          "correct": true,
+          "feedback": "Right: `small_llm` uses `RAG_HEADER_MODEL`, by default `gpt-4o-mini` on OpenAI."
+        },
+        {
+          "key": "b",
+          "text": "Voyage AI, to embed the headed chunks",
+          "correct": true,
+          "feedback": "Right: `_vo().embed(..., model=RAG_EMBED_MODEL)` runs once per file with new chunks."
+        },
+        {
+          "key": "c",
+          "text": "Cohere, to re-rank the chunks before they are stored",
+          "correct": false,
+          "feedback": "Re-ranking needs a question; it runs in `retrieve`, never at ingest."
+        },
+        {
+          "key": "d",
+          "text": "OpenAI's judge through Ragas, to score the new chunks",
+          "correct": false,
+          "feedback": "Ragas runs only in `python -m rag.eval`, against fixture questions."
+        }
+      ],
+      "explanation": "Sections 3 and 11: for each new chunk `contextual_header` calls the header model (`gpt-4o-mini` through OpenAI by default), and each file's new chunks are embedded with Voyage AI. Cohere is called only by `rerank`, at question time, and Ragas only by the evaluation.",
+      "hints": [
+        "Follow `ingest_path` line by line.",
+        "Which provider writes the header, and which one embeds?"
+      ]
+    },
+    {
+      "id": "ctx-028-q07",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "system-prompt",
+        "five-blocks"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "`prompts/system.md` has the blocks Identity, Rules, Format and Knowledge. Measured against post 14's checklist of five blocks, what is the right reading of the missing one?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Tool-use guidance is missing, which is right here because the chatbot has no tools",
+          "correct": true,
+          "feedback": "Right: a missing block is fine when its authors can say why, and there are no tools to guide."
+        },
+        {
+          "key": "b",
+          "text": "Tool-use guidance is missing, and its absence is why the chatbot cannot call the retriever",
+          "correct": false,
+          "feedback": "Retrieval is application code that runs before the call; the model never calls it as a tool."
+        },
+        {
+          "key": "c",
+          "text": "Knowledge should be removed, because retrieved chunks replace it",
+          "correct": false,
+          "feedback": "Post 14 keeps small, stable facts in Knowledge; only large or rarely needed material belongs in layer 04."
+        },
+        {
+          "key": "d",
+          "text": "Nothing is missing: Format and Rules together count as the fifth block",
+          "correct": false,
+          "feedback": "The five blocks are distinct; the fifth is tool-use guidance."
+        }
+      ],
+      "explanation": "Section 5: post 14's five blocks are identity, rules, format, knowledge and tool-use guidance. The chatbot calls no tools, so the tool-use block has nothing to say; post 14 asks only that a missing block be missing on purpose.",
+      "hints": [
+        "Name post 14's fifth block.",
+        "Does this chatbot have any tools?"
+      ]
+    },
+    {
+      "id": "ctx-028-q08",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 4,
+      "tags": [
+        "chunk-size",
+        "tokens"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The snippet counts the companion's sample corpus at 160 words and 227 tokens (`o200k_base`). `CHUNK_TARGET` is 500. At the sample's tokens-per-word ratio, about how many tokens does a full chunk hold? Give a whole number.",
+      "answer": {
+        "value": 709,
+        "tolerance": 6,
+        "unit": "tokens"
+      },
+      "precision_note": "500 × 227 / 160 = 709.38; snippets/offline_core.py prints 1.42 tokens per word and about 710 (rounded to tens). The tolerance accepts 703 to 715 and rejects 500 (target read as tokens) and 352 (500 / 1.42).",
+      "explanation": "Section 3: the chunker counts words, so a full chunk is 500 words, and at 227 / 160 = 1.419 tokens per word that is 500 × 1.419 ≈ 709 tokens (the snippet rounds it to about 710). Reading the target as 500 tokens, or dividing by the ratio, are the two wrong methods.",
+      "hints": [
+        "Is the target counted in words or in tokens?",
+        "Multiply the word target by tokens per word."
+      ]
+    },
+    {
+      "id": "ctx-028-q09",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "3",
+      "est_minutes": 4,
+      "tags": [
+        "cost",
+        "gpt-4o-mini"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "One question on the sample corpus sends `gpt-4o-mini` a system prompt of 187 tokens and a user message of 281 tokens, and gets back an answer of 120 tokens (illustrative). OpenAI's model page (consulted October 2026) prices the model at 0.15 dollars per million input tokens and 0.60 per million output tokens. What do 10,000 such questions cost in dollars? Ignore caching.",
+      "answer": {
+        "value": 1.422,
+        "tolerance": 0.006,
+        "unit": "dollars"
+      },
+      "precision_note": "(468 × 0.15 + 120 × 0.60) / 1,000,000 × 10,000 = 1.422. Token counts 187 and 281 are printed by snippets/offline_core.py; the 120 output tokens are illustrative. The tolerance accepts 1.422 and its rounding 1.42 and rejects 2.99 (rates swapped) and 0.70 (input only).",
+      "explanation": "Input is 187 + 281 = 468 tokens and output 120 tokens per question. Per question: 468 × 0.15 / 1,000,000 + 120 × 0.60 / 1,000,000 = 0.0000702 + 0.000072 = 0.0001422 dollars; times 10,000 gives 1.422 dollars, about 1.42. Swapping the two rates gives 2.99.",
+      "hints": [
+        "Add the two input parts first.",
+        "Price input and output separately at their own rates, then scale to 10,000."
+      ]
+    },
+    {
+      "id": "ctx-028-q10",
+      "type": "numeric",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "rrf",
+        "rank-convention"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The companion's `rrf_merge` is shown below. A chunk is first in the dense ranking and third in the BM25 ranking. What score does `rrf_merge` give it? Give six decimal places.",
+      "stimulus": {
+        "kind": "code",
+        "language": "python",
+        "content": "def rrf_merge(rankings: list[list[str]], *, k: int = 60) -> list[str]:\n    scores: dict[str, float] = defaultdict(float)\n    for ranking in rankings:\n        for rank, cid in enumerate(ranking):\n            scores[cid] += 1.0 / (k + rank)\n    return sorted(scores, key=scores.get, reverse=True)\n"
+      },
+      "answer": {
+        "value": 0.032796,
+        "tolerance": 2e-06,
+        "unit": ""
+      },
+      "precision_note": "1/60 + 1/62 = 0.0327957; the 1-based reading 1/61 + 1/63 = 0.0322659 is rejected.",
+      "explanation": "Section 4: `enumerate` counts ranks from 0, so first place adds 1/(60 + 0) and third place adds 1/(60 + 2). The score is 1/60 + 1/62 = 0.016667 + 0.016129 = 0.032796. Post 09's 1-based formula would give 1/61 + 1/63 = 0.032266.",
+      "hints": [
+        "What does `enumerate` return for the first item?",
+        "Add one term per ranking: 1/(60 + rank)."
+      ]
+    },
+    {
+      "id": "ctx-028-q11",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 2,
+      "tags": [
+        "chunking",
+        "units"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In `ingest.py`, `CHUNK_TARGET = 500` and `CHUNK_OVERLAP = 80`. What unit do both numbers count?",
+      "answer": {
+        "model": "Words: each sentence is measured with len(s.split()), not in tokens.",
+        "accept": [
+          "^(?!(?:(?!\\bwords?\\b)[\\s\\S])*?(?<!not )(?<!not in )(?<!than )(?<!than in )\\btokens?\\b)(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*\\bnot\\b(?:(?!tokens?)[^.;,]){0,30}\\bwords?\\b)(?![\\s\\S]*\\b(counts?|measures?|unit\\s+is|units?\\s+are|in|are|is)\\s+(both\\s+)?(\\w+\\s+)?tokens?\\b(?![\\s\\S]*\\bwords?\\b))(?=[\\s\\S]*\\b(words?|whitespace[- ]separated (pieces|items|strings)|split\\(\\)|s\\.split)\\b)[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 3: the chunker measures each sentence with `len(s.split())`, so both constants count words, not tokens. On the sample corpus a 500-word chunk is about 710 tokens.",
+      "hints": [
+        "Look at how `chunk` measures a sentence."
+      ]
+    },
+    {
+      "id": "ctx-028-q12",
+      "type": "short",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "11",
+      "est_minutes": 3,
+      "tags": [
+        "tests",
+        "lazy-client"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "The companion's five tests pass with no API key set, although `rag.retrieve` imports the Cohere SDK, which refuses to build a client without a key. In one sentence, why do the tests need no key?",
+      "answer": {
+        "model": "The clients are built on first use, inside functions such as `_co()` and `_oai()`, and the tests call only `chunk` and `rrf_merge`, which never build one.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be)\\b)(?![\\s\\S]*(?<!not )(?<!never )(?<!no longer )(?<!n't )\\b(built|created|constructed|instantiated|initiali[sz]ed|opened|made)\\s+((at|on|during)\\s+(the\\s+)?(module\\s+)?(import\\w*|load\\w*)|when\\s+(the\\s+)?(modules?|packages?)\\s+(is|are)\\s+(imported|loaded)|when\\s+imported)\\b)(?![\\s\\S]*\\b(not|never|n't|no)\\s+(\\w+\\s+){0,2}(built|created|constructed|instantiated|initiali[sz]ed|opened|made|lazy|lazily)\\s+(\\w+\\s+){0,1}(on\\s+first|lazily|only\\s+when)\\b)(?![\\s\\S]*\\b(not|never|n't)\\s+(\\w+\\s+){0,1}(lazy|lazily)\\b)(?![\\s\\S]*\\b(mock\\w*|stub\\w*|patch\\w*|fake\\s+client)\\b)(?![\\s\\S]*(?<!none of )(?<!no )\\b(the\\s+tests|tests|they)\\s+(do\\s+)?(call|calls|reach|contact|hit|send|query|use|uses)\\s+(the\\s+)?(real\\s+)?(openai|cohere|voyage\\w*|chroma\\w*|apis?|providers?|network|clients?)\\b)(?=[\\s\\S]*(\\b(built|created|constructed|instantiated|initiali[sz]ed|opened|made|build|create|open)\\s+(\\w+\\s+){0,3}(on|at|upon)\\s+(their\\s+|its\\s+|the\\s+)?first\\s+(use|call|request)|\\blaz(y|ily)\\b|\\bon\\s+first\\s+use\\b|\\bonly\\s+when\\s+(first\\s+)?(used|needed|called|requested)|\\b(not|never|no\\s+longer|n't)\\s+(\\w+\\s+){0,2}(built|created|constructed|instantiated|initiali[sz]ed|opened|made)\\s+(at|on|during|when\\s+(the\\s+)?modules?\\s+(is|are))\\s*(import\\w*|load\\w*)|\\bimport\\w*\\s+(\\w+\\s+){0,3}(builds?|creates?|constructs?|opens?|makes?)\\s+(no|none|nothing)\\b|\\bimport\\w*\\s+(\\w+\\s+){0,3}(does\\s+not|doesn't|never)\\s+(build|create|construct|open|make)\\b|_co\\(\\)|_oai\\(\\)|_vo\\(\\)))(?=[\\s\\S]*(\\b(tests?|they)\\s+(\\w+\\s+){0,2}(call|calls|test|tests|exercise|exercises|touch|touches|use|uses|check|checks|cover|covers)\\s+(\\w+\\s+){0,2}`?(chunk|rrf_merge|pure)|\\b(no|none\\s+of\\s+the|neither)\\s+(\\w+\\s+){0,2}tests?\\s+(\\w+\\s+){0,2}(calls?|uses?|builds?|needs?|touch\\w*|creates?|triggers?|reach\\w*|constructs?|opens?)\\b|\\b(tests?|they)\\s+(\\w+\\s+){0,2}(never|don't|do\\s+not|does\\s+not|doesn't)\\s+(\\w+\\s+){0,1}(call|use|build|need|touch|create|trigger|reach|construct|open|make)\\b|\\b(never|not|no)\\s+(\\w+\\s+){0,3}(called|used|built|needed|touched|created|triggered|reached|constructed|opened)\\s+(\\w+\\s+){0,2}(by|in|during)\\s+(the\\s+|any\\s+)?tests?\\b|\\bonly\\s+(\\w+\\s+){0,2}`?(chunk|rrf_merge)|`?chunk`?\\s+and\\s+`?rrf_merge))[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 11: importing the modules builds no client, because `_oai()`, `_vo()`, `_co()` and `COLL()` build or open theirs on first use, and the five tests call only `chunk` and `rrf_merge`, which use none of them. No key is read, and no Chroma directory is created.",
+      "hints": [
+        "When is a client built: at import, or later?",
+        "Which functions do the five tests call?"
+      ]
+    },
+    {
+      "id": "ctx-028-q13",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "8",
+      "est_minutes": 10,
+      "tags": [
+        "lazy-client",
+        "hardening"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "In the starter below, the client is built when the module is imported, so importing it without `RAG_TOY_API_KEY` fails. Fix it so that defining the module needs no key, a call without a key still fails loudly with the client's `RuntimeError`, and every call after the first reuses one client.",
+      "kind": "fix",
+      "language": "python",
+      "starter": "import os\n\n\nclass Client:\n    \"\"\"Stand-in for a provider SDK client: it refuses to be built without a key.\"\"\"\n    built = 0\n\n    def __init__(self):\n        if not os.environ.get(\"RAG_TOY_API_KEY\"):\n            raise RuntimeError(\"missing RAG_TOY_API_KEY\")\n        Client.built += 1\n\n    def complete(self, prompt):\n        return \"answer to \" + prompt\n\n\n_client = Client()\n\n\ndef complete(prompt):\n    return _client.complete(prompt)\n",
+      "solution": "import os\n\n\nclass Client:\n    \"\"\"Stand-in for a provider SDK client: it refuses to be built without a key.\"\"\"\n    built = 0\n\n    def __init__(self):\n        if not os.environ.get(\"RAG_TOY_API_KEY\"):\n            raise RuntimeError(\"missing RAG_TOY_API_KEY\")\n        Client.built += 1\n\n    def complete(self, prompt):\n        return \"answer to \" + prompt\n\n\n_client = None\n\n\ndef _get_client():\n    global _client\n    if _client is None:\n        _client = Client()\n    return _client\n\n\ndef complete(prompt):\n    return _get_client().complete(prompt)\n",
+      "tests": "import os\n\n# Importing (defining) the module above must not have needed the key.\nassert Client.built == 0, \"a client was built before any call\"\n\n# Without a key, a call fails loudly at call time.\nos.environ.pop(\"RAG_TOY_API_KEY\", None)\ntry:\n    complete(\"q\")\n    raise AssertionError(\"a call without a key must raise\")\nexcept RuntimeError:\n    pass\n\n# With a key, calls work and share one client.\nos.environ[\"RAG_TOY_API_KEY\"] = \"test\"\nassert complete(\"q1\") == \"answer to q1\"\nassert complete(\"q2\") == \"answer to q2\"\nassert complete(\"q3\") == \"answer to q3\"\nassert Client.built == 1, f\"expected one client, built {Client.built}\"\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "The pattern of the companion's `_oai()`, `_vo()` and `_co()` (section 8): the module keeps no client at import, and the first call builds one and caches it. A service, a test run or a health check can then start without every key, while a real call without a key still fails at the point of use.",
+      "hints": [
+        "Move the construction out of module level into a function that the call path uses.",
+        "Cache the client after the first successful construction so later calls reuse it."
+      ]
+    },
+    {
+      "id": "ctx-028-q14",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "4",
+      "est_minutes": 3,
+      "tags": [
+        "online-lane",
+        "pipeline"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Put the steps of one call to `answer(query)` in the order the companion's code runs them.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Embed the question with Voyage AI and query Chroma for the dense top-50"
+        },
+        {
+          "key": "b",
+          "text": "Score every stored chunk with BM25 and keep the top-50"
+        },
+        {
+          "key": "c",
+          "text": "Fuse the two rankings with `rrf_merge`"
+        },
+        {
+          "key": "d",
+          "text": "Re-rank the fused list with Cohere and keep the top-5"
+        },
+        {
+          "key": "e",
+          "text": "Order the five hits best first, second best last with `pack`"
+        },
+        {
+          "key": "f",
+          "text": "Send the two messages to `gpt-4o-mini` with `chat_llm`"
+        }
+      ],
+      "answer": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f"
+      ],
+      "partial_credit": true,
+      "explanation": "Sections 4 to 6: `retrieve` calls `hybrid` (dense ranking from Chroma, then BM25 scores, then `rrf_merge`) and passes the fused list to `rerank`; `answer` then calls `pack` and finally `chat_llm`.",
+      "hints": [
+        "`retrieve` runs `hybrid` before `rerank`; inside `hybrid`, the dense query comes first.",
+        "`answer` packs only after retrieval returns, and generates last."
+      ]
+    },
+    {
+      "id": "ctx-028-q15",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "2",
+      "est_minutes": 4,
+      "tags": [
+        "module-map",
+        "cross-references"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Match each function of the companion to the earlier post and section whose principle it implements.",
+      "left": [
+        {
+          "key": "a",
+          "text": "`chunk`"
+        },
+        {
+          "key": "b",
+          "text": "`rrf_merge`"
+        },
+        {
+          "key": "c",
+          "text": "`rerank`"
+        },
+        {
+          "key": "d",
+          "text": "`pack`"
+        },
+        {
+          "key": "e",
+          "text": "`run` in `eval.py`"
+        }
+      ],
+      "right": [
+        {
+          "key": "p",
+          "text": "Post 09, section 3: candidate generation"
+        },
+        {
+          "key": "q",
+          "text": "Post 09, section 4: re-ranking"
+        },
+        {
+          "key": "r",
+          "text": "Post 09, section 5: packing"
+        },
+        {
+          "key": "s",
+          "text": "Post 11, section 2: chunking and contextual retrieval"
+        },
+        {
+          "key": "t",
+          "text": "Post 20, section 5: the retrieval metrics (Ragas)"
+        },
+        {
+          "key": "u",
+          "text": "Post 12, section 3: summarisation"
+        },
+        {
+          "key": "v",
+          "text": "Post 16, section 9: memory in the prompt"
+        }
+      ],
+      "answer": {
+        "a": "s",
+        "b": "p",
+        "c": "q",
+        "d": "r",
+        "e": "t"
+      },
+      "explanation": "Section 2's module map: `chunk` is post 11's sentence-aware splitter (section 2), `rrf_merge` post 09's fusion of candidates (section 3), `rerank` post 09's re-ranking lever (section 4), `pack` post 09's bookend packing (section 5), and `run` post 20's Ragas metrics (section 5). Summarisation and memory blocks are extensions the starter leaves out.",
+      "hints": [
+        "Three of the five come from the same post's four levers."
+      ]
+    },
+    {
+      "id": "ctx-028-q16",
+      "type": "long",
+      "track": "connect",
+      "difficulty": 4,
+      "outcomes": [
+        "o5"
+      ],
+      "section": "7",
+      "est_minutes": 20,
+      "tags": [
+        "regression-gate",
+        "manifest",
+        "hardening"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "Using post 20's evaluation harness and post 10's incremental re-indexing, design the changes that would make the companion safe to change: what the evaluation must add to become a gate, and what ingestion must add so that an edited document or a new embedding model reaches the index. Name the files the changes touch and what each change catches.",
+      "connects": [
+        "ctx-020",
+        "ctx-010",
+        "ctx-011"
+      ],
+      "kind": "design",
+      "solution": "**Evaluation (eval.py, tests/fixtures.json, CI).**\n\n1. Grow `tests/fixtures.json` from three pairs to a golden set built from real failures, each labelled by its answer phrase rather than a chunk id, with questions whose answers are only in the corpus (not in the Knowledge block), so retrieval is actually tested.\n2. Make `answer` return the hit texts and have `run` score those, instead of retrieving a second time; the contexts scored are then the ones the answer saw, and each question costs one retrieval.\n3. Add a gate: save the four means of an approved run as a baseline file; in CI, run the evaluation and fail when any metric falls by more than an absolute 0.05 below its baseline or is missing, as post 20's `check_regression` does, and print the questions that flipped.\n4. Judge with a model from another family than `gpt-4o-mini`, or calibrate the judge on a human-labelled sample, against self-preference.\n\n**Ingestion (ingest.py plus a manifest file or table).**\n\n5. Keep a manifest row per document: its content hash, its chunk ids, the embedding model and the ingest time (post 10, sections 7 and 8).\n6. On each run: skip a document whose hash and model match; for a changed document, delete its previous chunk ids from Chroma, then add the new chunks; for a deleted file, delete its chunks.\n7. When `RAG_EMBED_MODEL` differs from the manifest's model, re-embed every document (or build a new collection and switch over), so queries and index use one model.\n\nWhat each catches: the gate catches a prompt, chunker or model change that lowers a metric; the manifest stops stale chunks producing conflicting answers and stops a model change from silently mixing vector spaces.",
+      "rubric": [
+        {
+          "criterion": "Names the evaluation gaps: three fixtures, contexts retrieved twice, a fixture answerable from the system prompt, no baseline",
+          "points": 2
+        },
+        {
+          "criterion": "Designs the gate as post 20 does: saved baseline, absolute tolerance of 0.05, CI failure, flipped cases",
+          "points": 3
+        },
+        {
+          "criterion": "Designs a manifest with hash, chunk ids and embedding model, and deletes or replaces stale chunks",
+          "points": 3
+        },
+        {
+          "criterion": "Handles an embedding-model change by re-embedding the corpus",
+          "points": 1
+        },
+        {
+          "criterion": "Says which file each change touches and what failure each catches",
+          "points": 1
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Sections 3, 7 and 12: the companion has a three-question golden set, retrieves twice per question, and has no baseline comparison; its ingest skips stored ids, never deletes a stale chunk and ignores the embedding model. Post 20 supplies the gate (saved baseline, absolute tolerance of 0.05, flipped cases) and post 10 the manifest that replaces old chunks and records the model.",
+      "hints": [
+        "Start from what `run` prints and what a gate needs beyond it.",
+        "For ingestion, list what the chunk id leaves out and what post 10's manifest stores."
+      ]
+    },
+    {
+      "id": "ctx-028-q17",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 5,
+      "outcomes": [
+        "o2",
+        "o3"
+      ],
+      "section": "12",
+      "est_minutes": 25,
+      "tags": [
+        "experiment-design",
+        "reranker",
+        "golden-set"
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-13",
+      "prompt": "A natural lab for this build is to index the sample corpus, answer the golden set, show the evaluation passing, then switch the re-ranker off and show the gate failing. Critique whether the companion as it stands can show this, then design the smallest experiment that could show re-ranking matters, including what would make a failure meaningful rather than noise.",
+      "kind": "critique",
+      "solution": "**What the companion cannot show today.**\n\n- The two sample files (88 and 72 words) make one chunk each, so the index holds two chunks. With `top_n=50` and `k=5` both chunks are packed whether or not Cohere re-ranks them; re-ranking can only swap their order, and with two hits `pack`'s bookend order is the rank order. Context precision may move slightly; context recall cannot.\n- Switching the re-ranker off means unsetting `COHERE_API_KEY`, after which `rerank` returns the fused top-5; but the switch is silent (a key exported only as `CO_API_KEY` turns re-ranking off too), so each arm must log whether Cohere was called.\n- There are three fixtures (one moves a mean by a third, and one is answerable from the Knowledge block) and no gate: `run` prints means and compares them with nothing.\n\n**A minimal meaningful experiment.**\n\n1. Corpus: enough documents for dozens of chunks, including near-miss distractors (for example several refund documents for other plans or years) that share the query's words, so the fused list puts wrong chunks inside the top-5 and only the cross-encoder separates them.\n2. Golden set: questions whose answers sit only in the corpus, labelled by answer phrase, enough of them that the expected effect is several cases, not one (on $n$ cases one case moves a mean by $1/n$).\n3. Noise floor: run the unchanged pipeline several times with caching off to measure the spread of each judged metric; set the tolerance above it and between multiples of $1/n$.\n4. Arms: re-ranker on (baseline saved) and off (the fused top-5), everything else fixed, the judge from another model family.\n5. Read the gate and the flipped cases: a drop in context precision and answer correctness beyond the tolerance, concentrated on the distractor questions, is the evidence; a drop on one case is not.\n\nPrediction to state in advance: recall@50 is unchanged by re-ranking (it only reorders the top-N), so any effect must show in the packed top-5.",
+      "rubric": [
+        {
+          "criterion": "Shows the sample index has two chunks, so k=5 packs both either way and bookend order equals rank order",
+          "points": 2
+        },
+        {
+          "criterion": "Says how re-ranking is switched off (no `COHERE_API_KEY`) and that each arm must confirm it, since the skip is silent",
+          "points": 2
+        },
+        {
+          "criterion": "Notes three fixtures, one answerable from the system prompt, and no gate",
+          "points": 1
+        },
+        {
+          "criterion": "Designs a corpus with more chunks than k and near-miss distractors",
+          "points": 2
+        },
+        {
+          "criterion": "Sizes the golden set and sets the tolerance from a measured noise floor and 1/n",
+          "points": 2
+        },
+        {
+          "criterion": "Predicts which metric can move (precision of the packed top-k, not recall@N) and reads flipped cases",
+          "points": 1
+        }
+      ],
+      "answer_length": "half a page",
+      "explanation": "Beyond the post (sections 3, 4, 7 and 12): the sample corpus makes two chunks, so with `k=5` both are packed with or without re-ranking and the bookend order is the rank order; re-ranking is switched off only by a missing `COHERE_API_KEY`, silently, so each arm must log whether Cohere ran; there are three fixtures and no gate. A meaningful test needs more chunks than k, distractor chunks that the fused ranking puts high, a golden set large enough that the expected drop exceeds both one case and the run-to-run noise, and a gate to read.",
+      "hints": [
+        "Count the chunks in the sample index and compare with `k`.",
+        "What has to be true of the corpus, the fixtures and the tolerance for a drop to mean something?",
+        "How would re-ranking be switched off in the companion today?"
+      ]
+    }
+  ]
+}

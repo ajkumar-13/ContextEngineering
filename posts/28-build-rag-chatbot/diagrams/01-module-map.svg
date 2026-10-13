@@ -1,15 +1,219 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 470" role="img" aria-labelledby="t d">
-  <title id="t">The five modules and which stage of the flow each one owns</title>
-  <desc id="d">A hand-drawn map of the build's modules. The ingest module owns the offline phase: read, chunk, header, embed, and index, everything that happens once per corpus change, with the chunk header being one cheap cached LLM call per chunk. The retrieve module owns dense and sparse search, reciprocal rank fusion, and cross-encoder reranking, where the reranker is the single largest quality lever. The prompt module owns the five-block system prompt and bookend packing with citation tags, where order is a decision rather than an accident of ranking. The chat module owns the turn loop and is thin on purpose, because logic living there is logic the eval cannot reach. Two panels below cover the eval module, which wraps the online phase in a scorer by calling it rather than re-implementing it, and the llm module, which holds the header model, the generator, and the embedding client together.</desc>
-
-  <style><![CDATA[
-    :root{--ctx-bg:#FAFAF7;--ctx-surface:#FFFFFF;--ctx-ink:#1A1A1A;--ctx-ink-muted:#5C5C5C;--ctx-ink-subtle:#9A9A9A;--ctx-border:#D9D9D4;--ctx-primary:#5B7FBF;--ctx-accent:#D98E5F;--ctx-success:#5C9E78;--ctx-warn:#B8895A;--ctx-alert:#C66B5E;--ctx-neutral-1:#EAEAE4;--ctx-neutral-2:#CFCFC8;--ctx-neutral-3:#8E8E88;--ctx-on-fill:#FFFDF9;--ctx-on-accent:#1A1A1A;}
-    @media (prefers-color-scheme:dark){:root{--ctx-bg:#0E0F12;--ctx-surface:#16181C;--ctx-ink:#F2F2EE;--ctx-ink-muted:#B4B4AE;--ctx-ink-subtle:#6E6E68;--ctx-border:#2A2D33;--ctx-primary:#8BA8E0;--ctx-accent:#E8B088;--ctx-success:#7FBF9B;--ctx-warn:#D4B58A;--ctx-alert:#D88880;--ctx-neutral-1:#1F2229;--ctx-neutral-2:#2C3038;--ctx-neutral-3:#6E6E68;--ctx-on-fill:#14161A;--ctx-on-accent:#1A1A1A;}}
-    .bg{fill:var(--ctx-bg);}
-    text{dominant-baseline:auto;}
-  ]]></style>
-
-  <rect class="bg" width="960" height="470"/>
-<text xml:space="preserve" x="40" y="38.24" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="22" fill="var(--ctx-ink)">Five modules, mapped one-to-one onto the flow</text><text xml:space="preserve" x="40" y="61.96" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="13" fill="var(--ctx-ink-muted)">Which file owns which stage is the most useful thing to know before opening any of them.</text><path d="M65.96 97.21C123.68 96.8 179.18 96.94 217.34 96.1C233.53 98.47 240.73 103.74 239.43 118.95C244.42 163.71 239.8 210.27 243.93 261.7C244.59 277.66 232.85 288.43 216.76 284.58C161.54 284.82 103.99 287.93 65.08 287.15C49.92 287.41 41.75 276.02 41.35 260.34C40.74 215.48 41.37 163.26 40.47 121.13C39.17 103.34 48.54 96.47 62.36 96.12C64 96 64 96 64 96" fill="var(--ctx-surface)" stroke="none"/><path d="M63.27 94.89C111.79 98.04 160.9 95.72 218.98 97.05M64.99 96.67C95.68 96.78 129.12 95.39 217.67 95.46M218 96C232.3 96.19 243.28 105.58 242.09 118.31M219.5 97.94C235.59 95.4 240.5 106.07 240.79 122.06M242.14 119.12C242.94 155.12 243.58 192.11 243.57 260.18M242.6 119.64C242.47 164.67 242.88 207.85 242.71 261.66M242 262C243.04 276.72 235.32 287.44 217.18 285.25M241.16 261.88C241.78 278 233.65 286.92 218.88 283.73M217.2 287.06C158.59 284.19 95.03 286.06 62.02 287.08M217.41 286.66C165.55 287.49 112.33 286.8 64.4 286.47M64 286C46.81 284.56 41.78 276.7 42 261.68M65.94 286.38C47.78 285.43 40.56 277.47 41.17 264.02M38.39 262.47C38.04 225.83 36.99 191.3 41.6 119.92M39.57 262.81C40.08 226.51 40.19 191.32 40.79 119.14M40 120C38.85 104.63 49.19 97.75 63 94.57M38.19 120.77C40.93 105.97 50.07 95.09 64.38 96.88M64 96C64 96 64 96 64 96M64 96C64 96 64 96 64 96" fill="none" stroke="var(--ctx-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M46.16 106.14C46.08 165.74 44.69 223.81 44.1 278.17M44.52 104.41C44.81 155.31 44.46 206.77 45.41 277.01" fill="none" stroke="var(--ctx-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="58" y="115.96" text-anchor="start" font-family='"JetBrains Mono",ui-monospace,Menlo,monospace' font-size="13" fill="var(--ctx-ink)">ingest.py</text><text xml:space="preserve" x="58" y="132.28" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-subtle)">offline</text><text xml:space="preserve" x="58" y="151.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">Read, chunk, header, embed,</text><text xml:space="preserve" x="58" y="163.7" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">index. Everything that</text><text xml:space="preserve" x="58" y="176.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">happens once per corpus</text><text xml:space="preserve" x="58" y="188.7" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">change.</text><text xml:space="preserve" x="58" y="236.28" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-muted)">The chunk header is one cheap</text><text xml:space="preserve" x="58" y="247.53" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-muted)">LLM call per chunk, at index</text><text xml:space="preserve" x="58" y="258.78" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-muted)">time, cached.</text><path d="M281.67 95.3C339.8 96.96 400.37 95.73 435.72 95.84C452.02 93.74 458.44 103.37 461.57 119.55C459.86 166.68 460.54 211.86 460.84 264.56C457.52 275.54 453.38 288.33 437.93 286.31C383.39 286 337.71 286.37 284.19 284.84C264.87 287 256.94 279.72 260.43 260.49C256.83 221.83 254.77 177.68 259.31 119.91C259.46 105.97 267.44 94.3 284.58 95.88C282 96 282 96 282 96" fill="var(--ctx-surface)" stroke="none"/><path d="M281.29 96.91C331.11 95.24 381.37 94.94 434.12 94.48M282.29 96.81C331.35 95.98 381.01 95.17 435.77 96.76M436 96C450.49 95.15 458.7 102.94 460.18 121.81M435.99 96.93C450.68 94.38 461.06 105.18 458.17 120.32M460.89 119.11C459.3 153.81 457.49 189.34 460.2 263.49M460.81 120.51C459.08 154.96 459.28 192.14 460.3 262.08M460 262C458.61 278.89 452.28 284.89 435.24 286.69M461.67 262.26C462.17 279.4 449.73 287 438.21 285.01M434 285.34C403.25 287.68 369.32 286.35 283.15 284.27M436.76 285.92C402.04 287.12 367.64 287.64 281.49 285.34M282 286C266.71 286.79 257.13 279.86 256.89 260.09M283.53 286.99C266.94 285.37 257.25 278.77 260.19 261.43M257.48 261.48C257.34 227.57 258.68 189.95 256.16 121.64M258.93 262.04C258.12 212.31 258.68 163.16 257.86 120.21M258 120C259.61 102.9 265.2 97.04 282.3 97.46M256.16 121.9C255.72 104.92 266.43 94.88 280.94 94.01M282 96C282 96 282 96 282 96M282 96C282 96 282 96 282 96" fill="none" stroke="var(--ctx-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M264.17 104.95C264.14 167.43 264.58 229.05 262.79 276.63M263.31 104.5C264.31 140.55 264.37 176.33 263.47 276.58" fill="none" stroke="var(--ctx-accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="276" y="115.96" text-anchor="start" font-family='"JetBrains Mono",ui-monospace,Menlo,monospace' font-size="13" fill="var(--ctx-ink)">retrieve.py</text><text xml:space="preserve" x="276" y="132.28" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-subtle)">online</text><text xml:space="preserve" x="276" y="151.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">Dense and sparse search, RRF</text><text xml:space="preserve" x="276" y="163.7" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">fusion, cross-encoder rerank</text><text xml:space="preserve" x="276" y="176.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">down to top k.</text><text xml:space="preserve" x="276" y="236.28" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-muted)">The reranker is the single</text><text xml:space="preserve" x="276" y="247.53" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-muted)">largest quality lever in the</text><text xml:space="preserve" x="276" y="258.78" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-muted)">build.</text><path d="M502.58 98.58C561.12 97.12 621.56 94.52 654.09 95.59C670.51 94.2 676.15 103 678.52 120.16C675.31 164.46 676.08 213.45 677.74 262.21C675.64 278.61 668.7 288.23 653.9 288.05C610.45 287.18 566.23 284.82 498.1 287.74C485.01 286.6 477.33 278.23 474.31 260.65C474.39 228.18 474.84 192.09 478.14 118.69C474.54 103.41 486.35 97.33 501.6 95.63C500 96 500 96 500 96" fill="var(--ctx-surface)" stroke="none"/><path d="M499.3 94.93C550.42 95.82 605.84 97.54 653.26 95.91M499.6 96.94C536.22 98.56 573.31 98.33 653.87 96.05M654 96C668.68 94.12 678.12 104.3 678.28 121.31M652.47 95.93C670.37 97.97 677.01 104.3 680.16 118.58M679.64 119.11C678.78 152.49 678.52 186.57 676.83 262.8M677.03 119.38C678.82 175.65 678.81 231.23 677.88 262.49M678 262C678.17 277.06 669.24 286.34 653.3 284.12M678.18 262.65C677.96 276.2 670.42 287.09 652.94 286.29M654.8 287.62C617.11 287.17 578.01 286.64 500.29 285.46M654.11 285.18C607.74 286.75 563.34 286.48 500.58 286.2M500 286C482.61 285.01 476.48 279.03 475.77 262.49M501.12 287.6C486.1 285.32 473.93 280.07 474.61 263.44M476.57 260.5C473.51 225.3 473.24 188.59 474.72 119.36M476.3 261.28C477.28 228.52 478.3 193.81 476.93 119.28M476 120C476.38 105.16 485.21 96.32 501.59 96.34M474.13 119.02C475.1 103.86 482.79 94.68 502.11 95.74M500 96C500 96 500 96 500 96M500 96C500 96 500 96 500 96" fill="none" stroke="var(--ctx-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M482.18 106.16C482.19 169.12 482.08 234.3 481.47 277.49M480.89 104.58C481.54 160.19 480.82 215.89 481.53 277.36" fill="none" stroke="var(--ctx-accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="494" y="115.96" text-anchor="start" font-family='"JetBrains Mono",ui-monospace,Menlo,monospace' font-size="13" fill="var(--ctx-ink)">prompt.py</text><text xml:space="preserve" x="494" y="132.28" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-subtle)">online</text><text xml:space="preserve" x="494" y="151.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">The five-block system</text><text xml:space="preserve" x="494" y="163.7" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">prompt, and bookend packing</text><text xml:space="preserve" x="494" y="176.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">with citation tags.</text><text xml:space="preserve" x="494" y="236.28" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-muted)">Order is a decision here, not an</text><text xml:space="preserve" x="494" y="247.53" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-muted)">accident of ranking.</text><path d="M718.3 96.67C751.65 95.68 781.14 96.91 872.46 95.33C889 94.67 893.85 102.63 895.46 120.76C897.43 167.43 898.29 215.04 894.65 259.87C893.76 276.49 889.23 288.13 869.87 284.58C832.3 288.36 794.75 288.47 717.21 285.44C699.96 286.19 692.52 276.74 693.4 260.81C695.68 234.53 693.43 201.3 691.78 117.47C694.83 106.05 700.05 95.16 718.62 95.39C718 96 718 96 718 96" fill="var(--ctx-surface)" stroke="none"/><path d="M717.32 96.95C773.73 97.02 826.32 96.76 872.41 97.34M718.9 95.08C771.89 95.76 825.2 96.1 871.96 95.34M872 96C886.87 97.08 897.54 105.66 896.37 120.82M872.96 94.93C890.06 96.95 897.56 103.41 897.55 121.44M894.39 119.1C895.13 151.18 896.44 183.79 897.46 262.12M895.25 120.25C895.43 167.94 895.21 215.52 895.46 262.9M896 262C897.74 279.23 886.2 287.8 871.36 285.56M894.7 263.03C893.74 277.6 886.5 287.17 872.28 287.57M871.6 285.89C830.97 286.67 786.71 286.94 717.43 286.65M871.46 286.44C815.44 288.37 757.04 287.32 717.67 285.07M718 286C702.52 287.24 695.83 278.19 694.66 260.89M718.71 284.21C700.65 285.26 695.21 276.77 693.63 260.86M695.66 263.51C692.8 227.04 694.92 187.23 693.28 121.08M693.66 262.51C693.31 214.33 694.79 165.66 694 120.35M694 120C693.14 103.43 701.21 95.61 716.88 95.23M692.1 120.14C694.49 102.81 703.75 94.47 718.67 97.46M718 96C718 96 718 96 718 96M718 96C718 96 718 96 718 96" fill="none" stroke="var(--ctx-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M700.19 104.97C697.98 170.81 697.3 239.54 700.16 275.95M698.47 104.66C698.77 145.43 698.47 186.65 699.59 276.94" fill="none" stroke="var(--ctx-accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="712" y="115.96" text-anchor="start" font-family='"JetBrains Mono",ui-monospace,Menlo,monospace' font-size="13" fill="var(--ctx-ink)">chat.py</text><text xml:space="preserve" x="712" y="132.28" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-subtle)">online</text><text xml:space="preserve" x="712" y="151.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">The turn loop: take a</text><text xml:space="preserve" x="712" y="163.7" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">question, call retrieve,</text><text xml:space="preserve" x="712" y="176.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">call prompt, call the model,</text><text xml:space="preserve" x="712" y="188.7" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink)">return.</text><text xml:space="preserve" x="712" y="236.28" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-muted)">Thin on purpose. Logic that</text><text xml:space="preserve" x="712" y="247.53" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-muted)">lives here is logic the eval</text><text xml:space="preserve" x="712" y="258.78" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="9" fill="var(--ctx-ink-muted)">cannot reach.</text><path d="M53.87 301.3C139.35 301.23 225.29 301.15 455.47 301.48C466.49 301.14 467.56 305.26 468.41 318.36C468.63 335.1 469.59 354.21 467.55 377.73C467.88 388.56 463.55 394.03 456.04 392.32C364.36 389.53 276.53 390.99 55.18 393.32C45.1 391.78 40.91 389.45 40.48 375.96C41.03 357.4 41.29 333.76 38.61 318.45C37.92 306.48 43.95 304.19 54.65 301.14C55 302 55 302 55 302" fill="var(--ctx-surface)" stroke="none"/><path d="M54.62 301.42C201.69 304.08 346.52 302.81 455.88 301.3M55.12 301.56C160.65 301.17 266.27 301.69 455.03 302.36M455 302C464.05 302.05 468.96 306.02 470.46 317.32M454.44 303.92C464.15 301.94 469.52 305.53 470.94 316.69M469.14 316.09C467.9 330.12 470.76 340.54 470.09 376.43M469.47 316.13C468.82 332.79 470.39 349.93 469.04 376.31M470 377C469.31 386.4 466.15 391.25 454.42 392.99M471.21 378.42C470.13 388 466.18 393.25 456.61 390.25M454.1 390.96C336.74 393.24 218.33 393.85 54.19 393.04M455.46 391.83C355.57 389.7 255.28 389.79 55.43 391.96M55 392C43.42 391.46 39.18 386.36 41.54 378.29M55.3 390.82C44.81 391.21 39.89 387.07 40.65 377.87M38.75 377.52C39.28 361.46 39.8 344.24 39.85 315.8M39.02 376.74C40.11 362.88 40.06 348 39.07 316.42M40 317C41.91 308.69 46.22 300.89 55.18 300.11M38.07 318.26C41.88 304.76 45.11 300.27 54.24 300.59M55 302C55 302 55 302 55 302M55 302C55 302 55 302 55 302" fill="none" stroke="var(--ctx-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M43.8 312.19C44.1 326.37 45.27 339.33 44.44 382.8M45.25 310.75C44.73 336.11 44.85 361.09 44.44 382.51" fill="none" stroke="var(--ctx-success)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="60" y="321.96" text-anchor="start" font-family='"JetBrains Mono",ui-monospace,Menlo,monospace' font-size="13" fill="var(--ctx-ink)">eval.py</text><text xml:space="preserve" x="60" y="341.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">Wraps the online phase in a scorer. It does not re-implement the</text><text xml:space="preserve" x="60" y="353.7" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">pipeline; it calls it, which is what makes the gate meaningful.</text><path d="M505.95 301.55C618.29 302.3 733.83 299.73 904.63 302.37C915.09 303.18 922.56 308.48 917.71 315.3C920.71 332.81 921.73 350.19 920.29 374.44C919.7 385.41 913.5 393.97 904.69 390.01C770.6 390.14 636.14 391.55 503.64 393.43C494.8 391.51 490.77 386.72 489.47 376.07C491.93 361.46 488.66 346.49 487.44 315.91C487.71 304.77 496.29 302.74 503.99 304.44C505 302 505 302 505 302" fill="var(--ctx-surface)" stroke="none"/><path d="M503.87 301.43C628.36 301.07 751.31 301.32 904.8 301.09M504.48 302.37C587.71 304.01 670.61 303.99 905.07 302.47M905 302C916.85 302.69 919.9 306.93 920.52 318.32M906.1 301.92C916.81 299.73 918.15 306.47 919 315.53M920.97 316.08C920.34 338.02 920.23 356.23 919.17 375.98M920.29 317.37C920.3 334.22 920.4 353.26 919.43 377.92M920 377C920.35 387.85 915.46 390.88 904.46 391.28M921.55 377.34C921.72 385.86 916.43 393.3 905.96 391.1M905.15 391.07C807.26 389.9 708.22 390.81 506.13 391.98M904.83 392.31C812.09 389.68 718.8 389.47 505.47 391.53M505 392C493.36 392.95 488.75 385.8 489.47 377.23M505.03 392.56C494.05 394.23 492.08 386.4 491.33 379.21M488.14 375.53C490.03 366.89 489.48 353.22 488.89 318.28M489.26 377.57C489.99 354.06 489.57 333.18 489.12 317.8M490 317C488.42 308.87 493.56 303.08 503.37 302.04M488.05 315C491.27 305.59 497.08 303.2 504.82 301.74M505 302C505 302 505 302 505 302M505 302C505 302 505 302 505 302" fill="none" stroke="var(--ctx-ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M495.41 312.19C494.26 334.59 494.25 359.41 495.7 382.57M494.57 310.4C494.24 332.42 494.63 352.69 494.48 382.63" fill="none" stroke="var(--ctx-neutral-2)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text xml:space="preserve" x="510" y="321.96" text-anchor="start" font-family='"JetBrains Mono",ui-monospace,Menlo,monospace' font-size="13" fill="var(--ctx-ink)">llm.py</text><text xml:space="preserve" x="510" y="341.2" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">One place for the model clients: the cheap header model, the</text><text xml:space="preserve" x="510" y="353.7" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="10" fill="var(--ctx-ink-muted)">generator, and the embedding client, all configured together.</text><text xml:space="preserve" x="40" y="427.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink-muted)">Out of scope by choice: streaming UI, multi-tenant auth, GraphRAG, fine-tuning, distributed indexing. Extensions, not foundations.</text><text xml:space="preserve" x="40" y="451.04" text-anchor="start" font-family='"Excalifont","Virgil","Segoe Print","Comic Sans MS",ui-rounded,cursive' font-size="12" fill="var(--ctx-ink)">The core works without any of them, which is the point of building it in this order.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="ctx-01-module-map-title" aria-describedby="ctx-01-module-map-desc">
+<title id="ctx-01-module-map-title">Every part traces to a post, and most depart from it</title>
+<desc id="ctx-01-module-map-desc">A table with one row per part of the companion and four columns: file, function, the earlier post and section it implements, and where it departs from it. ingest.py chunk, post 11 section 2, counts words, not tokens. contextual_header, post 11 section 2, sees the title, not the document. ingest_path, post 10 section 8, never deletes a stale chunk. retrieve.py rrf_merge, post 09 section 3, ranks from 0, RRF with k = 59. rerank, post 09 section 4, skipped if the key is named CO_API_KEY. prompt.py pack, post 09 section 5, as post 09. system.md, four blocks, post 14 section 2, no tool-use guidance because there are no tools. llm.py chat_llm, post 05 section 4, a prefix perhaps too short to cache. eval.py run, post 20 section 5, three fixtures and no gate.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-orange-soft { fill: var(--ctx-orange-soft); }
+</style>
+<defs>
+<marker id="ctx-01-module-map-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="540"/>
+<text x="40" y="48" class="t-title" data-w="627">Every part traces to a post, and most depart from it</text>
+<text x="40" y="76" class="t-subtitle" data-w="635">The companion code/28-rag-chatbot, file by file; the last column is what hardening fixes.</text>
+<rect x="40" y="328" width="880" height="36" class="f-orange-soft" data-fit="skip"/>
+<rect x="40" y="112" width="128" height="36" class="nofill"/>
+<rect x="168" y="112" width="184" height="36" class="nofill"/>
+<rect x="352" y="112" width="176" height="36" class="nofill"/>
+<rect x="528" y="112" width="392" height="36" class="nofill"/>
+<rect x="40" y="148" width="128" height="36" class="nofill"/>
+<rect x="168" y="148" width="184" height="36" class="nofill"/>
+<rect x="352" y="148" width="176" height="36" class="nofill"/>
+<rect x="528" y="148" width="392" height="36" class="nofill"/>
+<rect x="40" y="184" width="128" height="36" class="nofill"/>
+<rect x="168" y="184" width="184" height="36" class="nofill"/>
+<rect x="352" y="184" width="176" height="36" class="nofill"/>
+<rect x="528" y="184" width="392" height="36" class="nofill"/>
+<rect x="40" y="220" width="128" height="36" class="nofill"/>
+<rect x="168" y="220" width="184" height="36" class="nofill"/>
+<rect x="352" y="220" width="176" height="36" class="nofill"/>
+<rect x="528" y="220" width="392" height="36" class="nofill"/>
+<rect x="40" y="256" width="128" height="36" class="nofill"/>
+<rect x="168" y="256" width="184" height="36" class="nofill"/>
+<rect x="352" y="256" width="176" height="36" class="nofill"/>
+<rect x="528" y="256" width="392" height="36" class="nofill"/>
+<rect x="40" y="292" width="128" height="36" class="nofill"/>
+<rect x="168" y="292" width="184" height="36" class="nofill"/>
+<rect x="352" y="292" width="176" height="36" class="nofill"/>
+<rect x="528" y="292" width="392" height="36" class="nofill"/>
+<rect x="40" y="328" width="128" height="36" class="nofill"/>
+<rect x="168" y="328" width="184" height="36" class="nofill"/>
+<rect x="352" y="328" width="176" height="36" class="nofill"/>
+<rect x="528" y="328" width="392" height="36" class="nofill"/>
+<rect x="40" y="364" width="128" height="36" class="nofill"/>
+<rect x="168" y="364" width="184" height="36" class="nofill"/>
+<rect x="352" y="364" width="176" height="36" class="nofill"/>
+<rect x="528" y="364" width="392" height="36" class="nofill"/>
+<rect x="40" y="400" width="128" height="36" class="nofill"/>
+<rect x="168" y="400" width="184" height="36" class="nofill"/>
+<rect x="352" y="400" width="176" height="36" class="nofill"/>
+<rect x="528" y="400" width="392" height="36" class="nofill"/>
+<rect x="40" y="436" width="128" height="36" class="nofill"/>
+<rect x="168" y="436" width="184" height="36" class="nofill"/>
+<rect x="352" y="436" width="176" height="36" class="nofill"/>
+<rect x="528" y="436" width="392" height="36" class="nofill"/>
+<path d="M40,112H920M40,472H920" class="axis"/>
+<path d="M40,148H920" class="rule1"/>
+<text x="48" y="136" class="t-head" data-w="30">File</text>
+<text x="176" y="136" class="t-head" data-w="72">Function</text>
+<text x="360" y="136" class="t-head" data-w="97">Implements</text>
+<text x="536" y="136" class="t-head" data-w="124">Departs from it</text>
+<text x="48" y="172" class="t-label" data-w="62">ingest.py</text>
+<text x="176" y="172" class="t-label" data-w="40">chunk</text>
+<text x="360" y="172" class="t-label" data-w="119">post 11, section 2</text>
+<text x="536" y="172" class="t-label" data-w="169">counts words, not tokens</text>
+<text x="48" y="208" class="t-label" data-w="62">ingest.py</text>
+<text x="176" y="208" class="t-label" data-w="125">contextual_header</text>
+<text x="360" y="208" class="t-label" data-w="119">post 11, section 2</text>
+<text x="536" y="208" class="t-label" data-w="213">sees the title, not the document</text>
+<text x="48" y="244" class="t-label" data-w="62">ingest.py</text>
+<text x="176" y="244" class="t-label" data-w="80">ingest_path</text>
+<text x="360" y="244" class="t-label" data-w="119">post 10, section 8</text>
+<text x="536" y="244" class="t-label" data-w="183">never deletes a stale chunk</text>
+<text x="48" y="280" class="t-label" data-w="71">retrieve.py</text>
+<text x="176" y="280" class="t-label" data-w="66">rrf_merge</text>
+<text x="360" y="280" class="t-label" data-w="119">post 09, section 3</text>
+<text x="536" y="280" class="t-label" data-w="200">ranks from 0: RRF with k = 59</text>
+<text x="48" y="316" class="t-label" data-w="71">retrieve.py</text>
+<text x="176" y="316" class="t-label" data-w="43">rerank</text>
+<text x="360" y="316" class="t-label" data-w="119">post 09, section 4</text>
+<text x="536" y="316" class="t-label" data-w="278">skipped if the key is named CO_API_KEY</text>
+<text x="48" y="352" class="t-label" data-w="69">prompt.py</text>
+<text x="176" y="352" class="t-label" data-w="32">pack</text>
+<text x="360" y="352" class="t-label" data-w="119">post 09, section 5</text>
+<text x="536" y="352" class="t-label" data-w="255">as post 09: best first, second best last</text>
+<text x="48" y="388" class="t-label" data-w="74">system.md</text>
+<text x="176" y="388" class="t-label" data-w="74">four blocks</text>
+<text x="360" y="388" class="t-label" data-w="119">post 14, section 2</text>
+<text x="536" y="388" class="t-label" data-w="210">no tool-use guidance (no tools)</text>
+<text x="48" y="424" class="t-label" data-w="40">llm.py</text>
+<text x="176" y="424" class="t-label" data-w="57">chat_llm</text>
+<text x="360" y="424" class="t-label" data-w="119">post 05, section 4</text>
+<text x="536" y="424" class="t-label" data-w="222">prefix perhaps too short to cache</text>
+<text x="48" y="460" class="t-label" data-w="48">eval.py</text>
+<text x="176" y="460" class="t-label" data-w="22">run</text>
+<text x="360" y="460" class="t-label" data-w="119">post 20, section 5</text>
+<text x="536" y="460" class="t-label" data-w="173">three fixtures and no gate</text>
+<text x="40" y="504" class="t-note" data-w="553">Only the packing matches its post exactly; every other row is something to harden.</text>
 </svg>
