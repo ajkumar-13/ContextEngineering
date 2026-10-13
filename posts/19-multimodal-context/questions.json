@@ -1,0 +1,695 @@
+{
+  "standard": "2.1.0",
+  "post": "ctx-019",
+  "next_ordinal": 17,
+  "questions": [
+    {
+      "id": "ctx-019-q01",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 1,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 2,
+      "tags": [
+        "image-tokens",
+        "vision"
+      ],
+      "prompt": "On Anthropic's API, which property of an image decides how many tokens it adds to a call?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Its file size in megabytes, after compression.",
+          "correct": false,
+          "feedback": "Compression changes the bytes sent, not the count: the rule counts 28 by 28 pixel patches, so two files of different size but equal dimensions cost the same."
+        },
+        {
+          "key": "b",
+          "text": "Its width and height in pixels, counted in 28-pixel patches, up to the model's cap.",
+          "correct": true,
+          "feedback": "Right. The cost is the number of 28 by 28 patches, rounded up on each side, and an image over the long-edge or token limit is downscaled first."
+        },
+        {
+          "key": "c",
+          "text": "How many objects or words the image contains, whatever its pixel size.",
+          "correct": false,
+          "feedback": "The model is not billed by content: a blank image and a busy one of the same size cost the same."
+        },
+        {
+          "key": "d",
+          "text": "A flat amount per image, whatever its size or file format.",
+          "correct": false,
+          "feedback": "The count grows with the pixel area until the cap: a 200 by 200 image costs 64 tokens, a 1,000 by 1,000 image 1,296."
+        }
+      ],
+      "explanation": "Section 2: Anthropic's \"Vision\" page bills one visual token per 28 by 28 pixel patch, $\\lceil w/28 \\rceil \\times \\lceil h/28 \\rceil$, with images over the tier's long-edge or token limit downscaled before they are read.",
+      "hints": [
+        "Think about what the model actually reads: small square blocks of the image."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q02",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "image-tokens",
+        "arithmetic"
+      ],
+      "prompt": "An image of 1,400 by 700 pixels is sent to a standard-tier Claude model (limits 1,568 pixels on the long edge and 1,568 visual tokens). How many visual tokens does it cost?",
+      "answer": {
+        "value": 1250,
+        "tolerance": 0,
+        "unit": "tokens"
+      },
+      "precision_note": "ceil(1400/28) x ceil(700/28) = 50 x 25 = 1,250, under both limits, so the image is not resized (snippets/image_tokens.py, image_tokens(1400, 700)). The superseded area estimate 1,400 x 700 / 750 gives 1,306.7, and capping at 1,568 by mistake gives 1,568.",
+      "explanation": "Section 2: each side is divided by 28 and rounded up, and the two counts are multiplied. 1,400 is under the 1,568-pixel edge and 1,250 tokens is under the 1,568-token limit, so the image is read at its own size.",
+      "hints": [
+        "Check first whether the image is over either limit.",
+        "Count the 28-pixel patches across and down, rounding each up."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q03",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 5,
+      "tags": [
+        "image-tokens",
+        "pricing",
+        "computer-use"
+      ],
+      "prompt": "A computer-use agent on Claude Haiku 4.5 (input 1 dollar per million tokens, as of early 2026) sends 200 screenshots of 1,280 by 800 pixels over a day, each once and none cached. Haiku 4.5 is on the standard tier. What do the screenshots alone cost in input, in dollars, to four decimal places?",
+      "answer": {
+        "value": 0.2668,
+        "tolerance": 0.0005,
+        "unit": "USD"
+      },
+      "precision_note": "One screenshot is ceil(1280/28) x ceil(800/28) = 46 x 29 = 1,334 tokens (snippets/image_tokens.py prints it); 200 x 1,334 x 1 / 1,000,000 = 0.2668 dollars. The area estimate 1,280 x 800 / 750 gives 0.2731, and the Sonnet 4.5 rate of 3 dollars gives 0.8004.",
+      "explanation": "Sections 2 and 7: image tokens are priced at the model's input rate like text. 1,334 tokens a screenshot times 200 screenshots is 266,800 tokens, which at 1 dollar per million is about 27 cents.",
+      "hints": [
+        "Work out the tokens of one screenshot first; 1,280 by 800 is under both standard-tier limits.",
+        "Multiply by 200 and by the rate per million tokens."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q04",
+      "type": "mcq",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 3,
+      "tags": [
+        "resolution",
+        "image-tokens"
+      ],
+      "prompt": "A team rescans its A4 archive at 300 dpi instead of 130 dpi so that footnotes are easier to read, and sends the pages, one per request, to a standard-tier Claude model. What happens to the tokens and to the footnotes?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "The tokens rise about fivefold with the pixel area, and the footnotes become legible.",
+          "correct": false,
+          "feedback": "That would hold below the cap. Both scans are over the standard tier's limits, so both are shrunk to 924 by 1,307 pixels before they are read."
+        },
+        {
+          "key": "b",
+          "text": "The API rejects the 300-dpi pages for exceeding the long-edge limit.",
+          "correct": false,
+          "feedback": "A single oversized image in a message is downscaled, not rejected; it is a screenshot returned in a computer-use tool result that is rejected."
+        },
+        {
+          "key": "c",
+          "text": "Nothing changes: both scans are shrunk to the same size, cost 1,551 tokens each, and the footnotes are no easier to read.",
+          "correct": true,
+          "feedback": "Right. Past the cap the extra pixels are neither paid for nor seen; cropping the footnote region or a high-resolution-tier model is what helps."
+        },
+        {
+          "key": "d",
+          "text": "The tokens stay the same, but the model reads the footnotes from the original 300-dpi pixels.",
+          "correct": false,
+          "feedback": "The model reads the downscaled image, not the original, so the detail the extra pixels carried is gone."
+        }
+      ],
+      "explanation": "Section 2: a 130-dpi A4 page (1,075 by 1,520) and a 300-dpi one (2,480 by 3,508) are both resized to 924 by 1,307 on the standard tier, 1,551 tokens each, as the snippet prints.",
+      "hints": [
+        "Compare both scans with the tier's token limit before comparing them with each other."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q05",
+      "type": "mcq",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "pdf",
+        "pixels-or-text"
+      ],
+      "prompt": "An insurance pipeline handles four kinds of page. Which one should be sent to the model as a page image rather than as extracted text?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "A born-digital letter of three paragraphs of prose.",
+          "correct": false,
+          "feedback": "The words are the content and the text layer is reliable; extracted text carries the same information and composes with the text pipeline."
+        },
+        {
+          "key": "b",
+          "text": "A scanned claim form whose questions are answered by ticked boxes and handwritten amounts.",
+          "correct": true,
+          "feedback": "Right. The layout carries the meaning (which box is ticked, which amount sits beside which label) and there is no reliable text layer."
+        },
+        {
+          "key": "c",
+          "text": "A typed policy wording exported from a word processor.",
+          "correct": false,
+          "feedback": "Plain prose with a text layer: extraction keeps everything that matters, in a form the text pipeline can chunk and retrieve."
+        },
+        {
+          "key": "d",
+          "text": "A transcript of a phone call.",
+          "correct": false,
+          "feedback": "A transcript is already text; there is no layout to keep."
+        }
+      ],
+      "explanation": "Section 3: pass pixels when layout carries meaning (forms, checkboxes, handwriting, complex tables, scans with no text layer); extract text when the words are the content.",
+      "hints": [
+        "Ask, for each page, whether moving its words into a plain string would lose anything the questions need."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q06",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 3,
+      "tags": [
+        "pdf",
+        "pixels-or-text",
+        "image-tokens"
+      ],
+      "prompt": "Extracted text from a PDF page is often assumed to cost fewer tokens than an image of the same page. Why is that not always true on a standard-tier Claude model?",
+      "answer": {
+        "model": "Image tokens depend on the pixel size and are capped (1,568 on the standard tier), while text tokens grow with the number of words, so a dense page of text can cost more tokens than its image.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?!\\s*[a-z0-9 ,.-]{0,40}$)(?!\\s*[a-z-]+(\\s*,\\s*[a-z-]+)+\\s*\\.?\\s*$)(?![\\s\\S]*\\b(text|extracted text|it)( tokens?)? (is |are )?always (costs? |uses? |takes? |needs? )?(cheaper|smaller|fewer|less))(?![\\s\\S]*\\b(no|without (a|any)) (cap|limit|ceiling|maximum) (on|for) (the |an? )?(images?|pictures?|pixels?)\\b)(?![\\s\\S]*\\b(images?|pictures?|pixels?)( tokens?| costs?| counts?)? (has|have|is|are) (not|never|no|un) ?(cap|capped|limit|limited|ceiling|bounded|maximum)\\b)(?![\\s\\S]*\\btext( tokens?| costs?)? (is|are) (also |too |likewise |similarly )?(capped|limited|bounded|fixed))(?![\\s\\S]*\\bimages?( tokens?| cost)? (grow|grows|scale|scales|increase|increases|rise|rises) with (the )?(density|words|text|amount of text|number of words))(?=[\\s\\S]*\\b(is|are|cost|costs|can|could|depends?|grows?|scales?|has|have|stays?|stops?|keeps?|rises?|increases?|exceeds?|becomes?|runs?)\\b)(?=[\\s\\S]*(\\bcap\\b|\\bcapped\\b|ceiling|\\blimit|maximum|\\bmax\\b|\\bat most\\b|\\bfixed\\b|bounded|1,?568|depends? (only )?on (the )?(pixel|resolution|image size|size|dimension)|(set|determined|decided|fixed) by (the |its )?(pixel|resolution|size|dimension)|pixel (count|size|dimension|area)|resolution))(?=[\\s\\S]*(dense|density|many words|lots? of (text|words)|word count|number of words|amount of text|more words|text-heavy|text heavy|packed with|how much (text|is written)|how many words|what is written|(grows?|scales?|increases?|rises?|goes up) with (the )?(number of |amount of )?(words|text|content|density|writing)|proportional to (the )?(words|text)|1,?500|3,?000))[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 3: the snippet's 600-word prose page is 800 tokens as text against 1,551 as a 130-dpi image, but Anthropic's PDF page puts typical text at 1,500 to 3,000 tokens per page, and the image of any page is capped at 1,568 tokens on the standard tier.",
+      "hints": [
+        "Ask what each count grows with, and whether either one stops growing.",
+        "Compare the top of Anthropic's 1,500 to 3,000 tokens-per-page range with the standard tier's cap."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q07",
+      "type": "numeric",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o2"
+      ],
+      "section": "3",
+      "est_minutes": 4,
+      "tags": [
+        "pdf",
+        "routing",
+        "arithmetic"
+      ],
+      "prompt": "A 36-page report has 30 pages of prose and 6 pages of complex tables. Routed per page, each prose page goes in as extracted text at 900 tokens and each table page as a 130-dpi image at 1,551 tokens (illustrative sizes). How many input tokens does the whole report cost?",
+      "answer": {
+        "value": 36306,
+        "tolerance": 0,
+        "unit": "tokens"
+      },
+      "precision_note": "30 x 900 + 6 x 1,551 = 27,000 + 9,306 = 36,306. All pages as text gives 32,400, all as images 55,836, the nearest wrong methods.",
+      "explanation": "Section 3: routing per page pays the pixel price only on the pages whose layout matters, here the six table pages.",
+      "hints": [
+        "Price the two kinds of page separately, then add."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q08",
+      "type": "mcq",
+      "track": "connect",
+      "difficulty": 3,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 4,
+      "tags": [
+        "colpali",
+        "late-interaction",
+        "maxsim"
+      ],
+      "connects": [
+        "ctx-017"
+      ],
+      "prompt": "ColPali reuses the scoring idea that post 17 describes for ColBERT. How does it score a page against a query?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "It averages the page's patch vectors into one vector and takes the cosine similarity with the query vector.",
+          "correct": false,
+          "feedback": "That is single-vector retrieval, which is exactly what late interaction avoids: one strong match on a small region would be washed out by the average."
+        },
+        {
+          "key": "b",
+          "text": "For each query token it takes the highest similarity to any patch vector of the page, and sums these maxima over the query tokens.",
+          "correct": true,
+          "feedback": "Right. That is MaxSim, $s(q, d) = \\sum_i \\max_j \\mathbf{q}_i \\cdot \\mathbf{d}_j$, applied to image patches instead of text tokens."
+        },
+        {
+          "key": "c",
+          "text": "It runs OCR on the page and applies ColBERT to the extracted text.",
+          "correct": false,
+          "feedback": "ColPali never runs OCR; it embeds the page image directly, which is how it can match a question to a chart."
+        },
+        {
+          "key": "d",
+          "text": "It sums the similarities of every query token with every patch.",
+          "correct": false,
+          "feedback": "Summing all pairs would reward pages with many loosely similar patches; MaxSim keeps only the best patch for each query token."
+        }
+      ],
+      "explanation": "Section 4: ColPali keeps one vector per image patch and scores with MaxSim, the late-interaction mechanism of ColBERT that post 17 explains, lifted from text tokens to image patches.",
+      "hints": [
+        "Late interaction keeps many vectors per document; ask how they are combined into one score.",
+        "The name of the score says what is taken per query token."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q09",
+      "type": "match",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4",
+        "o1"
+      ],
+      "section": "7",
+      "est_minutes": 4,
+      "tags": [
+        "prompt-caching",
+        "screenshots",
+        "resizing"
+      ],
+      "prompt": "Requests to a standard-tier Claude model with prompt caching on, in a computer-use loop. Where breakpoints are mentioned, the previous call wrote the entries a minute ago. Match each situation to what happens.",
+      "left": [
+        {
+          "key": "a",
+          "text": "This turn's screenshot sits before a stable reference image; breakpoints after layer 02 and after the reference image."
+        },
+        {
+          "key": "b",
+          "text": "The reference image follows layer 02 with a breakpoint after it; this turn's screenshot is sent last."
+        },
+        {
+          "key": "c",
+          "text": "A screenshot returned in a computer-use tool result exceeds the model's size limits."
+        },
+        {
+          "key": "d",
+          "text": "A 1,920 by 1,080 image is attached to a user message."
+        }
+      ],
+      "right": [
+        {
+          "key": "a",
+          "text": "Layers 01 and 02 are read from the cache; the reference image and everything after it are processed again."
+        },
+        {
+          "key": "b",
+          "text": "Layers 01 and 02 and the reference image are read from the cache."
+        },
+        {
+          "key": "c",
+          "text": "The request is rejected with a validation error."
+        },
+        {
+          "key": "d",
+          "text": "The image is downscaled to 1,456 by 819 before the model reads it."
+        },
+        {
+          "key": "e",
+          "text": "Everything is read from the cache, because images are left out of the prefix match."
+        }
+      ],
+      "answer": {
+        "a": "a",
+        "b": "b",
+        "c": "c",
+        "d": "d"
+      },
+      "explanation": "Sections 2, 5 and 7: a hit needs identical text and images up to a breakpoint, so a changing screenshot ends the reusable prefix wherever it sits; oversized tool-result screenshots are rejected rather than resized; other oversized images are downscaled to the largest size within both limits.",
+      "hints": [
+        "Find, in each layout, the first entry that differs from the previous call.",
+        "Images in tool results and images in messages are treated differently when they are too large."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q10",
+      "type": "order",
+      "track": "workout",
+      "difficulty": 2,
+      "outcomes": [
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 2,
+      "tags": [
+        "ocr",
+        "rag",
+        "pipeline"
+      ],
+      "prompt": "Put the stages of OCR-then-text RAG over a corpus of page images in order, from the page image to the window.",
+      "items": [
+        {
+          "key": "a",
+          "text": "Embed each chunk as one vector"
+        },
+        {
+          "key": "b",
+          "text": "Run OCR and parse the page image"
+        },
+        {
+          "key": "c",
+          "text": "Pack the top-k chunks into layer 04, retrieved chunks"
+        },
+        {
+          "key": "d",
+          "text": "Split the extracted text into chunks"
+        },
+        {
+          "key": "e",
+          "text": "Score the chunk vectors against the query and keep the best"
+        }
+      ],
+      "answer": [
+        "b",
+        "d",
+        "a",
+        "e",
+        "c"
+      ],
+      "partial_credit": true,
+      "explanation": "Section 4: OCR turns pixels into text, the text is chunked, each chunk is embedded, the chunks are scored against the query, and the top-k enter layer 04. The OCR stage is where layout and charts are lost.",
+      "hints": [
+        "Nothing can be chunked before there is text, and nothing scored before it is embedded."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q11",
+      "type": "long",
+      "track": "workout",
+      "difficulty": 3,
+      "outcomes": [
+        "o2",
+        "o3"
+      ],
+      "section": "4",
+      "est_minutes": 15,
+      "tags": [
+        "design",
+        "pdf",
+        "colpali",
+        "retrieval"
+      ],
+      "kind": "design",
+      "prompt": "An insurer wants questions answered over 10,000 pages: 7,000 pages of born-digital letters (prose), 2,500 pages of scanned claim forms (ticked boxes, handwritten amounts) and 500 pages of born-digital tables of payouts. Users ask what a letter said, which boxes were ticked on a claim, and what was paid in a given year. Design the ingestion and retrieval: how each kind of page enters the index and the window, which retrieval route serves which questions, what each costs, and how the design is checked before it is trusted. State the tokens of three retrieved form pages in layer 04 on a standard-tier model if they are A4 scans at 130 dpi.",
+      "answer_length": "about a page",
+      "solution": "1. **Route per page, not per corpus.** Letters are prose with a reliable text layer: extract the text, chunk and embed it, and retrieve with the text pipeline (OCR-then-text RAG is not needed; born-digital extraction is enough). Claim forms carry their meaning in layout and handwriting and have no text layer: keep them as page images. Payout tables carry meaning in rows and columns: keep them as page images too, or reconstruct the tables as structured data during ingestion.\n2. **Retrieval.** Text retrieval over the letters. Visual retrieval (a ColPali-style late-interaction index over page patches) for forms and tables, since OCR would flatten tables and lose ticked boxes; it scores pages with MaxSim and returns whole pages for layer 04. The cost is index size: the ColPali paper reports 257.5 KB per page against 8.60 KB for one BGE-M3 vector, so 3,000 image pages take about 0.77 GB of patch vectors.\n3. **Window cost.** A 130-dpi A4 scan (1,075 by 1,520) is resized to 924 by 1,307 on the standard tier, 33 x 47 = 1,551 tokens, so three retrieved form pages put 4,653 tokens into layer 04, about what six 600-word pages would cost as text (6 x 800 = 4,800).\n4. **Checks.** Measure OCR or extraction accuracy on a sample of the worst pages; build a small golden set of questions of each kind and compare recall of the right page for the text route and the visual route before relying on either (the paper's 81.3 against 66.1 nDCG@5 is one benchmark's average, not this corpus's result); read `usage.input_tokens` on a live call to confirm the image token estimate.",
+      "rubric": [
+        {
+          "criterion": "Routes per page kind: letters as extracted text, forms as images, tables as images or rebuilt structure, with the reason (layout carries meaning or not)",
+          "points": 3
+        },
+        {
+          "criterion": "Chooses visual retrieval for forms and tables and text retrieval for letters, naming what OCR would lose",
+          "points": 2
+        },
+        {
+          "criterion": "States the index-size cost of patch vectors, citing or estimating per page",
+          "points": 1
+        },
+        {
+          "criterion": "Computes 3 x 1,551 = 4,653 tokens for three resized 130-dpi pages",
+          "points": 2
+        },
+        {
+          "criterion": "Plans a check on the corpus itself (sample accuracy, golden questions, a live usage reading) rather than trusting a benchmark",
+          "points": 2
+        }
+      ],
+      "explanation": "Sections 2, 3 and 4: pixels where the layout carries meaning, text where the words are the content; visual retrieval keeps what OCR drops at the price of a larger index; a page image's tokens follow from its pixel size and the tier's cap.",
+      "hints": [
+        "Sort the pages by whether a plain string of their words would lose what the questions ask about.",
+        "For the token count, check the 130-dpi page against both standard-tier limits first."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q12",
+      "type": "long",
+      "track": "edge",
+      "difficulty": 4,
+      "outcomes": [
+        "o4",
+        "o1"
+      ],
+      "section": "5",
+      "est_minutes": 20,
+      "tags": [
+        "computer-use",
+        "screenshots",
+        "prompt-caching",
+        "design"
+      ],
+      "kind": "design",
+      "prompt": "A computer-use agent on a standard-tier Claude model works through 60-turn tasks in a web application. Every turn it receives a full-resolution screenshot from a 2,732 by 1,536 display, and it consults a fixed two-page reference manual rendered as two A4 page images at 130 dpi. Its developers place each new screenshot right after the system prompt \"so the model sees it first\", keep every screenshot, and put one cache breakpoint at the end of the manual. Write a context policy that fixes this: the screenshot size and its tokens, where the manual and the screenshot go, where the breakpoints go, a pruning policy and the most screenshot tokens it can hold at once, and what to watch in the usage fields.",
+      "answer_length": "about a page",
+      "solution": "1. **Screenshot size.** 2,732 by 1,536 is over the standard tier's limits, and a screenshot in a computer-use tool result that exceeds them is rejected with a validation error rather than resized, so the application must downscale. Anthropic's computer-use page recommends 1,280 by 800 or 1,366 by 768 for web applications; 1,366 by 768 halves each side, fits both limits and costs ceil(1366/28) x ceil(768/28) = 49 x 28 = 1,372 tokens. Keep the scale factor (2) and multiply the coordinates the model returns by it before clicking.\n2. **Placement.** Caching needs identical text and images up to a breakpoint, so a screenshot that changes every turn must not sit before stable content. Order: layer 01, layer 02, then the two manual pages (2 x 1,551 = 3,102 tokens, stable), then the per-turn layers, with the new screenshot last, with layer 06.\n3. **Breakpoints.** One after layer 02 and one after the manual, so the manual is read from the cache on every call; with the old layout the screenshot ahead of the manual made every call process the manual again.\n4. **Pruning.** Keep the last three screenshots and prune in batches every 25 turns, as the computer-use page suggests, so the prefix stays identical between prunes; pruning one screenshot every turn would change the prefix every turn and invalidate the cache. Between prunes the history grows from 3 to 28 screenshots, at most 28 x 1,372 = 38,416 tokens. Above 20 images in a request a stricter per-image limit (no side over 2,000 pixels) applies, which 1,366 by 768 meets. Older screenshots become short text notes of what was done (compress). For models the page names as needing server-side clearing instead, follow the current page.\n5. **Watch.** `cache_read_input_tokens` should cover layers 01, 02 and the manual on every call; `cache_creation_input_tokens` should appear only after a prune or a lapse; input tokens should stay under the planned ceiling.",
+      "rubric": [
+        {
+          "criterion": "Downscales the screenshot (tool-result images over the limit are rejected), picks a recommended size, computes its tokens and keeps the scale factor for coordinates",
+          "points": 3
+        },
+        {
+          "criterion": "Moves the screenshot to the end and the stable manual before a breakpoint, with the identical-prefix reason",
+          "points": 2
+        },
+        {
+          "criterion": "Places breakpoints after layer 02 and after the manual",
+          "points": 1
+        },
+        {
+          "criterion": "Prunes in batches rather than every turn, with the cache reason, and bounds the screenshot tokens held at once",
+          "points": 3
+        },
+        {
+          "criterion": "Names the usage fields that show the policy working",
+          "points": 1
+        }
+      ],
+      "explanation": "Sections 2, 5 and 7: tool-result screenshots must be resized by the application; volatile images go last and stable ones before a breakpoint; batch pruning keeps the prefix identical between prunes.",
+      "hints": [
+        "Start with the screenshot size: what does the API do with an oversized screenshot in a tool result?",
+        "For the ceiling, count how many screenshots accumulate between two batch prunes."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q13",
+      "type": "code",
+      "track": "run",
+      "difficulty": 3,
+      "outcomes": [
+        "o1"
+      ],
+      "section": "2",
+      "est_minutes": 10,
+      "tags": [
+        "image-tokens",
+        "python"
+      ],
+      "kind": "fix",
+      "language": "python",
+      "prompt": "`visual_tokens` should count Anthropic's 28 by 28 pixel patches, rounding each side up on its own, and `fits` should say whether an image is within both the long-edge limit and the visual-token limit, so that it is sent without resizing. The starter gets both wrong. Fix them.",
+      "starter": "import math\n\nPATCH = 28  # pixels per side of one visual token\n\n\ndef visual_tokens(width, height):\n    \"\"\"Visual tokens of an image: one per 28 x 28 patch, each side rounded up.\"\"\"\n    return math.ceil(width * height / (PATCH * PATCH))\n\n\ndef fits(width, height, max_edge=1568, max_tokens=1568):\n    \"\"\"True if the image is within both limits and would be sent without resizing.\"\"\"\n    return width <= max_edge and height <= max_edge\n",
+      "solution": "import math\n\nPATCH = 28  # pixels per side of one visual token\n\n\ndef visual_tokens(width, height):\n    \"\"\"Visual tokens of an image: one per 28 x 28 patch, each side rounded up.\"\"\"\n    return math.ceil(width / PATCH) * math.ceil(height / PATCH)\n\n\ndef fits(width, height, max_edge=1568, max_tokens=1568):\n    \"\"\"True if the image is within both limits and would be sent without resizing.\"\"\"\n    return (width <= max_edge and height <= max_edge\n            and visual_tokens(width, height) <= max_tokens)\n",
+      "tests": "# 1. The example sizes of Anthropic's \"Vision\" page (standard tier, none resized).\nassert visual_tokens(200, 200) == 64, \"200 x 200 is 8 x 8 patches\"\nassert visual_tokens(1000, 1000) == 1296, \"1000 x 1000 is 36 x 36 patches\"\nassert visual_tokens(1092, 1092) == 1521, \"1092 x 1092 is 39 x 39 patches\"\n\n# 2. Each side is rounded up on its own: a sliver of a patch is a whole patch.\nassert visual_tokens(29, 28) == 2, \"29 pixels wide needs 2 patches\"\nassert visual_tokens(1, 1) == 1, \"one pixel is one patch\"\nassert visual_tokens(1456, 819) == 1560, \"1456 x 819 is 52 x 30 patches\"\n\n# 3. The A4 page at 130 dpi is under the edge limit but over the token limit.\nassert visual_tokens(1075, 1520) == 2145, \"1075 x 1520 is 39 x 55 patches\"\nassert fits(1075, 1520) is False, \"2,145 tokens is over the 1,568-token limit\"\nassert fits(924, 1307) is True, \"the resized page fits\"\n\n# 4. Exactly at the limits still fits; one pixel over the edge does not.\nassert fits(1568, 784) is True, \"1568 x 784 is exactly 1,568 tokens\"\nassert fits(1569, 100) is False, \"1569 pixels is over the edge limit\"\nassert fits(100, 1569) is False, \"1569 pixels tall is over the edge limit too\"\nassert fits(1093, 1093) is False, \"1093 x 1093 is 40 x 40 = 1,600 patches, over the token limit\"\n\n# 5. The high-resolution tier passes its own limits.\nassert fits(1075, 1520, max_edge=2576, max_tokens=4784) is True, \"2,145 tokens fits the high-resolution tier\"\nassert fits(2576, 1449, max_edge=2576, max_tokens=4784) is True, \"2576 x 1449 is 92 x 52 = 4,784 tokens\"\nassert fits(2577, 1449, max_edge=2576, max_tokens=4784) is False, \"one pixel over the high-resolution edge\"\n\nprint(\"all tests passed\")\n",
+      "expected_output": "all tests passed\n",
+      "explanation": "Section 2: the count is $\\lceil w/28 \\rceil \\times \\lceil h/28 \\rceil$, not the area divided by 784 and rounded once; and an image under the edge limit can still be over the token limit, as the 130-dpi A4 page is (2,145 tokens).",
+      "hints": [
+        "Compare rounding each side up with rounding the area once, on a 1,000 by 1,000 image.",
+        "The A4 page at 130 dpi has both sides under 1,568 pixels; check what `fits` should say about it."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q14",
+      "type": "mcq",
+      "track": "edge",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "5",
+      "est_minutes": 3,
+      "tags": [
+        "computer-use",
+        "pruning",
+        "prompt-caching"
+      ],
+      "prompt": "To keep its window small, a computer-use agent that caches its conversation drops the oldest screenshot on every turn, so that exactly three remain. What does this do to its cache?",
+      "select": "single",
+      "options": [
+        {
+          "key": "a",
+          "text": "Nothing: screenshots are never part of the cached prefix.",
+          "correct": false,
+          "feedback": "Images can be cached like text, and adding or removing an image anywhere invalidates the cached messages."
+        },
+        {
+          "key": "b",
+          "text": "The prefix changes on every turn, so the cached conversation is written again on every call and little is read.",
+          "correct": true,
+          "feedback": "Right. Each deletion changes the prompt at that turn, so everything after it is processed again; batch pruning (for example every 25 turns) pays that once per batch."
+        },
+        {
+          "key": "c",
+          "text": "The API rejects the request because an image was removed from the history.",
+          "correct": false,
+          "feedback": "Removing an image is allowed; the cost is a cache miss, not an error."
+        },
+        {
+          "key": "d",
+          "text": "It saves the most money of any policy, because the window is always as small as possible.",
+          "correct": false,
+          "feedback": "The window is small, but every call pays the cache write premium on the conversation it rewrites, which batch pruning avoids."
+        }
+      ],
+      "explanation": "Section 5 and section 7: Anthropic's computer-use page warns that dropping a screenshot every turn changes the prefix every turn and invalidates the cache, and suggests keeping the last three and pruning every 25 turns.",
+      "hints": [
+        "Ask what the prompt looks like at the turn where the screenshot was deleted, compared with the previous call.",
+        "A cache hit needs identical content up to the breakpoint, images included."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q15",
+      "type": "short",
+      "track": "intuition",
+      "difficulty": 2,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "7",
+      "est_minutes": 3,
+      "tags": [
+        "prompt-caching",
+        "screenshots",
+        "layout"
+      ],
+      "prompt": "With prompt caching on, why does this turn's screenshot belong at the end of the request rather than near the start?",
+      "answer": {
+        "model": "A cache hit needs an identical prefix; a screenshot that changes every turn breaks the prefix wherever it sits, so near the start everything after it is processed again at full price, while at the end nothing after it is lost.",
+        "accept": [
+          "^(?![\\s\\S]*\\b(maybe|perhaps|probably|possibly|not sure|i think|i guess|might be|could be)\\b)(?!\\s*[a-z0-9 ,.-]{0,40}$)(?!\\s*[a-z-]+(\\s*,\\s*[a-z-]+)+\\s*\\.?\\s*$)(?![\\s\\S]*\\b(position|order|placement|where it goes) (does not|doesn't|do not|don't) matter)(?![\\s\\S]*\\b(screenshots?|images?) (are|is) (never|not) (cached|cacheable|part of the cache))(?![\\s\\S]*\\bso (that )?(it|the screenshot) (can be|is|gets|will be) cached)(?=[\\s\\S]*\\b(is|are|would|will|breaks?|invalidates?|changes?|differs?|means|must|has|keeps?|stays?|cannot|can't|so|because|ends?|forces?)\\b)(?=[\\s\\S]*(chang|\\bnew\\b|differ|(not|n't) (the )?same|volatile|var(y|ies)|unique|fresh|every (turn|call|request)|each (turn|call|request)))(?=[\\s\\S]*(prefix|cache|cached|caching))(?=[\\s\\S]*(break|broke|invalidat|\\bmiss|reprocess|processed again|re-?sent at full|full price|everything after|all (the )?(content|blocks|tokens|layers) after|rest of the (prompt|request)|(stays?|remains?|kept) cached|can (still )?be (read|reused)|reus|stable (part|content|prefix|blocks)|before it|ends the|identical|match))[\\s\\S]*\\S"
+        ]
+      },
+      "explanation": "Section 7: a hit needs 100% identical text and images up to the block marked for caching, so a volatile image ends the reusable prefix; at the end of the request it has nothing after it to invalidate.",
+      "hints": [
+        "Ask what a cache hit requires of everything before the breakpoint.",
+        "Compare what comes after the screenshot in each position."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    },
+    {
+      "id": "ctx-019-q16",
+      "type": "numeric",
+      "track": "connect",
+      "difficulty": 3,
+      "outcomes": [
+        "o4"
+      ],
+      "section": "7",
+      "est_minutes": 5,
+      "tags": [
+        "prompt-caching",
+        "pricing",
+        "image-tokens"
+      ],
+      "connects": [
+        "ctx-005"
+      ],
+      "prompt": "A 1,551-token reference page image sits in a cached prefix on Claude Opus 4.6 (input 5 dollars per million tokens, as of early 2026), with the five-minute lifetime. Over 40 calls in close succession it is written once (1.25 times the input price) and then read 39 times (0.1 times). What does the image cost over the 40 calls, in dollars?",
+      "answer": {
+        "value": 0.0399,
+        "tolerance": 0.0002,
+        "unit": "USD"
+      },
+      "precision_note": "1,551 x 5 / 1,000,000 = 0.007755 dollars at full price; x (1.25 + 39 x 0.1) = x 5.15 = 0.039938 dollars. Forty reads with no write give 0.0310, a write plus 40 reads 0.0407, and no caching 0.3102.",
+      "explanation": "Section 7 with post 05's multipliers: one write at 1.25 times and 39 reads at 0.1 times the base input price, about an eighth of the 0.31 dollars the page costs sent 40 times uncached.",
+      "hints": [
+        "Price the image once at the full input rate.",
+        "Multiply by the sum of one write multiplier and 39 read multipliers."
+      ],
+      "status": "reviewed",
+      "updated": "2026-10-12"
+    }
+  ]
+}

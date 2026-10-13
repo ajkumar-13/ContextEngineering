@@ -1,0 +1,247 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="ctx-01-page-in-the-window-title" aria-describedby="ctx-01-page-in-the-window-desc">
+<title id="ctx-01-page-in-the-window-title">A page image is 1,551 tokens in the same window</title>
+<desc id="ctx-01-page-in-the-window-desc">On the left, the six layers of post 04's support agent as bars drawn to one scale with dashed outlines, because the sizes are illustrative: 01 System prompt 3,000 tokens, 02 Tools and MCP descriptions 1,600, 03 Memory and state 1,200, 04 Retrieved chunks 2,500 of text, 05 Conversation history 2,000, 06 User instruction 200. On the right, an A4 page scanned at 130 dpi, 1,075 by 1,520 pixels, resized to 924 by 1,307 and cut into a grid of 33 by 47 patches of 28 by 28 pixels, one token each, 1,551 tokens. An arrow carries the page into layer 04, where a solid segment of 1,551 tokens follows the 2,500 tokens of text. The input of the call grows from 10,500 to 12,051 tokens.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-blue-soft { fill: var(--ctx-blue-soft); }
+  .f-green-soft { fill: var(--ctx-green-soft); }
+  .f-ink-muted { fill: var(--ctx-ink-muted); }
+  .f-orange-soft { fill: var(--ctx-orange-soft); }
+  .f-purple-soft { fill: var(--ctx-purple-soft); }
+  .f-rule { fill: var(--ctx-rule); }
+  .f-surface-bg { fill: var(--ctx-surface); }
+  .s-blue-line { stroke: var(--ctx-blue-line); }
+  .s-green-line { stroke: var(--ctx-green-line); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+  .s-orange { stroke: var(--ctx-orange); }
+  .s-orange-line { stroke: var(--ctx-orange-line); }
+  .s-purple-line { stroke: var(--ctx-purple-line); }
+  .w075 { stroke-width: 0.75; }
+</style>
+<defs>
+<marker id="ctx-01-page-in-the-window-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="540"/>
+<text x="40" y="48" class="t-title" data-w="604">A page image is 1,551 tokens in the same window</text>
+<text x="40" y="76" class="t-subtitle" data-w="663">Post 04's agent, text sizes illustrative; image tokens by Anthropic's Vision rule, standard tier.</text>
+<text x="40" y="140" class="t-label" data-w="124">01 System prompt</text>
+<g data-grid="skip">
+<rect x="272" y="120" width="204" height="32" class="f-blue-soft" data-fit="skip"/>
+<rect x="272" y="120" width="204" height="32" class="w1 nofill s-blue-line d-proj" data-fit="skip"/>
+<text x="484" y="140" class="t-label" data-w="37">3,000</text>
+</g>
+<text x="40" y="192" class="t-label" data-w="211">02 Tools and MCP descriptions</text>
+<g data-grid="skip">
+<rect x="272" y="172" width="108.8" height="32" class="f-blue-soft" data-fit="skip"/>
+<rect x="272" y="172" width="108.8" height="32" class="w1 nofill s-blue-line d-proj" data-fit="skip"/>
+<text x="388.8" y="192" class="t-label" data-w="37">1,600</text>
+</g>
+<text x="40" y="244" class="t-label" data-w="143">03 Memory and state</text>
+<g data-grid="skip">
+<rect x="272" y="224" width="81.6" height="32" class="f-orange-soft" data-fit="skip"/>
+<rect x="272" y="224" width="81.6" height="32" class="w1 nofill s-orange-line d-proj" data-fit="skip"/>
+<text x="361.6" y="244" class="t-label" data-w="37">1,200</text>
+</g>
+<text x="40" y="296" class="t-label" data-w="137">04 Retrieved chunks</text>
+<g data-grid="skip">
+<rect x="272" y="276" width="170" height="32" class="f-orange-soft" data-fit="skip"/>
+<rect x="272" y="276" width="170" height="32" class="w1 nofill s-orange-line d-proj" data-fit="skip"/>
+<text x="357" y="296" text-anchor="middle" class="t-label" data-w="37">2,500</text>
+</g>
+<text x="40" y="348" class="t-label" data-w="159">05 Conversation history</text>
+<g data-grid="skip">
+<rect x="272" y="328" width="136" height="32" class="f-green-soft" data-fit="skip"/>
+<rect x="272" y="328" width="136" height="32" class="w1 nofill s-green-line d-proj" data-fit="skip"/>
+<text x="416" y="348" class="t-label" data-w="37">2,000</text>
+</g>
+<text x="40" y="400" class="t-label" data-w="127">06 User instruction</text>
+<g data-grid="skip">
+<rect x="272" y="380" width="13.6" height="32" class="f-purple-soft" data-fit="skip"/>
+<rect x="272" y="380" width="13.6" height="32" class="w1 nofill s-purple-line d-proj" data-fit="skip"/>
+<text x="293.6" y="400" class="t-label" data-w="25">200</text>
+</g>
+<g data-grid="skip">
+<rect x="442" y="276" width="105.47" height="32" class="f-orange-soft" data-fit="skip"/>
+<path d="M448.59,276 L448.59,308" class="s-orange-line w075 nofill"/>
+<path d="M455.18,276 L455.18,308" class="s-orange-line w075 nofill"/>
+<path d="M461.78,276 L461.78,308" class="s-orange-line w075 nofill"/>
+<path d="M468.37,276 L468.37,308" class="s-orange-line w075 nofill"/>
+<path d="M474.96,276 L474.96,308" class="s-orange-line w075 nofill"/>
+<path d="M481.55,276 L481.55,308" class="s-orange-line w075 nofill"/>
+<path d="M488.14,276 L488.14,308" class="s-orange-line w075 nofill"/>
+<path d="M494.73,276 L494.73,308" class="s-orange-line w075 nofill"/>
+<path d="M501.33,276 L501.33,308" class="s-orange-line w075 nofill"/>
+<path d="M507.92,276 L507.92,308" class="s-orange-line w075 nofill"/>
+<path d="M514.51,276 L514.51,308" class="s-orange-line w075 nofill"/>
+<path d="M521.1,276 L521.1,308" class="s-orange-line w075 nofill"/>
+<path d="M527.69,276 L527.69,308" class="s-orange-line w075 nofill"/>
+<path d="M534.28,276 L534.28,308" class="s-orange-line w075 nofill"/>
+<path d="M540.88,276 L540.88,308" class="s-orange-line w075 nofill"/>
+<rect x="442" y="276" width="105.47" height="32" class="w15 nofill s-orange" data-fit="skip"/>
+<text x="494.73" y="296" text-anchor="middle" class="t-value" data-w="38">1,551</text>
+</g>
+<rect x="704" y="120" width="216" height="304" class="f-surface-bg" data-fit="skip"/>
+<g data-grid="skip">
+<path d="M710.55,120V424M717.09,120V424M723.64,120V424M730.18,120V424M736.73,120V424M743.27,120V424M749.82,120V424M756.36,120V424M762.91,120V424M769.45,120V424M776,120V424M782.55,120V424M789.09,120V424M795.64,120V424M802.18,120V424M808.73,120V424M815.27,120V424M821.82,120V424M828.36,120V424M834.91,120V424M841.45,120V424M848,120V424M854.55,120V424M861.09,120V424M867.64,120V424M874.18,120V424M880.73,120V424M887.27,120V424M893.82,120V424M900.36,120V424M906.91,120V424M913.45,120V424M704,126.47H920M704,132.94H920M704,139.4H920M704,145.87H920M704,152.34H920M704,158.81H920M704,165.28H920M704,171.74H920M704,178.21H920M704,184.68H920M704,191.15H920M704,197.62H920M704,204.09H920M704,210.55H920M704,217.02H920M704,223.49H920M704,229.96H920M704,236.43H920M704,242.89H920M704,249.36H920M704,255.83H920M704,262.3H920M704,268.77H920M704,275.23H920M704,281.7H920M704,288.17H920M704,294.64H920M704,301.11H920M704,307.57H920M704,314.04H920M704,320.51H920M704,326.98H920M704,333.45H920M704,339.91H920M704,346.38H920M704,352.85H920M704,359.32H920M704,365.79H920M704,372.26H920M704,378.72H920M704,385.19H920M704,391.66H920M704,398.13H920M704,404.6H920M704,411.06H920M704,417.53H920" class="fine"/>
+<rect x="704" y="223.49" width="6.55" height="6.47" class="f-orange-soft" data-fit="skip"/>
+</g>
+<rect x="704" y="120" width="216" height="304" class="frame" data-fit="skip"/>
+<g data-grid="skip">
+<rect x="704" y="223.49" width="6.55" height="6.47" class="w15 nofill s-orange" data-fit="skip"/>
+</g>
+<g data-grid="skip">
+<rect x="724" y="140" width="120" height="8" class="f-ink-muted" data-fit="skip"/>
+<rect x="724" y="164" width="176" height="4" class="f-rule" data-fit="skip"/>
+<rect x="724" y="178" width="176" height="4" class="f-rule" data-fit="skip"/>
+<rect x="724" y="192" width="176" height="4" class="f-rule" data-fit="skip"/>
+<rect x="724" y="206" width="150" height="4" class="f-rule" data-fit="skip"/>
+<rect x="724" y="220" width="176" height="4" class="f-rule" data-fit="skip"/>
+<rect x="724" y="234" width="176" height="4" class="f-rule" data-fit="skip"/>
+<rect x="724" y="248" width="120" height="4" class="f-rule" data-fit="skip"/>
+<rect x="724" y="280" width="176" height="64" class="w1 nofill s-ink-muted" data-fit="skip"/>
+<path d="M724,296 L900,296" class="s-ink-muted w075 nofill"/>
+<path d="M724,312 L900,312" class="s-ink-muted w075 nofill"/>
+<path d="M724,328 L900,328" class="s-ink-muted w075 nofill"/>
+<path d="M784,280 L784,344" class="s-ink-muted w075 nofill"/>
+<rect x="724" y="364" width="176" height="4" class="f-rule" data-fit="skip"/>
+<rect x="724" y="378" width="176" height="4" class="f-rule" data-fit="skip"/>
+<rect x="724" y="392" width="140" height="4" class="f-rule" data-fit="skip"/>
+</g>
+<rect x="704" y="120" width="216" height="304" class="w15 nofill s-orange" data-fit="skip"/>
+<text x="812" y="448" text-anchor="middle" class="t-label" data-w="234">A4 page, 130 dpi: 1,075 × 1,520 px</text>
+<text x="812" y="468" text-anchor="middle" class="t-note" data-w="150">resized to 924 × 1,307</text>
+<text x="812" y="492" text-anchor="middle" class="t-value" data-w="222">33 × 47 patches = 1,551 tokens</text>
+<g data-grid="skip">
+<path d="M704,226.72 L680,226.72" class="brace"/>
+<text x="676" y="231.72" text-anchor="end" class="t-label" data-w="180">one 28 × 28 patch, 1 token</text>
+</g>
+<path d="M696,292 L559,292" class="flow" marker-end="url(#ctx-01-page-in-the-window-arrow)"/>
+<text x="624" y="316" text-anchor="middle" class="t-note" data-w="91">image tokens</text>
+<text x="40" y="448" class="t-value" data-w="458">Input of the call: 10,500 tokens of text + 1,551 of image = 12,051</text>
+<rect x="40" y="468" width="16" height="16" class="s-ink-muted w15 nofill d-lead"/>
+<text x="72" y="480" class="t-label" data-w="141">text, illustrative sizes</text>
+<rect x="248" y="468" width="16" height="16" class="s-orange w15 nofill"/>
+<text x="280" y="480" class="t-label" data-w="155">page image, computed</text>
+<text x="40" y="504" class="t-note" data-w="613">The page is priced and budgeted like the text around it: same window, same rate per token.</text>
+</svg>
