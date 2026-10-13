@@ -1,313 +1,345 @@
-# 16 · Memory systems
+# 16 - Memory systems
 
-> **TL;DR.** Memory is the layer that lets an agent remember what it learned yesterday without paying token cost for it today. The framework worth memorising is the **three-kind taxonomy**: **episodic** (events), **semantic** (facts and preferences), **procedural** (rules and how-tos) — each with its own write trigger, retrieval strategy, decay policy, and access pattern. This post is the engineering account: what each kind contains, what schema each needs, how to retrieve from each, and how to keep them all from poisoning each other.
+> **TL;DR.** An agent remembers across sessions only what the application writes to a store and selects back into layer 03, memory and state. This post asks why that store needs three kinds of memory, episodic (events), semantic (facts and preferences) and procedural (learned rules), and how each is written, retrieved, decayed and kept from corrupting the others. The three share post 08's nine-field row plus a trigger for rules, each has its own retrieval path in a fixed order, and four classes of bug, post 08's three plus the wrong kind, turn the store into a liability.
 >
-> **After reading this you will be able to:**
-> - Distinguish episodic, semantic, and procedural memory and route data to the right one.
-> - Specify the minimum metadata each memory cell needs.
-> - Avoid the four classes of bug that turn a memory store into an active liability.
+> **Prerequisites:** [Post 08](../08-write-strategies/index.md).
+> **Safe to skip?** Skip it if every memory an agent keeps already has a kind, a source, a retrieval path suited to that kind and a decay rule, and learned rules are kept apart from preferences and events.
+>
+> **After reading, you will be able to:**
+>
+> - Distinguish episodic, semantic and procedural memory, and route a piece of information to the right kind, or to no memory store at all.
+> - Specify the metadata each memory row needs: post 08's nine fields, how each kind uses them, and the trigger a procedural row adds.
+> - Retrieve from each kind by its own path (trigger match, background ranking, reference recall) in the orchestrator's order, with decay applied on read.
+> - Recognise the four classes of bug that turn a memory store into a liability, and the guard against each.
+> - Choose between a vector store, a temporal knowledge graph and tiered paging (Mem0, Zep, Letta) for a workload, or decide that no memory store is wanted.
 
-![Memory taxonomy](diagrams/08-memory-taxonomy.svg)
+![Three memory stores in the order they are read: procedural holds learned rules, retrieved by trigger match, no decay; semantic holds facts and preferences, retrieved as background top-k, decays; episodic holds events, retrieved by reference recall, decays. Each feeds 03 Memory and state in the six-layer window.](diagrams/01-three-kinds.svg)
 
-*The three-kind memory taxonomy: episodic (events), semantic (facts and preferences), and procedural (rules and how-tos), each with its own write trigger, retrieval strategy, and decay policy.*
+*Three stores, three write triggers, three retrieval paths and two decay policies, all feeding one layer. One table with one policy serves each of them badly.*
 
 ---
 
-## 1. Why an agent needs a memory layer at all
+## 1. The question: what does an agent remember, and where?
 
-An LLM is stateless. The model weights do not change between calls, and the model retains nothing from one request to the next: every turn, the entire relevant history has to be re-supplied in the prompt or it is gone. What feels like a chatbot "remembering" the earlier part of a conversation is just the host replaying the transcript on each call. Nothing is stored in the model.
+A large language model (LLM) is stateless. The model weights do not change between calls, and the model retains nothing from one request to the next: every turn, whatever the model should know has to be supplied in the request or it is gone. What feels like a chatbot "remembering" the earlier part of a conversation is the host replaying the transcript on each call. Nothing is stored in the model.
 
-That gives two distinct problems, and it is worth keeping them separate:
+That gives two distinct problems:
 
-- **Short-term memory** is the working set for the current task: the running conversation history plus any scratchpad the agent is using this session ([Post 08](../08-write-strategies/index.md), §3). It lives in the context window, it costs tokens on every call, and it is discarded when the session ends.
-- **Long-term memory** is what survives across sessions: preferences, past events, learned rules. It lives *outside* the prompt, in a store the agent reads from and writes to, and it costs tokens only for the slice retrieved on a given turn.
+- **Short-term memory** is the working set of the current task. The conversation history is layer 05: it sits in the window and costs tokens on every call. A scratchpad is a file outside the window that the agent writes between iterations and reads back by select ([post 08](../08-write-strategies/index.md), section 3); only the part read back costs tokens. Both end with the task.
+- **Long-term memory** is what survives across sessions: preferences, past events, learned rules. It lives in a store outside the window, and it costs tokens only for the slice selected into layer 03, memory and state, on a given turn.
 
-This post is about the long-term layer: the store that lets an agent remember what it learned yesterday without paying to carry yesterday's full transcript today. Short-term working memory is the subject of [Post 08](../08-write-strategies/index.md) (write) and [Post 12](../12-compress-strategies/index.md) (compress); everything below assumes the live conversation is already handled and asks what deserves to outlive it.
+This post is about the long-term store; short-term memory belongs to post 08 (write) and [post 12](../12-compress-strategies/index.md) (compress). The question is why an agent that remembers needs three different memories, and how each is written, retrieved, decayed and kept from corrupting the others. The figure at the top of the post is the answer in outline.
 
 ---
 
 ## 2. Why three kinds
 
-The temptation is to call the whole thing "memory" and store everything in one table. The problem with a single store is that the access patterns are different. A user-stated preference ("I prefer markdown") is small, durable, and asserted on most turns. An event ("user resolved ticket #4321 last Tuesday") is medium-sized, time-anchored, and only relevant when the user references that ticket. A rule ("refunds over $1,000 require manager approval") is large-impact, near-permanent, and gets retrieved by *intent* rather than *content*.
+The temptation is to call the whole thing "memory" and keep it in one table. The trouble with a single store is that the access patterns differ. A stated preference ("prefers replies in formal English") is small, durable and relevant on most turns. An event ("resolved ticket 4321 on 14 September by escalating the billing error") is time-anchored and relevant only when the user refers to it. A learned rule ("ask for the purchase-order number before discussing a refund") is obeyed rather than weighed, and it is relevant when a condition holds, whatever the words of the turn.
 
-Trying to cover all three with one schema, one retrieval strategy, and one decay policy means each is served badly: the preference gets buried under events, the event is treated as a standing fact, the rule scores below an episode and never fires.
+Covering all three with one schema, one retrieval strategy and one decay policy serves each badly: the preference is buried under events, the event is treated as a standing fact, and the rule scores below an episode in a similarity search and never fires.
 
-The taxonomy used here (episodic / semantic / procedural) comes from cognitive science (Tulving, 1972) by way of the agent-memory papers of 2023: Generative Agents (Park *et al.*, 2023) and MemGPT (Packer *et al.*, 2023). The vendor tools that followed each ship a variant of it: Mem0, Letta, and Zep organise storage along these same lines. It is small enough to memorise and large enough to cover what production systems need.
-
----
-
-## 3. Episodic memory
-
-**What it stores.** Events. Things that happened, with a *when* and a *who*. *"On 14 March, the user reported a billing error and resolved it by escalating to the billing team."* *"Three sessions ago, the agent recommended Postgres; the user adopted it."*
-
-**When it gets written.** At the end of an interaction, when something noteworthy happened. The decision of "noteworthy" is itself a small LLM judgement: did the user state a preference, take an action, react strongly, hit an error, achieve a goal? If yes, write an episode.
-
-**The minimum schema.**
-
-| Field | Notes |
-|---|---|
-| `id` | Stable reference |
-| `subject` | Who the episode is about (user id, project id) |
-| `event_type` | `decision` / `error` / `preference` / `action`: drives downstream filtering |
-| `summary` | One sentence. The retrievable form. |
-| `details` | Optional longer narrative. Not retrieved on the fast path. |
-| `source` | Conversation id, ticket id, transcript URL |
-| `timestamp` | When the event happened |
-| `confidence` | 0–1; lowers as the episode ages without confirmation |
-
-**How it gets retrieved.** Two access patterns. (a) *Reference recall*: the user mentions an entity ("the issue we had last week"), retrieval pulls episodes mentioning that entity. (b) *Background grounding*: the agent fetches the *N* most recent episodes about this subject as soft context for any turn. Both retrieve through the standard Select pipeline ([Post 09](../09-select-strategies/index.md)) over `summary` text plus metadata filters on `subject` and time range.
-
-**Decay.** Episodic facts age. A 6-month-old preference may have changed; a 6-month-old project decision is probably still valid. The simplest workable policy: drop `confidence` by a fixed step each quarter without re-confirmation, then demote anything below a floor to a colder tier (still searchable, less prominent) instead of deleting. As an illustrative starting point, not a tuned value: begin cells at `confidence` 1.0, subtract 0.1 per quarter, and demote below 0.4. The right numbers are workload-specific; the point is that decay is a schedule you choose, not a thing that happens by itself.
+The names come from cognitive psychology. Tulving (1972) separated episodic memory, of personally experienced events placed in time, from semantic memory, of general knowledge held without a record of when it was learned. Procedural memory, of how to do things, joined them later: Tulving's "How many memory systems are there?" (1985) arranged procedural, semantic and episodic memory as three systems. The three kinds reached language agents through the Cognitive Architectures for Language Agents framework (CoALA; Sumers et al., 2023), which gives an agent a working memory and three long-term memories: episodic, for experience from earlier decision cycles; semantic, for knowledge about the world and itself; procedural, held in the model's weights and the agent's code. Harrison Chase's "Memory for Agents" (LangChain, October 2024), which post 08 cites for the three kinds, takes them from CoALA. This series' procedural kind is narrower than CoALA's: it holds rules and how-tos written as text, not weights or code.
 
 ---
 
-## 4. Semantic memory
+## 3. One row for all three kinds
 
-**What it stores.** Facts and preferences. Things the agent should treat as currently true. *"The user prefers replies in formal English."* *"This customer is on the enterprise tier."* *"The team uses Postgres in production and DuckDB for analytics."*
+[Post 08](../08-write-strategies/index.md), section 2, fixes the row every memory store carries: `id`, `kind`, `subject`, `content`, `source`, `created_at`, `last_accessed_at`, `confidence` and `expires_at`. Episodic and semantic rows use the nine fields as they stand; a procedural row adds one field, `trigger`, keeps the rule in `content`, and uses `subject` as the rule's scope:
 
-**When it gets written.** On explicit assertion ("remember that I work in PST") or on observed pattern (the user has corrected the agent's tone twice in the same direction). Getting the "observed pattern" threshold wrong is a common source of semantic-memory bugs: set it too low and the store fills with noise; too high and obvious preferences never get captured.
+| Field | Episodic | Semantic | Procedural |
+|---|---|---|---|
+| `id`, `kind`, `source` | as post 08 | as post 08 | as post 08 |
+| `subject` | who the event is about | who the fact is about | the scope: the user, account or project the rule applies to |
+| `content` | the event, one sentence | the fact or preference | the rule |
+| `created_at` | when the event was written | when the fact was first asserted | when the rule was learned |
+| `last_accessed_at` | drives decay | drives decay | kept for audit; drives nothing |
+| `confidence` | decays | decays; below a cutoff, ask before asserting | fixed at 1.0 |
+| `expires_at` | rarely set | for knowingly short-lived facts | not used: a person removes a rule |
+| `trigger` (added) | none | none | the condition that fires the rule |
 
-**The minimum schema.** Mostly the same fields as episodic, with two differences: `event_type` becomes `kind` (`preference`, `fact`, `relationship`); `timestamp` is the most-recent-confirmation time, not the original observation time.
-
-**How it gets retrieved.** Almost always *background*. On every turn (or every *N* turns), pull the top-*k* semantic facts about the current subject and pack them into the memory layer of the prompt. (Top-*k* means the *k* highest-ranked results from the retrieval; see [Post 09](../09-select-strategies/index.md).) Because the layer is small ([Post 04](../04-tokens-windows-budgets/index.md), §6: a rule of thumb is 5–10% of the budget), the *ranking* matters: most-recently-confirmed first, then most-frequently-relevant. In practice this is a small *k*: even a large 200k-token window is not the constraint here, since a memory layer of a few thousand tokens holds only roughly ten to twenty short facts.
-
-**Conflict.** Semantic memory has the hardest write semantics of the three. The user said "use formal English" three months ago; today they used a casual greeting; should the preference change? The pattern that works:
-
-- **Never silently overwrite.** Two contradicting cells coexist for a while; the older one's `confidence` decays; eventually it falls below the demotion floor (the same illustrative 0.4 from §3).
-- **Surface the conflict on relevant turns.** "I have you down as preferring formal replies; should I keep using that style?" One round-trip per conflict; cheap insurance.
-
----
-
-## 5. Procedural memory
-
-**What it stores.** How-tos and rules. Reusable patterns. *"To deploy a hotfix, run `make hotfix && git push origin hotfix/<id>`."* *"Refunds over $1,000 require manager approval."* *"When the user says 'urgent', skip the standard intake form."*
-
-**When it gets written.** Rarely. Procedural memory is the most-edited *manually*; it tends to live in `AGENTS.md` files ([Post 08](../08-write-strategies/index.md), §4) rather than in a vector store. New rules get added in a PR by a human, with review.
-
-**Schema and retrieval.** Procedural memory blurs into the system-prompt rules block ([Post 14](../14-system-prompt-as-software/index.md), §2). The pragmatic split:
-
-- Rules that apply to *every* turn → live in the system prompt.
-- Rules that apply *conditionally* (only for this customer, only for this project, only when this tool is being called) → live in a procedural store and get retrieved by trigger.
-
-The retrieval pattern for the conditional case is **trigger matching**, not semantic search. *"User is on the enterprise tier"* triggers a known set of procedural cells. The store is essentially a small rules engine; the LLM is the executor.
-
-Because there is no ranking to tune, a procedural cell does not need a `confidence` field. It needs three: the **trigger** that fires it, the **rule** it injects, and the **scope** it applies to. Trigger matching then looks like a lookup table rather than a vector query:
-
-| `trigger` | `rule` | `scope` |
-|---|---|---|
-| `tier == "enterprise"` | May exceed standard rate limits; route escalations to the priority queue. | this customer |
-| `intent == "refund" and amount > 1000` | Require manager approval before issuing. | all customers |
-
-The contrast with semantic memory is exact: semantic retrieval asks *"what facts are similar to this turn?"* and ranks by relevance; procedural retrieval asks *"which triggers are true right now?"* and returns every match, unranked.
-
-![The three long-term memory kinds compared on what they store, when they are written, how they are retrieved, and whether they decay](diagrams/01-three-kinds-compared.svg)
-
-*Lined up on the same four questions, procedural stops looking like a variant of the other two.*
-
-**Decay.** Procedural memory does *not* decay. Stale rules are removed by humans, not by time. A confidence score is meaningless here.
-
----
-
-## 6. The retrieval orchestrator
-
-![Three memory retrievals in fixed order — procedural rules, then semantic facts, then episodic recall — wrapped behind one context assembler](diagrams/02-retrieval-orchestrator.svg)
-
-*Rules first can save the other two entirely. Episodic last means most turns never pay for it.*
-
-A live agent with all three memories needs to answer, on every turn, three questions:
-
-1. Which **semantic** facts about this subject should I include? (Background grounding.)
-2. Are any of the user's words **referring** to a past episode I should retrieve? (Reference recall.)
-3. Do any **procedural** rules trigger for this turn? (Rule matching.)
-
-The order matters. Procedural rules first (they may rule out the turn entirely: "do not respond to this user, escalate"). Semantic facts second (they shape tone and assumptions for the rest of the turn). Episodic recall last and conditionally (only if the user's turn references something specific).
-
-A useful pattern is to **wrap the three retrievals in a single "context assembler" call** that the rest of the agent code does not have to know about. The call returns a `MemoryContext` object that the prompt assembler stitches into the right layers. Concretely, `MemoryContext` is a small record with one field per memory kind:
-
-| Field | Type | Populated by |
-|---|---|---|
-| `procedural` | list of fired rules | trigger matching (§5) |
-| `semantic` | ranked list of facts | background grounding (§4) |
-| `episodic` | list of recalled events (may be empty) | reference recall (§3) |
-
-The next section shows the assembler in code.
-
----
-
-## 7. Code: a minimal memory layer
-
-The whole taxonomy fits in a small, provider-agnostic layer. This is a Mem0-style sketch (Mem0, 2024–25): a write path that routes each observation to the right kind, a per-kind retrieve, decay on read, and the assembler that produces the `MemoryContext` from §6. It is illustrative, not production code; the embedding store, the LLM "is this noteworthy?" judge, and locking are all stubbed.
+A store may add fields (a sensitivity label for the governance filter of [post 24](../24-privacy-and-governance/index.md)); it never drops one of the nine. One use changes: post 08 updates `last_accessed_at` on every read, while this post updates it only for the rows an answer relied on, for the reason section 15 gives. The post's snippet, `snippets/memory_layer.py`, declares the row this way:
 
 ```python
-import time
-from dataclasses import dataclass, field
-
-QUARTER = 90 * 24 * 3600          # seconds in ~one quarter
-DECAY_PER_QUARTER = 0.1           # illustrative; tune per workload
-DEMOTE_FLOOR = 0.4                # below this, a cell goes cold
-
 @dataclass
-class Cell:
-    kind: str                     # "episodic" | "semantic" | "procedural"
-    subject: str
-    summary: str
+class MemoryRow:
+    id: str
+    kind: str                     # episodic, semantic or procedural
+    subject: str                  # who the row is about; for a procedural row, the scope of the rule
+    content: str                  # the event, the fact, or the rule
     source: str
-    created_at: float
-    confidence: float = 1.0       # ignored for procedural
-    trigger: str | None = None    # procedural only
-
-@dataclass
-class MemoryContext:
-    procedural: list = field(default_factory=list)
-    semantic: list = field(default_factory=list)
-    episodic: list = field(default_factory=list)
-
-class MemoryLayer:
-    def __init__(self, embed, search, rules_match):
-        self.cells: list[Cell] = []
-        self.embed = embed            # text -> vector (stubbed)
-        self.search = search          # (query, cells) -> ranked cells
-        self.rules_match = rules_match  # (turn) -> fired trigger names
-
-    def write(self, cell: Cell):
-        # Append-only: never overwrite. Conflicts resolve at read time.
-        self.cells.append(cell)
-
-    def _decay(self, cell: Cell) -> float:
-        if cell.kind == "procedural":
-            return 1.0
-        quarters = (time.time() - cell.created_at) / QUARTER
-        return cell.confidence - DECAY_PER_QUARTER * quarters
-
-    def retrieve(self, subject: str, turn: str, k: int = 15) -> MemoryContext:
-        live = [c for c in self.cells
-                if c.subject == subject and self._decay(c) >= DEMOTE_FLOOR]
-        fired = set(self.rules_match(turn))
-        return MemoryContext(
-            # 1. procedural first: unranked, every trigger that fires
-            procedural=[c for c in live
-                        if c.kind == "procedural" and c.trigger in fired],
-            # 2. semantic second: background grounding, ranked, small k
-            semantic=self.search(turn, [c for c in live
-                                        if c.kind == "semantic"])[:k],
-            # 3. episodic last: only if the turn references something
-            episodic=self.search(turn, [c for c in live
-                                        if c.kind == "episodic"])[:k]
-                     if self._references_past(turn) else [],
-        )
-
-    def _references_past(self, turn: str) -> bool:
-        return False  # stub: an LLM/heuristic decides if recall is needed
+    created_at: str
+    last_accessed_at: str
+    confidence: float
+    expires_at: str | None = None
+    trigger: str | None = None    # procedural only: the condition that fires the rule, "key=value"
 ```
 
-The three retrievals happen in the §6 order, decay is applied on read rather than mutated on write (so history is preserved), and each list maps to one field of the `MemoryContext` the prompt assembler consumes. Everything real, the embedding index, the "is this noteworthy?" judge, and the conflict surfacing from §4, hangs off these same seams.
+Its write method refuses a row with no `source`, an unknown `kind`, or a `trigger` on anything but a procedural row, and it only appends: a contradiction becomes a new row, never an edit of the old one.
 
 ---
 
-## 8. The four bugs
+## 4. Episodic memory
 
-In practice a large share of memory-related production incidents trace back to one of four recurring bugs. The list below is a working taxonomy rather than a measured result, but each failure maps cleanly onto one of the four design decisions above (separate stores, provenance, decay, conflict handling).
+**What it stores.** Events: things that happened, with a when and a who. *"Resolved ticket 4321 on 14 September by escalating the billing error."* *"Three sessions ago, the agent recommended Postgres and the user adopted it."*
 
-**Bug 1: undifferentiated store.** Episodic, semantic, and procedural data in one table. Symptom: agent over-anchors to a stale event, or treats a one-time tool result as a persistent fact, or refuses to act on a procedural rule because it scored below an episode for retrieval. Fix: three tables, three policies, three retrieval strategies.
+**When it is written.** At the end of an interaction, when something noteworthy happened. Deciding what is noteworthy is itself a small model judgement: did the user state a preference, take an action, react strongly, hit an error, reach a goal? If so, write an episode.
 
-**Bug 2: no provenance.** A memory cell asserts a fact; the cell has no `source`; the user disputes it; nobody can find where the agent learned it. Fix: every cell carries `source` and `created_at` and (for semantic) `last_confirmed_at`. Recovery: bulk re-validation pass.
+**How it is retrieved.** Two access patterns. *Reference recall*: the user mentions an entity or a past exchange ("the issue from last week"), and retrieval pulls the episodes that mention it. *Background grounding*: the agent fetches the few most recent episodes about the subject as soft context for any turn. Both are the select pipeline of [post 09](../09-select-strategies/index.md) over `content`, with filters on `subject` and a `created_at` range. The snippet implements reference recall only, and only when the turn refers to the past; a word-overlap score stands in for an embedding search.
 
-**Bug 3: no decay.** Memories never expire. Old preferences override new ones. The agent insists the user uses Vim despite the last six sessions being in VS Code. Fix: confidence decay schedule; periodic "is this still true?" prompts on aging cells.
-
-**Bug 4: silent overwrite.** Conflicting facts overwrite each other; history is lost. The agent has no way to detect that the user changed their mind. Fix: append-only writes; conflict resolution at retrieval, not write, time.
-
-These are small disciplines. They are also the difference between memory that helps and memory that quietly degrades quality.
+**Decay.** Episodes age: last spring's complaint rarely matters to this week's question. The snippet uses post 08's illustrative scheme, confidence lowered by 0.01 for every day without a read, and treats a row below an illustrative 0.4 as cold: kept in the store, never packed by default. A production cold tier stays searchable on an explicit request. Decay is a schedule the team chooses, not something that happens by itself.
 
 ---
 
-## 9. What the vendors actually do
+## 5. Semantic memory
 
-You will rarely build the store from scratch. The production tools cluster into three storage shapes, and knowing which shape a tool uses tells you what it is good and bad at.
+**What it stores.** Facts and preferences the agent should treat as currently true. *"Prefers replies in formal English."* *"Is on the enterprise tier."* *"The team uses Postgres in production and DuckDB for analytics."*
 
-**Vector-based memory (Mem0).** Mem0 (Mem0, 2024–25) stores each memory as a text summary plus an embedding in a vector index, which is the model in §7 above. Writes go through an LLM extraction step that decides what is worth remembering and dedupes against existing cells; reads are a semantic search over the index, filtered by subject. Strength: it is the simplest thing that works, and semantic recall over unstructured facts is exactly what an embedding index is for. Weakness: relationships between memories ("this decision *caused* that error") are not first-class; you retrieve individual cells, not a connected picture.
+**When it is written.** On explicit assertion ("remember that I work in Pacific time") or on an observed pattern (the user has corrected the agent's tone twice in the same direction). Set the pattern threshold too low and the store fills with noise; too high, and obvious preferences are never captured.
 
-**Graph-based memory (Zep / Graphiti).** Zep's engine, Graphiti (Rasmussen *et al.*, 2025), stores memory as a *temporal knowledge graph*: entities are nodes, relationships are edges, and every edge carries a validity interval so the graph can say a fact *was* true then and *is* superseded now. Retrieval is a graph traversal from the entities in the current turn, not a flat similarity search. Strength: it answers relationship and "what changed when" questions that a flat vector store cannot, and the temporal edges give conflict resolution for free. Weakness: more machinery to run, and overkill when your memories are independent facts with no interesting structure between them.
+**How it is retrieved.** In the background: on every turn, or every few turns, the top-k semantic rows about the current subject are packed into layer 03. The layer is small, 5 to 10 percent of the input budget in [post 04](../04-tokens-windows-budgets/index.md)'s illustrative defaults (its section 6), so the ranking matters. The snippet ranks by decayed confidence and then by the last read, and packs the top 3. Generative Agents (Park et al., 2023) ranked its memory stream by a richer score: recency, an exponential decay over the sandbox game hours since a memory was last retrieved (decay factor 0.995), plus importance and relevance, each normalised and summed with equal weights.
 
-**Tiered / OS-style memory (Letta / MemGPT).** MemGPT (Packer *et al.*, 2023), now productised as Letta (Letta, 2024–25), takes a different cut: it treats the context window like RAM and an external store like disk, and gives the agent tools to *page* memory between them. The model itself decides what to keep in-context and what to evict to the external store, mediated by a fixed "memory management" prompt. Strength: the agent manages its own working set, which is powerful for very long-running sessions. Weakness: it puts memory decisions inside the model's control loop, which costs tokens and calls and is harder to audit than a store you drive from application code.
+**Conflict.** Semantic memory has the hardest write semantics of the three. Three months ago the user asked for formal English; today they opened with a casual greeting. Two rules hold up:
 
-**ChatGPT "memories", decoded.** The consumer ChatGPT memory feature (OpenAI, 2024) is mostly semantic memory in the taxonomy above with a thin episodic layer. When it says "memory updated", it has extracted a short user-fact ("prefers concise answers", "is learning Spanish") and appended it to a per-user store that is injected as background context on later chats, exactly the §4 background-grounding pattern. The user-facing "manage memories" panel is the `source`/provenance discipline from §8 made visible. What it deliberately does *not* do is graph relationships or page context, which is why it can remember your preferences but not reason about how three past conversations connect.
-
----
-
-## 10. How to choose
-
-The storage shape follows the questions you need to answer, not the other way around:
-
-- **Independent facts and preferences, "what does this user like?"** → a vector store (Mem0-style). Default choice; reach for it first.
-- **Relationships and change over time, "what changed, and what caused it?"** → a graph store (Zep / Graphiti).
-- **Very long single sessions where the agent must manage its own working set** → tiered / paging (Letta / MemGPT).
-- **Human-authored rules that change by PR, not by observation** → not a memory store at all; a file (`AGENTS.md`, [Post 08](../08-write-strategies/index.md), §4) is the right home for procedural memory.
-
-Most systems need only the first, some add the fourth, and only a minority genuinely need a graph. When in doubt, start with a vector store and the three-kind discipline from §§3–5; add a graph only once you can name the relationship question a flat store cannot answer.
+- **Never overwrite in place.** The new fact is a new row with its own source; the old row keeps its source and decays. Which one is packed is decided by the precedence rule of [post 06](../06-context-failure-modes/index.md), section 4 (the most recent wins; on a tie, the higher confidence), and the history of the change survives.
+- **Surface a doubtful fact instead of asserting it.** Below post 08's illustrative cutoff of 0.6, the snippet still packs the fact but marks it "unconfirmed: ask before relying on it". One question to the user costs one round trip; a wrong assertion costs trust.
 
 ---
 
-## 11. Memory in the prompt
+## 6. Procedural memory
 
-How the retrieved memory actually appears in the prompt matters. A skeleton that travels well:
+**What it stores.** How-tos and rules learned about one user, account or project: for a client whose system needs comma-separated values (CSV) and rejects a Portable Document Format (PDF) file on its own, *"Export this client's reports as CSV first; their system rejects a PDF on its own."*
 
+**Where a rule lives.** Not every rule is procedural memory. [Post 08](../08-write-strategies/index.md) gives rules three homes, and this post keeps them apart:
+
+- A rule for every user and every turn, written by the team ("refunds above $1,000 go to the manager queue"), belongs in the rules block of layer 01, the system prompt ([post 14](../14-system-prompt-as-software/index.md)), or in the repository's `AGENTS.md` (post 08, section 4). People write it and review it like code.
+- A packaged capability with its own instructions belongs in a skill's `SKILL.md`, loaded only when a task needs it (post 08, section 4).
+- A rule learned from one user or account, which applies only when a condition holds, is a procedural row in the memory store. That is the procedural kind of this post.
+
+**When it is written.** Rarely: on an explicit instruction ("always send this client CSV"), or when the same correction recurs. Because a rule is obeyed rather than weighed, a new procedural row deserves a confirmation step before it is written: the agent repeats the rule back to the user, or a person approves it.
+
+**How it is retrieved.** By **trigger matching**, not by similarity search. The turn's facts (its intent, the account's tier, the tool about to be called) are checked against each row's `trigger`, and every rule whose trigger is true fires, unranked. The snippet's three procedural rows read like a lookup table:
+
+| `trigger` | `content` (the rule) | `subject` (the scope) |
+|---|---|---|
+| `intent=export` | Export this client's reports as CSV first; their system rejects a PDF on its own | `user:u-17` |
+| `intent=escalate` | Copy every escalation to the account's named technical contact | `user:u-17` |
+| `intent=refund` | Ask for the purchase-order number before discussing a refund | `user:u-17` |
+
+The contrast with semantic memory is exact: semantic retrieval asks "which facts are most worth packing for this turn?" and ranks; procedural retrieval asks "which triggers are true right now?" and returns every match.
+
+**Decay.** None. A rule is not less true for being unused for five months; it is removed by a person when it stops applying. Its `confidence` stays at 1.0 and its `last_accessed_at` drives nothing.
+
+---
+
+## 7. The retrieval orchestrator
+
+A live agent with all three memories answers three questions on every turn:
+
+1. Do any **procedural** rules trigger for this turn? (Trigger match.)
+2. Which **semantic** facts about this subject should be packed? (Background grounding.)
+3. Does the turn **refer** to a past episode that should be recalled? (Reference recall.)
+
+The order matters. Procedural rules come first, because a rule can change what the turn is ("escalate this account's billing complaints to a person" may end it). Semantic facts come second, because they shape tone and assumptions for the rest of the turn. Episodic recall comes last and only when the turn refers to something specific, so most turns never pay for it.
+
+The three retrievals sit behind one call that returns a `MemoryContext`, a record with one list per kind, which the prompt assembler turns into layer 03; the rest of the agent never needs to know there are three stores. The snippet's `retrieve` method is the whole orchestrator:
+
+```python
+    def retrieve(self, turn: dict, k: int = 3) -> MemoryContext:
+        """Read-only: the application updates last_accessed_at for the rows the answer relied on."""
+        subject, text, facts = turn["subject"], turn["text"], turn["facts"]
+        # 1. procedural first: every rule whose trigger is true now, unranked
+        fired = [r for r in self.live(subject, "procedural")
+                 if facts.get(r.trigger.split("=")[0]) == r.trigger.split("=")[1]]
+        # 2. semantic second: background grounding, ranked by confidence, then by the last read
+        facts_now = sorted(self.live(subject, "semantic"),
+                           key=lambda r: (confidence_on(r, self.today), r.last_accessed_at), reverse=True)[:k]
+        # 3. episodic last, and only when the turn refers to the past
+        events = []
+        if PAST.search(text):
+            scored = [(len(words(text) & words(r.content)), r) for r in self.live(subject, "episodic")]
+            events = [r for s, r in sorted(scored, key=lambda p: -p[0]) if s > 0][:k]
+        return MemoryContext(fired, facts_now, events)
 ```
-[memory: facts you have stored about this user]
-- Prefers formal English replies. (last confirmed 14 days ago)
-- On the enterprise tier. (verified from billing system)
-- Resolved ticket #4321 by escalating to billing on 14 March.
 
-[memory: rules that apply to this conversation]
-- Enterprise tier customers may exceed standard rate limits.
-- Always offer the call-back option after the second message.
-```
+The figure below follows the snippet's second turn through the three paths. Each path is a select in [post 09](../09-select-strategies/index.md)'s sense over its own corpus, with its own query and its own ranking signal.
 
-Notice the structure: three labelled sub-sections (semantic / procedural / episodic, in the retrieval-orchestrator order from §6), each with the source or date in parentheses, each item one line. The model uses the structure as a hint: it treats the procedural items as imperatives, the semantic items as defaults, the episodic items as background.
+![One turn about ticket 4321 runs down three paths in order: the procedural path fires mem-09; the semantic path packs mem-02, mem-01 and mem-03, the last marked ask, and leaves mem-04 cold; the episodic path, run because the turn says back, recalls mem-05. The lists merge into one MemoryContext for 03 Memory and state.](diagrams/02-orchestrator.svg)
+
+*Rules first, because a rule can change what the turn is; episodes last, and only when the turn points at the past.*
 
 ---
 
-## 12. When *not* to use a memory store
+## 8. Decay on read
 
-A short tour of cases where the right answer is "no memory".
+Decay is applied when a row is read, from the stored values, and never written back:
 
-- **Stateless tools.** A pure function (a calculator, a unit converter, a regex tester) does not need memory. Adding it adds bugs.
-- **Single-turn use.** A search box is not an agent; do not bolt a memory store onto it.
-- **Sensitive interactions.** Health, financial, legal advice in some jurisdictions: persisting user statements across sessions is a regulatory liability. Either store nothing or store with explicit consent and clear deletion.
-- **Where humans expect amnesia.** Some user experiences are *better* without memory. A mood-journal agent that forgets between entries respects the user's privacy in a way one that "remembers" might not.
+```python
+def confidence_on(row: MemoryRow, today: date) -> float:
+    """Decay on read: computed from the stored row, never written back."""
+    if row.kind == "procedural":
+        return row.confidence          # a rule does not decay; a person removes it
+    if row.expires_at and today > date.fromisoformat(row.expires_at):
+        return 0.0
+    idle = (today - date.fromisoformat(row.last_accessed_at)).days
+    return max(0.0, round(row.confidence - DECAY_PER_IDLE_DAY * idle, 2))
+```
 
-The strongest agent designs are explicit about what they do and do not remember, and tell the user.
+The store keeps its history, because nothing is edited, and the schedule can change without a migration. On 12 October the snippet prints this table for its ten rows:
+
+```text
+confidence on 2026-10-12 (0.01 per idle day; procedural rows do not decay):
+  mem-01  semantic    idle   3 days  0.87  live
+  mem-02  semantic    idle   2 days  0.98  live
+  mem-03  semantic    idle  30 days  0.50  ask
+  mem-04  semantic    idle 103 days  0.00  cold
+  mem-05  episodic    idle  28 days  0.72  live
+  mem-06  episodic    idle  10 days  0.90  live
+  mem-07  episodic    idle 131 days  0.00  cold
+  mem-08  procedural  idle 145 days  1.00  live
+  mem-09  procedural  idle 116 days  1.00  live
+  mem-10  procedural  idle 145 days  1.00  live
+```
+
+The event mem-07, a refund request written on 3 June and never read again, is cold; the rule mem-10, written two weeks earlier on 20 May and never read either, still stands at 1.00. The figure below draws the same function over the months for one rule, two events and one fact.
+
+![Confidence from 20 May to 12 October for four rows. The rule mem-10 stays at 1.00. The event mem-07 falls from 1.00 on 3 June, is cold from 3 August and falls to 0.00 by 11 September. The event mem-05 ends at 0.72; the fact mem-03 ends at 0.50, between the ask line at 0.6 and the cold line at 0.4.](diagrams/03-decay.svg)
+
+*Events and facts lose confidence with every idle day; a rule does not. The two lines are post 08's ask cutoff and this post's cold threshold, both illustrative.*
+
+---
+
+## 9. Memory in the prompt
+
+The snippet renders the `MemoryContext` of its second turn as one block of layer 03:
+
+```text
+[memory: rules that apply to this turn]
+- Copy every escalation to the account's named technical contact (conversation:c-233)
+[memory: facts about this user]
+- Is on the enterprise tier (billing:acct-17, last read 2026-10-10)
+- Prefers replies in formal English (conversation:c-311, last read 2026-10-09)
+- Works in the Pacific time zone (conversation:c-298, unconfirmed: ask before relying on it)
+[memory: past events this turn refers to]
+- Resolved ticket 4321 on 14 September by escalating the billing error (ticket:4321, 2026-09-14)
+```
+
+The structure is deliberate: three labelled parts in the orchestrator's order, one line per item, each with its source and a date, and a doubtful fact marked as doubtful. The labels let the system prompt say how to treat each part: rules as instructions, facts as defaults the user may correct, events as background.
+
+The block is a per-turn injection: it follows the stable prefix of layer 01, the system prompt, and layer 02, tools and Model Context Protocol (MCP) descriptions, so changing it on every turn leaves the cached prefix intact ([post 05](../05-economics-of-context/index.md)). Of the carriers [post 02](../02-six-layers-of-context/index.md) names, two keep it there: a synthetic exchange at the start of the message list, or a block of the first user message; a block of the system prompt would change the cached prefix on every turn.
+
+---
+
+## 10. The four classes of bug
+
+[Post 08](../08-write-strategies/index.md) names three classes of bug; a store with three kinds adds a fourth.
+
+1. **No provenance** (post 08). The user disputes a fact and nobody can find where the agent learned it. Its quieter form is the silent overwrite: a new fact replaces the old row in place, and the agent's behaviour changes with no record of why. Guard: a `source` and `created_at` on every row, and append-only writes.
+2. **The wrong content** (post 08). A tool result, a turn of the live conversation, a secret, or a raw reasoning trace ([post 18](../18-reasoning-model-context/index.md)) is written into a long-lived store and read back as if it were still true, or leaked. Guard: a write gate, as post 08's `check_write`.
+3. **No expiry** (post 08). Nothing decays, so old preferences override new ones: the agent insists the user works in Vim although the last six sessions were in VS Code. Guard: decay on read, a cold tier, and `expires_at` for facts known to be short-lived.
+4. **The wrong kind** (this post). All three kinds share one table and one policy. A learned rule decays like a passing preference and disappears; a one-off event is packed every turn as a standing fact; a rule scores below an episode in a similarity search and never fires. Guard: a `kind` on every row, and a retrieval path and a decay policy per kind.
+
+---
+
+## 11. What Mem0, Letta and Zep do
+
+Few teams build the store from scratch. Three production designs show three storage shapes.
+
+**An extracted fact store (Mem0).** The Mem0 paper (Chhikara et al., April 2025) describes two phases. When a new pair of messages arrives, a model extracts candidate facts. For each candidate, the system retrieves the most similar stored memories by embedding (ten in the paper's experiments), and a model chooses one of four operations: ADD a new memory, UPDATE an existing one with complementary information, DELETE a memory the new information contradicts, or NOOP. In this post's terms it is mostly semantic memory with an automated write gate. Its DELETE is an overwrite policy: the store stays small and current, at the price of the history that section 5 keeps.
+
+**A temporal knowledge graph (Zep).** Zep's engine, Graphiti (Rasmussen et al., January 2025), stores memory as a knowledge graph whose edges are facts. Each edge carries four timestamps: when it was created and invalidated in the system, and when the fact held in the world. When a new edge contradicts an old one, the old edge is marked invalid from the time the new one became valid, not deleted, so the graph can say what was true then and what is true now. Retrieval combines embedding similarity, keyword search and a walk outward from the matched nodes. Strength: questions about relationships and change over time. Weakness: more machinery, and overkill for independent facts.
+
+**Tiered memory paged by the agent (Letta, formerly MemGPT).** MemGPT (Packer et al., October 2023) treats the window as main memory and external storage as disk, after an operating system's memory hierarchy, and lets the model move information between them with function calls. Letta's documentation (consulted October 2026) describes memory blocks pinned to the context window, which the agent edits through memory tools, and an archival memory, a searchable database outside the window that the agent queries through tools. Strength: the agent manages its own working set over very long sessions. Weakness: memory decisions sit inside the model's loop, which costs calls and is harder to audit than a store driven from application code.
+
+**ChatGPT's memory.** OpenAI's "Memory and new controls for ChatGPT" (13 February 2024, in its update of 10 April 2025) describes saved memories, which the user asks it to keep, and references to past conversations; either can be turned off. In this post's terms these are semantic rows written on explicit assertion and a form of episodic recall. OpenAI does not publish the storage design.
+
+---
+
+## 12. How to choose
+
+The storage shape follows from the questions the agent must answer:
+
+- **Independent facts and preferences, "what does this user want?"**: an extracted fact store over a vector index, as in Mem0. The default; reach for it first.
+- **Relationships and change over time, "what changed, and what caused it?"**: a temporal knowledge graph, as in Zep.
+- **Very long single sessions where the agent must manage its own working set**: tiered memory paged by the agent, as in Letta.
+- **Rules written by people that change by review, not by observation**: not a memory store at all. They belong in the system prompt's rules block or in `AGENTS.md` (post 08, section 4).
+
+A sensible path starts with the first and the three-kind discipline of sections 3 to 6, and adds a graph only once the relationship question a flat store cannot answer can be named.
+
+---
+
+## 13. When not to use a memory store
+
+Some agents are better with no long-term memory at all:
+
+- **Stateless tools and single-turn use.** A calculator or a search box needs no memory; adding one adds bugs.
+- **Sensitive interactions.** Health, financial and legal conversations carry data that privacy regimes protect strictly. Store nothing, or store with explicit consent and a working deletion path ([post 24](../24-privacy-and-governance/index.md)).
+- **Where people expect forgetting.** A journaling agent that forgets between entries can respect its user's privacy in a way that one that "remembers" does not.
+
+The strongest designs are explicit about what they remember and what they do not, and they tell the user.
+
+---
+
+## 14. Make it run: a minimal memory layer
+
+The memory layer of sections 3 to 9 is one standard-library file. From the series root:
+
+```text
+uv run python posts/16-memory-systems/snippets/memory_layer.py
+```
+
+It runs in well under a second, with no network and no model call. It writes ten rows (four semantic, three episodic, three procedural), prints the decay table of section 8, answers three turns, prints the block of section 9, and checks this post's gate: a preference, an event and a rule each retrieved by its own path, and a stale event decayed while a rule did not. The first turn asks for a report: mem-08 fires and no episode is recalled. The second is the turn of section 7. The third asks about a refund on invoice 88: mem-10 fires, and the only matching episode, mem-07, is cold. The run ends:
+
+```text
+gate: 5 of 5 checks pass
+  pass  preference mem-01 by background grounding
+  pass  event mem-05 by reference recall
+  pass  rule mem-08 by trigger match
+  pass  stale event mem-07 decayed
+  pass  rule mem-10 did not
+```
+
+Three changes show the moving parts. Moving `TODAY` to 12 November drops mem-01 under the ask cutoff (0.56) and mem-03 into the cold tier (0.19), so background grounding packs two facts instead of three, while the three rules still stand at 1.00. Setting mem-10's `kind` to `"semantic"` makes the write method refuse it, because it carries a `trigger`; removing the trigger as well lets it in, where it decays to 0.00 and the last check of the gate fails: the fourth class of bug of section 10. An empty `source` is refused as having no provenance.
+
+---
+
+## 15. What can go wrong?
+
+- **Background reads counted as confirmations.** Post 08 updates `last_accessed_at` on every read, so a fact packed as background on every turn never decays, however wrong it has become. The snippet's retrieval is read-only for this reason: count only the reads an answer relied on, or a confirmation by the user.
+- **A trigger on words instead of intent.** A rule fires on the word "refund", so "I do not want a refund, just the invoice" starts the refund procedure. A trigger tests a classified fact of the turn (its intent, the account's tier, the tool about to run), not a substring.
+- **Episodic recall on every turn.** Old events are packed into turns that never referred to them, and the answer drifts toward a ticket closed in September: distraction, in [post 06](../06-context-failure-modes/index.md)'s terms.
+- **A learned rule against a team rule.** A procedural row says "skip the approval step for this account"; layer 01 says every refund above $1,000 needs approval. That is conflict (post 06, section 4) inside one window. The write step checks a new rule against the system prompt, and the system prompt states that its rules win.
+- **A cold tier forgotten at deletion time.** A user asks for their data to be erased; the live rows go, and the cold rows, kept "never deleted", stay. Deletion has to reach every tier ([post 24](../24-privacy-and-governance/index.md)).
 
 ---
 
 ## Common pitfalls
 
-- **One table for all three kinds.** The single largest design mistake in this area.
-- **Writing tool results to long-term memory.** Tool results are transient. Re-call, do not remember.
-- **No `source`.** The cell that turned out to be wrong is unrecoverable.
-- **No decay.** Old facts compete with new ones forever.
-- **Silent overwrite on conflict.** History is lost; the agent cannot explain itself.
-- **Storing secrets.** Secrets belong in a secret manager; never in a memory store.
-- **Background-grounding the entire memory store.** The memory layer is small; rank, do not pack everything.
+1. **One table and one policy for all three kinds.** Rules decay with preferences and events pose as standing facts.
+2. **Writing tool results to long-term memory.** A tool result describes the moment of the call; when it is needed again, the tool is called again.
+3. **Packing the whole store as background.** Layer 03 is small; rank and pack the top few, and leave the rest in the store.
+4. **Overwriting a fact on contradiction.** Write the new fact as a new row and let the old one decay, so the change can be explained.
+5. **Writing a learned rule without confirmation.** A procedural row is obeyed on every matching turn; one mistaken rule misleads them all.
 
 ---
 
 ## Further reading
 
-- Tulving, E., *"Episodic and semantic memory"* (1972): the source of the three-kind taxonomy.
-- Park, J. *et al.*, *"Generative Agents: Interactive Simulacra of Human Behavior"* (2023).
-- Packer, C. *et al.*, *"MemGPT: Towards LLMs as Operating Systems"* (2023): tiered memory with explicit eviction.
-- Rasmussen, P. *et al.*, *"Zep: A Temporal Knowledge Graph Architecture for Agent Memory"* (2025): the Graphiti engine behind §9's graph-based memory.
-- Mem0, *"Long-term memory for AI agents"* (2024–25 docs): the vector-based memory layer in §7 and §9.
-- Letta (formerly MemGPT), *"Building Agents with Long-Term Memory"* (2024–25 docs).
-- OpenAI, *"Memory and new controls for ChatGPT"* (2024): the consumer memory feature decoded in §9.
-- LangChain Blog, *"The state of AI agents — memory"* (2024).
+- Tulving, E., "Episodic and semantic memory" (1972): the episodic and semantic distinction.
+- Tulving, E., "How many memory systems are there?" (*American Psychologist*, 1985): procedural, semantic and episodic memory as three systems.
+- Sumers, T. R., Yao, S., Narasimhan, K. and Griffiths, T. L., "Cognitive Architectures for Language Agents" (2023): working, episodic, semantic and procedural memory for language agents.
+- Harrison Chase, "Memory for Agents" (LangChain blog, October 2024): the three kinds for agent builders, after CoALA.
+- Park, J. S. *et al.*, "Generative Agents: Interactive Simulacra of Human Behavior" (2023): a memory stream ranked by recency, importance and relevance.
+- Packer, C. *et al.*, "MemGPT: Towards LLMs as Operating Systems" (2023): tiered memory paged by the agent.
+- Chhikara, P. *et al.*, "Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory" (2025): extraction and the ADD, UPDATE, DELETE and NOOP update phase.
+- Rasmussen, P. *et al.*, "Zep: A Temporal Knowledge Graph Architecture for Agent Memory" (2025): Graphiti and its time-stamped edges.
+- Letta, "Introduction to stateful agents" and "Archival memory" (Letta documentation, consulted October 2026).
+- OpenAI, "Memory and new controls for ChatGPT" (13 February 2024; update of 10 April 2025).
 
-Full citations in [REFERENCES.md](../../REFERENCES.md).
+Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
 ---
 
 ## What to read next
 
-- **[Post 17 — Advanced retrieval](../17-advanced-retrieval/index.md)**: the techniques that power memory retrieval.
-- **[Post 08 — Write strategies](../08-write-strategies/index.md)**: the persistence side, in depth.
-- **[Post 23 — Security](../23-security/index.md)**: what an attacker can do once they can write to memory.
+- **[Post 17 - Advanced retrieval](../17-advanced-retrieval/index.md):** graph retrieval and the other techniques for questions a flat similarity search cannot answer.
+- **[Post 23 - Security and prompt injection](../23-security/index.md):** what changes when someone writes to the memory store on purpose: memory poisoning.

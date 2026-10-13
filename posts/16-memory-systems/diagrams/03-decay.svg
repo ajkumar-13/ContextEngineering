@@ -1,0 +1,215 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="ctx-03-decay-title" aria-describedby="ctx-03-decay-desc">
+<title id="ctx-03-decay-title">Events and facts fade; a rule does not</title>
+<desc id="ctx-03-decay-desc">Confidence, from 0 to 1, against the date from 20 May to 12 October 2026, computed by the snippet's confidence_on for four rows from their last read. The rule mem-10 stays flat at 1.00 from 20 May. The event mem-07, last read on 3 June, falls by 0.01 a day, crosses the cold line at 0.4 on 3 August (marked) and reaches 0.00 on 11 September. The event mem-05, last read on 14 September, is at 0.72 on 12 October. The fact mem-03, last read on 12 September at 0.80, is at 0.50 on 12 October, between the ask line at 0.6 and the cold line at 0.4.</desc>
+<style>
+  :root {
+    --ctx-bg: #FAFAF7;
+    --ctx-surface: #FFFFFF;
+    --ctx-ink: #1A1A1A;
+    --ctx-ink-muted: #5C5C5C;
+    --ctx-ink-subtle: #9A9A9A;
+    --ctx-border: #D9D9D4;
+    --ctx-primary: #5B7FBF;
+    --ctx-accent: #D98E5F;
+    --ctx-success: #5C9E78;
+    --ctx-warn: #B8895A;
+    --ctx-alert: #C66B5E;
+    --ctx-neutral-1: #EAEAE4;
+    --ctx-neutral-2: #CFCFC8;
+    --ctx-neutral-3: #8E8E88;
+    --ctx-on-fill: #FFFDF9;
+    --ctx-on-accent: #1A1A1A;
+    --ctx-grid: rgba(26, 26, 26, 0.06);
+    --ctx-rule: #8E8E88;
+    --ctx-arrow: #6E6E68;
+    --ctx-neutral-soft: #F2F2EE;
+    --ctx-blue: #0072B2;
+    --ctx-blue-ink: #005A8C;
+    --ctx-blue-soft: #E3F0F8;
+    --ctx-blue-line: #9CC6E0;
+    --ctx-orange: #C98500;
+    --ctx-orange-ink: #8A5B00;
+    --ctx-orange-soft: #FBF0D9;
+    --ctx-orange-line: #E5C27A;
+    --ctx-green: #008F68;
+    --ctx-green-ink: #006B4E;
+    --ctx-green-soft: #DFF3EC;
+    --ctx-green-line: #8FCDB8;
+    --ctx-red: #A8322A;
+    --ctx-red-ink: #8F2A23;
+    --ctx-red-soft: #F8E3E1;
+    --ctx-red-line: #DDA49F;
+    --ctx-purple: #A14D8C;
+    --ctx-purple-ink: #833E72;
+    --ctx-purple-soft: #F4E4EF;
+    --ctx-purple-line: #D3A5C6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ctx-bg: #0E0F12;
+      --ctx-surface: #16181C;
+      --ctx-ink: #F2F2EE;
+      --ctx-ink-muted: #B4B4AE;
+      --ctx-ink-subtle: #6E6E68;
+      --ctx-border: #2A2D33;
+      --ctx-primary: #8BA8E0;
+      --ctx-accent: #E8B088;
+      --ctx-success: #7FBF9B;
+      --ctx-warn: #D4B58A;
+      --ctx-alert: #D88880;
+      --ctx-neutral-1: #1F2229;
+      --ctx-neutral-2: #2C3038;
+      --ctx-neutral-3: #6E6E68;
+      --ctx-on-fill: #14161A;
+      --ctx-on-accent: #1A1A1A;
+      --ctx-grid: rgba(241, 238, 232, 0.08);
+      --ctx-rule: #6A6D74;
+      --ctx-arrow: #9A9A94;
+      --ctx-neutral-soft: #1C1E23;
+      --ctx-blue: #5AA8E0;
+      --ctx-blue-ink: #7DBBE8;
+      --ctx-blue-soft: #14283A;
+      --ctx-blue-line: #2E5878;
+      --ctx-orange: #E8B040;
+      --ctx-orange-ink: #F0C060;
+      --ctx-orange-soft: #33260F;
+      --ctx-orange-line: #6E5222;
+      --ctx-green: #3CC497;
+      --ctx-green-ink: #62D1AC;
+      --ctx-green-soft: #10302A;
+      --ctx-green-line: #2A6A55;
+      --ctx-red: #E8796E;
+      --ctx-red-ink: #F09A90;
+      --ctx-red-soft: #3A1A18;
+      --ctx-red-line: #7A3A34;
+      --ctx-purple: #D58CC4;
+      --ctx-purple-ink: #E2A6D3;
+      --ctx-purple-soft: #331F2E;
+      --ctx-purple-line: #6E4466;
+    }
+  }
+  .bg { fill: var(--ctx-bg); }
+  text { font-family: -apple-system, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; fill: var(--ctx-ink); }
+  .t-title { font-size: 24px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-subtitle { font-size: 15px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-head { font-size: 16px; font-weight: 600; fill: var(--ctx-ink); }
+  .t-label { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); }
+  .t-note { font-size: 14px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-value { font-size: 14px; font-weight: 600; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-tick { font-size: 13px; font-weight: 400; fill: var(--ctx-ink-muted); font-variant-numeric: tabular-nums; }
+  .t-math { font-size: 17px; font-weight: 400; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-op { font-size: 24px; font-weight: 400; fill: var(--ctx-ink-muted); }
+  .t-code { font-size: 14px; font-weight: 400; fill: var(--ctx-ink); font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; }
+  .t-cell14 { font-size: 14px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell16 { font-size: 16px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .t-cell18 { font-size: 18px; font-weight: 500; fill: var(--ctx-ink); font-variant-numeric: tabular-nums; }
+  .i { font-style: italic; }
+  .sub { font-size: 13px; }
+  .b { font-weight: 700; }
+  .nofill { fill: none; }
+  .cell { fill: var(--ctx-surface); stroke: var(--ctx-rule); stroke-width: 1; }
+  .card { fill: var(--ctx-neutral-soft); stroke: var(--ctx-border); stroke-width: 1; }
+  .frame { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1.5; }
+  .rule1 { fill: none; stroke: var(--ctx-rule); stroke-width: 1; }
+  .fine { fill: none; stroke: var(--ctx-border); stroke-width: 0.75; }
+  .gridline { fill: none; stroke: var(--ctx-grid); stroke-width: 0.75; }
+  .axis { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .flow { fill: none; stroke: var(--ctx-arrow); stroke-width: 1.5; }
+  .lead { fill: none; stroke: var(--ctx-arrow); stroke-width: 1; stroke-dasharray: 4 4; }
+  .brace { fill: none; stroke: var(--ctx-ink-muted); stroke-width: 1; }
+  .arrowhead { fill: var(--ctx-arrow); }
+  .emph { fill: none; stroke-width: 2.5; }
+  .w1 { stroke-width: 1; }
+  .w15 { stroke-width: 1.5; }
+  .d-proj { stroke-dasharray: 6 4; }
+  .d-ref { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
+  .d-lead { stroke-dasharray: 4 4; }
+  .f-ink { fill: var(--ctx-ink); }
+  .f-ink-muted { fill: var(--ctx-ink-muted); }
+  .f-orange { fill: var(--ctx-orange); }
+  .f-orange-ink { fill: var(--ctx-orange-ink); }
+  .s-ink { stroke: var(--ctx-ink); }
+  .s-ink-muted { stroke: var(--ctx-ink-muted); }
+  .s-orange { stroke: var(--ctx-orange); }
+  .s-red { stroke: var(--ctx-red); }
+  .s-surface { stroke: var(--ctx-surface); }
+</style>
+<defs>
+<marker id="ctx-03-decay-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0,1 L10,5 L0,9 z" class="arrowhead"/></marker>
+<clipPath id="ctx-03-decay-clip-1"><rect x="90" y="122" width="660" height="312"/></clipPath>
+</defs>
+<rect class="bg" data-fit="skip" x="0" y="0" width="960" height="540"/>
+<text x="40" y="48" class="t-title" data-w="462">Events and facts fade; a rule does not</text>
+<text x="40" y="76" class="t-subtitle" data-w="632">Decay on read in snippets/memory_layer.py: 0.01 per idle day; rate and lines illustrative.</text>
+<g data-grid="skip">
+<path d="M96,428H744M96,368H744M96,308H744M96,248H744M96,188H744M96,128H744" class="gridline"/>
+<text x="88" y="432" text-anchor="end" class="t-tick" data-w="19">0.0</text>
+<text x="88" y="372" text-anchor="end" class="t-tick" data-w="19">0.2</text>
+<text x="88" y="312" text-anchor="end" class="t-tick" data-w="19">0.4</text>
+<text x="88" y="252" text-anchor="end" class="t-tick" data-w="19">0.6</text>
+<text x="88" y="192" text-anchor="end" class="t-tick" data-w="19">0.8</text>
+<text x="88" y="132" text-anchor="end" class="t-tick" data-w="19">1.0</text>
+<text x="149.63" y="448" text-anchor="middle" class="t-tick" data-w="34">1 Jun</text>
+<text x="283.7" y="448" text-anchor="middle" class="t-tick" data-w="30">1 Jul</text>
+<text x="422.23" y="448" text-anchor="middle" class="t-tick" data-w="37">1 Aug</text>
+<text x="560.77" y="448" text-anchor="middle" class="t-tick" data-w="37">1 Sep</text>
+<text x="694.84" y="448" text-anchor="middle" class="t-tick" data-w="34">1 Oct</text>
+<path d="M96,128V428H744" class="axis"/>
+<path d="M96,248H744" class="s-ink-muted w1 nofill d-ref"/>
+<path d="M96,308H744" class="s-ink-muted w1 nofill d-ref"/>
+<g clip-path="url(#ctx-03-decay-clip-1)">
+<path d="M96,128 L100.47,128 L104.94,128 L109.41,128 L113.88,128 L118.34,128 L122.81,128 L127.28,128 L131.75,128 L136.22,128 L140.69,128 L145.16,128 L149.63,128 L154.1,128 L158.57,128 L163.03,128 L167.5,128 L171.97,128 L176.44,128 L180.91,128 L185.38,128 L189.85,128 L194.32,128 L198.79,128 L203.26,128 L207.72,128 L212.19,128 L216.66,128 L221.13,128 L225.6,128 L230.07,128 L234.54,128 L239.01,128 L243.48,128 L247.94,128 L252.41,128 L256.88,128 L261.35,128 L265.82,128 L270.29,128 L274.76,128 L279.23,128 L283.7,128 L288.17,128 L292.63,128 L297.1,128 L301.57,128 L306.04,128 L310.51,128 L314.98,128 L319.45,128 L323.92,128 L328.39,128 L332.86,128 L337.32,128 L341.79,128 L346.26,128 L350.73,128 L355.2,128 L359.67,128 L364.14,128 L368.61,128 L373.08,128 L377.54,128 L382.01,128 L386.48,128 L390.95,128 L395.42,128 L399.89,128 L404.36,128 L408.83,128 L413.3,128 L417.77,128 L422.23,128 L426.7,128 L431.17,128 L435.64,128 L440.11,128 L444.58,128 L449.05,128 L453.52,128 L457.99,128 L462.46,128 L466.92,128 L471.39,128 L475.86,128 L480.33,128 L484.8,128 L489.27,128 L493.74,128 L498.21,128 L502.68,128 L507.14,128 L511.61,128 L516.08,128 L520.55,128 L525.02,128 L529.49,128 L533.96,128 L538.43,128 L542.9,128 L547.37,128 L551.83,128 L556.3,128 L560.77,128 L565.24,128 L569.71,128 L574.18,128 L578.65,128 L583.12,128 L587.59,128 L592.06,128 L596.52,128 L600.99,128 L605.46,128 L609.93,128 L614.4,128 L618.87,128 L623.34,128 L627.81,128 L632.28,128 L636.74,128 L641.21,128 L645.68,128 L650.15,128 L654.62,128 L659.09,128 L663.56,128 L668.03,128 L672.5,128 L676.97,128 L681.43,128 L685.9,128 L690.37,128 L694.84,128 L699.31,128 L703.78,128 L708.25,128 L712.72,128 L717.19,128 L721.66,128 L726.12,128 L730.59,128 L735.06,128 L739.53,128 L744,128" class="s-ink w15 nofill"/>
+<path d="M618.87,128 L623.34,131 L627.81,134 L632.28,137 L636.74,140 L641.21,143 L645.68,146 L650.15,149 L654.62,152 L659.09,155 L663.56,158 L668.03,161 L672.5,164 L676.97,167 L681.43,170 L685.9,173 L690.37,176 L694.84,179 L699.31,182 L703.78,185 L708.25,188 L712.72,191 L717.19,194 L721.66,197 L726.12,200 L730.59,203 L735.06,206 L739.53,209 L744,212" class="s-orange w15 nofill"/>
+<path d="M609.93,188 L614.4,191 L618.87,194 L623.34,197 L627.81,200 L632.28,203 L636.74,206 L641.21,209 L645.68,212 L650.15,215 L654.62,218 L659.09,221 L663.56,224 L668.03,227 L672.5,230 L676.97,233 L681.43,236 L685.9,239 L690.37,242 L694.84,245 L699.31,248 L703.78,251 L708.25,254 L712.72,257 L717.19,260 L721.66,263 L726.12,266 L730.59,269 L735.06,272 L739.53,275 L744,278" class="s-orange w15 nofill"/>
+<path d="M158.57,128 L163.03,131 L167.5,134 L171.97,137 L176.44,140 L180.91,143 L185.38,146 L189.85,149 L194.32,152 L198.79,155 L203.26,158 L207.72,161 L212.19,164 L216.66,167 L221.13,170 L225.6,173 L230.07,176 L234.54,179 L239.01,182 L243.48,185 L247.94,188 L252.41,191 L256.88,194 L261.35,197 L265.82,200 L270.29,203 L274.76,206 L279.23,209 L283.7,212 L288.17,215 L292.63,218 L297.1,221 L301.57,224 L306.04,227 L310.51,230 L314.98,233 L319.45,236 L323.92,239 L328.39,242 L332.86,245 L337.32,248 L341.79,251 L346.26,254 L350.73,257 L355.2,260 L359.67,263 L364.14,266 L368.61,269 L373.08,272 L377.54,275 L382.01,278 L386.48,281 L390.95,284 L395.42,287 L399.89,290 L404.36,293 L408.83,296 L413.3,299 L417.77,302 L422.23,305 L426.7,308 L431.17,311 L435.64,314 L440.11,317 L444.58,320 L449.05,323 L453.52,326 L457.99,329 L462.46,332 L466.92,335 L471.39,338 L475.86,341 L480.33,344 L484.8,347 L489.27,350 L493.74,353 L498.21,356 L502.68,359 L507.14,362 L511.61,365 L516.08,368 L520.55,371 L525.02,374 L529.49,377 L533.96,380 L538.43,383 L542.9,386 L547.37,389 L551.83,392 L556.3,395 L560.77,398 L565.24,401 L569.71,404 L574.18,407 L578.65,410 L583.12,413 L587.59,416 L592.06,419 L596.52,422 L600.99,425 L605.46,428 L609.93,428 L614.4,428 L618.87,428 L623.34,428 L627.81,428 L632.28,428 L636.74,428 L641.21,428 L645.68,428 L650.15,428 L654.62,428 L659.09,428 L663.56,428 L668.03,428 L672.5,428 L676.97,428 L681.43,428 L685.9,428 L690.37,428 L694.84,428 L699.31,428 L703.78,428 L708.25,428 L712.72,428 L717.19,428 L721.66,428 L726.12,428 L730.59,428 L735.06,428 L739.53,428 L744,428" class="s-orange w15 nofill"/>
+</g>
+<text x="756" y="133" class="t-note f-ink" data-w="122">mem-10 rule, 1.00</text>
+<text x="756" y="217" class="t-note f-orange-ink" data-w="134">mem-05 event, 0.72</text>
+<text x="756" y="283" class="t-note f-orange-ink" data-w="122">mem-03 fact, 0.50</text>
+<text x="756" y="433" class="t-note f-orange-ink" data-w="134">mem-07 event, 0.00</text>
+<text x="104" y="242" class="t-note f-ink-muted" data-w="92">ask below 0.6</text>
+<text x="104" y="302" class="t-note f-ink-muted" data-w="97">cold below 0.4</text>
+</g>
+<text x="96" y="116" class="t-note" data-w="74">confidence</text>
+<text x="420" y="472" text-anchor="middle" class="t-note" data-w="71">date, 2026</text>
+<g data-grid="skip">
+<path d="M91.5,123.5 H100.5 V132.5 H91.5 Z" class="f-ink s-surface w1"/>
+</g>
+<g data-grid="skip">
+<path d="M739.5,123.5 H748.5 V132.5 H739.5 Z" class="f-ink s-surface w1"/>
+</g>
+<g data-grid="skip">
+<circle cx="618.87" cy="128" r="5" class="nofill s-orange w15"/>
+</g>
+<g data-grid="skip">
+<circle cx="744" cy="212" r="5" class="f-orange s-surface w1"/>
+</g>
+<g data-grid="skip">
+<text x="618.87" y="114" class="t-note" data-w="142">mem-05 read 14 Sep</text>
+</g>
+<g data-grid="skip">
+<path d="M609.93,182 L615.93,188 L609.93,194 L603.93,188 Z" class="nofill s-orange w15"/>
+</g>
+<g data-grid="skip">
+<path d="M744,272 L750,278 L744,284 L738,278 Z" class="f-orange s-surface w1"/>
+</g>
+<g data-grid="skip">
+<text x="609.93" y="174" class="t-note" data-w="142">mem-03 read 12 Sep</text>
+</g>
+<g data-grid="skip">
+<path d="M158.57,121.5 L164.19,131.25 L152.94,131.25 Z" class="nofill s-orange w15"/>
+</g>
+<g data-grid="skip">
+<path d="M744,421.5 L749.63,431.25 L738.37,431.25 Z" class="f-orange s-surface w1"/>
+</g>
+<g data-grid="skip">
+<text x="170.57" y="152" class="t-note" data-w="131">mem-07 read 3 Jun</text>
+</g>
+<g data-grid="skip">
+<circle cx="431.17" cy="311" r="5" class="nofill s-red w15"/>
+</g>
+<g data-grid="skip">
+<text x="419.17" y="339" text-anchor="end" class="t-note" data-w="167">mem-07 cold from 3 Aug</text>
+</g>
+<text x="40" y="504" class="t-note" data-w="676">Hollow marks sit at each row's last read, solid ones at 12 October; the snippet computes every value.</text>
+</svg>

@@ -1,64 +1,26 @@
 id: ctx-016
 slug: 16-memory-systems
-title: "16 · Memory Systems"
-
-description: >
-  Explore how AI agents build and use long-term memory through episodic,
-  semantic, and procedural memory. Learn memory architectures, retrieval
-  orchestration, decay policies, conflict resolution, and how production
-  frameworks like Mem0, Letta, and Graphiti implement persistent memory.
-
-author: "Ajay"
-
+title: "16 - Memory systems"
+summary: "Why an agent that remembers needs three kinds of memory (episodic, semantic, procedural), how each is written, retrieved and decayed, and the four classes of bug that turn a memory store into a liability."
 date: 2026-05-24
-last_modified: 2026-05-24
-
-tags:
-  - context-engineering
-  - memory
-  - ai-agents
-  - long-term-memory
-  - episodic-memory
-  - semantic-memory
-  - procedural-memory
-  - retrieval
-
-category: Components
-series: Context Engineering
+updated: 2026-10-12
+status: complete
 part: "Part III - Layers in depth"
-chapter: "Part III — Components"
-
-hero: diagrams/08-memory-taxonomy.svg
-hero_alt: "Taxonomy of episodic, semantic, and procedural memory used in AI agent architectures"
-
-reading_time: 18
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - AI Memory
-  - Memory Systems
-  - Long-Term Memory
-  - Episodic Memory
-  - Semantic Memory
-  - Procedural Memory
-  - Memory Retrieval
-  - Memory Orchestration
-  - Memory Context
-  - Mem0
-  - Letta
-  - MemGPT
-  - Graphiti
-  - Zep
-  - Vector Database
-  - Knowledge Graph
-  - Agent Memory
-  - Memory Decay
-  - Conflict Resolution
-
-canonical_url: ""
-
-prev: ../15-tools-and-mcp/
-next: ../17-advanced-retrieval/
+level: intermediate
+reading_time: 21
+tags: [context-engineering, memory, episodic-memory, semantic-memory, procedural-memory, decay, ai-agents]
+hero: diagrams/01-three-kinds.svg
+prerequisites: [ctx-008]
+code: included
+outcomes:
+  - id: o1
+    text: "Distinguish episodic, semantic and procedural memory, and route a piece of information to the right kind, or to no memory store at all."
+  - id: o2
+    text: "Specify the metadata each memory row needs: post 08's nine fields, how each kind uses them, and the trigger a procedural row adds."
+  - id: o3
+    text: "Retrieve from each kind by its own path (trigger match, background ranking, reference recall) in the orchestrator's order, with decay applied on read."
+  - id: o4
+    text: "Recognise the four classes of bug that turn a memory store into a liability, and the guard against each."
+  - id: o5
+    text: "Choose between a vector store, a temporal knowledge graph and tiered paging (Mem0, Zep, Letta) for a workload, or decide that no memory store is wanted."
+recommended: [ctx-009, ctx-015]
