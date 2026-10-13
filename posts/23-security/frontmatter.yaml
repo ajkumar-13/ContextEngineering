@@ -1,64 +1,26 @@
 id: ctx-023
-slug: 23-security-and-guardrails
-title: "23 · Security and Guardrails"
-
-description: >
-  Learn how to secure LLM applications against prompt injection, jailbreaks,
-  indirect attacks, tool abuse, data exfiltration, and memory poisoning.
-  Explore guardrails, permission models, sandboxing, policy enforcement,
-  and defense-in-depth strategies for production AI systems.
-
-author: "Ajay"
-
+slug: 23-security
+title: "23 - Security and prompt injection"
+summary: "Any text in the context window can act as an instruction. The three classes of prompt injection, the data-exfiltration chain, and the four architectural defences that hold when the model is fooled."
 date: 2026-06-02
-last_modified: 2026-06-02
-
-tags:
-  - context-engineering
-  - security
-  - guardrails
-  - prompt-injection
-  - jailbreak
-  - ai-agents
-  - sandboxing
-  - governance
-
-category: Production Concerns
-series: Context Engineering
+updated: 2026-10-13
+status: complete
 part: "Part IV - Production-grade practice"
-chapter: "Part IV — Production Concerns"
-
-hero: diagrams/00-hero-security.svg
-hero_alt: "Defense-in-depth architecture for LLM applications showing prompt protection, tool permissions, sandboxing, and policy enforcement"
-
-reading_time: 15
-
-toc: true
-draft: false
-
-keywords:
-  - Context Engineering
-  - LLM Security
-  - AI Security
-  - Prompt Injection
-  - Indirect Prompt Injection
-  - Jailbreak
-  - Prompt Leakage
-  - Memory Poisoning
-  - Tool Abuse
-  - Data Exfiltration
-  - Guardrails
-  - Sandboxing
-  - Policy Enforcement
-  - Input Validation
-  - Output Validation
-  - Tool Permissions
-  - Least Privilege
-  - OWASP LLM
-  - AI Governance
-  - Defense in Depth
-
-canonical_url: ""
-
-prev: ../22-observability/
-next: ../24-deployment-and-operations/
+level: advanced
+reading_time: 20
+tags: [context-engineering, security, prompt-injection, memory-poisoning, least-privilege, mcp, owasp]
+hero: diagrams/00-hero-defences.svg
+prerequisites: [ctx-015, ctx-016]
+code: optional
+outcomes:
+  - id: o1
+    text: "Recognise direct injection, indirect injection and memory poisoning in a scenario, and state what each one can reach."
+  - id: o2
+    text: "Trace the data-exfiltration chain through an agent's tools and name the defence at each of its three steps."
+  - id: o3
+    text: "Apply the four architectural defences to an agent: authority in code, bounded tools, trust-tagged external text, and no silent merge into trusted context."
+  - id: o4
+    text: "Explain why asking the model nicely, an injection classifier or a newer model is defence in depth rather than a control, and what the Dual LLM pattern changes."
+  - id: o5
+    text: "Fill in a threat-model grid for an agent and its MCP servers, with the detection and response each row needs."
+recommended: [ctx-006, ctx-022]
