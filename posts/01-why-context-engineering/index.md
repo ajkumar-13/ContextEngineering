@@ -24,7 +24,7 @@ In December 2022, "prompt engineering" was an accurate description of the work. 
 
 Three changes between then and 2025 broke the name, and each added material to every call that the user never typed.
 
-**First, models gained tools.** OpenAI added function calling to its application programming interface (API) in June 2023 ("Function calling and other API updates"), and within a year the other major providers offered their own tool-use interfaces. The Model Context Protocol (MCP), which Anthropic introduced in November 2024 as an open standard for exposing tools and data to models (post 15 covers it), made those tool definitions portable across applications. On every call the model now reads the JSON (JavaScript Object Notation) schema of every tool it might use, and a large catalogue can run to thousands of tokens (an illustrative size) before the user's message.
+**First, models gained tools.** OpenAI added function calling to its application programming interface (API) in June 2023 ("Function calling and other API updates"), and within a year the other major providers offered their own tool-use interfaces. The Model Context Protocol (MCP), which Anthropic introduced in November 2024 as an open standard for exposing tools and data to models ([post 15](../15-tools-and-mcp/index.md) covers it), made those tool definitions portable across applications. On every call the model now reads the JSON (JavaScript Object Notation) schema of every tool it might use, and a large catalogue can run to thousands of tokens (an illustrative size) before the user's message.
 
 **Second, models gained access to outside data.** Retrieval-augmented generation (RAG), named by Lewis et al. in 2020, became a common pattern in production systems. The user asks a one-line question; the system retrieves a handful of relevant chunks from a document index and places them in the request, so the model reads pages of evidence before it reads the user's words.
 
@@ -64,7 +64,7 @@ Is the rename hype? Most of the techniques are old: few-shot examples, system pr
 
 **The interface is no longer a single string.** A modern API call is a structured object with a system prompt, a list of tool definitions and a list of messages, often carrying retrieved documents and cache markers. The unit of work is a layered data structure, not a phrase.
 
-**The window is finite, and the cost is real.** A window of a million tokens (an illustrative size; window sizes differ by model and change often) sounds endless until tools, retrieved documents and history start to fill it. Anthropic's "Pricing" page listed Claude Sonnet 4.5 input at 3 US dollars per million tokens as of early 2026. One uncached call with 100,000 input tokens therefore costs 100,000 times 3 dollars divided by 1,000,000, which is 0.30 dollars, roughly thirty cents, before any output tokens. Ten thousand such calls a day (an illustrative workload) cost 3,000 dollars a day in input alone. What to include, compress or write out now shows up directly in latency and money. Post 04 sizes a call on an envelope, and post 05 prices it in full, caching included.
+**The window is finite, and the cost is real.** A window of a million tokens (an illustrative size; window sizes differ by model and change often) sounds endless until tools, retrieved documents and history start to fill it. Anthropic's "Pricing" page listed Claude Sonnet 4.5 input at 3 US dollars per million tokens as of early 2026. One uncached call with 100,000 input tokens therefore costs 100,000 times 3 dollars divided by 1,000,000, which is 0.30 dollars, roughly thirty cents, before any output tokens. Ten thousand such calls a day (an illustrative workload) cost 3,000 dollars a day in input alone. What to include, compress or write out now shows up directly in latency and money. [Post 04](../04-tokens-windows-budgets/index.md) sizes a call on an envelope, and [post 05](../05-economics-of-context/index.md) prices it in full, caching included.
 
 In short, prompt engineering was a craft. Context engineering is the same craft, applied to a larger surface, under hard budgets.
 
@@ -80,13 +80,13 @@ Whatever the application (a coding agent, a support bot, a research assistant), 
 
 **1. Decide what goes in.** Which layers are populated, which tools are exposed, which memories are replayed, which documents are retrieved. It is the most visible decision and often where teams start.
 
-**2. Decide what stays out.** The harder and more important sibling of the first job. Every token that does not need to be in the window competes with the tokens that do. Pruning is not optimisation; it is correctness work, and post 06 shows the failures that follow when it is skipped.
+**2. Decide what stays out.** The harder and more important sibling of the first job. Every token that does not need to be in the window competes with the tokens that do. Pruning is not optimisation; it is correctness work, and [post 06](../06-context-failure-modes/index.md) shows the failures that follow when it is skipped.
 
-**3. Decide where each piece sits.** Position matters. Liu et al. ("Lost in the Middle", 2023) measured multi-document question answering and found that models used a relevant passage more reliably when it sat at the start or the end of a long input than when it sat in the middle; post 03 explains the mechanism. Provider prompt caches match on a prefix of the request, so the layers meant to be cached go first (post 05). This series places the user instruction last, on purpose (post 02).
+**3. Decide where each piece sits.** Position matters. Liu et al. ("Lost in the Middle", 2023) measured multi-document question answering and found that models used a relevant passage more reliably when it sat at the start or the end of a long input than when it sat in the middle; [post 03](../03-how-llms-read-context/index.md) explains the mechanism. Provider prompt caches match on a prefix of the request, so the layers meant to be cached go first ([post 05](../05-economics-of-context/index.md)). This series places the user instruction last, on purpose ([post 02](../02-six-layers-of-context/index.md)).
 
-**4. Decide when to refresh, compress, or write out.** A long-running session accumulates context, and left alone it degrades as stale and redundant tokens pile up. Engineers schedule compaction, summarisation and the writing of state out of the window to files or memory stores (posts 08, 12 and 16).
+**4. Decide when to refresh, compress, or write out.** A long-running session accumulates context, and left alone it degrades as stale and redundant tokens pile up. Engineers schedule compaction, summarisation and the writing of state out of the window to files or memory stores ([post 08](../08-write-strategies/index.md), [post 12](../12-compress-strategies/index.md) and [post 16](../16-memory-systems/index.md)).
 
-**5. Decide how to measure whether it worked.** Without traces, evaluations and cost dashboards, every change is a guess: the same change that improves answers on one slice of traffic can quietly degrade another (posts 20 and 22).
+**5. Decide how to measure whether it worked.** Without traces, evaluations and cost dashboards, every change is a guess: the same change that improves answers on one slice of traffic can quietly degrade another ([post 20](../20-evaluation/index.md) and [post 22](../22-observability/index.md)).
 
 Anyone doing one of these five jobs is doing context engineering, whatever the job title says.
 
@@ -104,7 +104,7 @@ Not every LLM bug is a context bug. Before reaching for a retrieval pipeline or 
 
 **It might be a model problem.** If the right information is demonstrably in the window, in a sensible position and in a sensible amount, and the model still fails however the instruction is worded (for example, on a task that needs deeper reasoning than the model can do), the problem is the model. The fix is a stronger model, not more context.
 
-What is left is the large middle: cases where the model is capable in principle but is being given the wrong information, in the wrong place, or in the wrong amount. Those are context problems, and they are the subject of this series. The first question can only be answered by looking at the request the application actually sent, which is why post 02 prints one and labels every part of it.
+What is left is the large middle: cases where the model is capable in principle but is being given the wrong information, in the wrong place, or in the wrong amount. Those are context problems, and they are the subject of this series. The first question can only be answered by looking at the request the application actually sent, which is why [post 02](../02-six-layers-of-context/index.md) prints one and labels every part of it.
 
 ---
 
@@ -117,9 +117,9 @@ The series goes deep on:
 - The **six layers** of a context window and how they interact, with their costs and failure modes (Part I).
 - The **four operations**, write, select, compress, isolate, that organise every context decision (Part II).
 - **RAG** done properly: ingestion, chunking, hybrid search, reranking, and where plain RAG breaks (Parts II and III).
-- **Memory systems**, with the episodic, semantic and procedural kinds (post 16), and **tools and MCP** (post 15).
+- **Memory systems**, with the episodic, semantic and procedural kinds ([post 16](../16-memory-systems/index.md)), and **tools and MCP** ([post 15](../15-tools-and-mcp/index.md)).
 - **Production practice**: evaluation, structured output, observability, security, privacy, and long context against RAG (Part IV).
-- Three **builds from scratch**: a RAG chatbot (post 28), an MCP server (post 29) and an email-reply agent (post 30).
+- Three **builds from scratch**: a RAG chatbot ([post 28](../28-build-rag-chatbot/index.md)), an MCP server ([post 29](../29-build-mcp-server/index.md)) and an email-reply agent ([post 30](../30-capstone-email-reply-agent/index.md)).
 
 It is not a survey of every framework, vector database or paper; it is a tutorial.
 
@@ -127,7 +127,7 @@ It is not a survey of every framework, vector database or paper; it is a tutoria
 
 ## 7. The plan from here
 
-The next post, [post 02](../02-six-layers-of-context/index.md), finds each of the six layers in a real API request, so that the rest of the series has a concrete spine. Post 03 explains how the model reads what it is sent: tokens, attention, positions and the cache of past computation. Post 04 introduces the token budget and how to size a call on an envelope. Post 05 prices calls, shows what prompt caching saves, and budgets latency. Post 06 names the five failure modes (distraction, confusion, conflict, lost-in-the-middle, tool-storm) that a badly assembled window produces.
+The next post, [post 02](../02-six-layers-of-context/index.md), finds each of the six layers in a real API request, so that the rest of the series has a concrete spine. [Post 03](../03-how-llms-read-context/index.md) explains how the model reads what it is sent: tokens, attention, positions and the cache of past computation. [Post 04](../04-tokens-windows-budgets/index.md) introduces the token budget and how to size a call on an envelope. [Post 05](../05-economics-of-context/index.md) prices calls, shows what prompt caching saves, and budgets latency. [Post 06](../06-context-failure-modes/index.md) names the five failure modes (distraction, confusion, conflict, lost-in-the-middle, tool-storm) that a badly assembled window produces.
 
 By the end of Part I a reader can name the six layers in a raw API request, estimate the tokens, latency and dollars of a prompt without running it, lay out a prefix so that it caches, and map a production bug report to one of the five failure modes. Everything in Parts II to V is a deeper look at one piece of that picture.
 
@@ -149,23 +149,23 @@ These are the mistakes that applying this post's ideas actually produces.
 
 1. **Treating "context engineering" as a synonym for "RAG".** RAG fills one of the six layers, layer 04, the retrieved chunks; it is not the whole job.
 2. **Confusing the context window with the context.** The window is a hard limit set by the model; the context is what the engineer chooses to put in it. The window is the budget and the context is the spending plan.
-3. **Adding context to fix a bad answer when the right move was to remove some.** More tokens are not more signal, and several of the failure modes in post 06 come from too much.
+3. **Adding context to fix a bad answer when the right move was to remove some.** More tokens are not more signal, and several of the failure modes in [post 06](../06-context-failure-modes/index.md) come from too much.
 4. **Optimising one layer in isolation.** The layers share one window and one budget, so a longer system prompt or a larger tool catalogue leaves less room, and less money, for everything else.
-5. **Skipping evaluation because the answers look better.** They look better on the handful of examples tried by hand; an evaluation set decides whether a change ships (post 20).
+5. **Skipping evaluation because the answers look better.** They look better on the handful of examples tried by hand; an evaluation set decides whether a change ships ([post 20](../20-evaluation/index.md)).
 
 ---
 
 ## Further reading
 
-- Andrej Karpathy, post on X endorsing "context engineering" over "prompt engineering" (25 June 2025). The definition quoted in section 2.
-- Lance Martin, "Context Engineering for Agents" (June 2025; LangChain blog version, July 2025). The source of the write, select, compress, isolate vocabulary.
-- Anthropic Engineering, "Effective context engineering for AI agents" (September 2025). Context as a finite resource; quoted in section 2.
-- IBM Think, "What is context engineering?" (2025). The definition quoted in section 2.
-- Dex Horthy, "12-Factor Agents" (2025). Practitioner patterns, including "own your context window".
-- OpenAI, "Function calling and other API updates" (June 2023), and Anthropic, "Introducing the Model Context Protocol" (November 2024). The tool changes of section 1.
-- Lewis et al., "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks" (2020). The paper that named RAG.
-- Liu et al., "Lost in the Middle: How Language Models Use Long Contexts" (2023). The position finding of section 4.
-- Anthropic, "Pricing" (per-million-token rates, as of early 2026). The source of the cost figure in section 3.
+- Andrej Karpathy, [post on X endorsing "context engineering" over "prompt engineering"](https://x.com/karpathy/status/1937902205765607626) (25 June 2025). The definition quoted in section 2.
+- Lance Martin, ["Context Engineering for Agents"](https://rlancemartin.github.io/2025/06/23/context_engineering/) (June 2025; [LangChain blog version](https://www.langchain.com/blog/context-engineering-for-agents), July 2025). The source of the write, select, compress, isolate vocabulary.
+- Anthropic Engineering, ["Effective context engineering for AI agents"](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) (September 2025). Context as a finite resource; quoted in section 2.
+- IBM Think, ["What is context engineering?"](https://www.ibm.com/think/topics/context-engineering) (2025). The definition quoted in section 2.
+- Dex Horthy, ["12-Factor Agents"](https://github.com/humanlayer/12-factor-agents) (2025). Practitioner patterns, including "own your context window".
+- OpenAI, ["Function calling and other API updates"](https://openai.com/index/function-calling-and-other-api-updates/) (June 2023), and Anthropic, ["Introducing the Model Context Protocol"](https://www.anthropic.com/news/model-context-protocol) (November 2024). The tool changes of section 1.
+- Lewis et al., ["Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"](https://arxiv.org/abs/2005.11401) (2020). The paper that named RAG.
+- Liu et al., ["Lost in the Middle: How Language Models Use Long Contexts"](https://arxiv.org/abs/2307.03172) (2023). The position finding of section 4.
+- Anthropic, ["Pricing"](https://platform.claude.com/docs/en/about-claude/pricing) (per-million-token rates, as of early 2026). The source of the cost figure in section 3.
 
 Full citations are in [REFERENCES.md](../../REFERENCES.md).
 
