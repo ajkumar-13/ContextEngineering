@@ -221,7 +221,7 @@ if __name__ == "__main__":
 
 Four things to notice.
 
-**The descriptions, against post 15's six parts.** [Post 15](../15-tools-and-mcp/index.md), section 3, asks for a name, a summary, when to use the tool, when not to, described parameters and one example. `search_orders` has the first five; its last sentence is the "when not to" line naming `issue_refund`. `issue_refund` has no "when not to" line. `escalate_to_human` leaves both parameters undescribed, and its queue is a regular-expression `pattern` where post 15 recommends an enum: `Literal["general", "billing", "engineering"]` would list the values in the schema. None has an example. With three tools the iron triangle of post 15, section 2, is easy: rich descriptions fit in layer 02 without a selection step.
+**The descriptions, against [post 15](../15-tools-and-mcp/index.md)'s six parts.** [Post 15](../15-tools-and-mcp/index.md), section 3, asks for a name, a summary, when to use the tool, when not to, described parameters and one example. `search_orders` has the first five; its last sentence is the "when not to" line naming `issue_refund`. `issue_refund` has no "when not to" line. `escalate_to_human` leaves both parameters undescribed, and its queue is a regular-expression `pattern` where [post 15](../15-tools-and-mcp/index.md) recommends an enum: `Literal["general", "billing", "engineering"]` would list the values in the schema. None has an example. With three tools the iron triangle of [post 15](../15-tools-and-mcp/index.md), section 2, is easy: rich descriptions fit in layer 02 without a selection step.
 
 **The threshold is in code.** The description tells the model that large refunds need confirmation; the `if amount > REFUND_THRESHOLD` line makes it true whatever the model does. It is D1 of [post 23](../23-security/index.md), section 5, the model is not the permission system, in its most literal form.
 
@@ -349,7 +349,7 @@ The four architectural defences of [post 23](../23-security/index.md), section 5
 
 - **D1, the model is not the permission system.** The threshold lives in `issue_refund`. The refunds policy's 30-day window, by contrast, is enforced nowhere: the resource states it and no code checks a purchase date.
 - **D2, a bounded blast radius.** The server reads one JSON file and mints refund identifiers, nothing else. A real version runs as a database user that can read orders and write refunds only.
-- **D3, filter at trust boundaries.** Every call is validated, by the schema or by `validate_call`, and results are structured data from the server's own files. The prompt template puts the customer's message between two `---` lines, a weak wrapper; post 23's trust tag would mark that text `external`, data the model must not obey.
+- **D3, filter at trust boundaries.** Every call is validated, by the schema or by `validate_call`, and results are structured data from the server's own files. The prompt template puts the customer's message between two `---` lines, a weak wrapper; [post 23](../23-security/index.md)'s trust tag would mark that text `external`, data the model must not obey.
 - **D4, never silently merge attacker text into trusted context.** The resource is a project file, and the server writes no memory. A tool returning customer-written text would need D3's tag on its result.
 
 The specification's Tools page adds four obligations: servers MUST validate all tool inputs, implement proper access controls, rate limit tool invocations and sanitise tool outputs. This build meets the first on both paths and the last by construction; with one identity it has no access control, and it has no rate limit.
@@ -422,15 +422,13 @@ The live steps need a host and have not been run for this post: install Claude D
 
 ## Further reading
 
-- Model Context Protocol, "Specification", revision 2026-07-28 (consulted October 2026): the Tools, Resources, Discovery, Versioning, stdio, Streamable HTTP and Authorization pages.
-- Model Context Protocol, "Python SDK" (GitHub, consulted October 2026): `FastMCP` in the 1.x line, `MCPServer` in 2.x.
-- Model Context Protocol, "Connect to local MCP servers" and "The MCP Registry" (consulted October 2026).
-- FastMCP, "Running Your Server" (gofastmcp.com, consulted October 2026): the standalone FastMCP project, whose HTTP transport string is `"http"` where the official SDK's is `"streamable-http"`.
-- Anthropic, "Introducing the Model Context Protocol" (November 2024).
-- agents.md project, "AGENTS.md" (consulted October 2026).
-- Cursor, "Model Context Protocol", and Continue, "MCP" (documentation, consulted October 2026).
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Model Context Protocol, ["Specification"](https://modelcontextprotocol.io/), revision 2026-07-28 (consulted October 2026): the Tools, Resources, Discovery, Versioning, stdio, Streamable HTTP and Authorization pages.
+- Model Context Protocol, ["Python SDK"](https://github.com/modelcontextprotocol/python-sdk) (GitHub, consulted October 2026): `FastMCP` in the 1.x line, `MCPServer` in 2.x.
+- Model Context Protocol, ["Connect to local MCP servers"](https://modelcontextprotocol.io/docs/develop/connect-local-servers) and ["The MCP Registry"](https://modelcontextprotocol.io/registry/about) (consulted October 2026).
+- FastMCP, ["Running Your Server"](https://gofastmcp.com/deployment/running-server) (gofastmcp.com, consulted October 2026): the standalone FastMCP project, whose HTTP transport string is `"http"` where the official SDK's is `"streamable-http"`.
+- Anthropic, ["Introducing the Model Context Protocol"](https://www.anthropic.com/news/model-context-protocol) (November 2024).
+- agents.md project, ["AGENTS.md"](https://agents.md/) (consulted October 2026).
+- Cursor, ["Model Context Protocol"](https://cursor.com/docs/context/mcp), and Continue, ["MCP"](https://docs.continue.dev/customize/deep-dives/mcp) (documentation, consulted October 2026).
 
 ---
 
