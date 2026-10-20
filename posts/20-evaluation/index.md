@@ -23,7 +23,7 @@
 
 A team without evaluation works in a loop: someone notices a bad output, edits the prompt, the bad case is fixed, and other cases regress unseen, until no one can say whether the last release was better than the one before. A fix can break cases far from it: a rule added to layer 01, the system prompt, can contradict an older rule, as two refund rules do in section 6 of [post 14](../14-system-prompt-as-software/index.md). The failure modes of [post 06](../06-context-failure-modes/index.md) name what breaks; only a measurement before and after a fix says whether it was cured.
 
-The fix is structural: every component gets a fixed test set, a metric, and a gate that acts on the metric. [Post 11](../11-rag-in-depth/index.md) built the minimum version for a retrieval pipeline and post 14 one for a system prompt (each in its section 6); this post generalises both into one harness. It is the discipline classical software adopted with automated tests, with one difference: a model's output varies between runs and rarely has one correct string, so the tests need scores, tolerances and, for qualities no string comparison captures, a judge.
+The fix is structural: every component gets a fixed test set, a metric, and a gate that acts on the metric. [Post 11](../11-rag-in-depth/index.md) built the minimum version for a retrieval pipeline and [post 14](../14-system-prompt-as-software/index.md) one for a system prompt (each in its section 6); this post generalises both into one harness. It is the discipline classical software adopted with automated tests, with one difference: a model's output varies between runs and rarely has one correct string, so the tests need scores, tolerances and, for qualities no string comparison captures, a judge.
 
 ---
 
@@ -106,7 +106,7 @@ jobs:
 
 The companion's `check_regression(current, baseline, tolerance=0.05)` fails when any baseline metric falls by more than the tolerance (an absolute drop on a score between 0 and 1; its README calls 0.05 a default to set per metric) or is missing. A failed gate exits non-zero, and the pull request cannot merge.
 
-**The gate on a twenty-case golden set.** The snippet `eval_gate.py` runs that gate against the toy pipeline of [post 11](../11-rag-in-depth/index.md): BM25 (Best Matching 25) and a character-trigram ranker over headed chunks, fused by reciprocal rank fusion. The golden set is post 11's ten questions plus ten more over the same four documents, each labelled by a phrase only its answer-bearing chunks contain. With no model offline, the answer is a stand-in, the text of the top-ranked chunk, so `answer_match` (the companion's containment check: is the gold phrase inside the answer, ignoring case and spacing) asks whether the first chunk carries the answer. `context_recall@3` is the share of each case's relevant chunks in the top 3, averaged over cases. Three changes to post 11's pipeline drop the BM25 half, the contextual headers, or both. Running `uv run python posts/20-evaluation/snippets/eval_gate.py` from the series root prints:
+**The gate on a twenty-case golden set.** The snippet `eval_gate.py` runs that gate against the toy pipeline of [post 11](../11-rag-in-depth/index.md): BM25 (Best Matching 25) and a character-trigram ranker over headed chunks, fused by reciprocal rank fusion. The golden set is [post 11](../11-rag-in-depth/index.md)'s ten questions plus ten more over the same four documents, each labelled by a phrase only its answer-bearing chunks contain. With no model offline, the answer is a stand-in, the text of the top-ranked chunk, so `answer_match` (the companion's containment check: is the gold phrase inside the answer, ignoring case and spacing) asks whether the first chunk carries the answer. `context_recall@3` is the share of each case's relevant chunks in the top 3, averaged over cases. Three changes to [post 11](../11-rag-in-depth/index.md)'s pipeline drop the BM25 half, the contextual headers, or both. Running `uv run python posts/20-evaluation/snippets/eval_gate.py` from the series root prints:
 
 ```text
 golden set: 20 cases (10 from post 11, 10 added), 17 chunks
@@ -128,7 +128,7 @@ The figure below draws each drop against the tolerance.
 
 *A drop has to pass the line to block; one case on twenty sits exactly on it.*
 
-Dropping the headers is blocked: recall falls by 0.075 as cases g03 and g17 lose some or all of their passages. Dropping BM25 passes, yet its mean hides four flips: `answer_match` fell on g02 and g07 and rose on g04 and g05. Reading the flipped cases, as post 11 recommends, shows that a passing change still broke two questions. Without the headers, `answer_match` falls by exactly 0.05, one net case, and that metric passes: the gate fires only on a drop larger than the tolerance, and on twenty cases one case is 0.05, so the size of the set sets the gate's resolution. Under a real model the tolerance must also clear run-to-run noise (section 5).
+Dropping the headers is blocked: recall falls by 0.075 as cases g03 and g17 lose some or all of their passages. Dropping BM25 passes, yet its mean hides four flips: `answer_match` fell on g02 and g07 and rose on g04 and g05. Reading the flipped cases, as [post 11](../11-rag-in-depth/index.md) recommends, shows that a passing change still broke two questions. Without the headers, `answer_match` falls by exactly 0.05, one net case, and that metric passes: the gate fires only on a drop larger than the tolerance, and on twenty cases one case is 0.05, so the size of the set sets the gate's resolution. Under a real model the tolerance must also clear run-to-run noise (section 5).
 
 **Caching and sampling.** Model calls in the harness are cached by a hash of prompt, model and parameters, so a repeated fixture costs nothing. Pull requests run a subset (say 50 of 200 end-to-end tasks, illustrative), nightly runs the full set, and a release adds a human sample.
 
@@ -143,7 +143,7 @@ Ragas began as a paper (Es et al., 2023) that defined three reference-free metri
 - **Context precision** evaluates "the retriever's ability to rank relevant chunks higher than irrelevant ones": the mean of precision@k at the position of each relevant retrieved chunk. It catches noise in layer 04, retrieved chunks, and good chunks ranked low. Inputs: question, retrieved contexts, and a reference answer (or the response, in a reference-free variant).
 - **Context recall** "measures how many of the relevant documents (or pieces of information) were successfully retrieved": with a judge, the share of the reference answer's claims that the retrieved context supports. It catches missed evidence, and it always needs a reference: an answer, reference contexts, or reference ids, in an ID-based variant that needs no model and that the companion's `context_recall@3` follows. Two deterministic checks complete a RAG dashboard: **citation validity** (every cited source id is in the retrieved set) and **citation presence** (the answer cites at least one source).
 
-**The noise floor.** Every judged metric has a noise floor: the spread between runs of the unchanged harness on the same fixtures. A drop smaller than the floor cannot be told from a re-roll, so the tolerance has to sit above it; measure it by running the unchanged suite several times with the cache off. The size of the golden set adds a second limit. On $n$ cases one case moves a mean by $1/n$, and post 11's standard error $\sqrt{p(1-p)/n}$ says how far a score on the set may sit from the score on all traffic: for $n = 20$ and $p = 0.75$, about 0.097, nearly two cases. A gate on twenty cases can say these twenty got worse, not that traffic got worse by less than about 0.1.
+**The noise floor.** Every judged metric has a noise floor: the spread between runs of the unchanged harness on the same fixtures. A drop smaller than the floor cannot be told from a re-roll, so the tolerance has to sit above it; measure it by running the unchanged suite several times with the cache off. The size of the golden set adds a second limit. On $n$ cases one case moves a mean by $1/n$, and [post 11](../11-rag-in-depth/index.md)'s standard error $\sqrt{p(1-p)/n}$ says how far a score on the set may sit from the score on all traffic: for $n = 20$ and $p = 0.75$, about 0.097, nearly two cases. A gate on twenty cases can say these twenty got worse, not that traffic got worse by less than about 0.1.
 
 ---
 
@@ -190,7 +190,7 @@ The companion [`code/20-eval-ragas`](../../code/20-eval-ragas/) holds `evalkit`:
 uv run --with pytest python -m pytest -p no:cacheprovider code/20-eval-ragas/tests
 ```
 
-They end with `6 passed` in under a second. The companion's fixture `tests/fixtures/golden_set.json` holds three cases, enough for its tests; the twenty-case set of section 4 is built by the snippet, which imports `evalkit` from `code/20-eval-ragas/src` and post 11's pipeline from its snippet, and prints in under a second:
+They end with `6 passed` in under a second. The companion's fixture `tests/fixtures/golden_set.json` holds three cases, enough for its tests; the twenty-case set of section 4 is built by the snippet, which imports `evalkit` from `code/20-eval-ragas/src` and [post 11](../11-rag-in-depth/index.md)'s pipeline from its snippet, and prints in under a second:
 
 ```text
 uv run python posts/20-evaluation/snippets/eval_gate.py
@@ -220,14 +220,12 @@ uv run python posts/20-evaluation/snippets/eval_gate.py
 
 ## Further reading
 
-- Zheng, L. *et al.*, "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena" (NeurIPS 2023): Tables 2 to 4.
-- Chiang, W.-L. *et al.*, "Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference" (ICML 2024).
-- Es, S. *et al.*, "RAGAS: Automated Evaluation of Retrieval Augmented Generation" (EACL 2024 demo), and the Ragas "Available metrics" documentation (consulted October 2026).
-- Liu, Y. *et al.*, "G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment" (EMNLP 2023).
-- Saad-Falcon, J. *et al.*, "ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems" (NAACL 2024).
-- promptfoo, DeepEval and LangSmith evaluation documentation (consulted October 2026).
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Zheng, L. *et al.*, ["Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena"](https://arxiv.org/abs/2306.05685) (NeurIPS 2023): Tables 2 to 4.
+- Chiang, W.-L. *et al.*, ["Chatbot Arena: An Open Platform for Evaluating LLMs by Human Preference"](https://arxiv.org/abs/2403.04132) (ICML 2024).
+- Es, S. *et al.*, ["RAGAS: Automated Evaluation of Retrieval Augmented Generation"](https://arxiv.org/abs/2309.15217) (EACL 2024 demo), and the Ragas ["Available metrics"](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/) documentation (consulted October 2026).
+- Liu, Y. *et al.*, ["G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment"](https://arxiv.org/abs/2303.16634) (EMNLP 2023).
+- Saad-Falcon, J. *et al.*, ["ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems"](https://arxiv.org/abs/2311.09476) (NAACL 2024).
+- [promptfoo](https://www.promptfoo.dev/docs/), [DeepEval](https://deepeval.com/docs) and [LangSmith](https://docs.langchain.com/langsmith/evaluation) evaluation documentation (consulted October 2026).
 
 ---
 
