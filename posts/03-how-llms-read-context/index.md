@@ -21,7 +21,7 @@
 
 ## 1. The question: what does a model do with the window?
 
-Post 02 split the window into six layers, from layer 01, the system prompt, to layer 06, the user instruction, and sent the stable layers first and the user instruction last. This post asks why that order pays: which properties of tokenisation, attention, positions and the KV cache make the order, the position and the stability of a prefix change what a prompt costs and what the model recalls?
+[Post 02](../02-six-layers-of-context/index.md) split the window into six layers, from layer 01, the system prompt, to layer 06, the user instruction, and sent the stable layers first and the user instruction last. This post asks why that order pays: which properties of tokenisation, attention, positions and the KV cache make the order, the position and the stability of a prefix change what a prompt costs and what the model recalls?
 
 The answer needs only a small part of the transformer: the model splits the input into tokens, maps each token to a vector, runs a stack of attention layers over the sequence, and produces a probability distribution over the next token. Each step has one consequence for context engineering.
 
@@ -29,7 +29,7 @@ The answer needs only a small part of the transformer: the model splits the inpu
 
 ## 2. From characters to tokens to vectors
 
-Before the model sees anything, a deterministic tokeniser breaks the input into **tokens**. The tokenisers of the GPT family, and of many other models, are variants of byte-pair encoding (BPE): the vocabulary is built by repeatedly merging the most frequent adjacent pair of symbols in a training corpus, so common words become single tokens and rare strings fall apart into fragments (Sennrich et al., 2016). OpenAI's "Tokenizer" page gives the rule of thumb that one token is about four characters, or three quarters of a word, of common English text; code, other languages and punctuation differ. The same string can also split differently under different vocabularies. The first practical consequence is that **counting words is not counting cost**; post 04 is about that cost.
+Before the model sees anything, a deterministic tokeniser breaks the input into **tokens**. The tokenisers of the GPT family, and of many other models, are variants of byte-pair encoding (BPE): the vocabulary is built by repeatedly merging the most frequent adjacent pair of symbols in a training corpus, so common words become single tokens and rare strings fall apart into fragments (Sennrich et al., 2016). OpenAI's "Tokenizer" page gives the rule of thumb that one token is about four characters, or three quarters of a word, of common English text; code, other languages and punctuation differ. The same string can also split differently under different vocabularies. The first practical consequence is that **counting words is not counting cost**; [post 04](../04-tokens-windows-budgets/index.md) is about that cost.
 
 The splits can be checked with OpenAI's tokeniser library `tiktoken`. The snippet `snippets/tokens.py` prints four strings and their pieces under the `o200k_base` encoding:
 
@@ -159,7 +159,7 @@ Three rules follow and recur in production:
 
 - **Caches are prefix-keyed.** A change at any point invalidates everything after it, because every later key and value was computed with the changed token in view. Layer 01, the system prompt, and layer 02, tools and Model Context Protocol (MCP) descriptions, belong at the front.
 - **Caches are exact.** A timestamp, a request id or a "today is" line at the top of the system prompt makes every call a miss, as layout B shows. Volatile content goes after the cacheable prefix.
-- **Caches expire.** An entry not read within its lifetime is dropped: steady traffic keeps a prefix warm, while a call every ten minutes may pay the full input price, and the write premium, every time. Post 05 works through that trade-off.
+- **Caches expire.** An entry not read within its lifetime is dropped: steady traffic keeps a prefix warm, while a call every ten minutes may pay the full input price, and the write premium, every time. [Post 05](../05-economics-of-context/index.md) works through that trade-off.
 
 ---
 
@@ -185,7 +185,7 @@ The four mechanics (tokens, attention, position and the cache) converge on one p
 | Middle | layer 03, memory and state; layer 04, retrieved chunks; layer 05, conversation history | Assembled or grown on every call, so not part of a stable prefix; the least-used region, so keep it short and put the strongest evidence at its edges |
 | End | layer 06, the user instruction | New on every call, so last keeps the reusable prefix long; the end is the other best-used position |
 
-The heuristic explains why the order of post 02 is the order the machinery rewards. Inside layer 04 the same logic gives the bookend layout of [post 09](../09-select-strategies/index.md): the strongest chunk first and the second strongest last.
+The heuristic explains why the order of [post 02](../02-six-layers-of-context/index.md) is the order the machinery rewards. Inside layer 04 the same logic gives the bookend layout of [post 09](../09-select-strategies/index.md): the strongest chunk first and the second strongest last.
 
 ---
 
@@ -226,18 +226,16 @@ The position effect needs a live model: a fact placed at the end of a prompt of 
 
 ## Further reading
 
-- Liu, N. F. *et al.*, *"Lost in the Middle: How Language Models Use Long Contexts"* (arXiv 2023, TACL 2024): section 5; Tables 1, 3 and 6 hold the numbers it quotes.
-- Xiao, G. *et al.*, *"Efficient Streaming Language Models with Attention Sinks"* (2023): attention sinks and StreamingLLM.
-- Su, J. *et al.*, *"RoFormer: Enhanced Transformer with Rotary Position Embedding"* (2021): RoPE.
-- Press, O. *et al.*, *"Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation"* (2022): ALiBi.
-- Sennrich, R. *et al.*, *"Neural Machine Translation of Rare Words with Subword Units"* (2016): byte-pair encoding.
-- OpenAI, *"Tokenizer"* and the `tiktoken` library: the tokeniser of section 2.
-- Anthropic, *"Prompt caching"* documentation: the cache rules of section 7.
-- Kamradt, G., *"Needle In A Haystack: Pressure Testing LLMs"* (2023): the harness that popularised the needle test.
-- Hsieh, C.-P. *et al.*, *"RULER: What's the Real Context Size of Your Long-Context Language Models?"* (2024): needle tests extended to harder tasks.
-- Hong, K. *et al.*, *"Context Rot: How Increasing Input Tokens Impacts LLM Performance"* (Chroma, 2025): degradation with input length.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Liu, N. F. *et al.*, *["Lost in the Middle: How Language Models Use Long Contexts"](https://arxiv.org/abs/2307.03172)* (arXiv 2023, TACL 2024): section 5; Tables 1, 3 and 6 hold the numbers it quotes.
+- Xiao, G. *et al.*, *["Efficient Streaming Language Models with Attention Sinks"](https://arxiv.org/abs/2309.17453)* (2023): attention sinks and StreamingLLM.
+- Su, J. *et al.*, *["RoFormer: Enhanced Transformer with Rotary Position Embedding"](https://arxiv.org/abs/2104.09864)* (2021): RoPE.
+- Press, O. *et al.*, *["Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation"](https://arxiv.org/abs/2108.12409)* (2022): ALiBi.
+- Sennrich, R. *et al.*, *["Neural Machine Translation of Rare Words with Subword Units"](https://arxiv.org/abs/1508.07909)* (2016): byte-pair encoding.
+- OpenAI, *["Tokenizer"](https://platform.openai.com/tokenizer)* and the [`tiktoken`](https://github.com/openai/tiktoken) library: the tokeniser of section 2.
+- Anthropic, *["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)* documentation: the cache rules of section 7.
+- Kamradt, G., *["Needle In A Haystack: Pressure Testing LLMs"](https://github.com/gkamradt/LLMTest_NeedleInAHaystack)* (2023): the harness that popularised the needle test.
+- Hsieh, C.-P. *et al.*, *["RULER: What's the Real Context Size of Your Long-Context Language Models?"](https://arxiv.org/abs/2404.06654)* (2024): needle tests extended to harder tasks.
+- Hong, K. *et al.*, *["Context Rot: How Increasing Input Tokens Impacts LLM Performance"](https://www.trychroma.com/research/context-rot)* (Chroma, 2025): degradation with input length.
 
 ---
 
