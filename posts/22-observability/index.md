@@ -52,7 +52,7 @@ turn                      4500 ms  $0.02558
     db_query                60 ms
 ```
 
-The figure at the top draws this tree on a time axis: the model call is 3,800 of the 4,500 milliseconds and 0.02508 of the 0.02558 dollars. It is post 05's agent turn at its early-2026 rates: 10,500 input tokens on Claude Sonnet 4.5, of which 4,600, layers 01 and 02, are read from the cache.
+The figure at the top draws this tree on a time axis: the model call is 3,800 of the 4,500 milliseconds and 0.02508 of the 0.02558 dollars. It is [post 05](../05-economics-of-context/index.md)'s agent turn at its early-2026 rates: 10,500 input tokens on Claude Sonnet 4.5, of which 4,600, layers 01 and 02, are read from the cache.
 
 ---
 
@@ -68,7 +68,7 @@ A starter set that covers the bugs of section 5:
 
 The rule behind the list: every operation that could cause a bug gets its own span.
 
-**Token fields need care.** Anthropic's usage block reports `input_tokens`, `cache_read_input_tokens` and `cache_creation_input_tokens`, and its "Prompt caching" page (consulted October 2026) defines `input_tokens` as the tokens after the last cache breakpoint: the total input is the sum of the three. The OpenTelemetry semantic conventions for generative AI (GenAI), kept in the `semantic-conventions-genai` repository and marked Development (consulted October 2026), name the attributes `gen_ai.usage.input_tokens`, `gen_ai.usage.cache_read.input_tokens`, `gen_ai.usage.cache_write.input_tokens` and `gen_ai.usage.output_tokens`, and their Anthropic page says the cache fields must be added to Anthropic's `input_tokens` to compute `gen_ai.usage.input_tokens`. The snippet's `record_usage` does exactly that, and prices the call at post 05's multipliers:
+**Token fields need care.** Anthropic's usage block reports `input_tokens`, `cache_read_input_tokens` and `cache_creation_input_tokens`, and its "Prompt caching" page (consulted October 2026) defines `input_tokens` as the tokens after the last cache breakpoint: the total input is the sum of the three. The OpenTelemetry semantic conventions for generative AI (GenAI), kept in the `semantic-conventions-genai` repository and marked Development (consulted October 2026), name the attributes `gen_ai.usage.input_tokens`, `gen_ai.usage.cache_read.input_tokens`, `gen_ai.usage.cache_write.input_tokens` and `gen_ai.usage.output_tokens`, and their Anthropic page says the cache fields must be added to Anthropic's `input_tokens` to compute `gen_ai.usage.input_tokens`. The snippet's `record_usage` does exactly that, and prices the call at [post 05](../05-economics-of-context/index.md)'s multipliers:
 
 ```python
 def record_usage(span, model, usage):
@@ -152,7 +152,7 @@ Four shapes recur in the author's experience; each is invisible in the answer an
 
 **Shape 2: buried evidence.** The retrieval span shows the right chunk in the top-k with a high score, yet the answer states a wrong fact. The prompt shows that chunk packed in the middle of layer 04, retrieved chunks, where models use information least reliably ([post 03](../03-how-llms-read-context/index.md), section 5): lost-in-the-middle. The first fix is bookend packing, the packing lever of select ([post 09](../09-select-strategies/index.md), section 5).
 
-**Shape 3: tool-storm.** The trace shows fifteen calls in one turn to the same `search_*` tool with slightly different arguments. The prompt shows layer 02, tools and MCP (Model Context Protocol) descriptions, with tools whose descriptions overlap, and a system prompt with no stop rule. This is tool-storm ([post 06](../06-context-failure-modes/index.md), section 6), whose first fixes are select and isolate: trim the catalogue to the tools the turn needs ([post 15](../15-tools-and-mcp/index.md), section 4), say in each description when not to call it, add a budget rule, cap the result size. Post 06's alert signals, tool calls and tokens per turn, are span counts.
+**Shape 3: tool-storm.** The trace shows fifteen calls in one turn to the same `search_*` tool with slightly different arguments. The prompt shows layer 02, tools and MCP (Model Context Protocol) descriptions, with tools whose descriptions overlap, and a system prompt with no stop rule. This is tool-storm ([post 06](../06-context-failure-modes/index.md), section 6), whose first fixes are select and isolate: trim the catalogue to the tools the turn needs ([post 15](../15-tools-and-mcp/index.md), section 4), say in each description when not to call it, add a budget rule, cap the result size. [Post 06](../06-context-failure-modes/index.md)'s alert signals, tool calls and tokens per turn, are span counts.
 
 **Shape 4: silent regression.** The dashboard shows cost per session down a week ago (20%, as an illustrative figure), and quality down the same week. Traces grouped by release show why: a "cleanup" change removed a line from layer 01, the system prompt, that the model had relied on. The fix is to restore the line and add a fixture so that the same change cannot ship again unseen, which is what replays do.
 
@@ -165,7 +165,7 @@ A trace store is also a fixture library: each trace holds the full input to ever
 The loop has three steps, drawn in the figure below:
 
 - **Capture.** Freeze the inputs of sampled traces that span the common intents. A triaged failure becomes a permanent fixture.
-- **Re-run.** On every prompt or model change, replay the frozen inputs through the new configuration. Deterministic steps (parsing, routing, tool selection) are checked exactly; generative steps go through the rubric or LLM judge of post 20.
+- **Re-run.** On every prompt or model change, replay the frozen inputs through the new configuration. Deterministic steps (parsing, routing, tool selection) are checked exactly; generative steps go through the rubric or LLM judge of [post 20](../20-evaluation/index.md).
 - **Diff.** Compare with the recorded baseline. A failing fixture blocks the change, as continuous integration (CI) blocks code that fails its tests.
 
 ![Five boxes joined left to right: the trace store, capture with 8 fixtures frozen, a re-run on prompt v13, a diff with routes 8 of 8 and rubric 5 of 8, and a gate that blocks v13. Below, eight fixture cells with their routes: fx-02, fx-05 and fx-07, the refund questions, fail; the other five pass.](diagrams/04-replay-loop.svg)
@@ -189,11 +189,11 @@ Every route matches; the three refund questions fail the rubric, and the gate bl
 
 The trace store holds the cost of every call beside its cause. Three knobs show up in it first.
 
-**Prompt-cache use.** The rule is post 05's, from Anthropic's "Prompt caching" page (consulted October 2026): a cache read costs 0.1 times the base input price for most models (the page lists lower multipliers for some newer models), and a cache write costs 1.25 times the base input price for a five-minute entry and 2 times for a one-hour entry, so a prefix pays only when it is read again within its lifetime ([post 05](../05-economics-of-context/index.md), section 4). OpenAI's "Prompt caching" guide (consulted October 2026) says caching is enabled by default for supported models, discounts cached input by up to 95%, and reports the count in the Responses API's `usage.input_tokens_details.cached_tokens`; Gemini offers implicit and explicit caching, as post 05 describes.
+**Prompt-cache use.** The rule is [post 05](../05-economics-of-context/index.md)'s, from Anthropic's "Prompt caching" page (consulted October 2026): a cache read costs 0.1 times the base input price for most models (the page lists lower multipliers for some newer models), and a cache write costs 1.25 times the base input price for a five-minute entry and 2 times for a one-hour entry, so a prefix pays only when it is read again within its lifetime ([post 05](../05-economics-of-context/index.md), section 4). OpenAI's "Prompt caching" guide (consulted October 2026) says caching is enabled by default for supported models, discounts cached input by up to 95%, and reports the count in the Responses API's `usage.input_tokens_details.cached_tokens`; Gemini offers implicit and explicit caching, as [post 05](../05-economics-of-context/index.md) describes.
 
 The number to watch is the **cache-hit rate**, cache-read input tokens over total input tokens. On the turn of section 2 it is $4{,}600 / 10{,}500 = 43.8\%$, the ceiling for that layout, because layers 03 to 06 change on every call. The denominator matters: the snippet also prints the rate over Anthropic's `input_tokens` alone, $4{,}600 / 5{,}900 = 78.0\%$, which looks healthy and is wrong, because that field excludes the cached tokens. A hit rate that drops after a deploy is the fingerprint of a prefix change (a timestamp in the system prompt, a reordered tool list, a non-deterministic serialisation): the first trace after the deploy shows a cache write where a read was expected, and diffing its prompt against the last good one finds the change.
 
-**Per-call model selection.** The trace names the model of every call. Routing, query rewriting and summarising old history can go to the cheap tier, a fifth of the frontier tier's price per token (post 05, section 2); the rewrite of section 2 costs 0.00050 dollars on Claude Haiku 4.5. A small-model task running on the frontier model is a cost bug the trace makes visible.
+**Per-call model selection.** The trace names the model of every call. Routing, query rewriting and summarising old history can go to the cheap tier, a fifth of the frontier tier's price per token ([post 05](../05-economics-of-context/index.md), section 2); the rewrite of section 2 costs 0.00050 dollars on Claude Haiku 4.5. A small-model task running on the frontier model is a cost bug the trace makes visible.
 
 **Sub-agent overuse.** Three nested sub-agent spans for a task that fits in one window are a cost bug too ([post 13](../13-isolate-strategies/index.md)); flag sessions above a sub-agent threshold and review their traces.
 
@@ -263,12 +263,10 @@ Their token counts, timings and traffic are illustrative: they show each mechani
 
 ## Further reading
 
-- OpenTelemetry, *"Semantic conventions for generative AI systems"*, `semantic-conventions-genai` repository (status Development, consulted October 2026): the span attributes, the opt-in content attributes, and how Anthropic's cache fields map to `gen_ai.usage.input_tokens`.
-- Anthropic, *"Prompt caching"* documentation (consulted October 2026): the usage fields and the cache multipliers of sections 3 and 7.
-- OpenAI, *"Prompt caching"* guide (consulted October 2026): default caching, the cached-input discount and the `cached_tokens` field.
-- LangSmith, Langfuse, Arize Phoenix, Braintrust and Helicone documentation (all consulted October 2026): the tools of section 9.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- OpenTelemetry, *["Semantic conventions for generative AI systems"](https://github.com/open-telemetry/semantic-conventions-genai)*, `semantic-conventions-genai` repository (status Development, consulted October 2026): the span attributes, the opt-in content attributes, and how Anthropic's cache fields map to `gen_ai.usage.input_tokens`.
+- Anthropic, *["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)* documentation (consulted October 2026): the usage fields and the cache multipliers of sections 3 and 7.
+- OpenAI, *["Prompt caching"](https://developers.openai.com/api/docs/guides/prompt-caching)* guide (consulted October 2026): default caching, the cached-input discount and the `cached_tokens` field.
+- [LangSmith](https://docs.langchain.com/langsmith), [Langfuse](https://langfuse.com/docs), [Arize Phoenix](https://docs.arize.com/phoenix), [Braintrust](https://www.braintrust.dev/docs) and [Helicone](https://docs.helicone.ai/) documentation (all consulted October 2026): the tools of section 9.
 
 ---
 
