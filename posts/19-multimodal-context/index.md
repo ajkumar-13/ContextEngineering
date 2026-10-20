@@ -24,7 +24,7 @@ Every earlier post treated the context window as a place for words. A vision-lan
 
 The six layers of [post 02](../02-six-layers-of-context/index.md) do not change. An image travels in the layer whose job it does: a page image that retrieval returns for this turn is layer 04, retrieved chunks; an image attached to the current request is part of layer 06, the user instruction; a screenshot from an earlier turn of an agent is part of layer 05, conversation history. What changes is the arithmetic. A paragraph and a full-page screenshot look nothing alike, yet both become tokens, and the screenshot can cost more than the paragraph, so a budget built on text alone ([post 04](../04-tokens-windows-budgets/index.md)) is wrong the moment images arrive.
 
-The figure at the top of the post shows the change: one retrieved page image adds 1,551 tokens to post 04's illustrative 10,500. The question is how that number is worked out, when a document should go in as pixels rather than text, and how images meet retrieval, the budget and the cache.
+The figure at the top of the post shows the change: one retrieved page image adds 1,551 tokens to [post 04](../04-tokens-windows-budgets/index.md)'s illustrative 10,500. The question is how that number is worked out, when a document should go in as pixels rather than text, and how images meet retrieval, the budget and the cache.
 
 ---
 
@@ -79,7 +79,7 @@ Providers handle a whole PDF differently. Anthropic's "PDF support" documentatio
 
 **Pass pixels when layout carries meaning.** A page image keeps tables, columns, figures, stamps, handwriting, checkboxes and which value sits beside which label, and a vision model reads them directly, at a token cost paid again on every call that includes the page. Pixels suit forms, invoices, figure-dense papers, complex tables and scans with no reliable text layer.
 
-**Extract text when the words are the content.** For prose, a contract clause or a plain report, extracted text carries the same information in a form the pipeline of [post 09](../09-select-strategies/index.md) can chunk, embed and retrieve. Whether it is also fewer tokens depends on the page: the snippet's illustrative prose page of 600 words is 800 tokens as text, by post 04's rule of three quarters of a word per token, against 1,551 as a 130-dpi image, but a dense page at the top of Anthropic's 1,500 to 3,000 range costs more as text than as a standard-tier image.
+**Extract text when the words are the content.** For prose, a contract clause or a plain report, extracted text carries the same information in a form the pipeline of [post 09](../09-select-strategies/index.md) can chunk, embed and retrieve. Whether it is also fewer tokens depends on the page: the snippet's illustrative prose page of 600 words is 800 tokens as text, by [post 04](../04-tokens-windows-budgets/index.md)'s rule of three quarters of a word per token, against 1,551 as a 130-dpi image, but a dense page at the top of Anthropic's 1,500 to 3,000 range costs more as text than as a standard-tier image.
 
 The failure to avoid is one method for the whole corpus. A filing might be prose for forty pages and tables for ten; routing per page pays the pixel price only where layout matters. The snippet prices that filing with the sizes above:
 
@@ -89,9 +89,9 @@ page as text 800 tokens, as pixels 1551 tokens
 scanned invoice, no text layer: pixels
 ```
 
-All text is cheapest and flattens the ten tables into runs of numbers (post 10, section 4). Routing per page keeps the tables for 7,510 tokens more than all text and 30,040 fewer than all pixels. Both forms of every page, as Anthropic's PDF document block sends them, cost the most and earn it only when the questions need the words and the layout of every page.
+All text is cheapest and flattens the ten tables into runs of numbers ([post 10](../10-data-ingestion-pipelines/index.md), section 4). Routing per page keeps the tables for 7,510 tokens more than all text and 30,040 fewer than all pixels. Both forms of every page, as Anthropic's PDF document block sends them, cost the most and earn it only when the questions need the words and the layout of every page.
 
-A silent OCR error ("rn" read as "m", a dropped decimal point) becomes a confidently wrong answer downstream, so post 10's advice holds: measure character accuracy on a sample first. A vision model makes its own errors (Anthropic's vision page names low-quality, rotated and very small images), so neither route is exempt from checking.
+A silent OCR error ("rn" read as "m", a dropped decimal point) becomes a confidently wrong answer downstream, so [post 10](../10-data-ingestion-pipelines/index.md)'s advice holds: measure character accuracy on a sample first. A vision model makes its own errors (Anthropic's vision page names low-quality, rotated and very small images), so neither route is exempt from checking.
 
 ---
 
@@ -105,7 +105,7 @@ The alternative is **visual retrieval**: embed the page image and retrieve on th
 
 *The visual route keeps the layout that OCR drops, and pays for it in index size.*
 
-The paper measures both routes on ViDoRe, a benchmark of ten page-retrieval tasks it introduces. In its Table 2 the average normalised discounted cumulative gain at 5 (nDCG@5, a 0 to 100 score that rewards the right page near the top) is 65.5 for OCR text ranked with BM25 (Best Matching 25), 66.1 with the BGE-M3 embedding model, 67.0 for the best text pipeline (captions added, BGE-M3), and 81.3 for ColPali. The gap varies by task, so it is measured on the reader's own pages before it is relied on. The price is post 17's late-interaction price: Table 4 gives 257.5 kilobytes (KB) per page for ColPali in 16-bit floats, against 8.60 KB for one BGE-M3 vector, with text pipelines typically keeping two to five vectors per page. The figure above sets the routes and these numbers side by side.
+The paper measures both routes on ViDoRe, a benchmark of ten page-retrieval tasks it introduces. In its Table 2 the average normalised discounted cumulative gain at 5 (nDCG@5, a 0 to 100 score that rewards the right page near the top) is 65.5 for OCR text ranked with BM25 (Best Matching 25), 66.1 with the BGE-M3 embedding model, 67.0 for the best text pipeline (captions added, BGE-M3), and 81.3 for ColPali. The gap varies by task, so it is measured on the reader's own pages before it is relied on. The price is [post 17](../17-advanced-retrieval/index.md)'s late-interaction price: Table 4 gives 257.5 kilobytes (KB) per page for ColPali in 16-bit floats, against 8.60 KB for one BGE-M3 vector, with text pipelines typically keeping two to five vectors per page. The figure above sets the routes and these numbers side by side.
 
 As a guide: reach for visual retrieval when the corpus is visually rich (slides, dashboards, forms, figure-heavy papers) and OCR loses what the questions need; stay with OCR-then-text RAG for mostly clean prose with a reliable text layer, which is cheaper to store and composes with everything else. Either way the top-k pages or chunks end in layer 04.
 
@@ -119,7 +119,7 @@ The most demanding multimodal workload is the **computer-use agent**, a model dr
 - **Prune old screenshots, in batches.** Above 20 images in a request a stricter per-image size limit applies, and pruning one screenshot every turn changes the prefix every turn and invalidates the cache. The page's default is to keep the last three screenshots and prune every 25 turns; for some newer models it advises server-side clearing of old tool results instead, so the current page decides.
 - **Replace pixels with a note.** Once the model has acted on a screen, a short note of what it did ("earlier: opened the settings panel, changed the timezone") is far cheaper than the pixels: the compress operation of [post 12](../12-compress-strategies/index.md) applied to images.
 
-Post 03's lost-in-the-middle measurements (Liu et al., 2023) were made on text documents, not strips of screenshots, so they say nothing direct here; post 03's rule, keep the middle short, still costs nothing to follow, and pruning is how.
+[Post 03](../03-how-llms-read-context/index.md)'s lost-in-the-middle measurements (Liu et al., 2023) were made on text documents, not strips of screenshots, so they say nothing direct here; [post 03](../03-how-llms-read-context/index.md)'s rule, keep the middle short, still costs nothing to follow, and pruning is how.
 
 ---
 
@@ -139,7 +139,7 @@ Two accounting facts change once images enter the window.
 
 First, **images count against the window and the bill as tokens**, with no separate image budget. A prompt of 30,000 tokens of text and 20,000 of images (illustrative numbers) is a 50,000-token prompt for the window ceiling, the input price, and the prefill that delays the first token ([post 05](../05-economics-of-context/index.md), section 5).
 
-Second, **caching applies to image tokens, with a sharp caveat**. Anthropic's "Prompt caching" documentation (consulted October 2026) lists images and documents among the blocks that can be cached. As post 05 sets out, a write costs 1.25 times the base input price for the five-minute lifetime and 2 times for the one-hour lifetime, and a read 0.1 times the base input price on most models, lower on some newer ones. A reference image that stays the same across many turns is a good candidate: one write, then reads at a tenth of its input price on this series' running models. The caveat is the page's rule: a hit needs 100% identical prompt segments, including all text and images, up to the block marked for caching, and the page warns that adding or removing images affects the cached messages; the computer-use page's batch pruning treats that as a change before the breakpoint, which a live call's `cache_read_input_tokens` confirms.
+Second, **caching applies to image tokens, with a sharp caveat**. Anthropic's "Prompt caching" documentation (consulted October 2026) lists images and documents among the blocks that can be cached. As [post 05](../05-economics-of-context/index.md) sets out, a write costs 1.25 times the base input price for the five-minute lifetime and 2 times for the one-hour lifetime, and a read 0.1 times the base input price on most models, lower on some newer ones. A reference image that stays the same across many turns is a good candidate: one write, then reads at a tenth of its input price on this series' running models. The caveat is the page's rule: a hit needs 100% identical prompt segments, including all text and images, up to the block marked for caching, and the page warns that adding or removing images affects the cached messages; the computer-use page's batch pruning treats that as a change before the breakpoint, which a live call's `cache_read_input_tokens` confirms.
 
 The design rule follows, and the figure below draws it. Stable images (a reference document, a fixed diagram) go early, right after layers 01 and 02 and before a cache breakpoint; volatile images (this turn's screenshot) go last, with layer 06, so that their churn changes nothing before them. A live screenshot placed early ends the reusable prefix, and every block after it, the reference page included, is processed again at full price on every call.
 
@@ -176,15 +176,13 @@ An image is a block of tokens that can be measured, budgeted, cached and pruned 
 
 ## Further reading
 
-- Anthropic, *"Vision"* and *"Coordinates and bounding boxes"* (consulted October 2026): the patch rule, the two tiers and the resize rule.
-- Anthropic, *"PDF support"* and *"Computer use tool"* (consulted October 2026): pages as text and image, screenshot sizes and pruning.
-- Anthropic, *"Prompt caching"* (consulted October 2026): images as cacheable blocks and the identical-prefix rule.
-- OpenAI, *"Images and vision"* and *"Computer use"* (consulted October 2026): tile and patch counts, and the screenshot loop.
-- Google, *"Document understanding"* and *"Audio understanding"* (Gemini API, consulted October 2026): page and audio token counts.
-- Faysse, M. *et al.*, *"ColPali: Efficient Document Retrieval with Vision Language Models"* (2024, ICLR 2025): visual late interaction and ViDoRe.
-- Khattab, O. and Zaharia, M., *"ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT"* (2020): the mechanism ColPali applies to patches.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Anthropic, *["Vision"](https://platform.claude.com/docs/en/build-with-claude/vision)* and *["Coordinates and bounding boxes"](https://platform.claude.com/docs/en/build-with-claude/coordinates)* (consulted October 2026): the patch rule, the two tiers and the resize rule.
+- Anthropic, *["PDF support"](https://platform.claude.com/docs/en/build-with-claude/pdf-support)* and *["Computer use tool"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool)* (consulted October 2026): pages as text and image, screenshot sizes and pruning.
+- Anthropic, *["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)* (consulted October 2026): images as cacheable blocks and the identical-prefix rule.
+- OpenAI, *["Images and vision"](https://developers.openai.com/api/docs/guides/images-vision)* and *["Computer use"](https://developers.openai.com/api/docs/guides/images-vision)* (consulted October 2026): tile and patch counts, and the screenshot loop.
+- Google, *["Document understanding"](https://ai.google.dev/gemini-api/docs/document-processing)* and *["Audio understanding"](https://ai.google.dev/gemini-api/docs/audio)* (Gemini API, consulted October 2026): page and audio token counts.
+- Faysse, M. *et al.*, *["ColPali: Efficient Document Retrieval with Vision Language Models"](https://arxiv.org/abs/2407.01449)* (2024, ICLR 2025): visual late interaction and ViDoRe.
+- Khattab, O. and Zaharia, M., *["ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT"](https://arxiv.org/abs/2004.12832)* (2020): the mechanism ColPali applies to patches.
 
 ---
 
