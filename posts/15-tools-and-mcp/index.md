@@ -42,7 +42,7 @@ Size and quality multiply: the tokens in layer 02 are roughly the tools shown ti
 *The trade is made whether or not anyone chooses it; choosing it deliberately is the difference.*
 
 - *Large catalogue and rich descriptions, no selection*: layer 02 outgrows its budget and the tool-storm of [post 06](../06-context-failure-modes/index.md) follows. A demo that connects every MCP server a team owns lands here.
-- *Large catalogue, no selection, descriptions cut to fit*: the model chooses from one-line summaries, the confusion of post 06.
+- *Large catalogue, no selection, descriptions cut to fit*: the model chooses from one-line summaries, the confusion of [post 06](../06-context-failure-modes/index.md).
 - *Rich descriptions, no selection, a small catalogue*: the comfort zone, until the product needs more capabilities.
 
 Keeping a large catalogue and rich descriptions means paying for the third vertex: a selection pipeline, a retrieval step per turn, and a cache decision (section 4).
@@ -60,7 +60,7 @@ Anthropic's "Define tools" page (consulted October 2026) calls detailed descript
 1. **Name.** A `verb_object` form: `search_shipments`, `get_order`, `cancel_subscription`, with one convention across the catalogue. `get_user`, `fetch_user` and `list_users` side by side are the near-identical names behind the confusion of [post 06](../06-context-failure-modes/index.md), section 3. When a catalogue spans services, the same page recommends a service prefix (`github_list_prs`).
 2. **One-line summary.** What the tool does, in about 10 to 15 words; the model reads it to decide whether to reach for the tool at all.
 3. **When to use it.** One sentence naming the situation: *"Use it when the user describes shipments but gives no shipment id."*
-4. **When not to use it.** One sentence naming the tool to use instead: *"Do not use it when a shipment id is known; use get_shipment instead."* It is post 06's first fix for confusion.
+4. **When not to use it.** One sentence naming the tool to use instead: *"Do not use it when a shipment id is known; use get_shipment instead."* It is [post 06](../06-context-failure-modes/index.md)'s first fix for confusion.
 5. **Parameters.** Each with a type, whether it is required, and a one-line description. A `status` free string that the model fills with "failed", "Failed" or "delivery failed" is a bug; an enum lets the schema reject all three, and `additionalProperties` set to false rejects an invented argument.
 6. **One worked example.** An input the tool accepts. Anthropic's API has a field for it, `input_examples`; each entry must validate against the schema and costs about 20 to 50 tokens for a simple example, the page says.
 
@@ -70,7 +70,7 @@ An anti-pattern: a 300-token description (an illustrative size) that is mostly d
 
 ## 4. The catalogue problem and runtime selection
 
-Loading every tool fails twice. The window fills: Anthropic's "Tool search tool" page (consulted October 2026) puts five MCP servers (GitHub, Slack, Sentry, Grafana and Splunk) at about 55,000 tokens of definitions before any work starts. And choice degrades: the same page says Claude's ability to pick the right tool degrades past 30 to 50 tools; OpenAI's guide suggests fewer than 20 functions at the start of a turn, as "a soft suggestion"; and post 06 recounts Breunig's report of a small model that failed with 46 tools and succeeded with 19.
+Loading every tool fails twice. The window fills: Anthropic's "Tool search tool" page (consulted October 2026) puts five MCP servers (GitHub, Slack, Sentry, Grafana and Splunk) at about 55,000 tokens of definitions before any work starts. And choice degrades: the same page says Claude's ability to pick the right tool degrades past 30 to 50 tools; OpenAI's guide suggests fewer than 20 functions at the start of a turn, as "a soft suggestion"; and [post 06](../06-context-failure-modes/index.md) recounts Breunig's report of a small model that failed with 46 tools and succeeded with 19.
 
 The way out is the select operation of [post 09](../09-select-strategies/index.md) with tool schemas as the corpus: index each schema offline (name, description and parameter descriptions together, since names alone make every `search_` tool look alike), retrieve candidates for the rewritten turn, re-rank, and pack the survivors into layer 02. Agent Skills applies the same idea to instructions, loading only each skill's name and description up front ([post 08](../08-write-strategies/index.md)).
 
@@ -112,7 +112,7 @@ validate {"shipment": "A-4821"}: ["$: additional property 'shipment' is not allo
 
 Selection keeps 681 of 6,348 estimated tokens, 10.7 percent, and four of its five tools fit the turn, `search_orders` only by its rank; `create_order` got in on the word "order", the near miss a cross-encoder reranker ([post 09](../09-select-strategies/index.md), section 4) is there to demote. The companion's `trim` keeps the first five tools: 644 tokens, but three of them are wrong for the turn and no shipment tool is among them. Thin descriptions save less and pay in miscalls. Prices use Claude Sonnet 4.5's input rate as of early 2026, 3 dollars per million tokens ([post 05](../05-economics-of-context/index.md)). The estimates assume four characters per token; OpenAI's `o200k_base` encoding counts 9 to 15 percent fewer, and neither is Claude's tokeniser ([post 04](../04-tokens-windows-budgets/index.md)). The last lines are the companion's validator rejecting a near-miss value and an invented argument.
 
-**Selection and the cache.** Layer 02 belongs to the stable prefix, so a tool list that changes every turn changes the prefix a prompt cache reuses (post 09, section 6). With a cache read at 0.1 times the base input price, the rule post 05 states for most Claude models, the full fifty-tool catalogue read from cache costs 0.001904 dollars per call, less than the five selected tools sent uncached at 0.002043. When the catalogue caches, selection buys attention and window space, not money. To keep both, a design keeps a fixed core in the prefix and adds selected tools after it. Anthropic's tool search tool does this: tools marked `defer_loading` stay out of the prefix, Claude searches for them, and the API expands what it finds inline in the conversation; in the page's words, "The prefix is untouched, so prompt caching is preserved."
+**Selection and the cache.** Layer 02 belongs to the stable prefix, so a tool list that changes every turn changes the prefix a prompt cache reuses ([post 09](../09-select-strategies/index.md), section 6). With a cache read at 0.1 times the base input price, the rule [post 05](../05-economics-of-context/index.md) states for most Claude models, the full fifty-tool catalogue read from cache costs 0.001904 dollars per call, less than the five selected tools sent uncached at 0.002043. When the catalogue caches, selection buys attention and window space, not money. To keep both, a design keeps a fixed core in the prefix and adds selected tools after it. Anthropic's tool search tool does this: tools marked `defer_loading` stay out of the prefix, Claude searches for them, and the API expands what it finds inline in the conversation; in the page's words, "The prefix is untouched, so prompt caching is preserved."
 
 **At larger scale.** Anthropic's "Code execution with MCP" (November 2025) presents MCP servers to the agent as code APIs in a file tree, so it reads a definition only when needed and filters tool results in code; its example task falls from 150,000 tokens to 2,000.
 
@@ -194,7 +194,7 @@ The rule: **the prompt is not a permission system.** "Do not call `delete_accoun
 
 ## 7. Sandboxing: keep tool noise out of the window
 
-Anything a tool returns enters the window on the next call, so verbose output (build logs, web pages, stack traces) can fill a window in a few turns. [Post 13](../13-isolate-strategies/index.md), section 6 gives the pattern, sandboxing in its output-scoping sense (the security sense is post 23's): its snippet kept a 2,385-token install log on disk and passed 38 tokens to the model.
+Anything a tool returns enters the window on the next call, so verbose output (build logs, web pages, stack traces) can fill a window in a few turns. [Post 13](../13-isolate-strategies/index.md), section 6 gives the pattern, sandboxing in its output-scoping sense (the security sense is [post 23](../23-security/index.md)'s): its snippet kept a 2,385-token install log on disk and passed 38 tokens to the model.
 
 - **Return structured results, not raw streams.** `{"ok": true, "duration_ms": 8742}` instead of pages of install output.
 - **Keep the verbose log on disk**, with its path in the result so a person can open it.
@@ -259,7 +259,7 @@ The first is this post's lab at toy scale; rewording `TURN` shows what each word
 ## Common pitfalls
 
 1. **Loading every tool.** Size layer 02 to its budget and select the rest per turn.
-2. **Tool names that look alike.** `get_user`, `get_users`, `fetch_user` and `list_users` in one catalogue is post 06's confusion waiting to happen.
+2. **Tool names that look alike.** `get_user`, `get_users`, `fetch_user` and `list_users` in one catalogue is [post 06](../06-context-failure-modes/index.md)'s confusion waiting to happen.
 3. **No "when not to use" line.** It is the cheapest line in a description, and it prevents miscalls between neighbouring tools.
 4. **Free strings where an enum exists.** A `status` the model fills with "open", "Open" and "OPEN" is three bugs.
 5. **Treating the prompt as the permission system.** Permissions are enforced in code, by the host and the tool.
@@ -268,15 +268,13 @@ The first is this post's lab at toy scale; rewording `TURN` shows what each word
 
 ## Further reading
 
-- Anthropic, "Introducing the Model Context Protocol" (November 2024): the announcement.
-- Model Context Protocol, "Specification", revision 2026-07-28 (consulted October 2026): roles, primitives, transports and security principles.
-- Anthropic, "Define tools", "Tool use with Claude", "Tool search tool" and "Structured outputs" (Claude API documentation, consulted October 2026).
-- Anthropic Engineering, "Code execution with MCP: building more efficient agents" (November 2025).
-- Anthropic Engineering, "Equipping agents for the real world with Agent Skills" (16 October 2025).
-- OpenAI, "Function calling" and "Structured Outputs" (documentation, consulted October 2026).
-- Pydantic, Instructor and Outlines (project documentation).
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Anthropic, ["Introducing the Model Context Protocol"](https://www.anthropic.com/news/model-context-protocol) (November 2024): the announcement.
+- Model Context Protocol, ["Specification"](https://modelcontextprotocol.io/), revision 2026-07-28 (consulted October 2026): roles, primitives, transports and security principles.
+- Anthropic, ["Define tools"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools), ["Tool use with Claude"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview), ["Tool search tool"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool) and ["Structured outputs"](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) (Claude API documentation, consulted October 2026).
+- Anthropic Engineering, ["Code execution with MCP: building more efficient agents"](https://www.anthropic.com/engineering/code-execution-with-mcp) (November 2025).
+- Anthropic Engineering, ["Equipping agents for the real world with Agent Skills"](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (16 October 2025).
+- OpenAI, ["Function calling"](https://platform.openai.com/docs/guides/function-calling) and ["Structured Outputs"](https://developers.openai.com/api/docs/guides/structured-outputs) (documentation, consulted October 2026).
+- [Pydantic](https://docs.pydantic.dev/), [Instructor](https://python.useinstructor.com/) and [Outlines](https://dottxt-ai.github.io/outlines/) (project documentation).
 
 ---
 
