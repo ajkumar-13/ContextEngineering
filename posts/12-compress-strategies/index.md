@@ -20,11 +20,11 @@
 
 ## 1. The question: what does compression buy, and what does it lose?
 
-Every long-running agent reaches a point where the next call no longer fits the budget. Layer 05, conversation history, is the growing tail of the window (post 02): every turn adds to it, and nothing leaves on its own. There are two kinds of move: drop something, which is cheap and lossy, or replace it with a smaller, denser representation, which costs a model call and loses less. This post asks which technique to use on which content, what each costs in the facts the next turn needs, and when to run it.
+Every long-running agent reaches a point where the next call no longer fits the budget. Layer 05, conversation history, is the growing tail of the window ([post 02](../02-six-layers-of-context/index.md)): every turn adds to it, and nothing leaves on its own. There are two kinds of move: drop something, which is cheap and lossy, or replace it with a smaller, denser representation, which costs a model call and loses less. This post asks which technique to use on which content, what each costs in the facts the next turn needs, and when to run it.
 
-Compression is needed before the window is full. Post 04 treats the window as a ceiling rather than a target, and Liu et al. ("Lost in the Middle", arXiv 2023, TACL 2024) found that models used information in the middle of a long input less reliably than at its start or end; a long history can put the turns that matter in that middle.
+Compression is needed before the window is full. [Post 04](../04-tokens-windows-budgets/index.md) treats the window as a ceiling rather than a target, and Liu et al. ("Lost in the Middle", arXiv 2023, TACL 2024) found that models used information in the middle of a long input less reliably than at its start or end; a long history can put the turns that matter in that middle.
 
-Compress is one of the four operations of post 07: it moves information out of the window, within one window. Lance Martin's essay "Context Engineering for Agents" (June 2025) names two compress techniques, summarisation and trimming. This post splits them into six, the series' own breakdown: windowing, priority pruning and tool-result clearing are forms of trimming, summarisation and semantic chunking are forms of summarising, and token-level prompt compression works below the level of whole turns.
+Compress is one of the four operations of [post 07](../07-write-select-compress-isolate/index.md): it moves information out of the window, within one window. Lance Martin's essay "Context Engineering for Agents" (June 2025) names two compress techniques, summarisation and trimming. This post splits them into six, the series' own breakdown: windowing, priority pruning and tool-result clearing are forms of trimming, summarisation and semantic chunking are forms of summarising, and token-level prompt compression works below the level of whole turns.
 
 To compare them, the post uses a teaching construct of its own, the **information retention ratio** (IRR): the fraction of a list of key facts that a later turn could still read after a compression pass. It is not a standard metric; it puts the loss next to the token reduction.
 
@@ -152,7 +152,7 @@ Pruning is blind inside a class. On the toy replay set of section 10, pruning to
 
 **Cost.** The highest on this list: a clustering pass, then one summary call per topic. It is reserved for long-lived sessions where the cost is spread over many later turns.
 
-A simple implementation: every *N* turns, embed each turn, cluster the embeddings (HDBSCAN, agglomerative clustering, or k-means with a sensible number of clusters *k*), summarise each cluster with the prompt of section 3, and replace the turns with the summaries. The name is shared with an ingestion technique that splits documents at topic boundaries before indexing (post 10); here it is applied to the history.
+A simple implementation: every *N* turns, embed each turn, cluster the embeddings (HDBSCAN, agglomerative clustering, or k-means with a sensible number of clusters *k*), summarise each cluster with the prompt of section 3, and replace the turns with the summaries. The name is shared with an ingestion technique that splits documents at topic boundaries before indexing ([post 10](../10-data-ingestion-pipelines/index.md)); here it is applied to the history.
 
 ---
 
@@ -166,7 +166,7 @@ The five techniques above work on whole turns, tool results or topics. Token-lev
 
 **When it works.** Fixed, verbose context sent many times: long retrieved contexts, blocks of few-shot examples, long static instructions.
 
-**When it breaks.** Anything a human reads or quotes verbatim, and short prompts where the compressor's own call costs more than it saves. It also interacts badly with prompt caching: a prefix rewritten on every call never matches the cached one and loses the cache-read discount (post 05, section 4), so the stable part is compressed once, reviewed, and then cached as it is.
+**When it breaks.** Anything a human reads or quotes verbatim, and short prompts where the compressor's own call costs more than it saves. It also interacts badly with prompt caching: a prefix rewritten on every call never matches the cached one and loses the cache-read discount ([post 05](../05-economics-of-context/index.md), section 4), so the stable part is compressed once, reviewed, and then cached as it is.
 
 **Token reduction.** The figures above are the papers' own, on their benchmarks; other traffic is measured before the technique is trusted, with the compressor's latency and cost added to the budget.
 
@@ -185,14 +185,14 @@ Neither is this post's tool-result clearing (section 4), which drops one verbose
 
 ## 9. The two triggers: 80 and 95 percent
 
-A compression policy is two thresholds and an action at each, measured against the input budget: the context window minus the output reserve that `max_tokens` holds back (post 04). The two numbers are illustrative defaults, a starting point and not a measured law.
+A compression policy is two thresholds and an action at each, measured against the input budget: the context window minus the output reserve that `max_tokens` holds back ([post 04](../04-tokens-windows-budgets/index.md)). The two numbers are illustrative defaults, a starting point and not a measured law.
 
 - **At 80 percent of the budget, the soft trigger.** Run the cheap operations, tool-result clearing and P3 pruning, oldest first, until the input is under 60 percent. No model is called.
 - **At 95 percent, the hard trigger.** Summarise, or semantically chunk, the older part of the conversation, keeping the most recent turns verbatim. The agent tells the user it is compressing earlier conversation, and the original turns go to a separate log for debugging.
 
 Both move down when token usage varies a lot from turn to turn (long tool outputs, deep retrieval) and up when it varies little.
 
-`snippets/compaction_policy.py` replays one illustrative session against this policy. The window is Claude Sonnet 4.5's 200,000 tokens (Anthropic, "Context windows", consulted October 2026, as post 04 cites it), less post 04's illustrative output reserve of 20,000, an input budget of 180,000 tokens. Layers 01 to 04 take 8,300 tokens on every call (post 04's support agent), and every turn appends 1,400 tokens of messages and one tool result of 800 to 9,000 tokens to layer 05, all illustrative sizes. It prints:
+`snippets/compaction_policy.py` replays one illustrative session against this policy. The window is Claude Sonnet 4.5's 200,000 tokens (Anthropic, "Context windows", consulted October 2026, as [post 04](../04-tokens-windows-budgets/index.md) cites it), less [post 04](../04-tokens-windows-budgets/index.md)'s illustrative output reserve of 20,000, an input budget of 180,000 tokens. Layers 01 to 04 take 8,300 tokens on every call ([post 04](../04-tokens-windows-budgets/index.md)'s support agent), and every turn appends 1,400 tokens of messages and one tool result of 800 to 9,000 tokens to layer 05, all illustrative sizes. It prints:
 
 ```text
 window 200000, output reserve 20000, input budget 180000
@@ -262,7 +262,7 @@ For a public check, long-context benchmarks such as LongBench (Bai et al., arXiv
 - **Add token-level compression** only for large, fixed context sent many times, and only where it can coexist with caching.
 - **Use windowing alone** only when the task is genuinely local; otherwise with pinned turns.
 
-The order matters: clearing and pruning give the headroom that lets the expensive techniques run rarely, as section 9 shows. The technique also follows from the layer that is over budget and the failure mode it feeds, in post 06's names:
+The order matters: clearing and pruning give the headroom that lets the expensive techniques run rarely, as section 9 shows. The technique also follows from the layer that is over budget and the failure mode it feeds, in [post 06](../06-context-failure-modes/index.md)'s names:
 
 | What is too large | Layer | Failure mode it feeds | Technique to try first |
 |---|---|---|---|
@@ -273,7 +273,7 @@ The order matters: clearing and pruning give the headroom that lets the expensiv
 | A long retrieved payload on every turn | 04 Retrieved chunks | lost-in-the-middle | RECOMP-style extraction, or pruning past the top three |
 | Few-shot examples, static instructions | 01 System prompt | none; a cost problem | token-level compression, once, then cached |
 
-Layer 06, the user instruction, is never compressed: it is the trigger of the call, small and last. Post 06's first fix for distraction remains a tighter select step; compression is the fix only when the distracting material is the session's own history.
+Layer 06, the user instruction, is never compressed: it is the trigger of the call, small and last. [Post 06](../06-context-failure-modes/index.md)'s first fix for distraction remains a tighter select step; compression is the fix only when the distracting material is the session's own history.
 
 ---
 
@@ -284,7 +284,7 @@ Compression is lossy by construction, so sometimes the right move is to keep the
 Isolate rather than compress when:
 
 - **The material is exact and irreplaceable.** Code, legal text, financial figures, tool outputs that will be quoted verbatim. Any lossy pass corrupts them; a sub-agent whose own window holds the full text does the work and returns only the conclusion.
-- **The context is really several unrelated jobs.** Compressing the combined history of three loosely related threads treats the distraction each causes the others (post 06) without curing it; separate windows remove those tokens from each other's context entirely.
+- **The context is really several unrelated jobs.** Compressing the combined history of three loosely related threads treats the distraction each causes the others ([post 06](../06-context-failure-modes/index.md)) without curing it; separate windows remove those tokens from each other's context entirely.
 - **Auditability is required.** A summariser that drops a fact leaves no trace; a sub-agent boundary makes the hand-off explicit and inspectable.
 
 The two are complementary: compress within a window, isolate across windows. A policy that keeps losing facts on the replay set however its prompt is tuned is the signal to isolate rather than compress harder.
@@ -314,15 +314,13 @@ The two are complementary: compress within a window, isolate across windows. A p
 
 ## Further reading
 
-- Anthropic, "How Claude Code works" and "Commands" (Claude Code documentation, consulted 12 October 2026): automatic compaction, `/compact` and `/clear`.
-- Martin, L., "Context Engineering for Agents" (June 2025): summarisation and trimming, the compress techniques this post splits into six.
-- Jiang, H. *et al.*, "LLMLingua: Compressing Prompts for Accelerated Inference of Large Language Models" (EMNLP 2023).
-- Pan, Z. *et al.*, "LLMLingua-2: Data Distillation for Efficient and Faithful Task-Agnostic Prompt Compression" (Findings of ACL 2024).
-- Xu, F., Shi, W. and Choi, E., "RECOMP: Improving Retrieval-Augmented LMs with Compression and Selective Augmentation" (arXiv 2023).
-- Bai, Y. *et al.*, "LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding" (arXiv 2023, ACL 2024).
-- Liu, N. F. *et al.*, "Lost in the Middle: How Language Models Use Long Contexts" (arXiv 2023, TACL 2024).
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Anthropic, ["How Claude Code works"](https://code.claude.com/docs/en/how-claude-code-works) and ["Commands"](https://code.claude.com/docs/en/commands) (Claude Code documentation, consulted 12 October 2026): automatic compaction, `/compact` and `/clear`.
+- Martin, L., ["Context Engineering for Agents"](https://rlancemartin.github.io/2025/06/23/context_engineering/) (June 2025): summarisation and trimming, the compress techniques this post splits into six.
+- Jiang, H. *et al.*, ["LLMLingua: Compressing Prompts for Accelerated Inference of Large Language Models"](https://arxiv.org/abs/2310.05736) (EMNLP 2023).
+- Pan, Z. *et al.*, ["LLMLingua-2: Data Distillation for Efficient and Faithful Task-Agnostic Prompt Compression"](https://arxiv.org/abs/2403.12968) (Findings of ACL 2024).
+- Xu, F., Shi, W. and Choi, E., ["RECOMP: Improving Retrieval-Augmented LMs with Compression and Selective Augmentation"](https://arxiv.org/abs/2310.04408) (arXiv 2023).
+- Bai, Y. *et al.*, ["LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding"](https://arxiv.org/abs/2308.14508) (arXiv 2023, ACL 2024).
+- Liu, N. F. *et al.*, ["Lost in the Middle: How Language Models Use Long Contexts"](https://arxiv.org/abs/2307.03172) (arXiv 2023, TACL 2024).
 
 ---
 
