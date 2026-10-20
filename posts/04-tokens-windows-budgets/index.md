@@ -23,7 +23,7 @@
 
 Before a context can be designed, three quantities need numbers: how much a call may hold, how much it should spend, and what it costs in money and time. All three are counted in tokens, so the unit comes first.
 
-A token is the unit a provider's tokeniser produces when it splits the input string. OpenAI's tokenisers, and many others, are **byte-pair encoding** (BPE) variants: a deterministic, reversible scheme that learns a vocabulary of sub-word units from a training corpus (Sennrich et al., 2016). Post 03 shows the mechanism. Common words become one token; rare words, names and unusual strings split into several, and whitespace is part of the token. OpenAI's `cl100k_base` encoding has a vocabulary of 100,277 tokens and its `o200k_base` encoding 200,019, as `snippets/count_tokens.py` prints with the `tiktoken` library.
+A token is the unit a provider's tokeniser produces when it splits the input string. OpenAI's tokenisers, and many others, are **byte-pair encoding** (BPE) variants: a deterministic, reversible scheme that learns a vocabulary of sub-word units from a training corpus (Sennrich et al., 2016). [Post 03](../03-how-llms-read-context/index.md) shows the mechanism. Common words become one token; rare words, names and unusual strings split into several, and whitespace is part of the token. OpenAI's `cl100k_base` encoding has a vocabulary of 100,277 tokens and its `o200k_base` encoding 200,019, as `snippets/count_tokens.py` prints with the `tiktoken` library.
 
 OpenAI's "Tokenizer" page gives the usual rule of thumb: for common English text, one token is roughly three quarters of a word, so 100 tokens are about 75 words. The snippet's English paragraph of 69 words is 87 tokens under both encodings, 0.79 words per token, close to the rule. The rule is good enough for a budget and too rough for a bill, because the ratio depends on what the text is.
 
@@ -67,7 +67,7 @@ These were current models in early 2026 (Anthropic now marks Claude Sonnet 4.5 d
 
 Two warnings follow.
 
-First, **the window is a ceiling, not a target.** Quality degrades well before the ceiling, for the reasons post 03 covers: attention spreads over more tokens, and information in the middle of a long input is used less reliably (Liu et al., "Lost in the Middle", 2023). Anthropic's page names the effect too: as the token count grows, accuracy and recall degrade. This series' working rule of thumb, an illustrative heuristic and not a measured threshold, is to plan for a fraction of the advertised window and to test before relying on the rest.
+First, **the window is a ceiling, not a target.** Quality degrades well before the ceiling, for the reasons [post 03](../03-how-llms-read-context/index.md) covers: attention spreads over more tokens, and information in the middle of a long input is used less reliably (Liu et al., "Lost in the Middle", 2023). Anthropic's page names the effect too: as the token count grows, accuracy and recall degrade. This series' working rule of thumb, an illustrative heuristic and not a measured threshold, is to plan for a fraction of the advertised window and to test before relying on the rest.
 
 Second, **the input and the output share the window.** A call to a 200,000-token model that reserves 20,000 tokens for the answer through `max_tokens` leaves 180,000 for the input (illustrative numbers). An agent whose input creeps up to the window without that reserve gets its answers cut short.
 
@@ -180,13 +180,13 @@ caching plus routing is 2.49 times cheaper than the uncached bill
 
 ### What prompt caching does and does not do
 
-Prompt caching, also called prefix caching, stores the model's computed attention state for a prefix, the **key-value (KV) cache** that post 03 introduces, so a later call that starts with the identical prefix skips recomputing it. Yichao Ji's account of building the Manus agent ("Context Engineering for AI Agents: Lessons from Building Manus", July 2025) calls the KV cache hit rate the single most important metric for a production agent, and gives a timestamp at the start of the system prompt as a common way to destroy it. Three properties decide whether caching helps, as Anthropic's "Prompt caching" page describes them (consulted October 2026):
+Prompt caching, also called prefix caching, stores the model's computed attention state for a prefix, the **key-value (KV) cache** that [post 03](../03-how-llms-read-context/index.md) introduces, so a later call that starts with the identical prefix skips recomputing it. Yichao Ji's account of building the Manus agent ("Context Engineering for AI Agents: Lessons from Building Manus", July 2025) calls the KV cache hit rate the single most important metric for a production agent, and gives a timestamp at the start of the system prompt as a common way to destroy it. Three properties decide whether caching helps, as Anthropic's "Prompt caching" page describes them (consulted October 2026):
 
 - **It caches only an identical prefix.** One changed token ends the reusable prefix at that point. Volatile content (the user turn, freshly retrieved chunks) goes last and stable content (the system prompt, the tool schemas) first, or nothing caches.
 - **It has a minimum length.** A prefix shorter than the model's minimum is not cached at all: 1,024 tokens for Claude Sonnet 4.5, and 4,096 for Claude Haiku 4.5 and Claude Opus 4.6. The support agent's 4,600-token prefix clears both.
 - **It expires, and writing it costs extra.** The default lifetime is five minutes, refreshed by every read, with a one-hour option. A write costs 1.25 times the base input price for the five-minute lifetime and 2 times for the one hour, so caching pays only when a prefix is read many times after it is written.
 
-The cache is marked in the request with `cache_control`, either once at the top level, where the API places the breakpoint itself, or on individual blocks. Other providers cache too, with their own minimum lengths and discounts, and post 05 compares them. The architectural lesson is the same everywhere: **order the context from stable to volatile, so the expensive, unchanging tokens sit in front.**
+The cache is marked in the request with `cache_control`, either once at the top level, where the API places the breakpoint itself, or on individual blocks. Other providers cache too, with their own minimum lengths and discounts, and [post 05](../05-economics-of-context/index.md) compares them. The architectural lesson is the same everywhere: **order the context from stable to volatile, so the expensive, unchanging tokens sit in front.**
 
 ---
 
@@ -275,17 +275,15 @@ uv run python posts/04-tokens-windows-budgets/snippets/envelope.py
 
 ## Further reading
 
-- OpenAI, *"Tokenizer"* and the `tiktoken` library: the three-quarters-of-a-word rule and the encodings counted in section 1.
-- Anthropic, *"Token counting"* documentation: counting Claude's tokens before sending a request.
-- Anthropic, *"Context windows"* documentation (consulted October 2026): what counts toward the window, the overflow behaviour and the window sizes of section 2.
-- Google, *"Long context"* (Gemini API documentation, updated June 2026): Gemini's windows of a million tokens or more.
-- Anthropic, *"Pricing"* (rates as of early 2026) and *"Prompt caching"* documentation (consulted October 2026): the prices of section 3, and the cache-read price, write premiums, lifetimes and minimum lengths of section 5.
-- Ji, Y. (Manus), *"Context Engineering for AI Agents: Lessons from Building Manus"* (July 2025): the KV cache hit rate as the metric that matters, and the stable prefix that keeps it high.
-- Sennrich, R. *et al.*, *"Neural Machine Translation of Rare Words with Subword Units"* (2016): the paper that adapted byte-pair encoding to sub-word units for neural machine translation.
-- Pope, R. *et al.*, *"Efficiently Scaling Transformer Inference"* (2022): the prefill and decode phases behind the latency model of section 3.
-- Liu, N. F. *et al.*, *"Lost in the Middle: How Language Models Use Long Contexts"* (2023): why quality falls before the window is full.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- OpenAI, *["Tokenizer"](https://platform.openai.com/tokenizer)* and the [`tiktoken`](https://github.com/openai/tiktoken) library: the three-quarters-of-a-word rule and the encodings counted in section 1.
+- Anthropic, *["Token counting"](https://docs.anthropic.com/en/docs/build-with-claude/token-counting)* documentation: counting Claude's tokens before sending a request.
+- Anthropic, *["Context windows"](https://platform.claude.com/docs/en/build-with-claude/context-windows)* documentation (consulted October 2026): what counts toward the window, the overflow behaviour and the window sizes of section 2.
+- Google, *["Long context"](https://ai.google.dev/gemini-api/docs/long-context)* (Gemini API documentation, updated June 2026): Gemini's windows of a million tokens or more.
+- Anthropic, *["Pricing"](https://platform.claude.com/docs/en/about-claude/pricing)* (rates as of early 2026) and *["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)* documentation (consulted October 2026): the prices of section 3, and the cache-read price, write premiums, lifetimes and minimum lengths of section 5.
+- Ji, Y. (Manus), *["Context Engineering for AI Agents: Lessons from Building Manus"](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus)* (July 2025): the KV cache hit rate as the metric that matters, and the stable prefix that keeps it high.
+- Sennrich, R. *et al.*, *["Neural Machine Translation of Rare Words with Subword Units"](https://arxiv.org/abs/1508.07909)* (2016): the paper that adapted byte-pair encoding to sub-word units for neural machine translation.
+- Pope, R. *et al.*, *["Efficiently Scaling Transformer Inference"](https://arxiv.org/abs/2211.05102)* (2022): the prefill and decode phases behind the latency model of section 3.
+- Liu, N. F. *et al.*, *["Lost in the Middle: How Language Models Use Long Contexts"](https://arxiv.org/abs/2307.03172)* (2023): why quality falls before the window is full.
 
 ---
 
