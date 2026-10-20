@@ -73,9 +73,9 @@ The rules ban the failures that bite in an inbox: an invented meeting time, a li
 - **Semantic**: facts and preferences about a sender (`recipient`, `kind`, a free label such as `role` or `style`, `content`, `confidence`, `last_confirmed_at`, `source`).
 - **Procedural**: rules (`scope`, `rule`, `created_at`) for learned per-sender how-tos such as "send this client's invoices as CSV".
 
-Against the row of post 16, section 3 ([post 08](../08-write-strategies/index.md)'s nine fields plus `trigger`), the tables are a start, not the finished store: a procedural row has neither `source` nor `trigger`, no row has `last_accessed_at` or `expires_at`, and the procedural table is created but never written or read. The docstring promises decay as "a periodic job" that does not exist; post 16, section 8, decays confidence on read instead.
+Against the row of [post 16](../16-memory-systems/index.md), section 3 ([post 08](../08-write-strategies/index.md)'s nine fields plus `trigger`), the tables are a start, not the finished store: a procedural row has neither `source` nor `trigger`, no row has `last_accessed_at` or `expires_at`, and the procedural table is created but never written or read. The docstring promises decay as "a periodic job" that does not exist; [post 16](../16-memory-systems/index.md), section 8, decays confidence on read instead.
 
-`recall_recipient(email)` is the read path: by default the five highest-confidence semantic facts and the three most recent episodes about the sender, as a text block for layer 03. The companion's runner writes no rows, so on its sample inbox the block always says "(no prior interactions on file)"; the snippet of section 6 writes three illustrative rows through the companion's own `add_semantic` and `add_episodic` and shows the block that comes back. Each line carries a confidence but not its source or date, which post 16, section 9, prints so that a confirmed fact can be told from a guess. A fact learned from an email is external text, and D4 of [post 23](../23-security/index.md) forbids it to return as a rule.
+`recall_recipient(email)` is the read path: by default the five highest-confidence semantic facts and the three most recent episodes about the sender, as a text block for layer 03. The companion's runner writes no rows, so on its sample inbox the block always says "(no prior interactions on file)"; the snippet of section 6 writes three illustrative rows through the companion's own `add_semantic` and `add_episodic` and shows the block that comes back. Each line carries a confidence but not its source or date, which [post 16](../16-memory-systems/index.md), section 9, prints so that a confirmed fact can be told from a guess. A fact learned from an email is external text, and D4 of [post 23](../23-security/index.md) forbids it to return as a rule.
 
 ---
 
@@ -94,7 +94,7 @@ The hits are packed in the bookend layout of [post 09](../09-select-strategies/i
 
 Five replies ranked r1 to r5 are packed as `r1 r3 r4 r5 r2` (the snippet prints it); two hits, as for thread t-001, keep their rank order.
 
-The ranking is only as good as the embedding. With `VOYAGE_API_KEY` set, `replies.py` embeds with Voyage's `voyage-3-lite`; without it, it falls back to a hashed bag of words (each word counted in one of 64 buckets by its SHA-256 hash), the same on every run but blind to meaning, so offline the recipient filter does the real work. The snippet ranks with this fallback and Chroma's default squared L2 distance. A deployment would add what [post 11](../11-rag-in-depth/index.md) and [post 17](../17-advanced-retrieval/index.md) describe and the RAG (retrieval-augmented generation) build of `ctx-028` implements: contextual headers (post 11, section 2), hybrid keyword and vector search, and reranking.
+The ranking is only as good as the embedding. With `VOYAGE_API_KEY` set, `replies.py` embeds with Voyage's `voyage-3-lite`; without it, it falls back to a hashed bag of words (each word counted in one of 64 buckets by its SHA-256 hash), the same on every run but blind to meaning, so offline the recipient filter does the real work. The snippet ranks with this fallback and Chroma's default squared L2 distance. A deployment would add what [post 11](../11-rag-in-depth/index.md) and [post 17](../17-advanced-retrieval/index.md) describe and the RAG (retrieval-augmented generation) build of `ctx-028` implements: contextual headers ([post 11](../11-rag-in-depth/index.md), section 2), hybrid keyword and vector search, and reranking.
 
 ---
 
@@ -153,8 +153,8 @@ The figure below draws the six counts. More than half of the 601 tokens is the s
 
 Thread t-001 is one message; a real thread can run to dozens, each quoting the one before. The companion does not compress. A deployed drafter applies the two triggers of [post 12](../12-compress-strategies/index.md), section 9, whose 80 and 95 percent are illustrative defaults, measured against a budget for the thread:
 
-- **At 80 percent, the soft trigger**: priority pruning (post 12, section 5), with no model call. The quoted copies of earlier messages (the `>` chains mail clients append) go first, because those messages are already in the thread; signatures and disclaimers next.
-- **At 95 percent, the hard trigger**: summarisation (post 12, section 3). A separate call condenses the older messages into a brief that keeps decisions, open questions and stated facts, in that order; the latest two or three messages stay verbatim.
+- **At 80 percent, the soft trigger**: priority pruning ([post 12](../12-compress-strategies/index.md), section 5), with no model call. The quoted copies of earlier messages (the `>` chains mail clients append) go first, because those messages are already in the thread; signatures and disclaimers next.
+- **At 95 percent, the hard trigger**: summarisation ([post 12](../12-compress-strategies/index.md), section 3). A separate call condenses the older messages into a brief that keeps decisions, open questions and stated facts, in that order; the latest two or three messages stay verbatim.
 
 The summary reads all it replaces, so it runs on the trigger only.
 
@@ -176,7 +176,7 @@ The triager runs first and classifies each thread as `reply_needed`, `info_only`
 
 Every failure falls back to `reply_needed`: a wasted draft costs cents, a missed reply costs a relationship. This is isolation as [post 13](../13-isolate-strategies/index.md) recommends it (sections 3 and 5), a sub-task with a clean contract: the thread in, a small JSON object out. The triager needs no tools, so its window has no layer 02; it needs no memory or prior replies; and it can run on a cheaper model. The companion sets both models through `EMAILBOT_TRIAGE_MODEL` and `EMAILBOT_DRAFT_MODEL`, both defaulting to `gpt-4o-mini` through OpenAI's Chat Completions API (application programming interface), so choosing a smaller triage model is a configuration change.
 
-What the split saves is arithmetic in the manner of post 13, section 8. With illustrative costs of a tenth of a cent per triage call and five cents per draft, and an illustrative inbox of 90 threads of which 30 need a reply, `snippets/triage_saving.py` prints:
+What the split saves is arithmetic in the manner of [post 13](../13-isolate-strategies/index.md), section 8. With illustrative costs of a tenth of a cent per triage call and five cents per draft, and an illustrative inbox of 90 threads of which 30 need a reply, `snippets/triage_saving.py` prints:
 
 ```text
 90 threads, 30 need a reply; triage 0.1 c, draft 5.0 c a call
@@ -237,7 +237,7 @@ case                  gate says                                                 
 5 of 9 right; 4 slip through
 ```
 
-The figure below sets the nine cases beside the three checks. The first four are the kind the tests cover. Case 9, an attacker's link in an email, is the first step of post 23's exfiltration chain (section 3); the gate blocks it because its allow-list is the operator's alone (`known_urls`, which `run.py` fills from `EMAILBOT_KNOWN_URLS`), never the email's. Each of the other four slips through a gap: "9 pm" has no colon; "five thousand dollars" has no currency sign; a 30-minute call at 17:45 ends at 18:15; and a thread that mentions a 500-dollar deposit licenses a 50,000-dollar balance, because the money check asks only whether the thread mentions money. A stricter gate compares amounts, reads every way of writing a time, and checks where the slot ends.
+The figure below sets the nine cases beside the three checks. The first four are the kind the tests cover. Case 9, an attacker's link in an email, is the first step of [post 23](../23-security/index.md)'s exfiltration chain (section 3); the gate blocks it because its allow-list is the operator's alone (`known_urls`, which `run.py` fills from `EMAILBOT_KNOWN_URLS`), never the email's. Each of the other four slips through a gap: "9 pm" has no colon; "five thousand dollars" has no currency sign; a 30-minute call at 17:45 ends at 18:15; and a thread that mentions a 500-dollar deposit licenses a 50,000-dollar balance, because the money check asks only whether the thread mentions money. A stricter gate compares amounts, reads every way of writing a time, and checks where the slot ends.
 
 ![Left, the three checks in order: the operator's URL allow-list, no new money term, hours 09:00 to 18:00. Right, nine draft cases with the gate's verdict: a clean reply passes; a new link, a new dollar term, 21:30 and an injected link are blocked; 9 pm, money in words, a call at 17:45 and a bigger sum pass and are marked missed in red.](diagrams/03-send-gate.svg)
 
@@ -247,9 +247,9 @@ The figure below sets the nine cases beside the three checks. The first four are
 
 ## 10. Observability and evaluation
 
-**One trace per thread.** In a deployment the triager call, memory read, retrieval, drafter call, gate verdict and the person's decision are spans of one trace in the trace store of [post 22](../22-observability/index.md), section 2; opening a bad draft's trace shows which layer was wrong. The four dashboard numbers of post 22, section 4, become cost per thread, latency at the 95th percentile (p95), quality, and errors by kind, and quality has a natural source: the share of drafts approved unedited, edited or rejected. The companion prints a line per thread and records nothing more.
+**One trace per thread.** In a deployment the triager call, memory read, retrieval, drafter call, gate verdict and the person's decision are spans of one trace in the trace store of [post 22](../22-observability/index.md), section 2; opening a bad draft's trace shows which layer was wrong. The four dashboard numbers of [post 22](../22-observability/index.md), section 4, become cost per thread, latency at the 95th percentile (p95), quality, and errors by kind, and quality has a natural source: the share of drafts approved unedited, edited or rejected. The companion prints a line per thread and records nothing more.
 
-**Evaluation.** `eval.py` scaffolds the harness of [post 20](../20-evaluation/index.md) over held-out threads with the user's actual reply and the bucket their behaviour revealed. It reports decision accuracy (the triager's bucket against the revealed one) and two judge scores from 1 to 5, tone fidelity and factual faithfulness, both comparing the draft with the user's actual reply, not with the thread or memory. Two gaps remain: its default fixture file, `data/eval_fixtures.json`, is not shipped, and it has no gate: post 20, section 4, blocks a change whose metric drops by more than an absolute 0.05, while the scaffold only prints. For tone, the judge failure modes of post 20, section 6, apply in full.
+**Evaluation.** `eval.py` scaffolds the harness of [post 20](../20-evaluation/index.md) over held-out threads with the user's actual reply and the bucket their behaviour revealed. It reports decision accuracy (the triager's bucket against the revealed one) and two judge scores from 1 to 5, tone fidelity and factual faithfulness, both comparing the draft with the user's actual reply, not with the thread or memory. Two gaps remain: its default fixture file, `data/eval_fixtures.json`, is not shipped, and it has no gate: [post 20](../20-evaluation/index.md), section 4, blocks a change whose metric drops by more than an absolute 0.05, while the scaffold only prints. For tone, the judge failure modes of [post 20](../20-evaluation/index.md), section 6, apply in full.
 
 ---
 
@@ -294,9 +294,9 @@ The prompt has five blocks because [post 14](../14-system-prompt-as-software/ind
 
 - The model receives six layers, each engineered separately ([post 02](../02-six-layers-of-context/index.md)), and reads them with measured biases ([post 03](../03-how-llms-read-context/index.md)).
 - Every token costs money, time and attention ([post 04](../04-tokens-windows-budgets/index.md), [post 05](../05-economics-of-context/index.md)); failures have names and first fixes ([post 06](../06-context-failure-modes/index.md)).
-- Write, select, compress and isolate cover the techniques (posts 07 to 13), and each layer is its own discipline (posts 14 to 19).
-- Production adds evaluation, structured output, observability, security, privacy and the long-context decision (posts 20 to 25); the workflow puts them in the editor and on a server (posts 26 and 27).
-- The three builds, posts 28 to 30, turn the principles into code a reader can run.
+- Write, select, compress and isolate cover the techniques ([posts 07](../07-write-select-compress-isolate/index.md) to [13](../13-isolate-strategies/index.md)), and each layer is its own discipline ([posts 14](../14-system-prompt-as-software/index.md) to [19](../19-multimodal-context/index.md)).
+- Production adds evaluation, structured output, observability, security, privacy and the long-context decision ([posts 20](../20-evaluation/index.md) to [25](../25-long-context-vs-rag/index.md)); the workflow puts them in the editor and on a server ([post 26](../26-modern-agentic-workflow/index.md) and [post 27](../27-remote-agentic-workflow/index.md)).
+- The three builds, [posts 28](../28-build-rag-chatbot/index.md) to [30](../30-capstone-email-reply-agent/index.md), turn the principles into code a reader can run.
 
 The intended result is a reader who ships LLM (large language model) systems that improve instead of decaying.
 
@@ -356,13 +356,11 @@ They load the companion's offline parts through `snippets/companion.py`, which b
 
 ## Further reading
 
-- Google, "Choose Gmail API scopes", "Configure push notifications with the Gmail API" and the Gmail API reference (consulted October 2026).
-- Google, "Using OAuth 2.0 for Web Server Applications" (consulted October 2026): offline access and refresh tokens.
-- Railway, "Cron Jobs" (consulted October 2026).
-- Vercel, "Vercel Functions" (consulted October 2026).
-- The earlier posts cited above, above all posts 14, 16, 20, 22 and 23.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Google, ["Choose Gmail API scopes"](https://developers.google.com/workspace/gmail/api/auth/scopes), ["Configure push notifications with the Gmail API"](https://developers.google.com/workspace/gmail/api/guides/push) and the [Gmail API reference](https://developers.google.com/gmail/api/reference/rest) (consulted October 2026).
+- Google, ["Using OAuth 2.0 for Web Server Applications"](https://developers.google.com/identity/protocols/oauth2/web-server) (consulted October 2026): offline access and refresh tokens.
+- Railway, ["Cron Jobs"](https://docs.railway.com/reference/cron-jobs) (consulted October 2026).
+- Vercel, ["Vercel Functions"](https://vercel.com/docs/functions) (consulted October 2026).
+- The earlier posts cited above, above all posts [14](../14-system-prompt-as-software/index.md), [16](../16-memory-systems/index.md), [20](../20-evaluation/index.md), [22](../22-observability/index.md) and [23](../23-security/index.md).
 
 ---
 
