@@ -1,9 +1,9 @@
 # 07 - Write, select, compress, isolate
 
-> **TL;DR.** Post 02 named the six layers of a context window and post 06 the five ways it fails; this post names the four operations that act on it: write, select, compress and isolate (WSCI), after the four strategies of Lance Martin's essay "Context Engineering for Agents". Two axes separate them: whether information goes into a window or out of one, and whether the move stays inside one window or spans several. Every technique in the rest of the series is one of the four, and every first fix in post 06's catalogue is a select, a compress or an isolate.
+> **TL;DR.** [Post 02](../02-six-layers-of-context/index.md) named the six layers of a context window and [post 06](../06-context-failure-modes/index.md) the five ways it fails; this post names the four operations that act on it: write, select, compress and isolate (WSCI), after the four strategies of Lance Martin's essay "Context Engineering for Agents". Two axes separate them: whether information goes into a window or out of one, and whether the move stays inside one window or spans several. Every technique in the rest of the series is one of the four, and every first fix in [post 06](../06-context-failure-modes/index.md)'s catalogue is a select, a compress or an isolate.
 >
 > **Prerequisites:** [Post 02](../02-six-layers-of-context/index.md), [Post 06](../06-context-failure-modes/index.md).
-> **Safe to skip?** Skip it if any technique (a memory store, a reranker, a rolling summary, a sub-agent) can already be placed under write, select, compress or isolate, and each failure mode of post 06 can be named with the operation behind its first fix.
+> **Safe to skip?** Skip it if any technique (a memory store, a reranker, a rolling summary, a sub-agent) can already be placed under write, select, compress or isolate, and each failure mode of [post 06](../06-context-failure-modes/index.md) can be named with the operation behind its first fix.
 >
 > **After reading, you will be able to:**
 >
@@ -55,7 +55,7 @@ Write puts information somewhere other than the live window. Once written, it is
 
 The cost of a write is paid once: a store insert, sometimes a model call to summarise what is written. The benefit appears only when a select brings the item back into a window.
 
-The common write mistake is to write everything, with no schema. A store whose rows carry no source, date or expiry fills with stale entries, each read back as trusted data on a later call. An error the agent wrote and keeps citing is handled in post 06 as conflict; content planted on purpose is an attack, treated in [post 23](../23-security/index.md). [Post 08](../08-write-strategies/index.md) is the deep dive on write.
+The common write mistake is to write everything, with no schema. A store whose rows carry no source, date or expiry fills with stale entries, each read back as trusted data on a later call. An error the agent wrote and keeps citing is handled in [post 06](../06-context-failure-modes/index.md) as conflict; content planted on purpose is an attack, treated in [post 23](../23-security/index.md). [Post 08](../08-write-strategies/index.md) is the deep dive on write.
 
 ---
 
@@ -90,7 +90,7 @@ Compress acts on tokens already in the window, or about to enter it: it changes 
 5. **Semantic chunking:** group the history by topic and summarise each topic on its own.
 6. **Token-level prompt compression:** a small model removes the tokens that carry least information (LLMLingua is one example).
 
-Every lossy technique can drop a fact that a later turn needs, typically the reason behind a decision while keeping the decision. Post 12 measures a compression pass by what it calls the information retention ratio, the fraction of key facts that survive the pass; the ratio is a teaching construct of this series, not a standard metric.
+Every lossy technique can drop a fact that a later turn needs, typically the reason behind a decision while keeping the decision. [Post 12](../12-compress-strategies/index.md) measures a compression pass by what it calls the information retention ratio, the fraction of key facts that survive the pass; the ratio is a teaching construct of this series, not a standard metric.
 
 A long-running agent reaches the point where compression is not optional. Anthropic's Claude Code documentation ("Manage costs effectively", consulted October 2026) says Claude Code compacts automatically, summarising the conversation history when it approaches the context limit, and the same page lets a user tell `/compact` what to preserve. The automatic trigger decides *when*; *what* is safe to summarise and what is load-bearing remains a policy someone has to design.
 
@@ -134,28 +134,28 @@ The four operations say *what* to do with context; the six layers of [post 02](.
 
 | Layer | Main operation | Also | How it shows up |
 |---|---|---|---|
-| 01 System prompt | write | select, compress | Rules written once to a versioned file; choosing which rules it carries is post 06's select for confusion; compress it when bloated. |
+| 01 System prompt | write | select, compress | Rules written once to a versioned file; choosing which rules it carries is [post 06](../06-context-failure-modes/index.md)'s select for confusion; compress it when bloated. |
 | 02 Tools and MCP descriptions | select | isolate | Only the schemas this turn needs; a sub-agent gets its own tool set. |
 | 03 Memory and state | write, select | none | Facts written between sessions; a few selected back on each call. |
 | 04 Retrieved chunks | select | write | The offline write (chunk, embed, index) feeds the per-turn select (retrieve, rerank, pack). |
 | 05 Conversation history | compress | select, isolate | Windowing and summaries keep the growing tail in budget; recall brings an older turn back; a sub-agent's transcript stays out. |
 | 06 User instruction | none | none | The trigger: placed last, never compressed. |
 
-Three readings follow. First, no layer needs all four operations. Second, the operations chain across layers: layers 03 and 04 are each written before they are selected, so a select that finds nothing often traces back to a write that never happened. Third, an operation can collide with a layer's lifetime class. Layer 02 belongs to the stable prefix, and a tool list selected afresh on every call changes that prefix, which ends the cached part of the request at the first change (post 02, section 11). Selecting from a few fixed tool groups keeps the prefix stable.
+Three readings follow. First, no layer needs all four operations. Second, the operations chain across layers: layers 03 and 04 are each written before they are selected, so a select that finds nothing often traces back to a write that never happened. Third, an operation can collide with a layer's lifetime class. Layer 02 belongs to the stable prefix, and a tool list selected afresh on every call changes that prefix, which ends the cached part of the request at the first change ([post 02](../02-six-layers-of-context/index.md), section 11). Selecting from a few fixed tool groups keeps the prefix stable.
 
 ---
 
 ## 8. WSCI and the five failure modes
 
-Post 06 gives every failure mode a first fix and names the operations behind it (its section 7 table, also in the [cheatsheet](../../CHEATSHEET.md)); the figure below draws that table as a grid, with the five modes and their pairs unchanged.
+[Post 06](../06-context-failure-modes/index.md) gives every failure mode a first fix and names the operations behind it (its section 7 table, also in the [cheatsheet](../../CHEATSHEET.md)); the figure below draws that table as a grid, with the five modes and their pairs unchanged.
 
 ![A grid of the five failure modes against the four operations, each filled cell naming the fix. Distraction: select, lower top-k, add a reranker. Confusion: select, explicit, motivated, exemplified rules. Conflict: select, provenance stamp and precedence rule; compress, deduplicate the candidates. Lost-in-the-middle: compress, summarise old history; isolate, split across sub-agents; select, dashed, bookend packing. Tool-storm: select, trim the catalogue; isolate, cap the result size. The write column is empty.](diagrams/03-wsci-vs-failures.svg)
 
-*Every fix in post 06's catalogue is a select, a compress or an isolate. Write is in no row: what is written acts later, when it is selected.*
+*Every fix in [post 06](../06-context-failure-modes/index.md)'s catalogue is a select, a compress or an isolate. Write is in no row: what is written acts later, when it is selected.*
 
 The grid makes three points. Select appears in four of the five rows, so a tighter select is the first lever to check for four of the five modes. Lost-in-the-middle touches select as well, because bookend packing is the packing step of select; compress and isolate are what remain when packing no longer rescues the middle. And write appears in no row: a provenance stamp is written with each memory, but it fixes conflict only when the select step uses it to pick the winner. Write prevents failures later rather than fixing one now.
 
-Part II takes the four in the WSCI order: write ([post 08](../08-write-strategies/index.md)), select ([post 09](../09-select-strategies/index.md), with ingestion in post 10 and RAG in post 11), compress ([post 12](../12-compress-strategies/index.md)) and isolate ([post 13](../13-isolate-strategies/index.md)).
+Part II takes the four in the WSCI order: write ([post 08](../08-write-strategies/index.md)), select ([post 09](../09-select-strategies/index.md), with ingestion in [post 10](../10-data-ingestion-pipelines/index.md) and RAG in [post 11](../11-rag-in-depth/index.md)), compress ([post 12](../12-compress-strategies/index.md)) and isolate ([post 13](../13-isolate-strategies/index.md)).
 
 ---
 
@@ -205,13 +205,11 @@ The count (five writes, four selects, two compresses, one isolate) belongs to th
 
 ## Further reading
 
-- Martin, L., "Context Engineering for Agents" (June 2025): the four strategies this series abbreviates as WSCI.
-- Anthropic Engineering, "Effective context engineering for AI agents" (September 2025): just-in-time retrieval, compaction, structured note-taking and sub-agent architectures.
-- IBM Think, "What is context engineering?" (2025): context selection, retrieval, compression and memory, in another vocabulary.
-- Anthropic, "Introducing Contextual Retrieval" (September 2024): the retrieval-failure reductions quoted in section 3.
-- Anthropic, Claude Code documentation, "Manage costs effectively" (consulted October 2026): automatic compaction and the token cost of agent teams.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Martin, L., ["Context Engineering for Agents"](https://rlancemartin.github.io/2025/06/23/context_engineering/) (June 2025): the four strategies this series abbreviates as WSCI.
+- Anthropic Engineering, ["Effective context engineering for AI agents"](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) (September 2025): just-in-time retrieval, compaction, structured note-taking and sub-agent architectures.
+- IBM Think, ["What is context engineering?"](https://www.ibm.com/think/topics/context-engineering) (2025): context selection, retrieval, compression and memory, in another vocabulary.
+- Anthropic, ["Introducing Contextual Retrieval"](https://www.anthropic.com/news/contextual-retrieval) (September 2024): the retrieval-failure reductions quoted in section 3.
+- Anthropic, Claude Code documentation, ["Manage costs effectively"](https://code.claude.com/docs/en/costs) (consulted October 2026): automatic compaction and the token cost of agent teams.
 
 ---
 
