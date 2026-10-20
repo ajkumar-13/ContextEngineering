@@ -102,7 +102,7 @@ Anything that should persist beyond a single call but is not literally part of t
 - **Long-term memory**, in three kinds:
   - **Episodic**: past interactions ("on April 4 the user asked about webhooks"), stored as events and retrieved by similarity.
   - **Semantic**: distilled facts and preferences ("user prefers Python, stack is AWS"), curated and slowly changing.
-  - **Procedural**: rules and how-tos learned about one user or account, kept as memory rows; team rules live in `AGENTS.md` and packaged capabilities in a skill's `SKILL.md` (post 16, section 6).
+  - **Procedural**: rules and how-tos learned about one user or account, kept as memory rows; team rules live in `AGENTS.md` and packaged capabilities in a skill's `SKILL.md` ([post 16](../16-memory-systems/index.md), section 6).
 
 Whatever the store, what reaches the model is text in the request. A common pattern, and the one this post's snippet uses (section 10), replays the selected memories as a synthetic exchange at the start of the message list: a user message the application writes, holding the stored facts, followed by a short assistant acknowledgement. Other applications put the same facts in a block of the system prompt or of the first user message. The model does not "remember" anything; it reads what is put there. [Post 16](../16-memory-systems/index.md) is an entire post on this.
 
@@ -292,15 +292,13 @@ The layers double as a checklist. Faced with any context bug, walk them from 01 
 
 ## Further reading
 
-- Anthropic Engineering, *"Effective context engineering for AI agents"* (September 2025): the components of context and compaction in Claude Code.
-- Anthropic, *"Prompt caching"* documentation: the identical-prefix rule, the cache order of tools, system and messages, and the cache-read price.
-- Anthropic, *"Introducing Contextual Retrieval"* (September 2024): the contextual-chunking technique named in section 7.
-- IBM Think, *"What is context engineering?"* (2025): an alternative list of the parts of a context.
-- Liu, N. F. *et al.*, *"Lost in the Middle: How Language Models Use Long Contexts"* (arXiv 2023, TACL 2024): the position result of section 11.
-- OpenAI, API reference for Chat Completions and Responses: the OpenAI field names in section 10.
-- Google, Gemini API reference, *`generateContent`*: the Gemini field names in section 10.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Anthropic Engineering, *["Effective context engineering for AI agents"](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)* (September 2025): the components of context and compaction in Claude Code.
+- Anthropic, *["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)* documentation: the identical-prefix rule, the cache order of tools, system and messages, and the cache-read price.
+- Anthropic, *["Introducing Contextual Retrieval"](https://www.anthropic.com/news/contextual-retrieval)* (September 2024): the contextual-chunking technique named in section 7.
+- IBM Think, *["What is context engineering?"](https://www.ibm.com/think/topics/context-engineering)* (2025): an alternative list of the parts of a context.
+- Liu, N. F. *et al.*, *["Lost in the Middle: How Language Models Use Long Contexts"](https://arxiv.org/abs/2307.03172)* (arXiv 2023, TACL 2024): the position result of section 11.
+- OpenAI, [API reference for Chat Completions and Responses](https://developers.openai.com/api/reference/): the OpenAI field names in section 10.
+- Google, Gemini API reference, [`generateContent`](https://ai.google.dev/api/generate-content): the Gemini field names in section 10.
 
 ---
 
