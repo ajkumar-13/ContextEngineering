@@ -23,7 +23,7 @@
 
 Retrieval-augmented generation (RAG) puts the chunks a retrieval pipeline selects into layer 04, retrieved chunks, of the window ([post 02](../02-six-layers-of-context/index.md)). [Post 09](../09-select-strategies/index.md) tunes that select step and [post 11](../11-rag-in-depth/index.md) builds it, and both assume the corpus is already clean text: paragraphs in reading order, tables that are still tables, no navigation menus or page numbers mixed into the content. Real corpora arrive as Portable Document Format (PDF) files exported from design tools, scans of paper, HyperText Markup Language (HTML) pages thick with cookie banners, slide decks, and spreadsheets whose meaning lives in the grid.
 
-Ingestion is invisible until answers go wrong. A demonstration built on three tidy Markdown files retrieves well, ships, and meets a real document store, where the embedded chunk is half a table caption glued to a footer line and the answer sits in a cell the parser dropped. Nothing in the retrieval stack is broken: the embedding model, the reranker and the vector database all work. The tokens that carried the answer never entered the index, and recall@N, the share of the relevant chunks that reach the top-N candidates (post 09), cannot recover a fact destroyed at parse time.
+Ingestion is invisible until answers go wrong. A demonstration built on three tidy Markdown files retrieves well, ships, and meets a real document store, where the embedded chunk is half a table caption glued to a footer line and the answer sits in a cell the parser dropped. Nothing in the retrieval stack is broken: the embedding model, the reranker and the vector database all work. The tokens that carried the answer never entered the index, and recall@N, the share of the relevant chunks that reach the top-N candidates ([post 09](../09-select-strategies/index.md)), cannot recover a fact destroyed at parse time.
 
 Debugging attention flows to what is easy to instrument, such as retrieval scores, and away from parsing scripts nobody owns. The cheapest check comes first: **before tuning retrieval, read the text the parser actually produced.** The question of this post is what the parse, clean and enrich stages must do so that the right text exists, and how a corpus that changes daily is kept from going stale.
 
@@ -190,9 +190,9 @@ Provenance pays off in three places downstream:
 
 - **Citations.** [Post 11](../11-rag-in-depth/index.md) has the model cite the header of each packed chunk, a source the user can check. That header is built from the provenance captured here.
 - **Conflict.** When two chunks disagree, such as an old policy and its replacement, the timestamp and the source let the window say which one wins. Conflict is one of the five failure modes of [post 06](../06-context-failure-modes/index.md), and its first fix is exactly this: a provenance and recency stamp on every retrieved chunk, with a precedence rule in the system prompt ("when sources disagree, the most recent one wins").
-- **Filtered retrieval.** Metadata filtering, one of the ways post 09 narrows the candidate set, scopes a query to one document, date range, document type or language, but only if those fields rode along from ingest.
+- **Filtered retrieval.** Metadata filtering, one of the ways [post 09](../09-select-strategies/index.md) narrows the candidate set, scopes a query to one document, date range, document type or language, but only if those fields rode along from ingest.
 
-A **manifest** turns provenance into a record of the index: one row per source document (per page in the snippet) with its content hash and chunk ids; a production row adds the parser and embedding-model versions and the ingest time. Post 11 keeps the same table from the indexing side; it is the record that answers "what changed in the index, and what parsed it".
+A **manifest** turns provenance into a record of the index: one row per source document (per page in the snippet) with its content hash and chunk ids; a production row adds the parser and embedding-model versions and the ingest time. [Post 11](../11-rag-in-depth/index.md) keeps the same table from the indexing side; it is the record that answers "what changed in the index, and what parsed it".
 
 ---
 
@@ -203,7 +203,7 @@ A corpus is a stream: documents are added, revised and retired, and an index tha
 The mechanism is **content hashing**. For each source document, the manifest stores a hash of its extracted text (or of its bytes); for each page, a hash of that page's text. On every ingest run, four cases fall out:
 
 - **Unchanged** (the document hash matches): skip it without embedding again. On a corpus that changes a little each day, most documents fall here, which is why incremental indexing is cheap.
-- **Changed** (the document hash differs): compare the page hashes, re-parse, re-chunk and re-embed only the changed pages, and *replace* their old chunks. Replacement is the step teams forget: if the old chunks stay, the agent can retrieve and cite a superseded policy, one of the ways post 11 lists for production RAG to go wrong.
+- **Changed** (the document hash differs): compare the page hashes, re-parse, re-chunk and re-embed only the changed pages, and *replace* their old chunks. Replacement is the step teams forget: if the old chunks stay, the agent can retrieve and cite a superseded policy, one of the ways [post 11](../11-rag-in-depth/index.md) lists for production RAG to go wrong.
 - **Deleted** (in the manifest, absent from the source): remove its chunks from both indexes.
 - **New** (in the source, absent from the manifest): parse and index it.
 
@@ -269,14 +269,12 @@ They print the outputs quoted in sections 3, 4, 5, 7 and 8. Every input is a toy
 
 ## Further reading
 
-- Smith, R., *"An Overview of the Tesseract OCR Engine"* (ICDAR 2007): the open-source OCR engine of section 3.
-- pdfminer.six, pdfplumber and PyMuPDF documentation (consulted October 2026): text-layer extraction for born-digital PDFs.
-- Smock, B., Pesala, R. and Abraham, R., *"PubTables-1M: Towards Comprehensive Table Extraction from Unstructured Documents"* (CVPR 2022): the dataset and the Table Transformer models behind table-region detection in section 4.
-- Barbaresi, A., *"Trafilatura: A Web Scraping Library and Command-Line Tool for Text Discovery and Extraction"* (ACL 2021, system demonstrations): main-content extraction from HTML, section 5.
-- Mozilla, *"Readability"* (GitHub): the library behind Firefox Reader View, section 5.
-- Docling, Unstructured and LlamaParse documentation (consulted October 2026): the layout-aware parsers of section 6, cited as a class.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Smith, R., *["An Overview of the Tesseract OCR Engine"](https://doi.org/10.1109/ICDAR.2007.4376991)* (ICDAR 2007): the open-source OCR engine of section 3.
+- [pdfminer.six](https://github.com/pdfminer/pdfminer.six), [pdfplumber](https://github.com/jsvine/pdfplumber) and [PyMuPDF](https://pymupdf.readthedocs.io/) documentation (consulted October 2026): text-layer extraction for born-digital PDFs.
+- Smock, B., Pesala, R. and Abraham, R., *["PubTables-1M: Towards Comprehensive Table Extraction from Unstructured Documents"](https://arxiv.org/abs/2110.00061)* (CVPR 2022): the dataset and the Table Transformer models behind table-region detection in section 4.
+- Barbaresi, A., *["Trafilatura: A Web Scraping Library and Command-Line Tool for Text Discovery and Extraction"](https://trafilatura.readthedocs.io/)* (ACL 2021, system demonstrations): main-content extraction from HTML, section 5.
+- Mozilla, *["Readability"](https://github.com/mozilla/readability)* (GitHub): the library behind Firefox Reader View, section 5.
+- [Docling](https://github.com/docling-project/docling), [Unstructured](https://unstructured.io/) and [LlamaParse](https://developers.llamaindex.ai/python/cloud/llamaparse/) documentation (consulted October 2026): the layout-aware parsers of section 6, cited as a class.
 
 ---
 
