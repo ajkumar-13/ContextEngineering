@@ -1,6 +1,6 @@
 # 16 - Memory systems
 
-> **TL;DR.** An agent remembers across sessions only what the application writes to a store and selects back into layer 03, memory and state. This post asks why that store needs three kinds of memory, episodic (events), semantic (facts and preferences) and procedural (learned rules), and how each is written, retrieved, decayed and kept from corrupting the others. The three share post 08's nine-field row plus a trigger for rules, each has its own retrieval path in a fixed order, and four classes of bug, post 08's three plus the wrong kind, turn the store into a liability.
+> **TL;DR.** An agent remembers across sessions only what the application writes to a store and selects back into layer 03, memory and state. This post asks why that store needs three kinds of memory, episodic (events), semantic (facts and preferences) and procedural (learned rules), and how each is written, retrieved, decayed and kept from corrupting the others. The three share [post 08](../08-write-strategies/index.md)'s nine-field row plus a trigger for rules, each has its own retrieval path in a fixed order, and four classes of bug, [post 08](../08-write-strategies/index.md)'s three plus the wrong kind, turn the store into a liability.
 >
 > **Prerequisites:** [Post 08](../08-write-strategies/index.md).
 > **Safe to skip?** Skip it if every memory an agent keeps already has a kind, a source, a retrieval path suited to that kind and a decay rule, and learned rules are kept apart from preferences and events.
@@ -8,7 +8,7 @@
 > **After reading, you will be able to:**
 >
 > - Distinguish episodic, semantic and procedural memory, and route a piece of information to the right kind, or to no memory store at all.
-> - Specify the metadata each memory row needs: post 08's nine fields, how each kind uses them, and the trigger a procedural row adds.
+> - Specify the metadata each memory row needs: [post 08](../08-write-strategies/index.md)'s nine fields, how each kind uses them, and the trigger a procedural row adds.
 > - Retrieve from each kind by its own path (trigger match, background ranking, reference recall) in the orchestrator's order, with decay applied on read.
 > - Recognise the four classes of bug that turn a memory store into a liability, and the guard against each.
 > - Choose between a vector store, a temporal knowledge graph and tiered paging (Mem0, Zep, Letta) for a workload, or decide that no memory store is wanted.
@@ -28,7 +28,7 @@ That gives two distinct problems:
 - **Short-term memory** is the working set of the current task. The conversation history is layer 05: it sits in the window and costs tokens on every call. A scratchpad is a file outside the window that the agent writes between iterations and reads back by select ([post 08](../08-write-strategies/index.md), section 3); only the part read back costs tokens. Both end with the task.
 - **Long-term memory** is what survives across sessions: preferences, past events, learned rules. It lives in a store outside the window, and it costs tokens only for the slice selected into layer 03, memory and state, on a given turn.
 
-This post is about the long-term store; short-term memory belongs to post 08 (write) and [post 12](../12-compress-strategies/index.md) (compress). The question is why an agent that remembers needs three different memories, and how each is written, retrieved, decayed and kept from corrupting the others. The figure at the top of the post is the answer in outline.
+This post is about the long-term store; short-term memory belongs to [post 08](../08-write-strategies/index.md) (write) and [post 12](../12-compress-strategies/index.md) (compress). The question is why an agent that remembers needs three different memories, and how each is written, retrieved, decayed and kept from corrupting the others. The figure at the top of the post is the answer in outline.
 
 ---
 
@@ -38,7 +38,7 @@ The temptation is to call the whole thing "memory" and keep it in one table. The
 
 Covering all three with one schema, one retrieval strategy and one decay policy serves each badly: the preference is buried under events, the event is treated as a standing fact, and the rule scores below an episode in a similarity search and never fires.
 
-The names come from cognitive psychology. Tulving (1972) separated episodic memory, of personally experienced events placed in time, from semantic memory, of general knowledge held without a record of when it was learned. Procedural memory, of how to do things, joined them later: Tulving's "How many memory systems are there?" (1985) arranged procedural, semantic and episodic memory as three systems. The three kinds reached language agents through the Cognitive Architectures for Language Agents framework (CoALA; Sumers et al., 2023), which gives an agent a working memory and three long-term memories: episodic, for experience from earlier decision cycles; semantic, for knowledge about the world and itself; procedural, held in the model's weights and the agent's code. Harrison Chase's "Memory for Agents" (LangChain, October 2024), which post 08 cites for the three kinds, takes them from CoALA. This series' procedural kind is narrower than CoALA's: it holds rules and how-tos written as text, not weights or code.
+The names come from cognitive psychology. Tulving (1972) separated episodic memory, of personally experienced events placed in time, from semantic memory, of general knowledge held without a record of when it was learned. Procedural memory, of how to do things, joined them later: Tulving's "How many memory systems are there?" (1985) arranged procedural, semantic and episodic memory as three systems. The three kinds reached language agents through the Cognitive Architectures for Language Agents framework (CoALA; Sumers et al., 2023), which gives an agent a working memory and three long-term memories: episodic, for experience from earlier decision cycles; semantic, for knowledge about the world and itself; procedural, held in the model's weights and the agent's code. Harrison Chase's "Memory for Agents" (LangChain, October 2024), which [post 08](../08-write-strategies/index.md) cites for the three kinds, takes them from CoALA. This series' procedural kind is narrower than CoALA's: it holds rules and how-tos written as text, not weights or code.
 
 ---
 
@@ -48,7 +48,7 @@ The names come from cognitive psychology. Tulving (1972) separated episodic memo
 
 | Field | Episodic | Semantic | Procedural |
 |---|---|---|---|
-| `id`, `kind`, `source` | as post 08 | as post 08 | as post 08 |
+| `id`, `kind`, `source` | [as post 08](../08-write-strategies/index.md) | [as post 08](../08-write-strategies/index.md) | [as post 08](../08-write-strategies/index.md) |
 | `subject` | who the event is about | who the fact is about | the scope: the user, account or project the rule applies to |
 | `content` | the event, one sentence | the fact or preference | the rule |
 | `created_at` | when the event was written | when the fact was first asserted | when the rule was learned |
@@ -57,7 +57,7 @@ The names come from cognitive psychology. Tulving (1972) separated episodic memo
 | `expires_at` | rarely set | for knowingly short-lived facts | not used: a person removes a rule |
 | `trigger` (added) | none | none | the condition that fires the rule |
 
-A store may add fields (a sensitivity label for the governance filter of [post 24](../24-privacy-and-governance/index.md)); it never drops one of the nine. One use changes: post 08 updates `last_accessed_at` on every read, while this post updates it only for the rows an answer relied on, for the reason section 15 gives. The post's snippet, `snippets/memory_layer.py`, declares the row this way:
+A store may add fields (a sensitivity label for the governance filter of [post 24](../24-privacy-and-governance/index.md)); it never drops one of the nine. One use changes: [post 08](../08-write-strategies/index.md) updates `last_accessed_at` on every read, while this post updates it only for the rows an answer relied on, for the reason section 15 gives. The post's snippet, `snippets/memory_layer.py`, declares the row this way:
 
 ```python
 @dataclass
@@ -86,7 +86,7 @@ Its write method refuses a row with no `source`, an unknown `kind`, or a `trigge
 
 **How it is retrieved.** Two access patterns. *Reference recall*: the user mentions an entity or a past exchange ("the issue from last week"), and retrieval pulls the episodes that mention it. *Background grounding*: the agent fetches the few most recent episodes about the subject as soft context for any turn. Both are the select pipeline of [post 09](../09-select-strategies/index.md) over `content`, with filters on `subject` and a `created_at` range. The snippet implements reference recall only, and only when the turn refers to the past; a word-overlap score stands in for an embedding search.
 
-**Decay.** Episodes age: last spring's complaint rarely matters to this week's question. The snippet uses post 08's illustrative scheme, confidence lowered by 0.01 for every day without a read, and treats a row below an illustrative 0.4 as cold: kept in the store, never packed by default. A production cold tier stays searchable on an explicit request. Decay is a schedule the team chooses, not something that happens by itself.
+**Decay.** Episodes age: last spring's complaint rarely matters to this week's question. The snippet uses [post 08](../08-write-strategies/index.md)'s illustrative scheme, confidence lowered by 0.01 for every day without a read, and treats a row below an illustrative 0.4 as cold: kept in the store, never packed by default. A production cold tier stays searchable on an explicit request. Decay is a schedule the team chooses, not something that happens by itself.
 
 ---
 
@@ -101,7 +101,7 @@ Its write method refuses a row with no `source`, an unknown `kind`, or a `trigge
 **Conflict.** Semantic memory has the hardest write semantics of the three. Three months ago the user asked for formal English; today they opened with a casual greeting. Two rules hold up:
 
 - **Never overwrite in place.** The new fact is a new row with its own source; the old row keeps its source and decays. Which one is packed is decided by the precedence rule of [post 06](../06-context-failure-modes/index.md), section 4 (the most recent wins; on a tie, the higher confidence), and the history of the change survives.
-- **Surface a doubtful fact instead of asserting it.** Below post 08's illustrative cutoff of 0.6, the snippet still packs the fact but marks it "unconfirmed: ask before relying on it". One question to the user costs one round trip; a wrong assertion costs trust.
+- **Surface a doubtful fact instead of asserting it.** Below [post 08](../08-write-strategies/index.md)'s illustrative cutoff of 0.6, the snippet still packs the fact but marks it "unconfirmed: ask before relying on it". One question to the user costs one round trip; a wrong assertion costs trust.
 
 ---
 
@@ -111,8 +111,8 @@ Its write method refuses a row with no `source`, an unknown `kind`, or a `trigge
 
 **Where a rule lives.** Not every rule is procedural memory. [Post 08](../08-write-strategies/index.md) gives rules three homes, and this post keeps them apart:
 
-- A rule for every user and every turn, written by the team ("refunds above $1,000 go to the manager queue"), belongs in the rules block of layer 01, the system prompt ([post 14](../14-system-prompt-as-software/index.md)), or in the repository's `AGENTS.md` (post 08, section 4). People write it and review it like code.
-- A packaged capability with its own instructions belongs in a skill's `SKILL.md`, loaded only when a task needs it (post 08, section 4).
+- A rule for every user and every turn, written by the team ("refunds above $1,000 go to the manager queue"), belongs in the rules block of layer 01, the system prompt ([post 14](../14-system-prompt-as-software/index.md)), or in the repository's `AGENTS.md` ([post 08](../08-write-strategies/index.md), section 4). People write it and review it like code.
+- A packaged capability with its own instructions belongs in a skill's `SKILL.md`, loaded only when a task needs it ([post 08](../08-write-strategies/index.md), section 4).
 - A rule learned from one user or account, which applies only when a condition holds, is a procedural row in the memory store. That is the procedural kind of this post.
 
 **When it is written.** Rarely: on an explicit instruction ("always send this client CSV"), or when the same correction recurs. Because a rule is obeyed rather than weighed, a new procedural row deserves a confirmation step before it is written: the agent repeats the rule back to the user, or a person approves it.
@@ -204,7 +204,7 @@ The event mem-07, a refund request written on 3 June and never read again, is co
 
 ![Confidence from 20 May to 12 October for four rows. The rule mem-10 stays at 1.00. The event mem-07 falls from 1.00 on 3 June, is cold from 3 August and falls to 0.00 by 11 September. The event mem-05 ends at 0.72; the fact mem-03 ends at 0.50, between the ask line at 0.6 and the cold line at 0.4.](diagrams/03-decay.svg)
 
-*Events and facts lose confidence with every idle day; a rule does not. The two lines are post 08's ask cutoff and this post's cold threshold, both illustrative.*
+*Events and facts lose confidence with every idle day; a rule does not. The two lines are [post 08](../08-write-strategies/index.md)'s ask cutoff and this post's cold threshold, both illustrative.*
 
 ---
 
@@ -233,9 +233,9 @@ The block is a per-turn injection: it follows the stable prefix of layer 01, the
 
 [Post 08](../08-write-strategies/index.md) names three classes of bug; a store with three kinds adds a fourth.
 
-1. **No provenance** (post 08). The user disputes a fact and nobody can find where the agent learned it. Its quieter form is the silent overwrite: a new fact replaces the old row in place, and the agent's behaviour changes with no record of why. Guard: a `source` and `created_at` on every row, and append-only writes.
-2. **The wrong content** (post 08). A tool result, a turn of the live conversation, a secret, or a raw reasoning trace ([post 18](../18-reasoning-model-context/index.md)) is written into a long-lived store and read back as if it were still true, or leaked. Guard: a write gate, as post 08's `check_write`.
-3. **No expiry** (post 08). Nothing decays, so old preferences override new ones: the agent insists the user works in Vim although the last six sessions were in VS Code. Guard: decay on read, a cold tier, and `expires_at` for facts known to be short-lived.
+1. **No provenance** ([post 08](../08-write-strategies/index.md)). The user disputes a fact and nobody can find where the agent learned it. Its quieter form is the silent overwrite: a new fact replaces the old row in place, and the agent's behaviour changes with no record of why. Guard: a `source` and `created_at` on every row, and append-only writes.
+2. **The wrong content** ([post 08](../08-write-strategies/index.md)). A tool result, a turn of the live conversation, a secret, or a raw reasoning trace ([post 18](../18-reasoning-model-context/index.md)) is written into a long-lived store and read back as if it were still true, or leaked. Guard: a write gate, as [post 08](../08-write-strategies/index.md)'s `check_write`.
+3. **No expiry** ([post 08](../08-write-strategies/index.md)). Nothing decays, so old preferences override new ones: the agent insists the user works in Vim although the last six sessions were in VS Code. Guard: decay on read, a cold tier, and `expires_at` for facts known to be short-lived.
 4. **The wrong kind** (this post). All three kinds share one table and one policy. A learned rule decays like a passing preference and disappears; a one-off event is packed every turn as a standing fact; a rule scores below an episode in a similarity search and never fires. Guard: a `kind` on every row, and a retrieval path and a decay policy per kind.
 
 ---
@@ -261,7 +261,7 @@ The storage shape follows from the questions the agent must answer:
 - **Independent facts and preferences, "what does this user want?"**: an extracted fact store over a vector index, as in Mem0. The default; reach for it first.
 - **Relationships and change over time, "what changed, and what caused it?"**: a temporal knowledge graph, as in Zep.
 - **Very long single sessions where the agent must manage its own working set**: tiered memory paged by the agent, as in Letta.
-- **Rules written by people that change by review, not by observation**: not a memory store at all. They belong in the system prompt's rules block or in `AGENTS.md` (post 08, section 4).
+- **Rules written by people that change by review, not by observation**: not a memory store at all. They belong in the system prompt's rules block or in `AGENTS.md` ([post 08](../08-write-strategies/index.md), section 4).
 
 A sensible path starts with the first and the three-kind discipline of sections 3 to 6, and adds a graph only once the relationship question a flat store cannot answer can be named.
 
@@ -304,10 +304,10 @@ Three changes show the moving parts. Moving `TODAY` to 12 November drops mem-01 
 
 ## 15. What can go wrong?
 
-- **Background reads counted as confirmations.** Post 08 updates `last_accessed_at` on every read, so a fact packed as background on every turn never decays, however wrong it has become. The snippet's retrieval is read-only for this reason: count only the reads an answer relied on, or a confirmation by the user.
+- **Background reads counted as confirmations.** [Post 08](../08-write-strategies/index.md) updates `last_accessed_at` on every read, so a fact packed as background on every turn never decays, however wrong it has become. The snippet's retrieval is read-only for this reason: count only the reads an answer relied on, or a confirmation by the user.
 - **A trigger on words instead of intent.** A rule fires on the word "refund", so "I do not want a refund, just the invoice" starts the refund procedure. A trigger tests a classified fact of the turn (its intent, the account's tier, the tool about to run), not a substring.
 - **Episodic recall on every turn.** Old events are packed into turns that never referred to them, and the answer drifts toward a ticket closed in September: distraction, in [post 06](../06-context-failure-modes/index.md)'s terms.
-- **A learned rule against a team rule.** A procedural row says "skip the approval step for this account"; layer 01 says every refund above $1,000 needs approval. That is conflict (post 06, section 4) inside one window. The write step checks a new rule against the system prompt, and the system prompt states that its rules win.
+- **A learned rule against a team rule.** A procedural row says "skip the approval step for this account"; layer 01 says every refund above $1,000 needs approval. That is conflict ([post 06](../06-context-failure-modes/index.md), section 4) inside one window. The write step checks a new rule against the system prompt, and the system prompt states that its rules win.
 - **A cold tier forgotten at deletion time.** A user asks for their data to be erased; the live rows go, and the cold rows, kept "never deleted", stay. Deletion has to reach every tier ([post 24](../24-privacy-and-governance/index.md)).
 
 ---
@@ -325,17 +325,15 @@ Three changes show the moving parts. Moving `TODAY` to 12 November drops mem-01 
 ## Further reading
 
 - Tulving, E., "Episodic and semantic memory" (1972): the episodic and semantic distinction.
-- Tulving, E., "How many memory systems are there?" (*American Psychologist*, 1985): procedural, semantic and episodic memory as three systems.
-- Sumers, T. R., Yao, S., Narasimhan, K. and Griffiths, T. L., "Cognitive Architectures for Language Agents" (2023): working, episodic, semantic and procedural memory for language agents.
-- Harrison Chase, "Memory for Agents" (LangChain blog, October 2024): the three kinds for agent builders, after CoALA.
-- Park, J. S. *et al.*, "Generative Agents: Interactive Simulacra of Human Behavior" (2023): a memory stream ranked by recency, importance and relevance.
-- Packer, C. *et al.*, "MemGPT: Towards LLMs as Operating Systems" (2023): tiered memory paged by the agent.
-- Chhikara, P. *et al.*, "Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory" (2025): extraction and the ADD, UPDATE, DELETE and NOOP update phase.
-- Rasmussen, P. *et al.*, "Zep: A Temporal Knowledge Graph Architecture for Agent Memory" (2025): Graphiti and its time-stamped edges.
-- Letta, "Introduction to stateful agents" and "Archival memory" (Letta documentation, consulted October 2026).
-- OpenAI, "Memory and new controls for ChatGPT" (13 February 2024; update of 10 April 2025).
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Tulving, E., ["How many memory systems are there?"](https://doi.org/10.1037/0003-066X.40.4.385) (*American Psychologist*, 1985): procedural, semantic and episodic memory as three systems.
+- Sumers, T. R., Yao, S., Narasimhan, K. and Griffiths, T. L., ["Cognitive Architectures for Language Agents"](https://arxiv.org/abs/2309.02427) (2023): working, episodic, semantic and procedural memory for language agents.
+- Harrison Chase, ["Memory for Agents"](https://www.langchain.com/blog/memory-for-agents) (LangChain blog, October 2024): the three kinds for agent builders, after CoALA.
+- Park, J. S. *et al.*, ["Generative Agents: Interactive Simulacra of Human Behavior"](https://arxiv.org/abs/2304.03442) (2023): a memory stream ranked by recency, importance and relevance.
+- Packer, C. *et al.*, ["MemGPT: Towards LLMs as Operating Systems"](https://arxiv.org/abs/2310.08560) (2023): tiered memory paged by the agent.
+- Chhikara, P. *et al.*, ["Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory"](https://arxiv.org/abs/2504.19413) (2025): extraction and the ADD, UPDATE, DELETE and NOOP update phase.
+- Rasmussen, P. *et al.*, ["Zep: A Temporal Knowledge Graph Architecture for Agent Memory"](https://arxiv.org/abs/2501.13956) (2025): Graphiti and its time-stamped edges.
+- Letta, ["Introduction to stateful agents"](https://docs.letta.com/) and ["Archival memory"](https://docs.letta.com/) (Letta documentation, consulted October 2026).
+- OpenAI, ["Memory and new controls for ChatGPT"](https://openai.com/index/memory-and-new-controls-for-chatgpt/) (13 February 2024; update of 10 April 2025).
 
 ---
 
