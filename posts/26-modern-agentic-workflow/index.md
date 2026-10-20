@@ -58,7 +58,7 @@ The model's own choices are mostly selects: a coding agent does not load the rep
 
 The standing instructions live in a file checked in beside the code: `AGENTS.md`, the open format read by Codex, Cursor and other agents, or `CLAUDE.md`, Claude Code's. [Post 14](../14-system-prompt-as-software/index.md), section 4, gives how each reaches the window. For nested files the agents.md site's rule is "The closest AGENTS.md to the edited file wins", and Cursor's "Rules" documentation (consulted October 2026) supports `AGENTS.md` "in the project root and subdirectories"; Claude Code instead concatenates the `CLAUDE.md` files from the root down and delivers them as a user message after the system prompt. Both do the job of layer 01, and one file can serve every host: Claude Code reads `AGENTS.md` when there is no `CLAUDE.md`, and a `CLAUDE.md` can import it with an `@AGENTS.md` line. Aider loads a conventions file when told to: its "Specifying coding conventions" page (consulted October 2026) recommends `aider --read CONVENTIONS.md`, which marks the file "read-only, and cached if prompt caching is enabled".
 
-A skeleton in post 14's five blocks (identity, rules, format, knowledge, tool-use guidance), each rule carrying the issue that motivated it:
+A skeleton in [post 14](../14-system-prompt-as-software/index.md)'s five blocks (identity, rules, format, knowledge, tool-use guidance), each rule carrying the issue that motivated it:
 
 ```markdown
 # AGENTS.md for acme-api
@@ -83,7 +83,7 @@ Agents implement changes and open pull requests here; they do not deploy.
 - `/run-tests` (a project skill): runs `make test`, lists the failures.
 ```
 
-A `frontend/CLAUDE.md` is read in addition to the root file, so it can add a rule but not replace one. The discipline is post 14's: **iterate from minimal**, adding a rule only when a real failure motivates it (the agent deleted a needed file, or committed in a style continuous integration (CI) rejected). Every line is read on every call; Claude Code's documentation targets under 200 lines per `CLAUDE.md`.
+A `frontend/CLAUDE.md` is read in addition to the root file, so it can add a rule but not replace one. The discipline is [post 14](../14-system-prompt-as-software/index.md)'s: **iterate from minimal**, adding a rule only when a real failure motivates it (the agent deleted a needed file, or committed in a style continuous integration (CI) rejected). Every line is read on every call; Claude Code's documentation targets under 200 lines per `CLAUDE.md`.
 
 ---
 
@@ -111,7 +111,7 @@ After: a migration that adds the nullable column and a matching index.
 
 **Which copy wins.** When a personal and a project skill share a name, the page's order is "Enterprise over personal, and personal over project". Sub-agent definitions resolve the other way (section 5).
 
-Skills are the packaged-capability home of [post 16](../16-memory-systems/index.md), section 6: team rules in `AGENTS.md`, packaged capabilities in a `SKILL.md`, a how-to learned about one user as a procedural memory row. Two habits pay off: **one concern per skill**, and **examples over instructions**, since one before-and-after pair often steers better than a paragraph of rules (rule 5 of post 14, section 3).
+Skills are the packaged-capability home of [post 16](../16-memory-systems/index.md), section 6: team rules in `AGENTS.md`, packaged capabilities in a `SKILL.md`, a how-to learned about one user as a procedural memory row. Two habits pay off: **one concern per skill**, and **examples over instructions**, since one before-and-after pair often steers better than a paragraph of rules (rule 5 of [post 14](../14-system-prompt-as-software/index.md), section 3).
 
 ---
 
@@ -129,7 +129,7 @@ Delegation is a four-step handshake, drawn below. The parent (1) frames a scoped
 - **Make the contract explicit.** The sub-agent returns a structured result (what it found, what it changed, which tests pass), and the parent checks it before acting ([post 13](../13-isolate-strategies/index.md), section 5).
 - **Review transcripts on a sample.** A summary can hide a skipped test, a hard-coded value or an edit the child should not have made.
 
-**The steelman against all this.** Walden Yan's "Don't Build Multi-Agents" (Cognition, June 2025) argues that splitting work fragments the context: each agent holds a slice of the reasoning behind the others' outputs, and parallel agents make conflicting implicit decisions. It recommends a single-threaded, linear agent, and describes Claude Code's sub-agents of the time as consistent with that view, since a sub-agent was usually given a question to answer rather than code to write and never ran in parallel with the main agent ([post 13](../13-isolate-strategies/index.md), section 9). The reconciling rule is post 13's contract test: delegate a task whose input is fully specified, whose output is structured and finite, and which needs none of the parent's evolving state; keep in the main agent anything whose reasoning must stay coherent across steps.
+**The steelman against all this.** Walden Yan's "Don't Build Multi-Agents" (Cognition, June 2025) argues that splitting work fragments the context: each agent holds a slice of the reasoning behind the others' outputs, and parallel agents make conflicting implicit decisions. It recommends a single-threaded, linear agent, and describes Claude Code's sub-agents of the time as consistent with that view, since a sub-agent was usually given a question to answer rather than code to write and never ran in parallel with the main agent ([post 13](../13-isolate-strategies/index.md), section 9). The reconciling rule is [post 13](../13-isolate-strategies/index.md)'s contract test: delegate a task whose input is fully specified, whose output is structured and finite, and which needs none of the parent's evolving state; keep in the main agent anything whose reasoning must stay coherent across steps.
 
 ---
 
@@ -194,7 +194,7 @@ compact at 100000            7254000        95500            3       37.55      
 no compaction reads 2.8 times the input tokens and costs 1.9 times as much with caching
 ```
 
-Without compaction the last call reads $18{,}000 + 119 \times 2{,}500 = 315{,}500$ tokens and the session $120 \times 18{,}000 + 2{,}500 \times (0 + 1 + \dots + 119) = 20{,}010{,}000$. Three compactions keep every call under 100,000 tokens and cut the input to 7,254,000. Caching narrows the dollar gap (12.72 against 6.80 dollars) but does not shrink what the model reads, and a long window is where distraction ([post 06](../06-context-failure-modes/index.md), section 2) and lost-in-the-middle (post 06, section 5) set in. The figure below draws the window call by call. The fix is automatic compaction left on, and `/compact` (or `/clear` at a real task boundary) when quality drifts ([post 12](../12-compress-strategies/index.md), sections 8 and 9).
+Without compaction the last call reads $18{,}000 + 119 \times 2{,}500 = 315{,}500$ tokens and the session $120 \times 18{,}000 + 2{,}500 \times (0 + 1 + \dots + 119) = 20{,}010{,}000$. Three compactions keep every call under 100,000 tokens and cut the input to 7,254,000. Caching narrows the dollar gap (12.72 against 6.80 dollars) but does not shrink what the model reads, and a long window is where distraction ([post 06](../06-context-failure-modes/index.md), section 2) and lost-in-the-middle ([post 06](../06-context-failure-modes/index.md), section 5) set in. The figure below draws the window call by call. The fix is automatic compaction left on, and `/compact` (or `/clear` at a real task boundary) when quality drifts ([post 12](../12-compress-strategies/index.md), sections 8 and 9).
 
 ![A line chart of the window in tokens over 120 model calls: without compaction a straight climb from 18,000 to 315,500; with compaction a sawtooth up to 95,500 and back to 23,000, three times, under a dotted 100,000-token limit. Illustrative sizes.](diagrams/03-session-window.svg)
 
@@ -226,7 +226,7 @@ A transcript can be read in the vocabulary of [post 07](../07-write-select-compr
 | 8 | After compaction, the agent reads its notes file back. | S | 05 Conversation history |
 | 9 | A `SessionEnd` hook archives the transcript outside every prompt. | W | none |
 
-The rules file and the skill are placed by their job, standing instructions, as post 14 places `CLAUDE.md` in layer 01; hooks that only block or report are code and appear only where they write or select.
+The rules file and the skill are placed by their job, standing instructions, as [post 14](../14-system-prompt-as-software/index.md) places `CLAUDE.md` in layer 01; hooks that only block or report are code and appear only where they write or select.
 
 ---
 
@@ -253,15 +253,13 @@ The rules file and the skill are placed by their job, standing instructions, as 
 
 ## Further reading
 
-- Anthropic, "How Claude Code works", "Hooks reference", "Extend Claude with skills", "Create custom subagents" and "How Claude remembers your project" (Claude Code documentation, consulted October 2026).
-- agents.md project, "AGENTS.md" (consulted October 2026).
-- Cursor, "Rules" (documentation, consulted October 2026).
-- Aider, "Specifying coding conventions" (documentation, consulted October 2026).
-- Anthropic Engineering, "Equipping agents for the real world with Agent Skills" (16 October 2025).
-- Cognition (Walden Yan), "Don't Build Multi-Agents" (June 2025): the counter-argument of section 5.
-- Anthropic, "Pricing" and "Prompt caching" (consulted October 2026): the rates of section 7.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Anthropic, ["How Claude Code works"](https://code.claude.com/docs/en/how-claude-code-works), ["Hooks reference"](https://code.claude.com/docs/en/hooks), ["Extend Claude with skills"](https://code.claude.com/docs/en/skills), ["Create custom subagents"](https://code.claude.com/docs/en/sub-agents) and ["How Claude remembers your project"](https://code.claude.com/docs/en/memory) (Claude Code documentation, consulted October 2026).
+- agents.md project, ["AGENTS.md"](https://agents.md/) (consulted October 2026).
+- Cursor, ["Rules"](https://cursor.com/docs/context/rules) (documentation, consulted October 2026).
+- Aider, ["Specifying coding conventions"](https://aider.chat/docs/usage/conventions.html) (documentation, consulted October 2026).
+- Anthropic Engineering, ["Equipping agents for the real world with Agent Skills"](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (16 October 2025).
+- Cognition (Walden Yan), ["Don't Build Multi-Agents"](https://cognition.com/blog/dont-build-multi-agents) (June 2025): the counter-argument of section 5.
+- Anthropic, ["Pricing"](https://platform.claude.com/docs/en/about-claude/pricing) and ["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) (consulted October 2026): the rates of section 7.
 
 ---
 
