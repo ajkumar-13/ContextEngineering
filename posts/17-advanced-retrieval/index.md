@@ -62,7 +62,7 @@ Single-hop BM25 packs the audit report and two documents that share its words, a
 
 *The buyer documents never mention the audit, so no score against the question finds them; one hop along an extracted edge does.*
 
-The two-step run is the other fix: read the vendor names from the first document and retrieve again with them (post 09's decomposition). One bridge needs no graph; a graph pays where the same relations are asked repeatedly, or a chain is too long to follow one query at a time.
+The two-step run is the other fix: read the vendor names from the first document and retrieve again with them ([post 09](../09-select-strategies/index.md)'s decomposition). One bridge needs no graph; a graph pays where the same relations are asked repeatedly, or a chain is too long to follow one query at a time.
 
 **Hop depth is the cost dial.** Each hop multiplies what is reached by roughly the links per entity: on a synthetic graph of 2,000 entities with four links each, the snippet reaches 4 entities within one hop, 20 within two, 82 within three and 308 within four, each bringing its source chunks into layer 04. Walking further than the question needs packs relations nobody asked about, the distraction failure mode of [post 06](../06-context-failure-modes/index.md).
 
@@ -114,7 +114,7 @@ B matches "fix" and "error" exactly but E-4012 at best 0.28; A matches E-4012 ex
 **The technique.** Text-to-SQL: a model call translates the question into SQL (Structured Query Language) against a known schema, the application runs it, and the result rows go into layer 04. Four practices make it dependable:
 
 1. **Retrieve the schema.** The prompt holds only the tables relevant to this question, found by retrieval over schema descriptions. A 500-table warehouse at 60 tokens a table (illustrative sizes) is 30,000 tokens of mostly irrelevant schema per call.
-2. **A few worked examples.** Two or three pairs of question and SQL resembling this one, picked as post 09 picks few-shot examples.
+2. **A few worked examples.** Two or three pairs of question and SQL resembling this one, picked as [post 09](../09-select-strategies/index.md) picks few-shot examples.
 3. **Validate before running.** The SQL is parsed and checked against the schema; an error goes back to the model for one repair.
 4. **Run it read-only.** A database user that cannot write turns an injected `DROP TABLE` into an error ([post 23](../23-security/index.md) covers prompt injection).
 
@@ -203,7 +203,7 @@ A stack that serves all four shapes, in the order it is built:
 | GraphRAG | Extraction, a graph, a bounded walk | Multi-hop and global questions |
 | Late interaction | A per-token index (ColBERTv2 with PLAID) | Rare exact terms |
 
-Routes are added in the order the unanswered questions demand, cheapest first. Every route writes into layer 04, so post 09's packing rules (budget, bookend order, citation headers) apply to rows, subgraphs and documents too.
+Routes are added in the order the unanswered questions demand, cheapest first. Every route writes into layer 04, so [post 09](../09-select-strategies/index.md)'s packing rules (budget, bookend order, citation headers) apply to rows, subgraphs and documents too.
 
 ---
 
@@ -244,15 +244,13 @@ Adding a question to `QUESTIONS` in `router.py`, or changing a size in `route_co
 
 ## Further reading
 
-- Edge, D. *et al.*, *"From Local to Global: A Graph RAG Approach to Query-Focused Summarization"* (Microsoft Research, arXiv 2024, v2 2025).
-- Khattab, O. and Zaharia, M., *"ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT"* (SIGIR 2020).
-- Santhanam, K. *et al.*, *"ColBERTv2: Effective and Efficient Retrieval via Lightweight Late Interaction"* (NAACL 2022), and *"PLAID: An Efficient Engine for Late Interaction Retrieval"* (CIKM 2022).
-- Pourreza, M. and Rafiei, D., *"DIN-SQL: Decomposed In-Context Learning of Text-to-SQL with Self-Correction"* (NeurIPS 2023).
-- Google, *"Long context"* (Gemini API documentation, consulted October 2026).
-- Anthropic, *"Long context prompting for Claude 2.1"* (December 2023): one sentence added to the start of the answer raised a needle-in-a-haystack score from 27% to 98%.
-- Asai, A. *et al.*, *"Self-RAG"* (2023), and Yan, S.-Q. *et al.*, *"Corrective Retrieval Augmented Generation"* (2024).
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Edge, D. *et al.*, *["From Local to Global: A Graph RAG Approach to Query-Focused Summarization"](https://arxiv.org/abs/2404.16130)* (Microsoft Research, arXiv 2024, v2 2025).
+- Khattab, O. and Zaharia, M., *["ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT"](https://arxiv.org/abs/2004.12832)* (SIGIR 2020).
+- Santhanam, K. *et al.*, *["ColBERTv2: Effective and Efficient Retrieval via Lightweight Late Interaction"](https://arxiv.org/abs/2112.01488)* (NAACL 2022), and *["PLAID: An Efficient Engine for Late Interaction Retrieval"](https://arxiv.org/abs/2205.09707)* (CIKM 2022).
+- Pourreza, M. and Rafiei, D., *["DIN-SQL: Decomposed In-Context Learning of Text-to-SQL with Self-Correction"](https://arxiv.org/abs/2304.11015)* (NeurIPS 2023).
+- Google, *["Long context"](https://ai.google.dev/gemini-api/docs/long-context)* (Gemini API documentation, consulted October 2026).
+- Anthropic, *["Long context prompting for Claude 2.1"](https://claude.com/blog/claude-2-1-prompting)* (December 2023): one sentence added to the start of the answer raised a needle-in-a-haystack score from 27% to 98%.
+- Asai, A. *et al.*, *["Self-RAG"](https://arxiv.org/abs/2310.11511)* (2023), and Yan, S.-Q. *et al.*, *["Corrective Retrieval Augmented Generation"](https://arxiv.org/abs/2401.15884)* (2024).
 
 ---
 
