@@ -71,11 +71,11 @@ One rule turns "effort per task" into a design constraint. The thinking configur
 
 Thinking spends from the two accounts of [post 04](../04-tokens-windows-budgets/index.md), the window and the bill.
 
-**The window.** Thinking of the current turn counts toward `max_tokens` and occupies the window for that turn; thinking of earlier turns follows the preservation rule of section 2 ("Thinking"). Post 04's output reserve, set through `max_tokens`, now has to hold the thinking as well as the answer; the same page lists 128K tokens as the largest `max_tokens` Claude Opus 4.6 accepts.
+**The window.** Thinking of the current turn counts toward `max_tokens` and occupies the window for that turn; thinking of earlier turns follows the preservation rule of section 2 ("Thinking"). [Post 04](../04-tokens-windows-budgets/index.md)'s output reserve, set through `max_tokens`, now has to hold the thinking as well as the answer; the same page lists 128K tokens as the largest `max_tokens` Claude Opus 4.6 accepts.
 
 **The bill.** Thinking is billed at the output rate: for Claude Opus 4.6, 25 dollars per million output tokens against 5 per million input tokens (Anthropic, "Pricing", as of early 2026, as [post 05](../05-economics-of-context/index.md) quotes it), so one thinking token costs what five prompt tokens cost.
 
-`snippets/thinking_budget.py` adds a thinking line to one hard turn of post 04's agent: the same six layers, 10,500 input tokens with the 4,600-token prefix read from the cache, a 1,500-token answer, and thinking at three effort levels. Every token count is illustrative: Anthropic's pages give no thinking counts per level, and a real request reports its own. Run as `uv run python posts/18-reasoning-model-context/snippets/thinking_budget.py` from the series root, it prints:
+`snippets/thinking_budget.py` adds a thinking line to one hard turn of [post 04](../04-tokens-windows-budgets/index.md)'s agent: the same six layers, 10,500 input tokens with the 4,600-token prefix read from the cache, a 1,500-token answer, and thinking at three effort levels. Every token count is illustrative: Anthropic's pages give no thinking counts per level, and a real request reports its own. Run as `uv run python posts/18-reasoning-model-context/snippets/thinking_budget.py` from the series root, it prints:
 
 ```text
 one hard turn on Claude Opus 4.6, illustrative token counts
@@ -154,7 +154,7 @@ input over the turn: 37300 tokens; cached 0.07385, uncached 0.18650
 output over the turn: 3400 tokens, of which thinking 2800 in 3 segments (82.4%); 0.08500
 ```
 
-The figure above draws the turn. First, **a loop has as many thinking segments as steps**: 2,800 of the turn's 3,400 output tokens are thinking, in three segments, and since each request in the loop has its own `max_tokens` ("Steering thinking"), the cap bounds a request, not the turn. Post 04's per-turn budget multiplies the thinking per step by the expected number of steps. Second, **blocks passed back unchanged keep the loop cheap**: each request reads the one before it from the cache, so the turn's 37,300 input tokens cost 0.07385 dollars cached against 0.18650 uncached, at the snippet's sizes. The "Thinking" page adds that thinking-heavy tasks often outlast the default five-minute cache lifetime, and suggests the one-hour lifetime.
+The figure above draws the turn. First, **a loop has as many thinking segments as steps**: 2,800 of the turn's 3,400 output tokens are thinking, in three segments, and since each request in the loop has its own `max_tokens` ("Steering thinking"), the cap bounds a request, not the turn. [Post 04](../04-tokens-windows-budgets/index.md)'s per-turn budget multiplies the thinking per step by the expected number of steps. Second, **blocks passed back unchanged keep the loop cheap**: each request reads the one before it from the cache, so the turn's 37,300 input tokens cost 0.07385 dollars cached against 0.18650 uncached, at the snippet's sizes. The "Thinking" page adds that thinking-heavy tasks often outlast the default five-minute cache lifetime, and suggests the one-hour lifetime.
 
 A useful default: keep the trail of tool calls and tool results, the record of what the agent did and saw, at full fidelity, and treat the thinking between them as working memory, passed back unchanged within the turn and a candidate for clearing later, at the cache price of section 5.
 
@@ -210,14 +210,12 @@ Their token counts are illustrative, so they show the shape of the trade, not a 
 
 ## Further reading
 
-- Anthropic, *"Thinking"*, *"Extended thinking"*, *"Effort"* and *"Steering thinking"* documentation (consulted October 2026): thinking blocks, display and billing, preservation by model, the deprecated `budget_tokens`, effort levels per model, interleaved thinking.
-- Anthropic, *"Prompt caching"* and *"Context editing"* documentation (consulted October 2026): how thinking blocks are cached, what invalidates the cache, and thinking-block clearing.
-- Anthropic Engineering, *"Building effective agents"* (December 2024): the simplest solution first.
-- Wei, J. *et al.*, *"Chain-of-Thought Prompting Elicits Reasoning in Large Language Models"* (2022): intermediate steps improve reasoning in large models.
-- DeepSeek-AI, *"DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning"* (2025): reasoning trained with large-scale reinforcement learning.
-- Hsieh, C.-P. *et al.*, *"RULER"* (2024), and Liu, N. F. *et al.*, *"Lost in the Middle"* (2023): the evidence of section 1.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Anthropic, *["Thinking"](https://platform.claude.com/docs/en/build-with-claude/thinking)*, *["Extended thinking"](https://platform.claude.com/docs/en/build-with-claude/extended-thinking)*, *["Effort"](https://platform.claude.com/docs/en/build-with-claude/effort)* and *["Steering thinking"](https://platform.claude.com/docs/en/build-with-claude/steering-thinking)* documentation (consulted October 2026): thinking blocks, display and billing, preservation by model, the deprecated `budget_tokens`, effort levels per model, interleaved thinking.
+- Anthropic, *["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)* and *["Context editing"](https://platform.claude.com/docs/en/build-with-claude/context-editing)* documentation (consulted October 2026): how thinking blocks are cached, what invalidates the cache, and thinking-block clearing.
+- Anthropic Engineering, *["Building effective agents"](https://www.anthropic.com/engineering/building-effective-agents)* (December 2024): the simplest solution first.
+- Wei, J. *et al.*, *["Chain-of-Thought Prompting Elicits Reasoning in Large Language Models"](https://arxiv.org/abs/2201.11903)* (2022): intermediate steps improve reasoning in large models.
+- DeepSeek-AI, *["DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning"](https://arxiv.org/abs/2501.12948)* (2025): reasoning trained with large-scale reinforcement learning.
+- Hsieh, C.-P. *et al.*, *["RULER"](https://arxiv.org/abs/2404.06654)* (2024), and Liu, N. F. *et al.*, *["Lost in the Middle"](https://arxiv.org/abs/2307.03172)* (2023): the evidence of section 1.
 
 ---
 
