@@ -272,15 +272,13 @@ The two positions agree more than they conflict. Every failure Cognition describ
 
 ## Further reading
 
-- Anthropic Engineering, "Building Effective AI Agents" (December 2024): workflows against agents, prompt chaining, parallelisation and orchestrator-workers.
-- Anthropic Engineering, "How we built our multi-agent research system" (June 2025): sub-agents in production, the 90.2% result and the token multipliers of section 1, and where multi-agent designs fit poorly.
-- Cognition (Walden Yan), "Don't Build Multi-Agents" (June 2025): the counter-argument of section 9.
-- Anthropic, "Pricing" (consulted October 2026): the rates of section 8.
-- LangChain, LangGraph documentation (2024 to 2025): supervisor and swarm topologies as library patterns.
-- Wu, Q. *et al.*, "AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation" (2023).
-- OpenAI, "Swarm" (GitHub repository, 2024): an experimental, educational library of hand-offs between agents, since replaced by the OpenAI Agents SDK.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Anthropic Engineering, ["Building Effective AI Agents"](https://www.anthropic.com/engineering/building-effective-agents) (December 2024): workflows against agents, prompt chaining, parallelisation and orchestrator-workers.
+- Anthropic Engineering, ["How we built our multi-agent research system"](https://www.anthropic.com/engineering/built-multi-agent-research-system) (June 2025): sub-agents in production, the 90.2% result and the token multipliers of section 1, and where multi-agent designs fit poorly.
+- Cognition (Walden Yan), ["Don't Build Multi-Agents"](https://cognition.com/blog/dont-build-multi-agents) (June 2025): the counter-argument of section 9.
+- Anthropic, ["Pricing"](https://platform.claude.com/docs/en/about-claude/pricing) (consulted October 2026): the rates of section 8.
+- LangChain, [LangGraph documentation](https://langchain-ai.github.io/langgraph/) (2024 to 2025): supervisor and swarm topologies as library patterns.
+- Wu, Q. *et al.*, ["AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation"](https://arxiv.org/abs/2308.08155) (2023).
+- OpenAI, ["Swarm"](https://github.com/openai/swarm) (GitHub repository, 2024): an experimental, educational library of hand-offs between agents, since replaced by the OpenAI Agents SDK.
 
 ---
 
