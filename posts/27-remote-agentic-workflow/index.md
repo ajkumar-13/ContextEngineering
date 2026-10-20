@@ -156,7 +156,7 @@ A server costs rate times hours: $0.17 \times 730 = 124.10$ dollars for a month 
 
 *The model bill outweighs a right-sized server several times over; only a large instance left running rivals it.*
 
-**Measure both sides**: the trace store of [post 22](../22-observability/index.md), section 2, records the model cost per call, and the cloud bill records the server. An idle server can be stopped outside working hours, at a price: a stopped instance loses its memory, so the `tmux` session and the agent end and the conversation returns only through `claude --continue`; it gets a new public IPv4 address at start unless an Elastic IP is attached; and its EBS (Elastic Block Store) volumes are still billed (AWS, "How EC2 instance stop and start works", consulted October 2026). If the model dominates, the levers are the series' own: a cached prefix (post 05), compression ([post 12](../12-compress-strategies/index.md)) and sub-agent budgets ([post 13](../13-isolate-strategies/index.md), section 5).
+**Measure both sides**: the trace store of [post 22](../22-observability/index.md), section 2, records the model cost per call, and the cloud bill records the server. An idle server can be stopped outside working hours, at a price: a stopped instance loses its memory, so the `tmux` session and the agent end and the conversation returns only through `claude --continue`; it gets a new public IPv4 address at start unless an Elastic IP is attached; and its EBS (Elastic Block Store) volumes are still billed (AWS, "How EC2 instance stop and start works", consulted October 2026). If the model dominates, the levers are the series' own: a cached prefix ([post 05](../05-economics-of-context/index.md)), compression ([post 12](../12-compress-strategies/index.md)) and sub-agent budgets ([post 13](../13-isolate-strategies/index.md), section 5).
 
 ---
 
@@ -174,7 +174,7 @@ The box runs an agent with a shell and some credentials; the table below lists e
 - **MFA on SSH** (multi-factor authentication) for the human side.
 - **An audit log** of every command the agent ran, with timestamp and user, kept where the agent's user cannot edit it.
 
-These are [post 23](../23-security/index.md)'s defences on a box. The role, the mounts and the staging credentials bound each tool's blast radius (D2: a sandbox in post 23's security sense, not post 13's output-scoping sense), and the hook checks a proposed action in code (D1). The chat bridge adds a boundary a laptop lacks: a reply from the engineer's chat is `user` content in post 23's trust-tag terms, a message from anyone else is `external` and never reaches `send-keys` (D3, post 23, section 5).
+These are [post 23](../23-security/index.md)'s defences on a box. The role, the mounts and the staging credentials bound each tool's blast radius (D2: a sandbox in [post 23](../23-security/index.md)'s security sense, not [post 13](../13-isolate-strategies/index.md)'s output-scoping sense), and the hook checks a proposed action in code (D1). The chat bridge adds a boundary a laptop lacks: a reply from the engineer's chat is `user` content in [post 23](../23-security/index.md)'s trust-tag terms, a message from anyone else is `external` and never reaches `send-keys` (D3, [post 23](../23-security/index.md), section 5).
 
 ---
 
@@ -214,13 +214,11 @@ The lab for this post, described as a procedure and not reported as a run: the m
 
 ## Further reading
 
-- AWS, *"Amazon EC2 On-Demand Pricing"*, and Hetzner, *"Price adjustment"* (consulted October 2026): the rates of section 6.
-- Anthropic, *"Pricing"* and *"Prompt caching"* (Claude API documentation, consulted October 2026).
-- AWS EC2 documentation (consulted October 2026): *"Amazon EC2 security groups"*, *"IAM roles for Amazon EC2"*, *"Connect to your Linux instance using a public IP address and EC2 Instance Connect"*, *"How EC2 instance stop and start works"*.
-- VS Code, *"Remote Development using SSH"*; Claude Code, *"Advanced setup"*, *"CLI reference"*, *"Hooks reference"* and *"Remote Control"*; Telegram, *"Bot API"* (all consulted October 2026).
-- The `tmux` manual page: `new-session`, `attach-session`, `send-keys -l`.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- AWS, *["Amazon EC2 On-Demand Pricing"](https://aws.amazon.com/ec2/pricing/on-demand/)*, and Hetzner, *["Price adjustment"](https://docs.hetzner.com/general/infrastructure-and-availability/price-adjustment/)* (consulted October 2026): the rates of section 6.
+- Anthropic, *["Pricing"](https://platform.claude.com/docs/en/about-claude/pricing)* and *["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)* (Claude API documentation, consulted October 2026).
+- AWS EC2 documentation (consulted October 2026): *["Amazon EC2 security groups"](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html)*, *["IAM roles for Amazon EC2"](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)*, *["Connect to your Linux instance using a public IP address and EC2 Instance Connect"](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-linux-inst-eic.html)*, *["How EC2 instance stop and start works"](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/how-ec2-instance-stop-start-works.html)*.
+- VS Code, *["Remote Development using SSH"](https://code.visualstudio.com/docs/remote/ssh)*; Claude Code, *["Advanced setup"](https://code.claude.com/docs/en/setup)*, *["CLI reference"](https://code.claude.com/docs/en/cli-reference)*, *["Hooks reference"](https://code.claude.com/docs/en/hooks)* and *["Remote Control"](https://code.claude.com/docs/en/remote-control)*; Telegram, *["Bot API"](https://core.telegram.org/bots/api)* (all consulted October 2026).
+- The [`tmux` manual page](https://man7.org/linux/man-pages/man1/tmux.1.html): `new-session`, `attach-session`, `send-keys -l`.
 
 ---
 
