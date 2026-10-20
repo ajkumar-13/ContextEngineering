@@ -144,7 +144,7 @@ The rules carry their issues (rule 2) and the first is positive (rule 3). Two ru
 
 A production prompt is resent on every call. **Prompt caching** removes most of that cost: the provider stores the processed state of a prefix, in effect its KV cache ([post 03](../03-how-llms-read-context/index.md), section 7), and reuses it when a later request starts with the same prefix. [Post 05](../05-economics-of-context/index.md) works through the rules and the arithmetic (its section 4); this section applies them to a prompt that changes by release.
 
-The rules, from Anthropic's "Prompt caching" documentation as consulted in October 2026 and as post 05 states them: a hit needs a prefix identical up to a cache breakpoint (a `cache_control` marker, at most four per request); the prefix is built in the order `tools`, `system`, `messages`; a cache write costs 1.25 times the base input price for the default five-minute lifetime and 2 times for the one-hour lifetime; a cache read costs 0.1 times the base input price on most models, with lower multipliers on some newer ones; and a prefix shorter than the model's minimum (1,024 tokens for Claude Sonnet 4.5, 4,096 for Claude Opus 4.6 and Claude Haiku 4.5) is not cached, with no error returned. OpenAI's "Prompt caching" guide (consulted October 2026) describes caching on by default for supported models, with cached input discounted by up to 95%, depending on the model.
+The rules, from Anthropic's "Prompt caching" documentation as consulted in October 2026 and as [post 05](../05-economics-of-context/index.md) states them: a hit needs a prefix identical up to a cache breakpoint (a `cache_control` marker, at most four per request); the prefix is built in the order `tools`, `system`, `messages`; a cache write costs 1.25 times the base input price for the default five-minute lifetime and 2 times for the one-hour lifetime; a cache read costs 0.1 times the base input price on most models, with lower multipliers on some newer ones; and a prefix shorter than the model's minimum (1,024 tokens for Claude Sonnet 4.5, 4,096 for Claude Opus 4.6 and Claude Haiku 4.5) is not cached, with no error returned. OpenAI's "Prompt caching" guide (consulted October 2026) describes caching on by default for supported models, with cached input discounted by up to 95%, depending on the model.
 
 Two consequences follow for a system prompt:
 
@@ -155,7 +155,7 @@ Two consequences follow for a system prompt:
 
 *A one-line rule edit costs one rewrite of the system prompt's cache entry; a breakpoint after the tools keeps the schemas reusable.*
 
-The figure above draws the second consequence for the snippet's change from rules 1.2.0 to 1.3.0, with post 05's multipliers. The practical rule is post 05's: batch prompt changes into deliberate releases, because each edit pays the write premium again and dents the cache-hit rate that monitoring watches (section 7).
+The figure above draws the second consequence for the snippet's change from rules 1.2.0 to 1.3.0, with [post 05](../05-economics-of-context/index.md)'s multipliers. The practical rule is [post 05](../05-economics-of-context/index.md)'s: batch prompt changes into deliberate releases, because each edit pays the write premium again and dents the cache-hit rate that monitoring watches (section 7).
 
 ---
 
@@ -258,15 +258,13 @@ Edits become reviewable changes; a reviewer sees which cases moved, not only whi
 
 ## Further reading
 
-- Anthropic, "Prompting best practices" (Claude documentation, consulted October 2026): roles, motivated instructions, positive phrasing and examples.
-- OpenAI, "Model Spec" (version of 18 August 2026, consulted October 2026): the levels of authority between system, developer and user instructions.
-- agents.md project, "AGENTS.md" (consulted October 2026): the open format and its nesting rule.
-- Anthropic, "How Claude remembers your project" (Claude Code documentation, consulted October 2026): how `CLAUDE.md` files load, where they are delivered, and the size guidance.
-- Anthropic Engineering, "Equipping agents for the real world with Agent Skills" (16 October 2025): the `SKILL.md` format and loading on demand.
-- Anthropic, "Prompt caching" documentation, and OpenAI, "Prompt caching" guide (both consulted October 2026): breakpoints, cache order, multipliers and minimum lengths.
-- DAIR.AI, "Prompt Engineering Guide" (2024 edition): the broader field and its vocabulary.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Anthropic, ["Prompting best practices"](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices) (Claude documentation, consulted October 2026): roles, motivated instructions, positive phrasing and examples.
+- OpenAI, ["Model Spec"](https://model-spec.openai.com/) (version of 18 August 2026, consulted October 2026): the levels of authority between system, developer and user instructions.
+- agents.md project, ["AGENTS.md"](https://agents.md/) (consulted October 2026): the open format and its nesting rule.
+- Anthropic, ["How Claude remembers your project"](https://code.claude.com/docs/en/memory) (Claude Code documentation, consulted October 2026): how `CLAUDE.md` files load, where they are delivered, and the size guidance.
+- Anthropic Engineering, ["Equipping agents for the real world with Agent Skills"](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (16 October 2025): the `SKILL.md` format and loading on demand.
+- Anthropic, ["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) documentation, and OpenAI, ["Prompt caching"](https://developers.openai.com/api/docs/guides/prompt-caching) guide (both consulted October 2026): breakpoints, cache order, multipliers and minimum lengths.
+- DAIR.AI, ["Prompt Engineering Guide"](https://www.promptingguide.ai/) (2024 edition): the broader field and its vocabulary.
 
 ---
 
