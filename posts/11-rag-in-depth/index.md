@@ -229,16 +229,14 @@ Its last lines bookend-pack the fused top-5 for the first question. Rewording a 
 
 ## Further reading
 
-- Lewis, P. *et al.*, "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks" (NeurIPS 2020).
-- Anthropic, "Introducing Contextual Retrieval" (September 2024).
-- Cormack, G. V. *et al.*, "Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods" (SIGIR 2009).
-- Günther, M. *et al.*, "Late Chunking: Contextual Chunk Embeddings Using Long-Context Embedding Models" (2024).
-- Muennighoff, N. *et al.*, "MTEB: Massive Text Embedding Benchmark" (2022).
-- Cohere, Voyage AI and BAAI reranker documentation.
-- Saad-Falcon, J. *et al.*, "ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems" (NAACL 2024).
-- Khattab, O. and Zaharia, M., "ColBERT" (SIGIR 2020): late interaction, in [post 17](../17-advanced-retrieval/index.md).
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Lewis, P. *et al.*, ["Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"](https://arxiv.org/abs/2005.11401) (NeurIPS 2020).
+- Anthropic, ["Introducing Contextual Retrieval"](https://www.anthropic.com/news/contextual-retrieval) (September 2024).
+- Cormack, G. V. *et al.*, ["Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods"](https://doi.org/10.1145/1571941.1572114) (SIGIR 2009).
+- Günther, M. *et al.*, ["Late Chunking: Contextual Chunk Embeddings Using Long-Context Embedding Models"](https://arxiv.org/abs/2409.04701) (2024).
+- Muennighoff, N. *et al.*, ["MTEB: Massive Text Embedding Benchmark"](https://arxiv.org/abs/2210.07316) (2022).
+- [Cohere](https://docs.cohere.com/docs/rerank), [Voyage AI](https://docs.voyageai.com/) and [BAAI](https://huggingface.co/BAAI/bge-reranker-v2-m3) reranker documentation.
+- Saad-Falcon, J. *et al.*, ["ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems"](https://arxiv.org/abs/2311.09476) (NAACL 2024).
+- Khattab, O. and Zaharia, M., ["ColBERT"](https://arxiv.org/abs/2004.12832) (SIGIR 2020): late interaction, in [post 17](../17-advanced-retrieval/index.md).
 
 ---
 
