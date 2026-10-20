@@ -20,7 +20,7 @@
 
 ## 1. The question: does a million-token window replace retrieval?
 
-The windows grew. As [post 04](../04-tokens-windows-budgets/index.md) tabulates them, Claude Haiku 4.5 and Claude Sonnet 4.5 hold 200,000 tokens and Claude Opus 4.6 holds 1,000,000 (Anthropic, "Context windows", consulted October 2026), and Google's Gemini "Long context" page (updated 22 June 2026) says that many Gemini models "come with large context windows of 1 million or more tokens". Models and sizes are as of early 2026 and change. By post 04's rule of three-quarters of a word per token, 1,000,000 tokens are about 750,000 words of English.
+The windows grew. As [post 04](../04-tokens-windows-budgets/index.md) tabulates them, Claude Haiku 4.5 and Claude Sonnet 4.5 hold 200,000 tokens and Claude Opus 4.6 holds 1,000,000 (Anthropic, "Context windows", consulted October 2026), and Google's Gemini "Long context" page (updated 22 June 2026) says that many Gemini models "come with large context windows of 1 million or more tokens". Models and sizes are as of early 2026 and change. By [post 04](../04-tokens-windows-budgets/index.md)'s rule of three-quarters of a word per token, 1,000,000 tokens are about 750,000 words of English.
 
 The pitch follows: stop building retrieval pipelines and paste the corpus in. It is right for small corpora. [Post 11](../11-rag-in-depth/index.md), section 8, quotes Anthropic's contextual-retrieval page drawing the line at a knowledge base "smaller than 200,000 tokens (about 500 pages of material)": below it, the whole corpus goes into the prompt and is cached. A vector store built to search one 50-page document is now the harder way to do an easy thing. Many real RAG corpora are bigger, change more often, and are queried a slice at a time; there the boundary has to be drawn precisely.
 
@@ -38,7 +38,7 @@ The questions are asked in order; each can settle the case before the next.
 
 **Question 3. Does each query need most of the corpus, or a small slice?** Summarising one document needs the whole document; a factoid lookup in a knowledge base needs one paragraph. The first suits long context; the second suits RAG on both cost and latency. A useful exercise is to label a sample of the real query log as global (needs most of the corpus) or local (needs a slice). If global queries are rare, RAG with an occasional whole-document load beats loading everything on every call; if both kinds are common, the answer is a router (section 6).
 
-**Question 4. Can the model actually use the long context for this task?** A window is a capacity, not a guarantee of use. Section 3 shows what the benchmarks say in general; the answer for one application comes from its own evaluation ([post 20](../20-evaluation/index.md)): the same ten or so real questions run once with the whole document loaded and once through the post 11 pipeline, with accuracy, latency and cost recorded for each. A model that finds single facts at that length but fails questions that combine them has answered no for the second kind.
+**Question 4. Can the model actually use the long context for this task?** A window is a capacity, not a guarantee of use. Section 3 shows what the benchmarks say in general; the answer for one application comes from its own evaluation ([post 20](../20-evaluation/index.md)): the same ten or so real questions run once with the whole document loaded and once through the [post 11](../11-rag-in-depth/index.md) pipeline, with accuracy, latency and cost recorded for each. A model that finds single facts at that length but fails questions that combine them has answered no for the second kind.
 
 ---
 
@@ -103,7 +103,7 @@ query
   count over records        ->  text-to-SQL
 ```
 
-The top-k sizes are illustrative. Text-to-SQL is post 17's route that turns a question into SQL (Structured Query Language) over a known schema.
+The top-k sizes are illustrative. Text-to-SQL is [post 17](../17-advanced-retrieval/index.md)'s route that turns a question into SQL (Structured Query Language) over a known schema.
 
 Each route has its own cost and quality metric, and the router is evaluated like any component: a labelled set of real queries, routing accuracy on it, and every misroute read ([post 20](../20-evaluation/index.md)). A misroute costs more than a weaker answer: a count sent to vector search returns a confident number from whichever rows were retrieved.
 
@@ -134,7 +134,7 @@ The figure below draws the four days to one scale.
 
 At these sizes, long context without caching costs about 26 times as much as RAG and with caching about 3 times; the hybrid stays within 1.5 times of RAG while sending the whole-document tenth of the traffic to long context. The ratios move with the corpus, the RAG call and the cache writes, each a variable in the snippet; a route that serves a tenth of the traffic sees longer quiet spells, so 10 writes a day flatters the hybrid.
 
-Latency follows the same tokens. At post 04's illustrative frontier-class rates of 0.4 milliseconds per prefill token and 32 per decode token, the snippet prints 80.04 seconds of prefill before the first token for the uncached corpus against 2.00 seconds for the RAG call, and 16.00 seconds of decode for the answer on either route. The linear model understates the long call, because attention work grows faster than the token count ([post 03](../03-how-llms-read-context/index.md)). A cache hit skips the cached prefix's prefill, so the first token comes sooner; Anthropic's documentation gives no figure, and neither does this post ([post 05](../05-economics-of-context/index.md), section 5).
+Latency follows the same tokens. At [post 04](../04-tokens-windows-budgets/index.md)'s illustrative frontier-class rates of 0.4 milliseconds per prefill token and 32 per decode token, the snippet prints 80.04 seconds of prefill before the first token for the uncached corpus against 2.00 seconds for the RAG call, and 16.00 seconds of decode for the answer on either route. The linear model understates the long call, because attention work grows faster than the token count ([post 03](../03-how-llms-read-context/index.md)). A cache hit skips the cached prefix's prefill, so the first token comes sooner; Anthropic's documentation gives no figure, and neither does this post ([post 05](../05-economics-of-context/index.md), section 5).
 
 ---
 
@@ -173,16 +173,14 @@ The lesson: **build a router, not a religion**. A system built on "long context 
 
 ## Further reading
 
-- Hsieh, C.-P. *et al.*, *"RULER: What's the Real Context Size of Your Long-Context Language Models?"* (NVIDIA, 2024): effective context length, Table 3.
-- Kuratov, Y. *et al.*, *"BABILong: Testing the Limits of LLMs with Long Context Reasoning-in-a-Haystack"* (NeurIPS 2024 Datasets and Benchmarks), the successor to *"In Search of Needles in a 11M Haystack"* (2024).
-- Bai, Y. *et al.*, *"LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding"* (ACL 2024).
-- Vodrahalli, K. *et al.*, *"Michelangelo: Long Context Evaluations Beyond Haystacks via Latent Structure Queries"* (Google DeepMind, 2024): MRCR and its sibling tasks.
-- Gemini Team, Google, *"Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context"* (2024): the needle results to 10 million tokens, and the origin of MRCR.
-- Google, *"Long context"* (Gemini API documentation, updated 22 June 2026, consulted October 2026).
-- Anthropic, *"Pricing"* and *"Prompt caching"* (Claude API documentation, consulted October 2026): the rates and multipliers of section 7.
-- Anthropic, *"Long context prompting for Claude 2.1"* (December 2023): one sentence added to the start of the answer raised a needle-in-a-haystack score from 27% to 98%.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Hsieh, C.-P. *et al.*, *["RULER: What's the Real Context Size of Your Long-Context Language Models?"](https://arxiv.org/abs/2404.06654)* (NVIDIA, 2024): effective context length, Table 3.
+- Kuratov, Y. *et al.*, *["BABILong: Testing the Limits of LLMs with Long Context Reasoning-in-a-Haystack"](https://arxiv.org/abs/2406.10149)* (NeurIPS 2024 Datasets and Benchmarks), the successor to *["In Search of Needles in a 11M Haystack"](https://arxiv.org/abs/2402.10790)* (2024).
+- Bai, Y. *et al.*, *["LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding"](https://arxiv.org/abs/2308.14508)* (ACL 2024).
+- Vodrahalli, K. *et al.*, *["Michelangelo: Long Context Evaluations Beyond Haystacks via Latent Structure Queries"](https://arxiv.org/abs/2409.12640)* (Google DeepMind, 2024): MRCR and its sibling tasks.
+- Gemini Team, Google, *["Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context"](https://arxiv.org/abs/2403.05530)* (2024): the needle results to 10 million tokens, and the origin of MRCR.
+- Google, *["Long context"](https://ai.google.dev/gemini-api/docs/long-context)* (Gemini API documentation, updated 22 June 2026, consulted October 2026).
+- Anthropic, *["Pricing"](https://platform.claude.com/docs/en/about-claude/pricing)* and *["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)* (Claude API documentation, consulted October 2026): the rates and multipliers of section 7.
+- Anthropic, *["Long context prompting for Claude 2.1"](https://claude.com/blog/claude-2-1-prompting)* (December 2023): one sentence added to the start of the answer raised a needle-in-a-haystack score from 27% to 98%.
 
 ---
 
