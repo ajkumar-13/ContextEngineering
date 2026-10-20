@@ -204,7 +204,7 @@ A guardrail can act before generation (the input layers' job), during it (constr
 
 **Evaluation measures; guardrails enforce.** Evaluation ([post 20](../20-evaluation/index.md)) runs offline, on a golden set, in continuous integration (CI), and produces a number, such as a schema-validity rate, that says whether the system is good enough to ship. It does nothing at runtime. A guardrail runs on every live response and produces a decision: pass this one, block that one. Evaluation catches a regression before it ships; a guardrail catches the bad response that slips through anyway. They share fixtures: the schema that scores the golden set offline gates real traffic online.
 
-**Security is the adversarial case.** Guardrails and security ([post 23](../23-security/index.md), prompt injection and its defences) overlap at the output boundary, but the threat models differ. Output guardrails mostly catch the model's accidental failures: a malformed object, an inadvertent PII leak. Security assumes an adversary trying to make the model leak data or take a forbidden action, often through instructions hidden in retrieved or tool-returned content. In post 23's account, validating model output before it reaches a shell, a query or a browser is part of filtering at trust boundaries: an output guardrail is a layer within security, not a substitute for it. A recipient allow-list on an outbound action is both; a moderation pass on a paragraph is a guardrail that is only incidentally a security control.
+**Security is the adversarial case.** Guardrails and security ([post 23](../23-security/index.md), prompt injection and its defences) overlap at the output boundary, but the threat models differ. Output guardrails mostly catch the model's accidental failures: a malformed object, an inadvertent PII leak. Security assumes an adversary trying to make the model leak data or take a forbidden action, often through instructions hidden in retrieved or tool-returned content. In [post 23](../23-security/index.md)'s account, validating model output before it reaches a shell, a query or a browser is part of filtering at trust boundaries: an output guardrail is a layer within security, not a substitute for it. A recipient allow-list on an outbound action is both; a moderation pass on a paragraph is a guardrail that is only incidentally a security control.
 
 Evaluation is the test suite, guardrails are the runtime assertions, and security is the threat model.
 
@@ -246,13 +246,11 @@ A measurement would send the same extraction task a hundred times on each rung w
 
 ## Further reading
 
-- OpenAI, *"Structured Outputs"*, *"Function calling"* and *"Moderation"* documentation (consulted October 2026): JSON mode, strict mode and its schema subset, `tool_choice`, the moderation model.
-- Anthropic, *"Structured outputs"* and *"Define tools"* documentation (consulted October 2026): `output_config.format`, strict tool use, the documented exceptions, `tool_choice`.
-- Willard, B. T. and Louf, R., *"Efficient Guided Generation for Large Language Models"* (2023), and the Outlines documentation: constrained decoding as a finite-state machine.
-- Pydantic and Instructor documentation: schemas as Python classes, validation, and retries.
-- Guardrails AI and NVIDIA NeMo Guardrails documentation (consulted October 2026): on-fail actions, and rails at five points of a conversation.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- OpenAI, *["Structured Outputs"](https://developers.openai.com/api/docs/guides/structured-outputs)*, *["Function calling"](https://developers.openai.com/api/docs/guides/structured-outputs)* and *["Moderation"](https://developers.openai.com/api/docs/guides/structured-outputs)* documentation (consulted October 2026): JSON mode, strict mode and its schema subset, `tool_choice`, the moderation model.
+- Anthropic, *["Structured outputs"](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)* and *["Define tools"](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview)* documentation (consulted October 2026): `output_config.format`, strict tool use, the documented exceptions, `tool_choice`.
+- Willard, B. T. and Louf, R., *["Efficient Guided Generation for Large Language Models"](https://arxiv.org/abs/2307.09702)* (2023), and the [Outlines documentation](https://dottxt-ai.github.io/outlines/): constrained decoding as a finite-state machine.
+- [Pydantic](https://docs.pydantic.dev/) and [Instructor](https://python.useinstructor.com/) documentation: schemas as Python classes, validation, and retries.
+- [Guardrails AI](https://www.guardrailsai.com/docs/concepts/validator_on_fail_actions) and [NVIDIA NeMo Guardrails](https://docs.nvidia.com/nemo/guardrails/) documentation (consulted October 2026): on-fail actions, and rails at five points of a conversation.
 
 ---
 
