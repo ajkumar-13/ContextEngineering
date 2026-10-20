@@ -167,8 +167,6 @@ These are the mistakes that applying this post's ideas actually produces.
 - Liu et al., ["Lost in the Middle: How Language Models Use Long Contexts"](https://arxiv.org/abs/2307.03172) (2023). The position finding of section 4.
 - Anthropic, ["Pricing"](https://platform.claude.com/docs/en/about-claude/pricing) (per-million-token rates, as of early 2026). The source of the cost figure in section 3.
 
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
-
 ---
 
 ## What to read next
