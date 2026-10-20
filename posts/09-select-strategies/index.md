@@ -119,9 +119,9 @@ The four levers apply to the other three select problems with small adaptations,
 
 *Swap the corpus and tune the stage that changes most; the pipeline stays. Only tool selection writes into the cached prefix.*
 
-**Tool selection.** The corpus is the tool catalogue, one schema (name, description, parameters) per item, embedded offline. At run time the rewritten user turn retrieves candidates by hybrid search over the schemas, a reranker orders them, and the surviving handful is packed into layer 02, tools and MCP descriptions (MCP is the Model Context Protocol, the open protocol through which external tools reach a host application). Selecting the few relevant tools per turn keeps the catalogue the model reads small, tool-storm's first fix in post 06 and the pattern [post 15](../15-tools-and-mcp/index.md) develops. The cost: layer 02 belongs to the stable prefix, and a catalogue that changes per turn changes the prefix a prompt cache reuses ([post 05](../05-economics-of-context/index.md)), so a design keeps a fixed core of tools in the prefix or selects among a few fixed groups.
+**Tool selection.** The corpus is the tool catalogue, one schema (name, description, parameters) per item, embedded offline. At run time the rewritten user turn retrieves candidates by hybrid search over the schemas, a reranker orders them, and the surviving handful is packed into layer 02, tools and MCP descriptions (MCP is the Model Context Protocol, the open protocol through which external tools reach a host application). Selecting the few relevant tools per turn keeps the catalogue the model reads small, tool-storm's first fix in [post 06](../06-context-failure-modes/index.md) and the pattern [post 15](../15-tools-and-mcp/index.md) develops. The cost: layer 02 belongs to the stable prefix, and a catalogue that changes per turn changes the prefix a prompt cache reuses ([post 05](../05-economics-of-context/index.md)), so a design keeps a fixed core of tools in the prefix or selects among a few fixed groups.
 
-**Memory recall.** The corpus is the memory store, one row per item. The query is built from the intent of the turn ("what does this user usually want when they ask this?") rather than its surface text. Re-ranking mixes relevance with recency and confidence: a memory scored 0.9 for relevance from two years ago may rank below one scored 0.7 from yesterday (illustrative scores). Packing respects layer 03's small budget, 5 to 10 percent of the input in post 04's illustrative defaults.
+**Memory recall.** The corpus is the memory store, one row per item. The query is built from the intent of the turn ("what does this user usually want when they ask this?") rather than its surface text. Re-ranking mixes relevance with recency and confidence: a memory scored 0.9 for relevance from two years ago may rank below one scored 0.7 from yesterday (illustrative scores). Packing respects layer 03's small budget, 5 to 10 percent of the input in [post 04](../04-tokens-windows-budgets/index.md)'s illustrative defaults.
 
 **Few-shot example selection.** The corpus is the bank of labelled examples, with the label class in the metadata. Retrieval is dense within a filter ("only examples of class C"). The series' starting rule is two or three examples: each extra one costs tokens on every call, and whether it still helps is measured. Examples picked per turn are per-turn content, so they travel with the retrieved material in layer 04, after the cached prefix; a fixed set that never changes can live in layer 01 and cache. Good selection re-ranks for diversity as well as relevance, so the model sees varied cases rather than three near copies. The usual mechanism is maximal marginal relevance (MMR; Carbonell and Goldstein, 1998): each candidate's relevance is penalised by its similarity to the examples already picked.
 
@@ -148,7 +148,7 @@ The reranker and k come first because they act on precision directly; the embedd
 Two retrieval metrics come before any of the dials, one per half of the pipeline. With $R$ the set of items relevant to a query:
 
 - **Recall@N** $= |R \cap \mathrm{top}N| / |R|$, the share of the relevant items that reach the candidate set, averaged over a curated set of queries. It measures candidate generation and caps everything after it: an item missing from the top-N cannot be re-ranked or packed.
-- **Precision@k** $= |R \cap \mathrm{top}k| / k$, the share of the packed items that are relevant. It measures re-ranking and the choice of k; post 06 names a falling precision@k as the signal of distraction.
+- **Precision@k** $= |R \cap \mathrm{top}k| / k$, the share of the packed items that are relevant. It measures re-ranking and the choice of k; [post 06](../06-context-failure-modes/index.md) names a falling precision@k as the signal of distraction.
 
 A third metric watches the answer. **Citation accuracy** asks whether the chunk the model cited contains the fact it asserted: a person labels a weekly sample of production answers (50 is an illustrative size). It catches packing and citation bugs that neither retrieval metric sees. End-to-end correctness on a held-out set closes the loop ([post 20](../20-evaluation/index.md)).
 
@@ -208,16 +208,14 @@ The corpus was written to show the mechanism, so the numbers say which lever mov
 
 ## Further reading
 
-- Karpukhin, V. *et al.*, *"Dense Passage Retrieval for Open-Domain Question Answering"* (EMNLP 2020).
-- Robertson, S. and Zaragoza, H., *"The Probabilistic Relevance Framework: BM25 and Beyond"* (2009).
-- Cormack, G. V., Clarke, C. L. A. and Büttcher, S., *"Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods"* (SIGIR 2009): the RRF formula and $k = 60$.
-- Gao, L. *et al.*, *"Precise Zero-Shot Dense Retrieval without Relevance Labels"* (arXiv 2022, ACL 2023): HyDE.
-- Anthropic, *"Introducing Contextual Retrieval"* (September 2024): contextual embeddings, contextual BM25 and re-ranking, and the failure rates of sections 3 and 4.
-- Liu, N. F. *et al.*, *"Lost in the Middle: How Language Models Use Long Contexts"* (arXiv 2023, TACL 2024): the position finding behind the bookend layout.
-- Carbonell, J. and Goldstein, J., *"The Use of MMR, Diversity-Based Reranking for Reordering Documents and Producing Summaries"* (SIGIR 1998): maximal marginal relevance.
-- Cohere, *"Rerank"*; Voyage AI, *"Rerankers"*; BAAI, *"bge-reranker-v2"* model cards: the rerankers of section 4.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Karpukhin, V. *et al.*, *["Dense Passage Retrieval for Open-Domain Question Answering"](https://arxiv.org/abs/2004.04906)* (EMNLP 2020).
+- Robertson, S. and Zaragoza, H., *["The Probabilistic Relevance Framework: BM25 and Beyond"](https://doi.org/10.1561/1500000019)* (2009).
+- Cormack, G. V., Clarke, C. L. A. and Büttcher, S., *["Reciprocal Rank Fusion outperforms Condorcet and individual Rank Learning Methods"](https://doi.org/10.1145/1571941.1572114)* (SIGIR 2009): the RRF formula and $k = 60$.
+- Gao, L. *et al.*, *["Precise Zero-Shot Dense Retrieval without Relevance Labels"](https://arxiv.org/abs/2212.10496)* (arXiv 2022, ACL 2023): HyDE.
+- Anthropic, *["Introducing Contextual Retrieval"](https://www.anthropic.com/news/contextual-retrieval)* (September 2024): contextual embeddings, contextual BM25 and re-ranking, and the failure rates of sections 3 and 4.
+- Liu, N. F. *et al.*, *["Lost in the Middle: How Language Models Use Long Contexts"](https://arxiv.org/abs/2307.03172)* (arXiv 2023, TACL 2024): the position finding behind the bookend layout.
+- Carbonell, J. and Goldstein, J., *["The Use of MMR, Diversity-Based Reranking for Reordering Documents and Producing Summaries"](https://doi.org/10.1145/290941.291025)* (SIGIR 1998): maximal marginal relevance.
+- Cohere, *["Rerank"](https://docs.cohere.com/)*; Voyage AI, *["Rerankers"](https://docs.voyageai.com/)*; BAAI, *["bge-reranker-v2"](https://huggingface.co/BAAI/bge-reranker-v2-m3)* model cards: the rerankers of section 4.
 
 ---
 
