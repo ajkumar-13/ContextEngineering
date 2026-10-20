@@ -113,7 +113,7 @@ Caching therefore buys the same move twice: cheaper and sooner on every hit.
 
 ## 6. A worked example, with and without caching
 
-Take one turn of the section 1 agent and price it both ways. The per-layer breakdown uses post 04's illustrative token counts, in this series' layer order:
+Take one turn of the section 1 agent and price it both ways. The per-layer breakdown uses [post 04](../04-tokens-windows-budgets/index.md)'s illustrative token counts, in this series' layer order:
 
 | Layer | Tokens | Changes between calls? |
 |---|---|---|
@@ -220,13 +220,11 @@ Caching lowers the unit cost; guardrails keep the total from surprising anyone. 
 
 ## Further reading
 
-- Anthropic, *"Pricing"* (consulted 12 October 2026): the per-token rates of the three running models in section 2 and the cache-write and cache-read prices.
-- Anthropic, *"Prompt caching"* documentation (consulted 12 October 2026): the identical-prefix rule, breakpoints and lookback, the tools, system, messages order, the minimum cacheable lengths, the two lifetimes, the write and read multipliers and their per-model exceptions, and the usage fields.
-- Pope, R. *et al.*, *"Efficiently Scaling Transformer Inference"* (2022): prefill and decode, behind the asymmetry of section 3 and the latency model of section 5.
-- Ji, Y. (Manus), *"Context Engineering for AI Agents: Lessons from Building Manus"* (July 2025): the cache-hit rate as the agent metric to watch, and the case against timestamps in the prefix.
-- OpenAI, *"Prompt caching"* guide, and Google, *"Context caching"* (Gemini API documentation), both consulted 12 October 2026: the other providers' caching in section 4.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Anthropic, *["Pricing"](https://platform.claude.com/docs/en/about-claude/pricing)* (consulted 12 October 2026): the per-token rates of the three running models in section 2 and the cache-write and cache-read prices.
+- Anthropic, *["Prompt caching"](https://platform.claude.com/docs/en/build-with-claude/prompt-caching)* documentation (consulted 12 October 2026): the identical-prefix rule, breakpoints and lookback, the tools, system, messages order, the minimum cacheable lengths, the two lifetimes, the write and read multipliers and their per-model exceptions, and the usage fields.
+- Pope, R. *et al.*, *["Efficiently Scaling Transformer Inference"](https://arxiv.org/abs/2211.05102)* (2022): prefill and decode, behind the asymmetry of section 3 and the latency model of section 5.
+- Ji, Y. (Manus), *["Context Engineering for AI Agents: Lessons from Building Manus"](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus)* (July 2025): the cache-hit rate as the agent metric to watch, and the case against timestamps in the prefix.
+- OpenAI, *["Prompt caching"](https://developers.openai.com/api/docs/guides/prompt-caching)* guide, and Google, *["Context caching"](https://ai.google.dev/gemini-api/docs/caching)* (Gemini API documentation), both consulted 12 October 2026: the other providers' caching in section 4.
 
 ---
 
