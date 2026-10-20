@@ -91,7 +91,7 @@ A **trust tag** is a label the application attaches to every piece of content it
 
 The wrapper is not perfect, since a model can still follow wrapped text, but it marks the boundary for the model, for a filter and for whoever audits the trace. The boundary runs both ways: model output passed to a shell, a SQL query, a browser or another tool is validated as user input would be (OWASP's LLM05:2025 Improper Output Handling). Refusing output that carries secrets, script tags, or links and images to unknown hosts is the egress half of D3, and it would have closed the image channel of section 4.
 
-**D4. Never silently merge attacker text into trusted context.** Text that arrived as `external` must not come back later as a `system` or `user` fact, and above all not as a rule. A memory row keeps [post 08](../08-write-strategies/index.md)'s nine fields, and the `trigger` that [post 16](../16-memory-systems/index.md), section 3, adds to a rule, and adds the trust tag as one more field, which post 16 allows a store to do. The planted rule of section 2, as a row:
+**D4. Never silently merge attacker text into trusted context.** Text that arrived as `external` must not come back later as a `system` or `user` fact, and above all not as a rule. A memory row keeps [post 08](../08-write-strategies/index.md)'s nine fields, and the `trigger` that [post 16](../16-memory-systems/index.md), section 3, adds to a rule, and adds the trust tag as one more field, which [post 16](../16-memory-systems/index.md) allows a store to do. The planted rule of section 2, as a row:
 
 ```json
 { "id": "mem-0107", "kind": "procedural", "subject": "support-desk",
@@ -277,14 +277,12 @@ In this series' terms, LLM01, LLM05, LLM06, LLM07 and LLM10 are context-engineer
 
 ## Further reading
 
-- OWASP, "Top 10 for LLM Applications", 2025 edition, including "LLM01:2025 Prompt Injection" and "LLM07:2025 System Prompt Leakage".
-- Greshake, K. *et al.*, "Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection" (2023).
-- Simon Willison, "Prompt injection" essay series (2022 to 2025), including "The Dual LLM pattern for building AI assistants that can resist prompt injection" (April 2023) and "The lethal trifecta for AI agents" (June 2025).
-- Model Context Protocol, "Specification", revision 2026-07-28, "Security and Trust & Safety" (consulted October 2026).
-- Invariant Labs, "MCP Security Notification: Tool Poisoning Attacks" (April 2025); Aim Labs, "EchoLeak" (CVE-2025-32711, June 2025).
-- NIST, "AI 600-1: Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile" (July 2024).
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- OWASP, ["Top 10 for LLM Applications"](https://owasp.org/www-project-top-10-for-large-language-model-applications/), 2025 edition, including "LLM01:2025 Prompt Injection" and "LLM07:2025 System Prompt Leakage".
+- Greshake, K. *et al.*, ["Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection"](https://arxiv.org/abs/2302.12173) (2023).
+- Simon Willison, ["Prompt injection"](https://simonwillison.net/series/prompt-injection/) essay series (2022 to 2025), including ["The Dual LLM pattern for building AI assistants that can resist prompt injection"](https://simonwillison.net/2023/Apr/25/dual-llm-pattern/) (April 2023) and ["The lethal trifecta for AI agents"](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/) (June 2025).
+- Model Context Protocol, ["Specification"](https://modelcontextprotocol.io/), revision 2026-07-28, "Security and Trust & Safety" (consulted October 2026).
+- Invariant Labs, ["MCP Security Notification: Tool Poisoning Attacks"](https://invariantlabs.ai/blog/mcp-security-notification) (April 2025); Aim Labs, ["EchoLeak"](https://www.aim.security/post/when-public-prompts-turn-into-local-shells-rce-in-cursor-via-mcp-auto-start) (CVE-2025-32711, June 2025).
+- NIST, ["AI 600-1: Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile"](https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf) (July 2024).
 
 ---
 
