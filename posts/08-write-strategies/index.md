@@ -250,17 +250,15 @@ Each of the first six rows names a destination whose lifetime matches the inform
 
 ## Further reading
 
-- Lance Martin, "Context Engineering for Agents" (June 2025): write as the first of the four operations, with scratchpads and memories as its forms.
-- Harrison Chase, "Memory for Agents" (LangChain blog, October 2024): the three kinds of memory, and hot-path against background writes.
-- Anthropic, "How Claude remembers your project" (Claude Code documentation, consulted October 2026): how `CLAUDE.md` and `AGENTS.md` are loaded.
-- Anthropic Engineering, "Effective context engineering for AI agents" (September 2025): structured note-taking and starting from a minimal prompt.
-- Anthropic Engineering, "Building Effective AI Agents" (December 2024): the augmented model, with retrieval, tools and memory, as the building block of agents.
-- Anthropic Engineering, "Equipping agents for the real world with Agent Skills" (October 2025): the `SKILL.md` format and loading on demand.
-- agents.md project, "AGENTS.md" (2025): the vendor-neutral convention of section 4.
-- Anthropic, "Introducing Contextual Retrieval" (September 2024): the enrichment step and its failure-rate results in section 5.
-- Park, J. S. *et al.*, "Generative Agents: Interactive Simulacra of Human Behavior" (2023): an early agent architecture built on a memory stream of timestamped observations.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Lance Martin, ["Context Engineering for Agents"](https://rlancemartin.github.io/2025/06/23/context_engineering/) (June 2025): write as the first of the four operations, with scratchpads and memories as its forms.
+- Harrison Chase, ["Memory for Agents"](https://www.langchain.com/blog/memory-for-agents) (LangChain blog, October 2024): the three kinds of memory, and hot-path against background writes.
+- Anthropic, ["How Claude remembers your project"](https://code.claude.com/docs/en/memory) (Claude Code documentation, consulted October 2026): how `CLAUDE.md` and `AGENTS.md` are loaded.
+- Anthropic Engineering, ["Effective context engineering for AI agents"](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) (September 2025): structured note-taking and starting from a minimal prompt.
+- Anthropic Engineering, ["Building Effective AI Agents"](https://www.anthropic.com/engineering/building-effective-agents) (December 2024): the augmented model, with retrieval, tools and memory, as the building block of agents.
+- Anthropic Engineering, ["Equipping agents for the real world with Agent Skills"](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills) (October 2025): the `SKILL.md` format and loading on demand.
+- agents.md project, ["AGENTS.md"](https://agents.md/) (2025): the vendor-neutral convention of section 4.
+- Anthropic, ["Introducing Contextual Retrieval"](https://www.anthropic.com/news/contextual-retrieval) (September 2024): the enrichment step and its failure-rate results in section 5.
+- Park, J. S. *et al.*, ["Generative Agents: Interactive Simulacra of Human Behavior"](https://arxiv.org/abs/2304.03442) (2023): an early agent architecture built on a memory stream of timestamped observations.
 
 ---
 
