@@ -101,7 +101,7 @@ Later benchmarks show that length is a problem as well as the middle. RULER (Hsi
 
 *Every model drawn holds its accuracy over a shorter span than its advertised window; the gap runs from a factor of two to more than sixty.*
 
-In practice the failure appears when layer 04, retrieved chunks, or layer 05, conversation history, grows long. Layer 06, the user instruction, is involved too: if it is not placed last, the question itself can end up in the middle, the symptom post 02's table gives for layer 06 ("It answers a different question than I asked."). RULER's table puts the effective length of 11 of its 17 models between 16K and 64K tokens, for models of 2023 and 2024; how long is too long depends on the model and the task, and is measured, not assumed.
+In practice the failure appears when layer 04, retrieved chunks, or layer 05, conversation history, grows long. Layer 06, the user instruction, is involved too: if it is not placed last, the question itself can end up in the middle, the symptom [post 02](../02-six-layers-of-context/index.md)'s table gives for layer 06 ("It answers a different question than I asked."). RULER's table puts the effective length of 11 of its 17 models between 16K and 64K tokens, for models of 2023 and 2024; how long is too long depends on the model and the task, and is measured, not assumed.
 
 **First fix.** Bookend packing. Place the highest-ranked retrieved chunk first and the second-highest last, with the weaker chunks in the middle, and keep the user instruction as the very last thing the model reads, as the figure below lays out. For history, summarise older turns into a short brief near the start of the message list and keep the recent turns verbatim at the end.
 
@@ -197,20 +197,18 @@ Breunig's context poisoning is the accidental case: a hallucination or other err
 2. **Answering confusion with more rules.** Six clear rules beat thirty fuzzy ones.
 3. **Treating tool-storm as "the model going crazy".** It is a catalogue problem, a description problem or a missing stop condition, and all three are under the engineer's control.
 4. **Reading Breunig's names as this series' names.** In the essay, confusion means superfluous content; here it means unclear rules over the right content, and superfluous content is distraction.
-5. **Filing memory poisoning under conflict and stopping there.** A planted memory is an attack: a precedence rule will not stop the next one, and the defences of post 23 apply.
+5. **Filing memory poisoning under conflict and stopping there.** A planted memory is an attack: a precedence rule will not stop the next one, and the defences of [post 23](../23-security/index.md) apply.
 
 ---
 
 ## Further reading
 
-- Drew Breunig, "How Long Contexts Fail" (June 2025): the four failures this taxonomy starts from.
-- Liu, N. F. *et al.*, "Lost in the Middle: How Language Models Use Long Contexts" (arXiv 2023, TACL 2024): the position result of section 5.
-- Hsieh, C.-P. *et al.*, "RULER: What's the Real Context Size of Your Long-Context Language Models?" (NVIDIA, 2024): effective context length.
-- Hong, K., Troynikov, A. and Huber, J., "Context Rot: How Increasing Input Tokens Impacts LLM Performance" (Chroma, July 2025).
-- Anthropic Engineering, "Effective context engineering for AI agents" (September 2025).
-- Greshake, K. *et al.*, "Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection" (2023): the deliberate relative of these modes, in post 23.
-
-Full citations are in [REFERENCES.md](../../REFERENCES.md).
+- Drew Breunig, ["How Long Contexts Fail"](https://www.dbreunig.com/2025/06/22/how-contexts-fail-and-how-to-fix-them.html) (June 2025): the four failures this taxonomy starts from.
+- Liu, N. F. *et al.*, ["Lost in the Middle: How Language Models Use Long Contexts"](https://arxiv.org/abs/2307.03172) (arXiv 2023, TACL 2024): the position result of section 5.
+- Hsieh, C.-P. *et al.*, ["RULER: What's the Real Context Size of Your Long-Context Language Models?"](https://arxiv.org/abs/2404.06654) (NVIDIA, 2024): effective context length.
+- Hong, K., Troynikov, A. and Huber, J., ["Context Rot: How Increasing Input Tokens Impacts LLM Performance"](https://www.trychroma.com/research/context-rot) (Chroma, July 2025).
+- Anthropic Engineering, ["Effective context engineering for AI agents"](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) (September 2025).
+- Greshake, K. *et al.*, ["Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection"](https://arxiv.org/abs/2302.12173) (2023): the deliberate relative of these modes, in [post 23](../23-security/index.md).
 
 ---
 
